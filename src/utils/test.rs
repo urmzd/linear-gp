@@ -1,8 +1,8 @@
 // For testing purposes only (binary classification).
 
 use derive_new::new;
+use noisy_float::prelude::r64;
 use rand::{distributions::Standard, prelude::Distribution};
-use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 
 use crate::{
@@ -12,7 +12,7 @@ use crate::{
     extensions::classification::{ClassificationInput, ClassificationParameters},
 };
 
-#[derive(PartialEq, PartialOrd, Clone, Debug, Serialize, Deserialize, new)]
+#[derive(PartialEq, PartialOrd, Clone, Debug, new)]
 pub struct TestInput(pub [RegisterValue; 5]);
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount)]
@@ -32,7 +32,7 @@ impl ValidInput for TestInput {
 
 impl ClassificationInput for TestInput {
     fn get_class(&self) -> usize {
-        self.0[Self::N_INPUT_REGISTERS] as usize
+        self.0[Self::N_INPUT_REGISTERS].const_raw() as usize
     }
 }
 
@@ -43,13 +43,13 @@ impl GeneticAlgorithm for TestLgp {
 
 impl Default for TestInput {
     fn default() -> Self {
-        TestInput::new([0.; 5])
+        TestInput::new([r64(0.); 5])
     }
 }
 
 impl Distribution<TestInput> for Standard {
     fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> TestInput {
-        let data: [RegisterValue; 5] = [0.; 5].map(|_| rng.gen_range((0.)..=(1.)));
+        let data: [RegisterValue; 5] = [0.; 5].map(|_| r64(rng.gen_range((0.)..=(1.))));
         TestInput(data)
     }
 }

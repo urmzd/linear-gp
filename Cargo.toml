@@ -10,11 +10,6 @@ serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.18", features = ["full", "macros"] }
 rand = "0.8.5"
 rand_chacha = "0.3.1"
-ordered-float = { git = "https://github.com/urmzd/rust-ordered-float.git", features = [
-    "serde",
-    "rand",
-    "std"
-] }
 log = "0.4.17"
 strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
@@ -27,6 +22,7 @@ derivative = "2.2.0"
 derive_more = { version = "0.99" }
 plotters = "0.3.1"
 itertools = "0.10"
+noisy_float = "0.2"
 
 [dev-dependencies]
 reqwest = "0.11"

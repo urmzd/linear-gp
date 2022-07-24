@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use csv::ReaderBuilder;
 use more_asserts::{assert_ge, assert_le};
-use ordered_float::OrderedFloat;
+use noisy_float::prelude::{r64, Float};
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
 
@@ -16,7 +16,6 @@ use super::{
     characteristics::Mutate,
     inputs::{Inputs, ValidInput},
     population::Population,
-    registers::RegisterValue,
 };
 
 #[derive(Debug)]
@@ -25,9 +24,9 @@ where
     OrganismType: Fitness + Mutate + Generate,
 {
     pub population_size: usize,
-    pub gap: RegisterValue,
-    pub n_mutations: RegisterValue,
-    pub n_crossovers: RegisterValue,
+    pub gap: f64,
+    pub n_mutations: f64,
+    pub n_crossovers: f64,
     pub max_generations: usize,
     pub fitness_parameters: OrganismType::FitnessParameters,
     pub program_parameters: OrganismType::GeneratorParameters,
@@ -91,14 +90,13 @@ where
         population.sort();
     }
 
-    fn apply_selection(population: &mut Population<Self::O>, gap: RegisterValue) {
-        assert!(gap >= 0. as RegisterValue && gap <= 1. as RegisterValue);
+    fn apply_selection(population: &mut Population<Self::O>, gap: f64) {
+        assert!(gap >= 0. && gap <= 1.);
         assert_le!(population.last(), population.first());
 
         let pop_len = population.len();
 
-        let cutoff_index =
-            ((1 as RegisterValue - gap) * (pop_len as RegisterValue)).floor() as i32 as usize;
+        let cutoff_index = ((r64(1.0) - gap) * (pop_len as f64)).floor().const_raw() as usize;
 
         for _ in 0..cutoff_index {
             population.pop();
@@ -107,30 +105,15 @@ where
 
     fn breed(
         population: &mut Population<Self::O>,
-        mutation_percent: RegisterValue,
-        crossover_percent: RegisterValue,
+        mutation_percent: f64,
+        crossover_percent: f64,
         mutation_parameters: &<Self::O as Generate>::GeneratorParameters,
     ) {
-        assert_ge!(
-            OrderedFloat(mutation_percent),
-            OrderedFloat(0 as RegisterValue)
-        );
-        assert_ge!(
-            OrderedFloat(crossover_percent),
-            OrderedFloat(0 as RegisterValue)
-        );
-        assert_le!(
-            OrderedFloat(crossover_percent + mutation_percent),
-            OrderedFloat(1 as RegisterValue)
-        );
-        assert_le!(
-            OrderedFloat(mutation_percent),
-            OrderedFloat(1 as RegisterValue)
-        );
-        assert_le!(
-            OrderedFloat(crossover_percent),
-            OrderedFloat(1 as RegisterValue)
-        );
+        assert_ge!(mutation_percent, 0.);
+        assert_ge!(crossover_percent, 0.);
+        assert_le!(crossover_percent + mutation_percent, 1.);
+        assert_le!(mutation_percent, 1.);
+        assert_le!(crossover_percent, 1.);
 
         let pop_cap = population.capacity();
         let pop_len = population.len();
@@ -138,9 +121,9 @@ where
         let mut remaining_pool_spots: usize = pop_cap - pop_len;
 
         let mut n_mutated_children =
-            ((mutation_percent * remaining_pool_spots as RegisterValue) as f64).floor() as usize;
+            (mutation_percent * remaining_pool_spots as f64).floor() as usize;
         let mut n_crossover_children =
-            ((crossover_percent * remaining_pool_spots as RegisterValue) as f64).floor() as usize;
+            (crossover_percent * remaining_pool_spots as f64).floor() as usize;
 
         assert_le!(
             n_mutated_children + n_crossover_children,

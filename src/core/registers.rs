@@ -1,13 +1,14 @@
 use core::slice::Iter;
 use std::{ops::Index, slice::SliceIndex};
 
-use serde::Serialize;
+use itertools::Itertools;
+use noisy_float::prelude::{r64, R64};
 
 use super::characteristics::DuplicateNew;
 
-pub type RegisterValue = f64;
+pub type RegisterValue = R64;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct Registers {
     data: Vec<RegisterValue>,
 }
@@ -26,7 +27,8 @@ impl DuplicateNew for Registers {
 
 impl Registers {
     pub fn new(n_registers: usize) -> Self {
-        let data = vec![0.; n_registers];
+        let values = vec![0.; n_registers];
+        let data = values.into_iter().map(|v| r64(v)).collect_vec();
 
         Registers { data }
     }
@@ -34,7 +36,7 @@ impl Registers {
     pub fn reset(&mut self) {
         let Registers { data } = self;
         for value in data.as_mut_slice() {
-            *value = 0.
+            *value = r64(0.)
         }
     }
 
@@ -71,12 +73,14 @@ where
 
 #[cfg(test)]
 mod tests {
+    use noisy_float::prelude::r64;
+
     use crate::core::registers::Registers;
 
     #[test]
     fn given_registers_when_indexed_with_range_then_slice_is_returned() {
         let mut registers = Registers::new(10);
-        registers.update(0, 1.);
+        registers.update(0, r64(1.));
 
         let slice = &registers[0..2];
 

@@ -1,6 +1,7 @@
 use core::fmt;
 use std::fmt::Display;
 
+use noisy_float::prelude::r64;
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 
@@ -69,10 +70,10 @@ impl<'a> Loader for IrisLgp {
 
 #[derive(Deserialize, Debug, Clone, PartialEq, PartialOrd, Serialize)]
 pub struct IrisInput {
-    sepal_length: RegisterValue,
-    sepal_width: RegisterValue,
-    petal_length: RegisterValue,
-    petal_width: RegisterValue,
+    sepal_length: f64,
+    sepal_width: f64,
+    petal_length: f64,
+    petal_width: f64,
     class: IrisClass,
 }
 
@@ -100,6 +101,7 @@ impl ValidInput for IrisInput {
             self.petal_length,
             self.petal_width,
         ]
+        .map(|v| r64(v))
         .to_vec()
     }
 }
