@@ -68,3 +68,18 @@ where
         &self.data[index]
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::core::registers::Registers;
+
+    #[test]
+    fn given_registers_when_indexed_with_range_then_slice_is_returned() {
+        let mut registers = Registers::new(10);
+        registers.update(0, 1.);
+
+        let slice = &registers[0..2];
+
+        assert_eq!(slice, &[1., 0.]);
+    }
+}

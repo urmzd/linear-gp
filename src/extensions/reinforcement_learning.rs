@@ -83,7 +83,9 @@ where
             .map(|(index, _)| index)
             .collect_vec();
 
-        indices.choose(&mut generator()).map(|v| *v as i32).unwrap()
+        let index_chosen = indices.choose(&mut generator());
+
+        index_chosen.map(|v| *v as i32).unwrap()
     }
 }
 
