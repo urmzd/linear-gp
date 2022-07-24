@@ -23,13 +23,13 @@ impl ReinforcementLearningInput for MountainCarInput {
 
     fn sim(&mut self, action: usize) -> StateRewardPair {
         let ActionReward { reward, done, .. } = self.environment.step(action);
-        let reward_f32 = reward.into_inner() as f32;
+        let reward_ RegisterValue = reward.into_inner() as  RegisterValue;
 
         StateRewardPair {
             state: self.get_state(),
             reward: match done {
-                true => Reward::Terminal(reward_f32),
-                false => Reward::Continue(reward_f32),
+                true => Reward::Terminal(reward_ RegisterValue),
+                false => Reward::Continue(reward_ RegisterValue),
             },
         }
     }
@@ -37,7 +37,7 @@ impl ReinforcementLearningInput for MountainCarInput {
     fn get_state(&self) -> Vec<R32> {
         let state = &self.environment.state;
         [state.position, state.velocity]
-            .map(|v| v.into_inner() as f32)
+            .map(|v| v.into_inner() as  RegisterValue)
             .to_vec()
     }
 

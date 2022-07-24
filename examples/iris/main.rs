@@ -41,6 +41,7 @@ mod tests {
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
             instruction::InstructionGeneratorParameters,
             program::{Program, ProgramGeneratorParameters},
+            registers::RegisterValue,
         },
         extensions::classification::ClassificationParameters,
         utils::plots::plot_population_benchmarks,
@@ -89,7 +90,7 @@ mod tests {
 
         const PLOT_FILE_NAME: &'static str =
             "./assets/tests/plots/lgp_with_mutate_crossover_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0f32..1f32)?;
+        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
     #[tokio::test]
@@ -128,7 +129,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/lgp_with_mutate_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0f32..1f32)?;
+        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
 
@@ -168,7 +169,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/lgp_with_crossover_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0f32..1f32)?;
+        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         Ok(())
     }
@@ -222,7 +223,7 @@ mod tests {
 
         // TODO: Pull the graph section out into a seperate function.
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/lgp_smoke_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0f32..1f32)?;
+        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         if worst != median || median != best {
             // TODO: Create concrete error type; SNAFU or Failure?
@@ -261,12 +262,7 @@ mod tests {
 
         assert_lt!(dropped_pop_len, hyper_params.population_size);
 
-        IrisLgp::breed(
-            &mut population,
-            0f32,
-            0f32,
-            &hyper_params.program_parameters,
-        );
+        IrisLgp::breed(&mut population, 0.0, 0.0, &hyper_params.program_parameters);
 
         assert_eq!(population.len(), hyper_params.population_size);
 
@@ -301,8 +297,8 @@ mod tests {
 
         self::assert_eq!(
             population.len(),
-            ((hyper_params.population_size as f32 * (1f32 - hyper_params.gap)).floor() as i32
-                as usize)
+            ((hyper_params.population_size as RegisterValue * (1.0 - hyper_params.gap)).floor()
+                as i32 as usize)
         );
 
         Ok(())

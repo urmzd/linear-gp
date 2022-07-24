@@ -5,15 +5,15 @@ use serde::Serialize;
 
 use super::characteristics::DuplicateNew;
 
-pub type R32 = f32;
+pub type RegisterValue = f64;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Registers {
-    data: Vec<R32>,
+    data: Vec<RegisterValue>,
 }
 
-impl From<Vec<R32>> for Registers {
-    fn from(data: Vec<R32>) -> Self {
+impl From<Vec<RegisterValue>> for Registers {
+    fn from(data: Vec<RegisterValue>) -> Self {
         Registers { data }
     }
 }
@@ -43,24 +43,24 @@ impl Registers {
         data.len()
     }
 
-    pub fn update(&mut self, index: usize, value: R32) {
+    pub fn update(&mut self, index: usize, value: RegisterValue) {
         let Registers { data } = self;
         data[index] = value;
     }
 
-    pub fn get(&self, index: usize) -> &R32 {
+    pub fn get(&self, index: usize) -> &RegisterValue {
         let Registers { data } = self;
         data.get(index).unwrap()
     }
 
-    pub fn iter<'a>(&'a self) -> Iter<'a, R32> {
+    pub fn iter<'a>(&'a self) -> Iter<'a, RegisterValue> {
         self.data.iter()
     }
 }
 
 impl<Idx> Index<Idx> for Registers
 where
-    Idx: SliceIndex<[R32]>,
+    Idx: SliceIndex<[RegisterValue]>,
 {
     type Output = Idx::Output;
 

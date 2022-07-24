@@ -1,7 +1,9 @@
 use derive_new::new;
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
 use lgp::{
-    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
+    core::{
+        algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program, registers::RegisterValue,
+    },
     extensions::reinforcement_learning::{
         ReinforcementLearningInput, ReinforcementLearningParameters, Reward, StateRewardPair,
     },
@@ -19,7 +21,7 @@ impl ValidInput for CartPoleInput {
     const N_INPUT_REGISTERS: usize = 4;
     const N_ACTION_REGISTERS: usize = 2;
 
-    fn flat(&self) -> Vec<lgp::core::registers::R32> {
+    fn flat(&self) -> Vec<lgp::core::registers::RegisterValue> {
         self.get_state()
     }
 }
@@ -31,7 +33,7 @@ impl ReinforcementLearningInput for CartPoleInput {
 
     fn sim(&mut self, action: usize) -> StateRewardPair {
         let action_reward = self.environment.step(action);
-        let reward = action_reward.reward.into_inner() as f32;
+        let reward = action_reward.reward.into_inner() as RegisterValue;
 
         StateRewardPair {
             state: self.get_state(),
@@ -46,11 +48,11 @@ impl ReinforcementLearningInput for CartPoleInput {
         self.environment.reset(None, false, None);
     }
 
-    fn get_state(&self) -> Vec<lgp::core::registers::R32> {
+    fn get_state(&self) -> Vec<lgp::core::registers::RegisterValue> {
         let state = self.environment.state;
         let state_vec: Vec<_> = state.into();
 
-        state_vec.iter().map(move |s| *s as f32).collect()
+        state_vec.iter().map(move |s| *s as RegisterValue).collect()
     }
 
     fn finish(&mut self) {

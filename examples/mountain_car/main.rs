@@ -80,7 +80,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/mountain_car.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, -200f32..0f32)?;
+        plot_population_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
         Ok(())
     }
 }
