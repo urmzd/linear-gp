@@ -5,7 +5,7 @@ use csv::ReaderBuilder;
 use more_asserts::{assert_ge, assert_le};
 use ordered_float::OrderedFloat;
 use rand::prelude::{IteratorRandom, SliceRandom};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::de::DeserializeOwned;
 
 use crate::{
     core::characteristics::{Breed, Fitness, Generate},
@@ -56,21 +56,12 @@ where
 
 pub trait GeneticAlgorithm
 where
-    Self::O: Fitness
-        + Generate
-        + PartialEq
-        + Eq
-        + PartialOrd
-        + Serialize
-        + Sized
-        + Clone
-        + Mutate
-        + Breed
-        + fmt::Debug,
+    Self::O: Fitness + Generate + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug,
 {
     type O;
 
     /// Prevent errors from being thrown when "multple" initializations occur.
+    /// TODO: Remove monkey patch.
     fn init_env() -> () {
         pretty_env_logger::try_init().unwrap_or(());
     }
@@ -93,6 +84,7 @@ where
         for individual in population.iter_mut() {
             if individual.get_fitness().is_none() {
                 individual.eval_fitness(fitness_parameters);
+                assert_ne!(individual.get_fitness(), None);
             }
         }
         population.sort();

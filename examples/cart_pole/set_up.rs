@@ -29,7 +29,7 @@ impl ReinforcementLearningInput for CartPoleInput {
         self.environment.reset(Some(0), false, None);
     }
 
-    fn act(&mut self, action: usize) -> StateRewardPair {
+    fn sim(&mut self, action: usize) -> StateRewardPair {
         let action_reward = self.environment.step(action);
         let reward = action_reward.reward.into_inner() as f32;
 
