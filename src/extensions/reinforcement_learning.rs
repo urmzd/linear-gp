@@ -1,7 +1,6 @@
 use derivative::Derivative;
 use derive_new::new;
 use itertools::Itertools;
-use ordered_float::OrderedFloat;
 use rand::prelude::SliceRandom;
 use serde::Serialize;
 
@@ -59,7 +58,7 @@ impl StateRewardPair {
 
 pub trait ReinforcementLearningInput: ValidInput + Sized {
     fn init(&mut self);
-    fn act(&mut self, action: usize) -> StateRewardPair;
+    fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
     fn get_state(&self) -> Vec<R32>;
     fn finish(&mut self);
@@ -110,7 +109,7 @@ where
                 self.exec(&parameters.environment);
                 // Eval
                 let picked_action = ReinforcementLearningParameters::<T>::argmax(&self.registers);
-                let state_reward = parameters.environment.act(picked_action as usize);
+                let state_reward = parameters.environment.sim(picked_action as usize);
 
                 score += state_reward.get_value();
 
@@ -123,10 +122,10 @@ where
             parameters.environment.reset();
         }
 
-        scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
         parameters.environment.finish();
 
-        let median = scores.remove(parameters.n_runs / 2);
+        scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let median = scores.swap_remove(parameters.n_runs / 2);
 
         self.fitness = Some(median);
 
@@ -135,109 +134,5 @@ where
 
     fn get_fitness(&self) -> Option<crate::core::characteristics::FitnessScore> {
         self.fitness
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct QTable {
-    table: Vec<Vec<R32>>,
-    /// Step size parameter.
-    alpha: R32,
-    /// Discount.
-    gamma: R32,
-}
-
-pub struct QProgram<T>
-where
-    T: ReinforcementLearningInput,
-{
-    program: Program<ReinforcementLearningParameters<T>>,
-    q_table: QTable,
-}
-
-impl QTable {
-    pub fn new(n_actions: usize, n_registers: usize, alpha: R32, gamma: R32) -> Self {
-        let table = vec![vec![0.; n_actions]; n_registers];
-        QTable {
-            table,
-            alpha,
-            gamma,
-        }
-    }
-
-    pub fn action_argmax(&self, register_number: usize) -> usize {
-        let QTable { table, .. } = &self;
-        let mut best_action = -1 as i32;
-        let mut best_q_value = 0f32;
-        let available_actions = table
-            .get(register_number)
-            .expect("Register number to be less than length of QTable.");
-
-        for (action, q_value) in available_actions.into_iter().enumerate() {
-            if *q_value > best_q_value {
-                best_q_value = *q_value;
-                best_action = action as i32;
-            }
-        }
-
-        best_action as usize
-    }
-
-    pub fn update(
-        &mut self,
-        current_register: usize,
-        current_action: usize,
-        current_reward: R32,
-        next_register: usize,
-    ) {
-        let current_q_value = self.table[current_register][current_action];
-        let next_q_value = self.action_argmax(next_register) as f32;
-
-        let new_q_value = current_q_value
-            + self.alpha * (current_reward + self.gamma * next_q_value - current_q_value);
-
-        self.table[current_register][current_action] = new_q_value;
-    }
-}
-
-impl<T> Fitness for QProgram<T>
-where
-    T: ReinforcementLearningInput,
-{
-    type FitnessParameters = ReinforcementLearningParameters<T>;
-
-    fn eval_fitness(
-        &mut self,
-        parameters: &mut Self::FitnessParameters,
-    ) -> crate::core::characteristics::FitnessScore {
-        parameters.environment.init();
-        for _run in 0..parameters.n_runs {
-            let mut score = 0f32;
-            for _step in 0..parameters.max_episode_length {
-                self.program.exec(&parameters.environment);
-
-                let selected_register = self
-                    .program
-                    .registers
-                    .iter()
-                    .map(|v| OrderedFloat(*v))
-                    .position_max()
-                    .expect("Registers length to be greater than 0.");
-
-                let state_reward_pair = parameters.environment.act(selected_register);
-
-                score += state_reward_pair.get_value();
-
-                if state_reward_pair.is_terminal() {
-                    break;
-                }
-            }
-        }
-
-        todo!()
-    }
-
-    fn get_fitness(&self) -> Option<crate::core::characteristics::FitnessScore> {
-        todo!()
     }
 }

@@ -10,7 +10,7 @@ use rand::{
 use serde::Serialize;
 
 use super::{
-    characteristics::{Breed, FitnessScore, Generate, Mutate},
+    characteristics::{Breed, DuplicateNew, FitnessScore, Generate, Mutate},
     inputs::ValidInput,
     instruction::{Instruction, InstructionGeneratorParameters},
     instructions::Instructions,
@@ -131,9 +131,9 @@ where
         let [child_a_instructions, child_b_instructions] =
             self.instructions.two_point_crossover(&mate.instructions);
 
-        let program_a = Program::new(child_a_instructions, self.registers.duplicate(), None);
+        let program_a = Program::new(child_a_instructions, self.registers.duplicate_new(), None);
 
-        let program_b = Program::new(child_b_instructions, self.registers.duplicate(), None);
+        let program_b = Program::new(child_b_instructions, self.registers.duplicate_new(), None);
 
         [program_a, program_b]
     }

@@ -22,3 +22,7 @@ pub trait Generate {
 
     fn generate<'a>(parameters: &'a Self::GeneratorParameters) -> Self;
 }
+
+pub trait DuplicateNew {
+    fn duplicate_new(&self) -> Self;
+}

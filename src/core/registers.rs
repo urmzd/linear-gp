@@ -3,6 +3,8 @@ use std::{ops::Index, slice::SliceIndex};
 
 use serde::Serialize;
 
+use super::characteristics::DuplicateNew;
+
 pub type R32 = f32;
 
 #[derive(Debug, Clone, Serialize)]
@@ -13,6 +15,12 @@ pub struct Registers {
 impl From<Vec<R32>> for Registers {
     fn from(data: Vec<R32>) -> Self {
         Registers { data }
+    }
+}
+
+impl DuplicateNew for Registers {
+    fn duplicate_new(&self) -> Self {
+        Self::new(self.len())
     }
 }
 
@@ -28,10 +36,6 @@ impl Registers {
         for value in data.as_mut_slice() {
             *value = 0.
         }
-    }
-
-    pub fn duplicate(&self) -> Self {
-        Self::new(self.len())
     }
 
     pub fn len(&self) -> usize {

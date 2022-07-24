@@ -1,25 +1,11 @@
-use derive_new::new;
-use gym_rs::core::ActionReward;
-use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
-use lgp::extensions::reinforcement_learning::StateRewardPair;
-use lgp::{
-    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program, registers::R32},
-    extensions::reinforcement_learning::{
-        ReinforcementLearningInput, ReinforcementLearningParameters, Reward,
-    },
-};
-use serde::Serialize;
-
-pub struct MountainCarLgp;
-
-impl GeneticAlgorithm for MountainCarLgp {
-    type O = Program<ReinforcementLearningParameters<MountainCarInput>>;
-}
-
 #[derive(Debug, Serialize, new, Clone)]
 pub struct MountainCarInput {
     environment: MountainCarEnv,
 }
+impl GeneticAlgorithm for QMountainCarLgp {
+    type O = QProgram<MountainCarInput>;
+}
+pub struct QMountainCarLgp;
 
 impl ValidInput for MountainCarInput {
     const N_INPUT_REGISTERS: usize = 2;
@@ -30,7 +16,6 @@ impl ValidInput for MountainCarInput {
         state
     }
 }
-
 impl ReinforcementLearningInput for MountainCarInput {
     fn init(&mut self) {
         self.environment.reset(Some(0), false, None);
@@ -62,5 +47,13 @@ impl ReinforcementLearningInput for MountainCarInput {
 
     fn reset(&mut self) {
         self.environment.reset(None, false, None);
+    }
+}
+
+impl QLearningInput for MountainCarInput {
+    type State = <MountainCarEnv as Env>::Observation;
+
+    fn set_state(&mut self, state: Self::State) {
+        self.environment.state = state;
     }
 }
