@@ -1,12 +1,13 @@
 use derive_new::new;
 use itertools::Itertools;
+use noisy_float::prelude::r64;
 use serde::Serialize;
 
 use crate::core::{
     characteristics::Fitness,
     inputs::{Inputs, ValidInput},
     program::Program,
-    registers::{Registers, RegisterValue},
+    registers::Registers,
 };
 
 use super::core::ExtensionParameters;
@@ -25,16 +26,12 @@ where
 {
     fn argmax(registers: &Registers) -> i32 {
         let action_registers = &registers[0..T::N_ACTION_REGISTERS];
-        let max_value = action_registers
-            .into_iter()
-            .copied()
-            .reduce(|a, b| f64::max(a, b))
-            .unwrap();
+        let max_value = action_registers.into_iter().sorted().last().unwrap();
 
         let mut indices = action_registers
             .into_iter()
             .enumerate()
-            .filter(|(_, value)| **value == max_value)
+            .filter(|(_, value)| *value == max_value)
             .map(|(index, _)| index)
             .collect_vec();
 
@@ -62,7 +59,7 @@ where
     ) -> crate::core::characteristics::FitnessScore {
         let inputs = &parameters.inputs;
 
-        let mut n_correct = 0;
+        let mut n_correct = 0.0;
 
         for input in inputs {
             self.exec(input);
@@ -71,13 +68,13 @@ where
             let correct_class = input.get_class() as i32;
 
             if predicted_class == correct_class {
-                n_correct += 1;
+                n_correct += 1.;
             }
 
             self.registers.reset();
         }
 
-        let fitness = n_correct as RegisterValue / inputs.len() as RegisterValue;
+        let fitness = r64(n_correct / inputs.len() as f64);
 
         self.fitness = Some(fitness);
 

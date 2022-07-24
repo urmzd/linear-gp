@@ -1,13 +1,12 @@
 use derive_new::new;
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
 use lgp::{
-    core::{
-        algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program, registers::RegisterValue,
-    },
+    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
     extensions::reinforcement_learning::{
         ReinforcementLearningInput, ReinforcementLearningParameters, Reward, StateRewardPair,
     },
 };
+use noisy_float::prelude::r64;
 use serde::Serialize;
 
 pub struct CartPoleLgp;
@@ -33,7 +32,7 @@ impl ReinforcementLearningInput for CartPoleInput {
 
     fn sim(&mut self, action: usize) -> StateRewardPair {
         let action_reward = self.environment.step(action);
-        let reward = action_reward.reward.into_inner() as RegisterValue;
+        let reward = action_reward.reward.into_inner();
 
         StateRewardPair {
             state: self.get_state(),
@@ -52,7 +51,7 @@ impl ReinforcementLearningInput for CartPoleInput {
         let state = self.environment.state;
         let state_vec: Vec<_> = state.into();
 
-        state_vec.iter().map(move |s| *s as RegisterValue).collect()
+        state_vec.iter().map(move |s| r64(*s)).collect()
     }
 
     fn finish(&mut self) {

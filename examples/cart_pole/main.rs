@@ -42,7 +42,7 @@ mod tests {
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
             instruction::InstructionGeneratorParameters,
-            program::ProgramGeneratorParameters, registers::RegisterValue,
+            program::ProgramGeneratorParameters,
         },
         extensions::reinforcement_learning::ReinforcementLearningParameters,
         utils::plots::plot_population_benchmarks,
@@ -78,7 +78,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "assets/tests/plots/cart_pole.png";
-        let range = (0.)..(hyper_params.fitness_parameters.max_episode_length as RegisterValue);
+        let range = (0.)..(hyper_params.fitness_parameters.max_episode_length as f64);
         plot_population_benchmarks(populations, PLOT_FILE_NAME, range)?;
         Ok(())
     }

@@ -10,6 +10,7 @@ use lgp::{
         ReinforcementLearningInput, ReinforcementLearningParameters,
     },
 };
+use noisy_float::prelude::r64;
 use serde::Serialize;
 
 pub struct MountainCarLgp;
@@ -54,7 +55,7 @@ impl ReinforcementLearningInput for MountainCarInput {
     fn get_state(&self) -> Vec<RegisterValue> {
         let state = &self.environment.state;
         [state.position, state.velocity]
-            .map(|v| v.into_inner() as RegisterValue)
+            .map(|v| r64(v.into_inner()))
             .to_vec()
     }
 

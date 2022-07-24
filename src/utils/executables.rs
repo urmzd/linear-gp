@@ -1,3 +1,5 @@
+use noisy_float::prelude::r64;
+
 use crate::core::registers::RegisterValue;
 
 pub type Op = fn(a: RegisterValue, b: RegisterValue) -> RegisterValue;
@@ -19,5 +21,5 @@ pub fn multiply(a: RegisterValue, b: RegisterValue) -> RegisterValue {
 }
 
 pub fn divide(a: RegisterValue, _b: RegisterValue) -> RegisterValue {
-    a / 2 as RegisterValue
+    a / r64(2.)
 }

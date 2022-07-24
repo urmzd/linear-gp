@@ -2,7 +2,7 @@ use std::fmt::{self, Debug};
 
 use itertools::Itertools;
 use more_asserts::{assert_ge, assert_le};
-use ordered_float::OrderedFloat;
+use noisy_float::prelude::r64;
 use rand::distributions::uniform::{UniformFloat, UniformInt, UniformSampler};
 
 use crate::{
@@ -25,12 +25,7 @@ pub struct QTable {
     table: Vec<Vec<RegisterValue>>,
     n_actions: usize,
     n_registers: usize,
-    /// Step size parameter.
-    alpha: RegisterValue,
-    /// Discount.
-    gamma: RegisterValue,
-    // Greedy selection.
-    epsilon: RegisterValue,
+    q_consts: QConsts,
 }
 pub trait QLearningInput: ReinforcementLearningInput {
     type State;
@@ -57,7 +52,7 @@ where
     T: QLearningInput,
 {
     fn argmax(registers: &Registers) -> i32 {
-        let selected_register = registers.iter().map(|v| OrderedFloat(*v)).position_max();
+        let selected_register = registers.iter().map(|v| *v).position_max();
 
         selected_register.expect("Register to be of cardinality non-zero.") as i32
     }
@@ -74,32 +69,18 @@ where
 
 impl DuplicateNew for QTable {
     fn duplicate_new(&self) -> Self {
-        QTable::new(
-            self.n_actions,
-            self.n_registers,
-            self.alpha,
-            self.gamma,
-            self.epsilon,
-        )
+        QTable::new(self.n_actions, self.n_registers, self.q_consts)
     }
 }
 
 impl QTable {
-    pub fn new(
-        n_actions: usize,
-        n_registers: usize,
-        alpha: RegisterValue,
-        gamma: RegisterValue,
-        epsilon: RegisterValue,
-    ) -> Self {
-        let table = vec![vec![0.; n_actions]; n_registers];
+    pub fn new(n_actions: usize, n_registers: usize, q_consts: QConsts) -> Self {
+        let table = vec![vec![r64(0.); n_actions]; n_registers];
         QTable {
             table,
             n_actions,
             n_registers,
-            alpha,
-            gamma,
-            epsilon,
+            q_consts,
         }
     }
 
@@ -119,7 +100,7 @@ impl QTable {
 
         available_actions
             .into_iter()
-            .map(|v| OrderedFloat(*v))
+            .map(|v| *v)
             .position_max()
             .expect("Actions length to greater than 0.")
     }
@@ -129,13 +110,13 @@ impl QTable {
         T: ExtensionParameters,
     {
         let winning_register = T::argmax(registers);
-        assert_le!(self.epsilon, 1.0);
-        assert_ge!(self.epsilon, 0.);
+        assert_le!(self.q_consts.epsilon, 1.0);
+        assert_ge!(self.q_consts.epsilon, 0.);
 
         // TODO: Move generator to structs.
-        let prob = UniformFloat::<RegisterValue>::new_inclusive(0., 1.).sample(&mut generator());
+        let prob = UniformFloat::<f64>::new_inclusive(0., 1.).sample(&mut generator());
 
-        let winning_action = if prob < self.epsilon {
+        let winning_action = if prob < self.q_consts.epsilon {
             self.action_random(winning_register as usize)
         } else {
             self.action_argmax(winning_register as usize)
@@ -151,16 +132,17 @@ impl QTable {
         &mut self,
         current_register: usize,
         current_action: usize,
-        current_reward: RegisterValue,
+        current_reward: f64,
         next_register: usize,
     ) {
-        let current_q_value = self.table[current_register][current_action];
-        let next_q_value = self.action_argmax(next_register) as RegisterValue;
+        let current_q_value = (self.table[current_register][current_action]).const_raw();
+        let next_q_value = self.action_argmax(next_register) as f64;
 
         let new_q_value = current_q_value
-            + self.alpha * (current_reward + self.gamma * next_q_value - current_q_value);
+            + self.q_consts.alpha
+                * (current_reward + self.q_consts.gamma * next_q_value - current_q_value);
 
-        self.table[current_register][current_action] = new_q_value;
+        self.table[current_register][current_action] = r64(new_q_value);
     }
 }
 
@@ -209,7 +191,7 @@ where
         // TODO: Call init and finish after `rank`
         for state in &parameters.initial_states {
             // INIT STEPS.
-            let mut score = 0. as RegisterValue;
+            let mut score = 0.;
             parameters
                 .rl_parameters
                 .environment
@@ -251,7 +233,7 @@ where
         }
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let median = scores.swap_remove(scores.len() / 2);
+        let median = r64(scores.swap_remove(scores.len() / 2));
 
         self.program.fitness = Some(median);
 
@@ -308,13 +290,7 @@ where
             .program_parameters
             .instruction_generator_parameters;
 
-        let q_table = QTable::new(
-            n_features,
-            n_registers,
-            parameters.alpha,
-            parameters.gamma,
-            parameters.epsilon,
-        );
+        let q_table = QTable::new(n_features, n_registers, parameters.consts);
 
         QProgram { q_table, program }
     }
@@ -323,7 +299,15 @@ where
 #[derive(Debug)]
 pub struct QProgramGeneratorParameters {
     program_parameters: ProgramGeneratorParameters,
-    alpha: RegisterValue,
-    gamma: RegisterValue,
-    epsilon: RegisterValue,
+    consts: QConsts,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct QConsts {
+    /// Step size parameter.
+    alpha: f64,
+    /// Discount.
+    gamma: f64,
+    // Greedy selection.
+    epsilon: f64,
 }

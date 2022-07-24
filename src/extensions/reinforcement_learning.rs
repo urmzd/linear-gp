@@ -1,6 +1,7 @@
 use derivative::Derivative;
 use derive_new::new;
 use itertools::Itertools;
+use noisy_float::prelude::r64;
 use rand::prelude::SliceRandom;
 use serde::Serialize;
 
@@ -30,8 +31,8 @@ where
 
 #[derive(Debug, Serialize, Clone, Copy)]
 pub enum Reward {
-    Continue(RegisterValue),
-    Terminal(RegisterValue),
+    Continue(f64),
+    Terminal(f64),
 }
 
 #[derive(Debug, Clone)]
@@ -41,7 +42,7 @@ pub struct StateRewardPair {
 }
 
 impl StateRewardPair {
-    pub fn get_value(&self) -> RegisterValue {
+    pub fn get_value(&self) -> f64 {
         match self.reward {
             Reward::Continue(reward) => reward,
             Reward::Terminal(reward) => reward,
@@ -70,22 +71,21 @@ where
 {
     fn argmax(registers: &Registers) -> i32 {
         let action_registers = &registers[0..T::N_ACTION_REGISTERS];
-        let max_value = action_registers
-            .into_iter()
-            .copied()
-            .reduce(|a, b| f64::max(a, b))
-            .unwrap();
+        let max_value = action_registers.into_iter().sorted().last().unwrap();
 
         let indices = action_registers
             .into_iter()
             .enumerate()
-            .filter(|(_, value)| **value == max_value)
+            .filter(|(_, value)| *value == max_value)
             .map(|(index, _)| index)
             .collect_vec();
 
-        let index_chosen = indices.choose(&mut generator());
+        let index_chosen = indices
+            .choose(&mut generator())
+            .map(|v| *v as i32)
+            .expect("Index to exist.");
 
-        index_chosen.map(|v| *v as i32).unwrap()
+        index_chosen
     }
 }
 
@@ -127,7 +127,7 @@ where
         parameters.environment.finish();
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let median = scores.swap_remove(parameters.n_runs / 2);
+        let median = r64(scores.swap_remove(parameters.n_runs / 2));
 
         self.fitness = Some(median);
 

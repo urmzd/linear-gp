@@ -41,7 +41,6 @@ mod tests {
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
             instruction::InstructionGeneratorParameters,
             program::{Program, ProgramGeneratorParameters},
-            registers::RegisterValue,
         },
         extensions::classification::ClassificationParameters,
         utils::plots::plot_population_benchmarks,
@@ -297,8 +296,7 @@ mod tests {
 
         self::assert_eq!(
             population.len(),
-            ((hyper_params.population_size as RegisterValue * (1.0 - hyper_params.gap)).floor()
-                as i32 as usize)
+            ((hyper_params.population_size as f64 * (1.0 - hyper_params.gap)).floor() as usize)
         );
 
         Ok(())

@@ -1,4 +1,4 @@
-use std::{fmt::Display, marker::PhantomData};
+use std::marker::PhantomData;
 
 use crate::{extensions::core::ExtensionParameters, utils::random::generator};
 use derivative::Derivative;
@@ -36,7 +36,7 @@ where
     }
 }
 
-#[derive(Debug, Serialize, new, Derivative)]
+#[derive(Debug, new, Derivative)]
 #[derivative(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Program<T>
 where
@@ -63,16 +63,6 @@ where
         for instruction in &self.instructions {
             instruction.apply(&mut &mut self.registers, input)
         }
-    }
-}
-
-impl<T> Display for Program<T>
-where
-    T: ExtensionParameters,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let serialized = toml::to_string(&self).unwrap();
-        f.write_str(&serialized)
     }
 }
 
