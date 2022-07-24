@@ -6,7 +6,7 @@ use crate::core::{
     characteristics::Fitness,
     inputs::{Inputs, ValidInput},
     program::Program,
-    registers::Registers,
+    registers::{Registers, RegisterValue},
 };
 
 use super::core::ExtensionParameters;
@@ -28,7 +28,7 @@ where
         let max_value = action_registers
             .into_iter()
             .copied()
-            .reduce(|a, b| f32::max(a, b))
+            .reduce(|a, b| f64::max(a, b))
             .unwrap();
 
         let mut indices = action_registers
@@ -77,7 +77,7 @@ where
             self.registers.reset();
         }
 
-        let fitness = n_correct as f32 / inputs.len() as f32;
+        let fitness = n_correct as RegisterValue / inputs.len() as RegisterValue;
 
         self.fitness = Some(fitness);
 

@@ -10,7 +10,7 @@ use crate::{
         characteristics::{Breed, DuplicateNew, Fitness, Generate, Mutate},
         instruction::InstructionGeneratorParameters,
         program::{Program, ProgramGeneratorParameters},
-        registers::{Registers, R32},
+        registers::{RegisterValue, Registers},
     },
     utils::random::generator,
 };
@@ -22,15 +22,15 @@ use super::{
 
 #[derive(Clone, Debug)]
 pub struct QTable {
-    table: Vec<Vec<R32>>,
+    table: Vec<Vec<RegisterValue>>,
     n_actions: usize,
     n_registers: usize,
     /// Step size parameter.
-    alpha: R32,
+    alpha: RegisterValue,
     /// Discount.
-    gamma: R32,
+    gamma: RegisterValue,
     // Greedy selection.
-    epsilon: R32,
+    epsilon: RegisterValue,
 }
 pub trait QLearningInput: ReinforcementLearningInput {
     type State;
@@ -85,7 +85,13 @@ impl DuplicateNew for QTable {
 }
 
 impl QTable {
-    pub fn new(n_actions: usize, n_registers: usize, alpha: R32, gamma: R32, epsilon: R32) -> Self {
+    pub fn new(
+        n_actions: usize,
+        n_registers: usize,
+        alpha: RegisterValue,
+        gamma: RegisterValue,
+        epsilon: RegisterValue,
+    ) -> Self {
         let table = vec![vec![0.; n_actions]; n_registers];
         QTable {
             table,
@@ -127,7 +133,7 @@ impl QTable {
         assert_ge!(self.epsilon, 0.);
 
         // TODO: Move generator to structs.
-        let prob = UniformFloat::<f32>::new_inclusive(0., 1.).sample(&mut generator());
+        let prob = UniformFloat::<RegisterValue>::new_inclusive(0., 1.).sample(&mut generator());
 
         let winning_action = if prob < self.epsilon {
             self.action_random(winning_register as usize)
@@ -145,11 +151,11 @@ impl QTable {
         &mut self,
         current_register: usize,
         current_action: usize,
-        current_reward: R32,
+        current_reward: RegisterValue,
         next_register: usize,
     ) {
         let current_q_value = self.table[current_register][current_action];
-        let next_q_value = self.action_argmax(next_register) as f32;
+        let next_q_value = self.action_argmax(next_register) as RegisterValue;
 
         let new_q_value = current_q_value
             + self.alpha * (current_reward + self.gamma * next_q_value - current_q_value);
@@ -203,7 +209,7 @@ where
         // TODO: Call init and finish after `rank`
         for state in &parameters.initial_states {
             // INIT STEPS.
-            let mut score = 0f32;
+            let mut score = 0. as RegisterValue;
             parameters
                 .rl_parameters
                 .environment
@@ -317,7 +323,7 @@ where
 #[derive(Debug)]
 pub struct QProgramGeneratorParameters {
     program_parameters: ProgramGeneratorParameters,
-    alpha: R32,
-    gamma: R32,
-    epsilon: R32,
+    alpha: RegisterValue,
+    gamma: RegisterValue,
+    epsilon: RegisterValue,
 }

@@ -1,23 +1,23 @@
-use crate::core::registers::R32;
+use crate::core::registers::RegisterValue;
 
-pub type Op = fn(a: R32, b: R32) -> R32;
+pub type Op = fn(a: RegisterValue, b: RegisterValue) -> RegisterValue;
 
 pub type Executables = &'static [Op];
 
 pub const DEFAULT_EXECUTABLES: Executables = &[add, subtract, multiply, divide];
 
-pub fn add(a: R32, b: R32) -> R32 {
+pub fn add(a: RegisterValue, b: RegisterValue) -> RegisterValue {
     a + b
 }
 
-pub fn subtract(a: R32, b: R32) -> R32 {
+pub fn subtract(a: RegisterValue, b: RegisterValue) -> RegisterValue {
     a - b
 }
 
-pub fn multiply(a: R32, b: R32) -> R32 {
+pub fn multiply(a: RegisterValue, b: RegisterValue) -> RegisterValue {
     a * b
 }
 
-pub fn divide(a: R32, _b: R32) -> R32 {
-    a / 2f32
+pub fn divide(a: RegisterValue, _b: RegisterValue) -> RegisterValue {
+    a / 2 as RegisterValue
 }

@@ -9,7 +9,7 @@ use crate::{
         characteristics::Fitness,
         inputs::ValidInput,
         program::Program,
-        registers::{Registers, R32},
+        registers::{RegisterValue, Registers},
     },
     utils::random::generator,
 };
@@ -30,18 +30,18 @@ where
 
 #[derive(Debug, Serialize, Clone, Copy)]
 pub enum Reward {
-    Continue(R32),
-    Terminal(R32),
+    Continue(RegisterValue),
+    Terminal(RegisterValue),
 }
 
 #[derive(Debug, Clone)]
 pub struct StateRewardPair {
-    pub state: Vec<R32>,
+    pub state: Vec<RegisterValue>,
     pub reward: Reward,
 }
 
 impl StateRewardPair {
-    pub fn get_value(&self) -> R32 {
+    pub fn get_value(&self) -> RegisterValue {
         match self.reward {
             Reward::Continue(reward) => reward,
             Reward::Terminal(reward) => reward,
@@ -60,7 +60,7 @@ pub trait ReinforcementLearningInput: ValidInput + Sized {
     fn init(&mut self);
     fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
-    fn get_state(&self) -> Vec<R32>;
+    fn get_state(&self) -> Vec<RegisterValue>;
     fn finish(&mut self);
 }
 
@@ -73,7 +73,7 @@ where
         let max_value = action_registers
             .into_iter()
             .copied()
-            .reduce(|a, b| f32::max(a, b))
+            .reduce(|a, b| f64::max(a, b))
             .unwrap();
 
         let indices = action_registers

@@ -5,12 +5,12 @@ use plotters::{
     style::{colors, IntoFont, WHITE},
 };
 
-use crate::core::{characteristics::Fitness, population::Population};
+use crate::core::{characteristics::Fitness, population::Population, registers::RegisterValue};
 
 pub fn plot_population_benchmarks<T>(
     populations: Vec<Population<T>>,
     plot_path: &str,
-    y_range: Range<f32>,
+    y_range: Range<RegisterValue>,
 ) -> Result<(), Box<dyn error::Error>>
 where
     T: Fitness + Clone + Ord + fmt::Debug,
@@ -29,7 +29,7 @@ where
 
     chart.configure_mesh().draw()?;
 
-    let benchmarks: Vec<[f32; 3]> = populations
+    let benchmarks: Vec<[RegisterValue; 3]> = populations
         .into_iter()
         .map(|population| {
             let best = population.first();

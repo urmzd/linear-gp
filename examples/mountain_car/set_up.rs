@@ -1,11 +1,13 @@
 use derive_new::new;
 use gym_rs::core::ActionReward;
 use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
-use lgp::extensions::reinforcement_learning::StateRewardPair;
+use lgp::extensions::reinforcement_learning::{Reward, StateRewardPair};
 use lgp::{
-    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program, registers::R32},
+    core::{
+        algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program, registers::RegisterValue,
+    },
     extensions::reinforcement_learning::{
-        ReinforcementLearningInput, ReinforcementLearningParameters, Reward,
+        ReinforcementLearningInput, ReinforcementLearningParameters,
     },
 };
 use serde::Serialize;
@@ -25,7 +27,7 @@ impl ValidInput for MountainCarInput {
     const N_INPUT_REGISTERS: usize = 2;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat(&self) -> Vec<R32> {
+    fn flat(&self) -> Vec<RegisterValue> {
         let state = self.get_state();
         state
     }
@@ -38,21 +40,21 @@ impl ReinforcementLearningInput for MountainCarInput {
 
     fn sim(&mut self, action: usize) -> StateRewardPair {
         let ActionReward { reward, done, .. } = self.environment.step(action);
-        let reward_f32 = reward.into_inner() as f32;
+        let reward_ = reward.into_inner();
 
         StateRewardPair {
             state: self.get_state(),
             reward: match done {
-                true => Reward::Terminal(reward_f32),
-                false => Reward::Continue(reward_f32),
+                true => Reward::Terminal(reward_),
+                false => Reward::Continue(reward_),
             },
         }
     }
 
-    fn get_state(&self) -> Vec<R32> {
+    fn get_state(&self) -> Vec<RegisterValue> {
         let state = &self.environment.state;
         [state.position, state.velocity]
-            .map(|v| v.into_inner() as f32)
+            .map(|v| v.into_inner() as RegisterValue)
             .to_vec()
     }
 
