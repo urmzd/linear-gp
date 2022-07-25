@@ -1,16 +1,13 @@
 use std::fmt::Debug;
 
 use derive_new::new;
-use itertools::Itertools;
 use rand::prelude::SliceRandom;
 use serde::Serialize;
 
 use crate::{
-    core::{characteristics::Fitness, inputs::ValidInput, program::Program, registers::Registers},
-    utils::{float_ops, random::generator},
+    core::{characteristics::Fitness, inputs::ValidInput, program::Program},
+    utils::random::generator,
 };
-
-use super::core::ExtensionParameters;
 
 #[derive(Debug, Clone, new)]
 pub struct ReinforcementLearningParameters<T>
@@ -60,31 +57,6 @@ pub trait ReinforcementLearningInput: ValidInput + Sized {
     fn finish(&mut self);
 }
 
-impl<T> ExtensionParameters for ReinforcementLearningParameters<T>
-where
-    T: ReinforcementLearningInput,
-{
-    fn argmax(registers: &Registers) -> i32 {
-        let action_registers = &registers[0..T::N_ACTION_REGISTERS];
-        let max_value = float_ops::max_val(action_registers.iter().copied())
-            .expect("Max value to have been found");
-
-        let indices = action_registers
-            .into_iter()
-            .enumerate()
-            .filter(|(_, value)| **value == max_value)
-            .map(|(index, _)| index)
-            .collect_vec();
-
-        let index_chosen = indices
-            .choose(&mut generator())
-            .map(|v| *v as i32)
-            .expect("Index to exist.");
-
-        index_chosen
-    }
-}
-
 impl<T> Fitness for Program<ReinforcementLearningParameters<T>>
 where
     T: ReinforcementLearningInput,
@@ -106,7 +78,11 @@ where
                 // Run program.
                 self.exec(&parameters.environment);
                 // Eval
-                let picked_action = ReinforcementLearningParameters::<T>::argmax(&self.registers);
+                let winning_registers = self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS));
+                let picked_action = winning_registers
+                    .choose(&mut generator())
+                    .map(|v| *v)
+                    .expect("Register to have been chosen.");
                 let state_reward = parameters.environment.sim(picked_action as usize);
 
                 score += state_reward.get_value();

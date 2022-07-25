@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{extensions::core::ExtensionParameters, utils::random::generator};
+use crate::utils::random::generator;
 use derivative::Derivative;
 use derive_new::new;
 use rand::{
@@ -22,10 +22,7 @@ pub struct ProgramGeneratorParameters {
     pub instruction_generator_parameters: InstructionGeneratorParameters,
 }
 
-impl<T> Clone for Program<T>
-where
-    T: ExtensionParameters,
-{
+impl<T> Clone for Program<T> {
     fn clone(&self) -> Self {
         Self {
             instructions: self.instructions.clone(),
@@ -38,10 +35,7 @@ where
 
 #[derive(Debug, new, Derivative)]
 #[derivative(PartialEq, Eq, PartialOrd, Ord)]
-pub struct Program<T>
-where
-    T: ExtensionParameters,
-{
+pub struct Program<T> {
     #[derivative(Ord = "ignore", PartialOrd = "ignore")]
     pub instructions: Instructions,
     #[derivative(Ord = "ignore", PartialOrd = "ignore", PartialEq = "ignore")]
@@ -52,10 +46,7 @@ where
     marker: PhantomData<T>,
 }
 
-impl<T> Program<T>
-where
-    T: ExtensionParameters,
-{
+impl<T> Program<T> {
     pub fn exec<I>(&mut self, input: &I)
     where
         I: ValidInput,
@@ -66,10 +57,7 @@ where
     }
 }
 
-impl<T> Generate for Program<T>
-where
-    T: ExtensionParameters,
-{
+impl<T> Generate for Program<T> {
     type GeneratorParameters = ProgramGeneratorParameters;
 
     fn generate(parameters: &Self::GeneratorParameters) -> Self {
@@ -89,10 +77,7 @@ where
     }
 }
 
-impl<T> Mutate for Program<T>
-where
-    T: ExtensionParameters,
-{
+impl<T> Mutate for Program<T> {
     fn mutate(&self, params: &Self::GeneratorParameters) -> Self {
         let mut mutated = self.clone();
 
@@ -113,10 +98,7 @@ where
     }
 }
 
-impl<T> Breed for Program<T>
-where
-    T: ExtensionParameters,
-{
+impl<T> Breed for Program<T> {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
         let [child_a_instructions, child_b_instructions] =
             self.instructions.two_point_crossover(&mate.instructions);
