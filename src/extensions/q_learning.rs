@@ -1,5 +1,6 @@
 use std::fmt::{self, Debug};
 
+use derive_new::new;
 use itertools::Itertools;
 use more_asserts::{assert_ge, assert_le};
 use noisy_float::prelude::r64;
@@ -15,10 +16,7 @@ use crate::{
     utils::random::generator,
 };
 
-use super::{
-    core::ExtensionParameters,
-    reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters},
-};
+use super::{core::ExtensionParameters, reinforcement_learning::ReinforcementLearningInput};
 
 #[derive(Clone, Debug)]
 pub struct QTable {
@@ -58,13 +56,14 @@ where
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct QLearningParameters<InputType>
+#[derive(Debug, Clone, new)]
+pub struct QLearningParameters<T>
 where
-    InputType: QLearningInput,
+    T: QLearningInput,
 {
-    rl_parameters: ReinforcementLearningParameters<InputType>,
-    initial_states: Vec<InputType::State>,
+    environment: T,
+    max_episode_length: usize,
+    initial_states: Vec<T::State>,
 }
 
 impl DuplicateNew for QTable {
@@ -192,25 +191,19 @@ where
         for state in &parameters.initial_states {
             // INIT STEPS.
             let mut score = 0.;
-            parameters
-                .rl_parameters
-                .environment
-                .set_state(state.clone());
-            self.program.exec(&parameters.rl_parameters.environment);
+            parameters.environment.set_state(state.clone());
+            self.program.exec(&parameters.environment);
             let prev_action_state = self
                 .q_table
                 .eval::<QLearningParameters<T>>(&self.program.registers);
 
-            for _step in 1..parameters.rl_parameters.max_episode_length {
-                let state_reward_pair = parameters
-                    .rl_parameters
-                    .environment
-                    .sim(prev_action_state.action);
+            for _step in 1..parameters.max_episode_length {
+                let state_reward_pair = parameters.environment.sim(prev_action_state.action);
 
                 let reward = state_reward_pair.get_value();
                 score += reward;
 
-                self.program.exec(&parameters.rl_parameters.environment);
+                self.program.exec(&parameters.environment);
                 let current_action_state = self
                     .q_table
                     .eval::<QLearningParameters<T>>(&self.program.registers);
@@ -296,18 +289,18 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, new)]
 pub struct QProgramGeneratorParameters {
     program_parameters: ProgramGeneratorParameters,
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, new)]
 pub struct QConsts {
     /// Step size parameter.
     alpha: f64,
     /// Discount.
     gamma: f64,
-    // Greedy selection.
+    /// Greedy selection.
     epsilon: f64,
 }

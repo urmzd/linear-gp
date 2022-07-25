@@ -1,4 +1,18 @@
-#[derive(Debug, Serialize, new, Clone)]
+use derive_new::new;
+use gym_rs::{
+    core::{ActionReward, Env},
+    envs::classical_control::mountain_car::MountainCarEnv,
+};
+use lgp::{
+    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, registers::RegisterValue},
+    extensions::{
+        q_learning::{QLearningInput, QProgram},
+        reinforcement_learning::{ReinforcementLearningInput, Reward, StateRewardPair},
+    },
+};
+use noisy_float::prelude::r64;
+
+#[derive(Debug, new, Clone)]
 pub struct MountainCarInput {
     environment: MountainCarEnv,
 }
@@ -11,11 +25,12 @@ impl ValidInput for MountainCarInput {
     const N_INPUT_REGISTERS: usize = 2;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat(&self) -> Vec<R32> {
+    fn flat(&self) -> Vec<RegisterValue> {
         let state = self.get_state();
         state
     }
 }
+
 impl ReinforcementLearningInput for MountainCarInput {
     fn init(&mut self) {
         self.environment.reset(Some(0), false, None);
@@ -34,10 +49,10 @@ impl ReinforcementLearningInput for MountainCarInput {
         }
     }
 
-    fn get_state(&self) -> Vec<R32> {
+    fn get_state(&self) -> Vec<RegisterValue> {
         let state = &self.environment.state;
         [state.position, state.velocity]
-            .map(|v| v.into_inner())
+            .map(|v| r64(v.into_inner()))
             .to_vec()
     }
 
