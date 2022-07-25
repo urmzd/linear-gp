@@ -173,6 +173,6 @@ impl Instruction {
         let target_value = *data.get(self.target_index);
         let source_value = *registers.get(self.source_index);
         let new_source_value = (self.executable)(source_value, target_value);
-        registers.update(self.source_index, new_source_value);
+        registers.update_then_softmax(self.source_index, new_source_value);
     }
 }

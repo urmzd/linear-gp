@@ -48,6 +48,10 @@ impl Registers {
     pub fn update(&mut self, index: usize, value: RegisterValue) {
         let Registers { data } = self;
         data[index] = value;
+    }
+
+    pub fn update_then_softmax(&mut self, index: usize, value: RegisterValue) {
+        self.update(index, value);
         self.softmax();
     }
 
@@ -60,7 +64,7 @@ impl Registers {
         let shifted_data = self.data.iter().map(|v| *v - *max).collect_vec();
         let sum: R64 = shifted_data.iter().map(|v| v.exp()).sum();
         if sum != 0. {
-            self.data = shifted_data.iter().map(|v| *v - sum.log2()).collect_vec();
+            self.data = shifted_data.iter().map(|v| *v / sum).collect_vec();
         }
     }
 
