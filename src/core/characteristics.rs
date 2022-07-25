@@ -1,12 +1,8 @@
-use super::registers::RegisterValue;
-
-pub type FitnessScore = RegisterValue;
-
 pub trait Fitness {
     type FitnessParameters;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> FitnessScore;
-    fn get_fitness(&self) -> Option<FitnessScore>;
+    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64;
+    fn get_fitness(&self) -> Option<f64>;
 }
 
 pub trait Breed: Clone {

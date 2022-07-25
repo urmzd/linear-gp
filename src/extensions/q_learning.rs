@@ -1,9 +1,7 @@
 use std::fmt::{self, Debug};
 
 use derive_new::new;
-use itertools::Itertools;
 use more_asserts::{assert_ge, assert_le};
-use noisy_float::prelude::r64;
 use rand::distributions::uniform::{UniformFloat, UniformInt, UniformSampler};
 
 use crate::{
@@ -11,16 +9,16 @@ use crate::{
         characteristics::{Breed, DuplicateNew, Fitness, Generate, Mutate},
         instruction::InstructionGeneratorParameters,
         program::{Program, ProgramGeneratorParameters},
-        registers::{RegisterValue, Registers},
+        registers::Registers,
     },
-    utils::random::generator,
+    utils::{float_ops, random::generator},
 };
 
 use super::{core::ExtensionParameters, reinforcement_learning::ReinforcementLearningInput};
 
 #[derive(Clone, Debug)]
 pub struct QTable {
-    table: Vec<Vec<RegisterValue>>,
+    table: Vec<Vec<f64>>,
     n_actions: usize,
     n_registers: usize,
     q_consts: QConsts,
@@ -51,7 +49,8 @@ where
     T: QLearningInput,
 {
     fn argmax(registers: &Registers) -> i32 {
-        let selected_register = registers.iter().map(|v| *v).position_max();
+        let vec_registers = registers.iter().copied();
+        let selected_register = float_ops::argmax(vec_registers);
 
         selected_register.expect("Register to be of cardinality non-zero.") as i32
     }
@@ -75,7 +74,7 @@ impl DuplicateNew for QTable {
 
 impl QTable {
     pub fn new(n_actions: usize, n_registers: usize, q_consts: QConsts) -> Self {
-        let table = vec![vec![r64(0.); n_actions]; n_registers];
+        let table = vec![vec![0.; n_actions]; n_registers];
         QTable {
             table,
             n_actions,
@@ -94,11 +93,9 @@ impl QTable {
             .get(register_number)
             .expect("Register number to be less than length of QTable.");
 
-        available_actions
-            .into_iter()
-            .map(|v| *v)
-            .position_max()
-            .expect("Actions length to greater than 0.")
+        let iter = available_actions.into_iter().map(|v| *v);
+
+        float_ops::argmax(iter).expect("Available actions to yield an index.")
     }
 
     pub fn eval<T>(&self, registers: &Registers) -> ActionRegisterPair
@@ -131,13 +128,13 @@ impl QTable {
         next_action_state: ActionRegisterPair,
     ) {
         let current_q_value =
-            (self.table[current_action_state.register][current_action_state.action]).const_raw();
+            self.table[current_action_state.register][current_action_state.action];
         let next_q_value = self.action_argmax(next_action_state.register) as f64;
 
         let new_q_value = self.q_consts.alpha
             * (current_reward + self.q_consts.gamma * next_q_value - current_q_value);
 
-        self.table[current_action_state.register][current_action_state.action] += r64(new_q_value);
+        self.table[current_action_state.register][current_action_state.action] += new_q_value;
     }
 }
 
@@ -178,10 +175,7 @@ where
 {
     type FitnessParameters = QLearningParameters<T>;
 
-    fn eval_fitness(
-        &mut self,
-        parameters: &mut Self::FitnessParameters,
-    ) -> crate::core::characteristics::FitnessScore {
+    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64 {
         let mut scores = vec![];
         // TODO: Call init and finish after `rank`
         for state in &parameters.initial_states {
@@ -222,14 +216,14 @@ where
         }
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let median = r64(scores.swap_remove(scores.len() / 2));
+        let median = scores.swap_remove(scores.len() / 2);
 
         self.program.fitness = Some(median);
 
         median
     }
 
-    fn get_fitness(&self) -> Option<crate::core::characteristics::FitnessScore> {
+    fn get_fitness(&self) -> Option<f64> {
         self.program.fitness
     }
 }

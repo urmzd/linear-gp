@@ -1,13 +1,15 @@
 use derive_new::new;
 use itertools::Itertools;
-use noisy_float::prelude::r64;
 use serde::Serialize;
 
-use crate::core::{
-    characteristics::Fitness,
-    inputs::{Inputs, ValidInput},
-    program::Program,
-    registers::Registers,
+use crate::{
+    core::{
+        characteristics::Fitness,
+        inputs::{Inputs, ValidInput},
+        program::Program,
+        registers::Registers,
+    },
+    utils::float_ops,
 };
 
 use super::core::ExtensionParameters;
@@ -26,12 +28,13 @@ where
 {
     fn argmax(registers: &Registers) -> i32 {
         let action_registers = &registers[0..T::N_ACTION_REGISTERS];
-        let max_value = action_registers.into_iter().sorted().last().unwrap();
+        let max_value = float_ops::max_val(action_registers.iter().copied())
+            .expect("Action registers to have a max value.");
 
         let mut indices = action_registers
             .into_iter()
             .enumerate()
-            .filter(|(_, value)| *value == max_value)
+            .filter(|(_, value)| **value == max_value)
             .map(|(index, _)| index)
             .collect_vec();
 
@@ -53,10 +56,7 @@ where
 {
     type FitnessParameters = ClassificationParameters<T>;
 
-    fn eval_fitness(
-        &mut self,
-        parameters: &mut Self::FitnessParameters,
-    ) -> crate::core::characteristics::FitnessScore {
+    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64 {
         let inputs = &parameters.inputs;
 
         let mut n_correct = 0.0;
@@ -74,14 +74,14 @@ where
             self.registers.reset();
         }
 
-        let fitness = r64(n_correct / inputs.len() as f64);
+        let fitness = n_correct / inputs.len() as f64;
 
         self.fitness = Some(fitness);
 
         fitness
     }
 
-    fn get_fitness(&self) -> Option<crate::core::characteristics::FitnessScore> {
+    fn get_fitness(&self) -> Option<f64> {
         self.fitness
     }
 }

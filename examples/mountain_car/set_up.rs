@@ -3,14 +3,11 @@ use gym_rs::core::ActionReward;
 use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
 use lgp::extensions::reinforcement_learning::{Reward, StateRewardPair};
 use lgp::{
-    core::{
-        algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program, registers::RegisterValue,
-    },
+    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
     extensions::reinforcement_learning::{
         ReinforcementLearningInput, ReinforcementLearningParameters,
     },
 };
-use noisy_float::prelude::r64;
 use serde::Serialize;
 
 pub struct MountainCarLgp;
@@ -28,7 +25,7 @@ impl ValidInput for MountainCarInput {
     const N_INPUT_REGISTERS: usize = 2;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat(&self) -> Vec<RegisterValue> {
+    fn flat(&self) -> Vec<f64> {
         let state = self.get_state();
         state
     }
@@ -52,10 +49,10 @@ impl ReinforcementLearningInput for MountainCarInput {
         }
     }
 
-    fn get_state(&self) -> Vec<RegisterValue> {
+    fn get_state(&self) -> Vec<f64> {
         let state = &self.environment.state;
         [state.position, state.velocity]
-            .map(|v| r64(v.into_inner()))
+            .map(|v| v.into_inner())
             .to_vec()
     }
 

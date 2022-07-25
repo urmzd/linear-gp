@@ -6,7 +6,6 @@ use lgp::{
         ReinforcementLearningInput, ReinforcementLearningParameters, Reward, StateRewardPair,
     },
 };
-use noisy_float::prelude::r64;
 use serde::Serialize;
 
 pub struct CartPoleLgp;
@@ -20,7 +19,7 @@ impl ValidInput for CartPoleInput {
     const N_INPUT_REGISTERS: usize = 4;
     const N_ACTION_REGISTERS: usize = 2;
 
-    fn flat(&self) -> Vec<lgp::core::registers::RegisterValue> {
+    fn flat(&self) -> Vec<f64> {
         self.get_state()
     }
 }
@@ -47,11 +46,11 @@ impl ReinforcementLearningInput for CartPoleInput {
         self.environment.reset(None, false, None);
     }
 
-    fn get_state(&self) -> Vec<lgp::core::registers::RegisterValue> {
+    fn get_state(&self) -> Vec<f64> {
         let state = self.environment.state;
         let state_vec: Vec<_> = state.into();
 
-        state_vec.iter().map(move |s| r64(*s)).collect()
+        state_vec.iter().copied().collect()
     }
 
     fn finish(&mut self) {

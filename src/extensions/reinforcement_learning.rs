@@ -1,18 +1,12 @@
 use derivative::Derivative;
 use derive_new::new;
 use itertools::Itertools;
-use noisy_float::prelude::r64;
 use rand::prelude::SliceRandom;
 use serde::Serialize;
 
 use crate::{
-    core::{
-        characteristics::Fitness,
-        inputs::ValidInput,
-        program::Program,
-        registers::{RegisterValue, Registers},
-    },
-    utils::random::generator,
+    core::{characteristics::Fitness, inputs::ValidInput, program::Program, registers::Registers},
+    utils::{float_ops, random::generator},
 };
 
 use super::core::ExtensionParameters;
@@ -37,7 +31,7 @@ pub enum Reward {
 
 #[derive(Debug, Clone)]
 pub struct StateRewardPair {
-    pub state: Vec<RegisterValue>,
+    pub state: Vec<f64>,
     pub reward: Reward,
 }
 
@@ -61,7 +55,7 @@ pub trait ReinforcementLearningInput: ValidInput + Sized {
     fn init(&mut self);
     fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
-    fn get_state(&self) -> Vec<RegisterValue>;
+    fn get_state(&self) -> Vec<f64>;
     fn finish(&mut self);
 }
 
@@ -71,12 +65,13 @@ where
 {
     fn argmax(registers: &Registers) -> i32 {
         let action_registers = &registers[0..T::N_ACTION_REGISTERS];
-        let max_value = action_registers.into_iter().sorted().last().unwrap();
+        let max_value = float_ops::max_val(action_registers.iter().copied())
+            .expect("Max value to have been found");
 
         let indices = action_registers
             .into_iter()
             .enumerate()
-            .filter(|(_, value)| *value == max_value)
+            .filter(|(_, value)| **value == max_value)
             .map(|(index, _)| index)
             .collect_vec();
 
@@ -95,10 +90,7 @@ where
 {
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
-    fn eval_fitness(
-        &mut self,
-        parameters: &mut Self::FitnessParameters,
-    ) -> crate::core::characteristics::FitnessScore {
+    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64 {
         let mut scores = vec![];
 
         parameters.environment.init();
@@ -128,14 +120,14 @@ where
         parameters.environment.finish();
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let median = r64(scores.swap_remove(parameters.n_runs / 2));
+        let median = scores.swap_remove(parameters.n_runs / 2);
 
         self.fitness = Some(median);
 
         median
     }
 
-    fn get_fitness(&self) -> Option<crate::core::characteristics::FitnessScore> {
+    fn get_fitness(&self) -> Option<f64> {
         self.fitness
     }
 }
