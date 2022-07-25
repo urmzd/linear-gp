@@ -34,7 +34,7 @@ fn main() {
         gap: 0.5,
         n_mutations: 1,
         n_crossovers: 0,
-        max_generations: 1000,
+        max_generations: 100,
         fitness_parameters: parameters,
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
