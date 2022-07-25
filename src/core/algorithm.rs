@@ -2,7 +2,7 @@ use core::fmt;
 use std::path::PathBuf;
 
 use csv::ReaderBuilder;
-use more_asserts::{assert_ge, assert_le};
+use more_asserts::assert_le;
 use noisy_float::prelude::{r64, Float};
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
@@ -25,8 +25,8 @@ where
 {
     pub population_size: usize,
     pub gap: f64,
-    pub n_mutations: f64,
-    pub n_crossovers: f64,
+    pub n_mutations: usize,
+    pub n_crossovers: usize,
     pub max_generations: usize,
     pub fitness_parameters: OrganismType::FitnessParameters,
     pub program_parameters: OrganismType::GeneratorParameters,
@@ -105,41 +105,31 @@ where
 
     fn breed(
         population: &mut Population<Self::O>,
-        mutation_percent: f64,
-        crossover_percent: f64,
+        mut n_mutations: usize,
+        mut n_crossovers: usize,
         mutation_parameters: &<Self::O as Generate>::GeneratorParameters,
     ) {
-        assert_ge!(mutation_percent, 0.);
-        assert_ge!(crossover_percent, 0.);
-        assert_le!(crossover_percent + mutation_percent, 1.);
-        assert_le!(mutation_percent, 1.);
-        assert_le!(crossover_percent, 1.);
-
         let pop_cap = population.capacity();
         let pop_len = population.len();
 
         let mut remaining_pool_spots: usize = pop_cap - pop_len;
 
-        let mut n_mutated_children =
-            (mutation_percent * remaining_pool_spots as f64).floor() as usize;
-        let mut n_crossover_children =
-            (crossover_percent * remaining_pool_spots as f64).floor() as usize;
-
-        assert_le!(
-            n_mutated_children + n_crossover_children,
-            remaining_pool_spots
-        );
+        assert_le!(n_mutations + n_crossovers, remaining_pool_spots);
 
         let mut children = vec![];
 
         // Crossover + Mutation
-        while (n_crossover_children + n_mutated_children) > 0 {
-            if let [parent_a, parent_b] = population
+        // TODO: Add a way to priortize mutations or crossovers.
+        while (n_crossovers + n_mutations) > 0 {
+            let parents = population
                 .iter()
-                .choose_multiple(&mut generator(), 2)
-                .as_slice()
-            {
-                if n_crossover_children > 0 {
+                .cycle()
+                .choose_multiple(&mut generator(), 2);
+
+            let parents_slice = parents.as_slice();
+
+            if let [parent_a, parent_b] = parents_slice {
+                if n_crossovers > 0 {
                     let crossover_child = parent_a
                         .two_point_crossover(parent_b)
                         .choose(&mut generator())
@@ -147,11 +137,11 @@ where
                         .to_owned();
 
                     remaining_pool_spots -= 1;
-                    n_crossover_children -= 1;
+                    n_crossovers -= 1;
                     children.push(crossover_child)
                 }
 
-                if n_mutated_children > 0 {
+                if n_mutations > 0 {
                     let parents = [parent_a, parent_b];
                     let selected_parent = parents.choose(&mut generator());
 
@@ -160,7 +150,7 @@ where
                         .unwrap();
 
                     remaining_pool_spots -= 1;
-                    n_mutated_children -= 1;
+                    n_mutations -= 1;
 
                     children.push(mutation_child)
                 }
@@ -325,8 +315,8 @@ mod tests {
         let mut hyper_params = HyperParameters {
             population_size: 10,
             gap: 0.5,
-            n_mutations: 0.5,
-            n_crossovers: 0.5,
+            n_mutations: 5,
+            n_crossovers: 0,
             max_generations: 1,
             fitness_parameters: ClassificationParameters::new(inputs),
             program_parameters: ProgramGeneratorParameters::new(

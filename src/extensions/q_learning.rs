@@ -192,12 +192,13 @@ where
             // INIT STEPS.
             let mut score = 0.;
             parameters.environment.set_state(state.clone());
+
             self.program.exec(&parameters.environment);
-            let prev_action_state = self
+            let mut prev_action_state = self
                 .q_table
                 .eval::<QLearningParameters<T>>(&self.program.registers);
 
-            for _step in 1..parameters.max_episode_length {
+            for _step in 0..parameters.max_episode_length {
                 let state_reward_pair = parameters.environment.sim(prev_action_state.action);
 
                 let reward = state_reward_pair.get_value();
@@ -217,11 +218,15 @@ where
                     )
                 }
 
+                prev_action_state = current_action_state;
+
                 if state_reward_pair.is_terminal() {
                     break;
                 }
             }
 
+            self.program.registers.reset();
+            parameters.environment.reset();
             scores.push(score);
         }
 
