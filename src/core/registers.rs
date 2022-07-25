@@ -1,5 +1,10 @@
 use core::slice::Iter;
-use std::{ops::Index, slice::SliceIndex};
+use std::{
+    ops::{Index, Range},
+    slice::SliceIndex,
+};
+
+use itertools::Itertools;
 
 use super::characteristics::DuplicateNew;
 
@@ -25,6 +30,26 @@ impl Registers {
         let data = vec![0.; n_registers];
 
         Registers { data }
+    }
+
+    pub fn all_argmax(&self, range: Option<Range<usize>>) -> Vec<usize> {
+        let Registers { data } = self;
+        let range_to_use = range.unwrap_or(0..data.len());
+        let sliced_data = &data[range_to_use];
+        let max_value = sliced_data
+            .iter()
+            .copied()
+            .reduce(f64::max)
+            .expect("Sliced values to not be of cardinality 0.");
+
+        let max_indices = sliced_data
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| **v == max_value)
+            .map(|(i, _)| i)
+            .collect_vec();
+
+        max_indices
     }
 
     pub fn reset(&mut self) {

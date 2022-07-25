@@ -2,7 +2,10 @@ use std::fmt::{self, Debug};
 
 use derive_new::new;
 use more_asserts::{assert_ge, assert_le};
-use rand::distributions::uniform::{UniformFloat, UniformInt, UniformSampler};
+use rand::{
+    distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
+    prelude::SliceRandom,
+};
 
 use crate::{
     core::{
@@ -14,10 +17,7 @@ use crate::{
     utils::{float_ops, random::generator},
 };
 
-use super::{
-    core::ExtensionParameters,
-    reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters},
-};
+use super::reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters};
 
 #[derive(Clone, Debug)]
 pub struct QTable {
@@ -59,16 +59,19 @@ impl QTable {
             .get(register_number)
             .expect("Register number to be less than length of QTable.");
 
-        let iter = available_actions.into_iter().map(|v| *v);
+        let iter = available_actions.iter().copied();
+        let max = float_ops::argmax(iter);
 
-        float_ops::argmax(iter).expect("Available actions to yield an index.")
+        max.expect("Available action to yield an index.")
     }
 
-    pub fn eval<T>(&self, registers: &Registers) -> ActionRegisterPair
-    where
-        T: ExtensionParameters,
-    {
-        let winning_register = T::argmax(registers);
+    pub fn eval<T>(&self, registers: &Registers) -> ActionRegisterPair {
+        let winning_registers = registers.all_argmax(None);
+        let winning_register = winning_registers
+            .choose(&mut generator())
+            .map(|v| *v)
+            .expect("Register to have been chosen.");
+
         assert_le!(self.q_consts.epsilon, 1.0);
         assert_ge!(self.q_consts.epsilon, 0.);
 
@@ -78,7 +81,7 @@ impl QTable {
         let winning_action = if prob < self.q_consts.epsilon {
             self.action_random()
         } else {
-            self.action_argmax(winning_register as usize)
+            self.action_argmax(winning_register)
         };
 
         ActionRegisterPair {
