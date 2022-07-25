@@ -14,7 +14,10 @@ use crate::{
     utils::{float_ops, random::generator},
 };
 
-use super::{core::ExtensionParameters, reinforcement_learning::ReinforcementLearningInput};
+use super::{
+    core::ExtensionParameters,
+    reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters},
+};
 
 #[derive(Clone, Debug)]
 pub struct QTable {
@@ -23,47 +26,10 @@ pub struct QTable {
     n_registers: usize,
     q_consts: QConsts,
 }
-pub trait QLearningInput: ReinforcementLearningInput {
-    type State;
-
-    fn set_state(&mut self, state: Self::State);
-}
-
 #[derive(Debug, Clone, Copy)]
 pub struct ActionRegisterPair {
     action: usize,
     register: usize,
-}
-
-impl<T> QLearningParameters<T>
-where
-    T: QLearningInput,
-{
-    pub fn update_states(&mut self, states: Vec<T::State>) {
-        self.initial_states = states;
-    }
-}
-
-impl<T> ExtensionParameters for QLearningParameters<T>
-where
-    T: QLearningInput,
-{
-    fn argmax(registers: &Registers) -> i32 {
-        let vec_registers = registers.iter().copied();
-        let selected_register = float_ops::argmax(vec_registers);
-
-        selected_register.expect("Register to be of cardinality non-zero.") as i32
-    }
-}
-
-#[derive(Debug, Clone, new)]
-pub struct QLearningParameters<T>
-where
-    T: QLearningInput,
-{
-    environment: T,
-    max_episode_length: usize,
-    initial_states: Vec<T::State>,
 }
 
 impl DuplicateNew for QTable {
@@ -141,16 +107,16 @@ impl QTable {
 #[derive(Debug, Clone)]
 pub struct QProgram<T>
 where
-    T: QLearningInput,
+    T: ReinforcementLearningInput,
     T::State: Clone + fmt::Debug,
 {
     q_table: QTable,
-    program: Program<QLearningParameters<T>>,
+    program: Program<ReinforcementLearningParameters<T>>,
 }
 
 impl<T> PartialEq for QProgram<T>
 where
-    T: QLearningInput,
+    T: ReinforcementLearningInput,
     T::State: Clone + fmt::Debug,
 {
     fn eq(&self, other: &Self) -> bool {
@@ -160,7 +126,7 @@ where
 
 impl<T> PartialOrd for QProgram<T>
 where
-    T: QLearningInput,
+    T: ReinforcementLearningInput,
     T::State: Clone + fmt::Debug,
 {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
@@ -170,10 +136,10 @@ where
 
 impl<T> Fitness for QProgram<T>
 where
-    T: QLearningInput,
+    T: ReinforcementLearningInput,
     T::State: Clone + Debug,
 {
-    type FitnessParameters = QLearningParameters<T>;
+    type FitnessParameters = ReinforcementLearningParameters<T>;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64 {
         let mut scores = vec![];
@@ -181,12 +147,12 @@ where
         for state in &parameters.initial_states {
             // INIT STEPS.
             let mut score = 0.;
-            parameters.environment.set_state(state.clone());
+            parameters.environment.update_state(state.clone());
 
             self.program.exec(&parameters.environment);
             let mut c_action_state = self
                 .q_table
-                .eval::<QLearningParameters<T>>(&self.program.registers);
+                .eval::<ReinforcementLearningParameters<T>>(&self.program.registers);
 
             for _step in 0..parameters.max_episode_length {
                 let state_reward_pair = parameters.environment.sim(c_action_state.action);
@@ -194,20 +160,20 @@ where
                 let reward = state_reward_pair.get_value();
                 score += reward;
 
+                if state_reward_pair.is_terminal() {
+                    break;
+                }
+
                 self.program.exec(&parameters.environment);
                 let n_action_state = self
                     .q_table
-                    .eval::<QLearningParameters<T>>(&self.program.registers);
+                    .eval::<ReinforcementLearningParameters<T>>(&self.program.registers);
 
                 if c_action_state.register != n_action_state.register {
                     self.q_table.update(c_action_state, reward, n_action_state)
                 }
 
                 c_action_state = n_action_state;
-
-                if state_reward_pair.is_terminal() {
-                    break;
-                }
             }
 
             self.program.registers.reset();
@@ -230,7 +196,7 @@ where
 
 impl<T> Breed for QProgram<T>
 where
-    T: QLearningInput,
+    T: ReinforcementLearningInput,
     T::State: Clone + Debug,
 {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
@@ -244,7 +210,7 @@ where
 
 impl<T> Mutate for QProgram<T>
 where
-    T: QLearningInput,
+    T: ReinforcementLearningInput,
     T::State: Clone + Debug,
 {
     fn mutate(&self, parameters: &Self::GeneratorParameters) -> Self {
@@ -258,13 +224,14 @@ where
 
 impl<T> Generate for QProgram<T>
 where
-    T: QLearningInput,
+    T: ReinforcementLearningInput,
     T::State: Clone + Debug,
 {
     type GeneratorParameters = QProgramGeneratorParameters;
 
     fn generate(parameters: &Self::GeneratorParameters) -> Self {
-        let program = Program::<QLearningParameters<T>>::generate(&parameters.program_parameters);
+        let program =
+            Program::<ReinforcementLearningParameters<T>>::generate(&parameters.program_parameters);
 
         let InstructionGeneratorParameters {
             n_features,

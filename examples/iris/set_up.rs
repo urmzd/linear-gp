@@ -92,7 +92,7 @@ impl ValidInput for IrisInput {
     const N_INPUT_REGISTERS: usize = 4;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat(&self) -> Vec<f64> {
+    fn flat_input(&self) -> Vec<f64> {
         [
             self.sepal_length,
             self.sepal_width,

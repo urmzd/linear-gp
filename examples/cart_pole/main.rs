@@ -1,4 +1,8 @@
-use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
+use gym_rs::{
+    envs::classical_control::cartpole::{CartPoleEnv, CartPoleObservation},
+    utils::{custom::Sample, renderer::RenderMode},
+};
+use itertools::Itertools;
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -6,6 +10,7 @@ use lgp::{
         program::ProgramGeneratorParameters,
     },
     extensions::reinforcement_learning::ReinforcementLearningParameters,
+    utils::random::generator,
 };
 use set_up::{CartPoleInput, CartPoleLgp};
 
@@ -14,6 +19,10 @@ mod set_up;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let environment = CartPoleEnv::new(RenderMode::Human);
     let input = CartPoleInput::new(environment);
+    let initial_states = (vec![0; 5])
+        .into_iter()
+        .map(|_| CartPoleObservation::sample_between(&mut generator(), None))
+        .collect_vec();
 
     let mut hyper_params = HyperParameters {
         population_size: 1,
@@ -21,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         n_crossovers: 50,
         n_mutations: 50,
         max_generations: 1,
-        fitness_parameters: ReinforcementLearningParameters::new(5, 500, input),
+        fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
         program_parameters: ProgramGeneratorParameters::new(
             100,
             InstructionGeneratorParameters::from::<CartPoleInput>(1),
@@ -37,7 +46,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 mod tests {
     use std::error;
 
-    use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
+    use gym_rs::{
+        envs::classical_control::cartpole::{CartPoleEnv, CartPoleObservation},
+        utils::{custom::Sample, renderer::RenderMode},
+    };
+    use itertools::Itertools;
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -45,7 +58,7 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::reinforcement_learning::ReinforcementLearningParameters,
-        utils::plots::plot_population_benchmarks,
+        utils::{plots::plot_population_benchmarks, random::generator},
     };
 
     use crate::set_up::{CartPoleInput, CartPoleLgp};
@@ -55,6 +68,10 @@ mod tests {
     {
         let environment = CartPoleEnv::new(RenderMode::None);
         let input = CartPoleInput::new(environment);
+        let initial_states = (vec![0; 5])
+            .into_iter()
+            .map(|_| CartPoleObservation::sample_between(&mut generator(), None))
+            .collect_vec();
 
         let mut hyper_params = HyperParameters {
             population_size: 10,
@@ -62,7 +79,7 @@ mod tests {
             n_crossovers: 0,
             n_mutations: 5,
             max_generations: 100,
-            fitness_parameters: ReinforcementLearningParameters::new(5, 500, input),
+            fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
             program_parameters: ProgramGeneratorParameters::new(
                 32,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),

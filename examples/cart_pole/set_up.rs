@@ -2,8 +2,8 @@ use derive_new::new;
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
 use lgp::{
     core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
-    extensions::reinforcement_learning::{
-        ReinforcementLearningInput, ReinforcementLearningParameters, Reward, StateRewardPair,
+    extensions::{
+        gym_rs::ExtendedGymRsEnvironment, reinforcement_learning::ReinforcementLearningParameters,
     },
 };
 use serde::Serialize;
@@ -19,42 +19,24 @@ impl ValidInput for CartPoleInput {
     const N_INPUT_REGISTERS: usize = 4;
     const N_ACTION_REGISTERS: usize = 2;
 
-    fn flat(&self) -> Vec<f64> {
-        self.get_state()
+    fn flat_input(&self) -> Vec<f64> {
+        self.environment.state.into()
     }
 }
 
-impl ReinforcementLearningInput for CartPoleInput {
-    fn init(&mut self) {
-        self.environment.reset(Some(0), false, None);
+impl ExtendedGymRsEnvironment for CartPoleInput {
+    type Environment = CartPoleEnv;
+
+    fn get_state(&self) -> <Self::Environment as Env>::Observation {
+        self.environment.state
     }
 
-    fn sim(&mut self, action: usize) -> StateRewardPair {
-        let action_reward = self.environment.step(action);
-        let reward = action_reward.reward.into_inner();
-
-        StateRewardPair {
-            state: self.get_state(),
-            reward: match action_reward.done {
-                true => Reward::Terminal(reward),
-                false => Reward::Continue(reward),
-            },
-        }
+    fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation) {
+        self.environment.state = new_state;
     }
 
-    fn reset(&mut self) {
-        self.environment.reset(None, false, None);
-    }
-
-    fn get_state(&self) -> Vec<f64> {
-        let state = self.environment.state;
-        let state_vec: Vec<_> = state.into();
-
-        state_vec.iter().copied().collect()
-    }
-
-    fn finish(&mut self) {
-        self.environment.close()
+    fn get_env(&mut self) -> &mut Self::Environment {
+        &mut self.environment
     }
 }
 

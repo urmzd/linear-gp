@@ -1,73 +1,42 @@
 use derive_new::new;
-use gym_rs::{
-    core::{ActionReward, Env},
-    envs::classical_control::mountain_car::MountainCarEnv,
-};
-use lgp::{
-    core::{algorithm::GeneticAlgorithm, inputs::ValidInput},
-    extensions::{
-        q_learning::{QLearningInput, QProgram},
-        reinforcement_learning::{ReinforcementLearningInput, Reward, StateRewardPair},
-    },
-};
+use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
+use lgp::core::{algorithm::GeneticAlgorithm, inputs::ValidInput};
+use lgp::extensions::gym_rs::ExtendedGymRsEnvironment;
+use lgp::extensions::q_learning::QProgram;
+use serde::Serialize;
 
-#[derive(Debug, new, Clone)]
-pub struct MountainCarInput {
-    environment: MountainCarEnv,
-}
+pub struct QMountainCarLgp;
+
 impl GeneticAlgorithm for QMountainCarLgp {
     type O = QProgram<MountainCarInput>;
 }
-pub struct QMountainCarLgp;
+
+#[derive(Debug, Serialize, new, Clone)]
+pub struct MountainCarInput {
+    environment: MountainCarEnv,
+}
 
 impl ValidInput for MountainCarInput {
     const N_INPUT_REGISTERS: usize = 2;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat(&self) -> Vec<f64> {
-        let state = self.get_state();
-        state
+    fn flat_input(&self) -> Vec<f64> {
+        self.environment.state.into()
     }
 }
 
-impl ReinforcementLearningInput for MountainCarInput {
-    fn init(&mut self) {
-        self.environment.reset(Some(0), false, None);
+impl ExtendedGymRsEnvironment for MountainCarInput {
+    type Environment = MountainCarEnv;
+
+    fn get_state(&self) -> <Self::Environment as Env>::Observation {
+        self.environment.state
     }
 
-    fn sim(&mut self, action: usize) -> StateRewardPair {
-        let ActionReward { reward, done, .. } = self.environment.step(action);
-        let reward = reward.into_inner();
-
-        StateRewardPair {
-            state: self.get_state(),
-            reward: match done {
-                true => Reward::Terminal(reward),
-                false => Reward::Continue(reward),
-            },
-        }
+    fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation) {
+        self.environment.state = new_state;
     }
 
-    fn get_state(&self) -> Vec<f64> {
-        let state = &self.environment.state;
-        [state.position, state.velocity]
-            .map(|v| v.into_inner())
-            .to_vec()
-    }
-
-    fn finish(&mut self) {
-        self.environment.close();
-    }
-
-    fn reset(&mut self) {
-        self.environment.reset(None, false, None);
-    }
-}
-
-impl QLearningInput for MountainCarInput {
-    type State = <MountainCarEnv as Env>::Observation;
-
-    fn set_state(&mut self, state: Self::State) {
-        self.environment.state = state;
+    fn get_env(&mut self) -> &mut Self::Environment {
+        &mut self.environment
     }
 }

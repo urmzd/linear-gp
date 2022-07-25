@@ -1,12 +1,9 @@
 use derive_new::new;
-use gym_rs::core::ActionReward;
 use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
-use lgp::extensions::reinforcement_learning::{Reward, StateRewardPair};
+use lgp::extensions::gym_rs::ExtendedGymRsEnvironment;
 use lgp::{
     core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
-    extensions::reinforcement_learning::{
-        ReinforcementLearningInput, ReinforcementLearningParameters,
-    },
+    extensions::reinforcement_learning::ReinforcementLearningParameters,
 };
 use serde::Serialize;
 
@@ -25,42 +22,23 @@ impl ValidInput for MountainCarInput {
     const N_INPUT_REGISTERS: usize = 2;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat(&self) -> Vec<f64> {
-        let state = self.get_state();
-        state
+    fn flat_input(&self) -> Vec<f64> {
+        self.environment.state.into()
     }
 }
 
-impl ReinforcementLearningInput for MountainCarInput {
-    fn init(&mut self) {
-        self.environment.reset(Some(0), false, None);
+impl ExtendedGymRsEnvironment for MountainCarInput {
+    type Environment = MountainCarEnv;
+
+    fn get_state(&self) -> <Self::Environment as Env>::Observation {
+        self.environment.state
     }
 
-    fn sim(&mut self, action: usize) -> StateRewardPair {
-        let ActionReward { reward, done, .. } = self.environment.step(action);
-        let reward_ = reward.into_inner();
-
-        StateRewardPair {
-            state: self.get_state(),
-            reward: match done {
-                true => Reward::Terminal(reward_),
-                false => Reward::Continue(reward_),
-            },
-        }
+    fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation) {
+        self.environment.state = new_state;
     }
 
-    fn get_state(&self) -> Vec<f64> {
-        let state = &self.environment.state;
-        [state.position, state.velocity]
-            .map(|v| v.into_inner())
-            .to_vec()
-    }
-
-    fn finish(&mut self) {
-        self.environment.close();
-    }
-
-    fn reset(&mut self) {
-        self.environment.reset(None, false, None);
+    fn get_env(&mut self) -> &mut Self::Environment {
+        &mut self.environment
     }
 }

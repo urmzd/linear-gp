@@ -1,8 +1,6 @@
 use core::slice::Iter;
 use std::{ops::Index, slice::SliceIndex};
 
-use itertools::Itertools;
-
 use super::characteristics::DuplicateNew;
 
 #[derive(Debug, Clone)]
@@ -44,30 +42,6 @@ impl Registers {
     pub fn update(&mut self, index: usize, value: f64) {
         let Registers { data } = self;
         data[index] = value;
-    }
-
-    pub fn update_then_softmax(&mut self, index: usize, value: f64) {
-        self.update(index, value);
-        self.softmax();
-    }
-
-    fn softmax(&mut self) {
-        let max = self
-            .data
-            .iter()
-            .reduce(|current_max, value| {
-                if value > current_max {
-                    value
-                } else {
-                    current_max
-                }
-            })
-            .expect("Max value to have been found.");
-        let shifted_data = self.data.iter().map(|v| *v - *max).collect_vec();
-        let sum: f64 = shifted_data.iter().map(|v| v.exp()).sum();
-        if sum != 0. {
-            self.data = shifted_data.iter().map(|v| *v / sum).collect_vec();
-        }
     }
 
     pub fn get(&self, index: usize) -> &f64 {
