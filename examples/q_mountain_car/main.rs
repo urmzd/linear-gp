@@ -2,9 +2,11 @@ use gym_rs::{
     envs::classical_control::mountain_car::{MountainCarEnv, MountainCarObservation},
     utils::{custom::Sample, renderer::RenderMode},
 };
+use itertools::Itertools;
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
+        characteristics::Fitness,
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
@@ -15,9 +17,9 @@ use set_up::{MountainCarInput, QMountainCarLgp};
 mod set_up;
 
 fn main() {
-    let game = MountainCarEnv::new(RenderMode::Human, None);
+    let game = MountainCarEnv::new(RenderMode::None, None);
     let environment = MountainCarInput::new(game);
-    let mut parameters = QLearningParameters::new(
+    let parameters = QLearningParameters::new(
         environment,
         200,
         [MountainCarObservation::sample_between(&mut generator(), None); 5].to_vec(),
@@ -39,6 +41,14 @@ fn main() {
         ),
     };
 
-    QMountainCarLgp::execute(&mut hyper_params, EventHooks::default())
+    let population = QMountainCarLgp::execute(&mut hyper_params, EventHooks::default())
         .expect("Example to have been ran successfully.");
+
+    println!(
+        "{:?}",
+        population
+            .into_iter()
+            .map(|p| p.get_fitness())
+            .collect_vec()
+    );
 }
