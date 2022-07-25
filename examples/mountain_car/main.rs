@@ -66,7 +66,7 @@ mod tests {
             max_generations: 100,
             fitness_parameters: ReinforcementLearningParameters::new(5, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
-                100,
+                32,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
         };
