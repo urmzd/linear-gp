@@ -2,7 +2,7 @@ use core::slice::Iter;
 use std::{ops::Index, slice::SliceIndex};
 
 use itertools::Itertools;
-use noisy_float::prelude::{r64, R64};
+use noisy_float::prelude::{r64, Float, R64};
 
 use super::characteristics::DuplicateNew;
 
@@ -48,6 +48,20 @@ impl Registers {
     pub fn update(&mut self, index: usize, value: RegisterValue) {
         let Registers { data } = self;
         data[index] = value;
+        self.softmax();
+    }
+
+    fn softmax(&mut self) {
+        let max = self
+            .data
+            .iter()
+            .max()
+            .expect("Max value to have been found.");
+        let shifted_data = self.data.iter().map(|v| *v - *max).collect_vec();
+        let sum: R64 = shifted_data.iter().map(|v| v.exp()).sum();
+        if sum != 0. {
+            self.data = shifted_data.iter().map(|v| *v - sum.log2()).collect_vec();
+        }
     }
 
     pub fn get(&self, index: usize) -> &RegisterValue {
@@ -55,7 +69,7 @@ impl Registers {
         data.get(index).unwrap()
     }
 
-    pub fn iter<'a>(&'a self) -> Iter<'a, RegisterValue> {
+    pub fn iter(&self) -> Iter<RegisterValue> {
         self.data.iter()
     }
 }

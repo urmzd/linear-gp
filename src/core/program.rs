@@ -72,7 +72,7 @@ where
 {
     type GeneratorParameters = ProgramGeneratorParameters;
 
-    fn generate<'a>(parameters: &'a Self::GeneratorParameters) -> Self {
+    fn generate(parameters: &Self::GeneratorParameters) -> Self {
         let ProgramGeneratorParameters {
             max_instructions,
             instruction_generator_parameters,

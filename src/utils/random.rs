@@ -25,7 +25,7 @@ pub fn generator() -> Random {
 
 impl Default for Random {
     fn default() -> Self {
-        self::generator()
+        generator()
     }
 }
 

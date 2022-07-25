@@ -72,7 +72,7 @@ where
         self.capacity
     }
 
-    pub fn iter<'a>(&'a self) -> Iter<'a, T> {
+    pub fn iter(&self) -> Iter<T> {
         self.list.iter()
     }
 
@@ -80,7 +80,7 @@ where
         self.list.into_iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> IterMut<T> {
+    pub fn iter_mut(&mut self) -> IterMut<T> {
         self.list.iter_mut()
     }
 }

@@ -199,7 +199,7 @@ where
             (hook)(&mut population)?;
         }
 
-        for _ in 0..hyper_params.max_generations {
+        for _generation in 0..hyper_params.max_generations {
             Self::rank(&mut population, &mut hyper_params.fitness_parameters);
             if let Some(hook) = after_rank {
                 (hook)(&mut population)?;

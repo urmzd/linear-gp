@@ -14,13 +14,13 @@ pub trait Breed: Clone {
 }
 
 pub trait Mutate: Generate + Clone {
-    fn mutate<'a>(&self, parameters: &'a Self::GeneratorParameters) -> Self;
+    fn mutate(&self, parameters: &Self::GeneratorParameters) -> Self;
 }
 
 pub trait Generate {
     type GeneratorParameters;
 
-    fn generate<'a>(parameters: &'a Self::GeneratorParameters) -> Self;
+    fn generate(parameters: &Self::GeneratorParameters) -> Self;
 }
 
 pub trait DuplicateNew {
