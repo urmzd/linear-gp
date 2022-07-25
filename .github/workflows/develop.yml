@@ -26,6 +26,9 @@ jobs:
   test:
     name: Execute Tests
     runs-on: ubuntu-latest
+    env:
+      RUST_BACKTRACE: 1 
+      RUST_LOG: debug
     steps:
       - run: mkdir -p ./assets/tests/plots
       - run: sudo apt install libsdl2-gfx-dev xvfb -y
@@ -35,7 +38,7 @@ jobs:
           toolchain: stable
           override: true
           default: true
-      - run: xvfb-run RUST_BACKTRACE=1 RUST_LOG=debug cargo test --no-fail-fast
+      - run: xvfb-run cargo test --no-fail-fast
       - uses: actions/upload-artifact@v3
         with:
           name: plots
