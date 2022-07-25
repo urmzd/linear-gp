@@ -56,9 +56,18 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 ```rust
 //examples/mountain_car/main.rs#L14-L34
 
+};
+use set_up::{MountainCarInput, MountainCarLgp};
+
+mod set_up;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let environment = MountainCarEnv::new(RenderMode::Human, None);
     let input = MountainCarInput::new(environment);
+    let initial_states = (vec![0; 5])
+        .into_iter()
+        .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
+        .collect_vec();
 
     let mut hyper_params = HyperParameters {
         population_size: 1,
@@ -66,17 +75,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         n_crossovers: 0,
         n_mutations: 0,
         max_generations: 1,
-        fitness_parameters: ReinforcementLearningParameters::new(5, 200, input),
+        fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
         program_parameters: ProgramGeneratorParameters::new(
-            100,
-            InstructionGeneratorParameters::from::<MountainCarInput>(1),
-        ),
-    };
-
-    MountainCarLgp::execute(&mut hyper_params, EventHooks::default())?;
-
-    Ok(())
-}
 ```
 
 #### cart_pole
@@ -84,9 +84,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```rust
 //examples/cart_pole/main.rs#L14-L34
 
+};
+use set_up::{CartPoleInput, CartPoleLgp};
+
+mod set_up;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let environment = CartPoleEnv::new(RenderMode::Human);
     let input = CartPoleInput::new(environment);
+    let initial_states = (vec![0; 5])
+        .into_iter()
+        .map(|_| CartPoleObservation::sample_between(&mut generator(), None))
+        .collect_vec();
 
     let mut hyper_params = HyperParameters {
         population_size: 1,
@@ -94,17 +103,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         n_crossovers: 50,
         n_mutations: 50,
         max_generations: 1,
-        fitness_parameters: ReinforcementLearningParameters::new(5, 500, input),
+        fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
         program_parameters: ProgramGeneratorParameters::new(
-            100,
-            InstructionGeneratorParameters::from::<CartPoleInput>(1),
-        ),
-    };
-
-    CartPoleLgp::execute(&mut hyper_params, EventHooks::default())?;
-
-    Ok(())
-}
 ```
 
 ## Building
