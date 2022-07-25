@@ -31,6 +31,7 @@ pub trait QLearningInput: ReinforcementLearningInput {
     fn set_state(&mut self, state: Self::State);
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct ActionRegisterPair {
     action: usize,
     register: usize,
@@ -83,12 +84,8 @@ impl QTable {
         }
     }
 
-    pub fn action_random(&self, register_number: usize) -> usize {
-        let QTable { table, .. } = &self;
-
-        let action_size = table[register_number].len();
-
-        UniformInt::<usize>::new(0, action_size).sample(&mut generator())
+    pub fn action_random(&self) -> usize {
+        UniformInt::<usize>::new(0, self.n_actions).sample(&mut generator())
     }
 
     pub fn action_argmax(&self, register_number: usize) -> usize {
@@ -116,7 +113,7 @@ impl QTable {
         let prob = UniformFloat::<f64>::new_inclusive(0., 1.).sample(&mut generator());
 
         let winning_action = if prob < self.q_consts.epsilon {
-            self.action_random(winning_register as usize)
+            self.action_random()
         } else {
             self.action_argmax(winning_register as usize)
         };
@@ -129,19 +126,18 @@ impl QTable {
 
     pub fn update(
         &mut self,
-        current_register: usize,
-        current_action: usize,
+        current_action_state: ActionRegisterPair,
         current_reward: f64,
-        next_register: usize,
+        next_action_state: ActionRegisterPair,
     ) {
-        let current_q_value = (self.table[current_register][current_action]).const_raw();
-        let next_q_value = self.action_argmax(next_register) as f64;
+        let current_q_value =
+            (self.table[current_action_state.register][current_action_state.action]).const_raw();
+        let next_q_value = self.action_argmax(next_action_state.register) as f64;
 
-        let new_q_value = current_q_value
-            + self.q_consts.alpha
-                * (current_reward + self.q_consts.gamma * next_q_value - current_q_value);
+        let new_q_value = self.q_consts.alpha
+            * (current_reward + self.q_consts.gamma * next_q_value - current_q_value);
 
-        self.table[current_register][current_action] = r64(new_q_value);
+        self.table[current_action_state.register][current_action_state.action] += r64(new_q_value);
     }
 }
 
@@ -194,31 +190,26 @@ where
             parameters.environment.set_state(state.clone());
 
             self.program.exec(&parameters.environment);
-            let mut prev_action_state = self
+            let mut c_action_state = self
                 .q_table
                 .eval::<QLearningParameters<T>>(&self.program.registers);
 
             for _step in 0..parameters.max_episode_length {
-                let state_reward_pair = parameters.environment.sim(prev_action_state.action);
+                let state_reward_pair = parameters.environment.sim(c_action_state.action);
 
                 let reward = state_reward_pair.get_value();
                 score += reward;
 
                 self.program.exec(&parameters.environment);
-                let current_action_state = self
+                let n_action_state = self
                     .q_table
                     .eval::<QLearningParameters<T>>(&self.program.registers);
 
-                if prev_action_state.register != current_action_state.register {
-                    self.q_table.update(
-                        prev_action_state.register,
-                        current_action_state.action,
-                        reward,
-                        current_action_state.register,
-                    )
+                if c_action_state.register != n_action_state.register {
+                    self.q_table.update(c_action_state, reward, n_action_state)
                 }
 
-                prev_action_state = current_action_state;
+                c_action_state = n_action_state;
 
                 if state_reward_pair.is_terminal() {
                     break;

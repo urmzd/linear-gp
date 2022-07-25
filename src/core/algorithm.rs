@@ -121,14 +121,10 @@ where
         // Crossover + Mutation
         // TODO: Add a way to priortize mutations or crossovers.
         while (n_crossovers + n_mutations) > 0 {
-            let parents = population
-                .iter()
-                .cycle()
-                .choose_multiple(&mut generator(), 2);
+            let selected_a = population.iter().choose(&mut generator());
+            let selected_b = population.iter().choose(&mut generator());
 
-            let parents_slice = parents.as_slice();
-
-            if let [parent_a, parent_b] = parents_slice {
+            if let (Some(parent_a), Some(parent_b)) = (selected_a, selected_b) {
                 if n_crossovers > 0 {
                     let crossover_child = parent_a
                         .two_point_crossover(parent_b)
