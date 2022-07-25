@@ -22,7 +22,7 @@ impl ValidInput for TestInput {
     const N_INPUT_REGISTERS: usize = 4;
     const N_ACTION_REGISTERS: usize = 2;
 
-    fn flat(&self) -> Vec<f64> {
+    fn flat_input(&self) -> Vec<f64> {
         vec![self.0[0], self.0[1], self.0[2], self.0[3]]
     }
 }

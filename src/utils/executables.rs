@@ -13,6 +13,7 @@ pub fn subtract(a: f64, b: f64) -> f64 {
 }
 
 pub fn multiply(a: f64, b: f64) -> f64 {
+    // Multiply by 2.
     a * b
 }
 

@@ -1,4 +1,8 @@
-use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
+use gym_rs::{
+    envs::classical_control::mountain_car::{MountainCarEnv, MountainCarObservation},
+    utils::{custom::Sample, renderer::RenderMode},
+};
+use itertools::Itertools;
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -6,6 +10,7 @@ use lgp::{
         program::ProgramGeneratorParameters,
     },
     extensions::reinforcement_learning::ReinforcementLearningParameters,
+    utils::random::generator,
 };
 use set_up::{MountainCarInput, MountainCarLgp};
 
@@ -14,6 +19,10 @@ mod set_up;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let environment = MountainCarEnv::new(RenderMode::Human, None);
     let input = MountainCarInput::new(environment);
+    let initial_states = (vec![0; 5])
+        .into_iter()
+        .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
+        .collect_vec();
 
     let mut hyper_params = HyperParameters {
         population_size: 1,
@@ -21,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         n_crossovers: 0,
         n_mutations: 0,
         max_generations: 1,
-        fitness_parameters: ReinforcementLearningParameters::new(5, 200, input),
+        fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
         program_parameters: ProgramGeneratorParameters::new(
             100,
             InstructionGeneratorParameters::from::<MountainCarInput>(1),
@@ -36,8 +45,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(test)]
 mod tests {
     use gym_rs::{
-        envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode,
+        envs::classical_control::mountain_car::{MountainCarEnv, MountainCarObservation},
+        utils::{custom::Sample, renderer::RenderMode},
     };
+    use itertools::Itertools;
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -45,7 +56,7 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::reinforcement_learning::ReinforcementLearningParameters,
-        utils::plots::plot_population_benchmarks,
+        utils::{plots::plot_population_benchmarks, random::generator},
     };
 
     use crate::set_up::{MountainCarInput, MountainCarLgp};
@@ -57,6 +68,10 @@ mod tests {
 
         let environment = MountainCarEnv::new(RenderMode::None, None);
         let input = MountainCarInput::new(environment);
+        let initial_states = (vec![0; 5])
+            .into_iter()
+            .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
+            .collect_vec();
 
         let mut hyper_params = HyperParameters {
             population_size: 100,
@@ -64,7 +79,7 @@ mod tests {
             n_crossovers: 25,
             n_mutations: 25,
             max_generations: 100,
-            fitness_parameters: ReinforcementLearningParameters::new(5, 200, input),
+            fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
                 32,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),

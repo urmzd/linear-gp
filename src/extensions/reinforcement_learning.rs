@@ -1,4 +1,5 @@
-use derivative::Derivative;
+use std::fmt::Debug;
+
 use derive_new::new;
 use itertools::Itertools;
 use rand::prelude::SliceRandom;
@@ -11,15 +12,13 @@ use crate::{
 
 use super::core::ExtensionParameters;
 
-#[derive(Debug, Serialize, Derivative, new)]
-#[derivative(PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, Clone, new)]
 pub struct ReinforcementLearningParameters<T>
 where
     T: ReinforcementLearningInput,
 {
-    pub n_runs: usize,
+    pub initial_states: Vec<T::State>,
     pub max_episode_length: usize,
-    #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub environment: T,
 }
 
@@ -52,10 +51,12 @@ impl StateRewardPair {
 }
 
 pub trait ReinforcementLearningInput: ValidInput + Sized {
+    type State;
+
     fn init(&mut self);
     fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
-    fn get_state(&self) -> Vec<f64>;
+    fn update_state(&mut self, state: Self::State);
     fn finish(&mut self);
 }
 
@@ -87,6 +88,7 @@ where
 impl<T> Fitness for Program<ReinforcementLearningParameters<T>>
 where
     T: ReinforcementLearningInput,
+    T::State: Clone,
 {
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
@@ -95,8 +97,10 @@ where
 
         parameters.environment.init();
 
-        for _ in 0..parameters.n_runs {
+        for initial_state in parameters.initial_states.clone() {
             let mut score = 0.;
+
+            parameters.environment.update_state(initial_state);
 
             for _ in 0..parameters.max_episode_length {
                 // Run program.
@@ -120,7 +124,7 @@ where
         parameters.environment.finish();
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let median = scores.swap_remove(parameters.n_runs / 2);
+        let median = scores.swap_remove(scores.len() / 2);
 
         self.fitness = Some(median);
 

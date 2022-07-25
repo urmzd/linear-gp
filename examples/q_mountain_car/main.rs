@@ -11,11 +11,11 @@ use lgp::{
         program::ProgramGeneratorParameters,
     },
     extensions::{
-        q_learning::{QConsts, QLearningParameters, QProgramGeneratorParameters},
-        reinforcement_learning::ReinforcementLearningInput,
+        q_learning::{QConsts, QProgramGeneratorParameters},
+        reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters},
     },
+    utils::random::generator,
 };
-use rand::thread_rng;
 use set_up::{MountainCarInput, QMountainCarLgp};
 mod set_up;
 
@@ -23,14 +23,17 @@ fn main() {
     let game = MountainCarEnv::new(RenderMode::None, None);
     let mut environment = MountainCarInput::new(game);
     environment.init();
-    let parameters = QLearningParameters::new(
-        environment,
+    let parameters = ReinforcementLearningParameters::new(
+        (vec![0; 5])
+            .into_iter()
+            .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
+            .collect_vec(),
         200,
-        [MountainCarObservation::sample_between(&mut thread_rng(), None); 5].to_vec(),
+        environment,
     );
 
     let mut hyper_params = HyperParameters {
-        population_size: 2,
+        population_size: 10,
         gap: 0.5,
         n_mutations: 1,
         n_crossovers: 0,
