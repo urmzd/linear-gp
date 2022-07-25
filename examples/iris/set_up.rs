@@ -1,7 +1,6 @@
 use core::fmt;
 use std::fmt::Display;
 
-use noisy_float::prelude::r64;
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 
@@ -10,7 +9,6 @@ use lgp::{
         algorithm::{GeneticAlgorithm, Loader},
         inputs::ValidInput,
         program::Program,
-        registers::RegisterValue,
     },
     extensions::classification::{ClassificationInput, ClassificationParameters},
 };
@@ -94,14 +92,13 @@ impl ValidInput for IrisInput {
     const N_INPUT_REGISTERS: usize = 4;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat(&self) -> Vec<RegisterValue> {
+    fn flat(&self) -> Vec<f64> {
         [
             self.sepal_length,
             self.sepal_width,
             self.petal_length,
             self.petal_width,
         ]
-        .map(|v| r64(v))
         .to_vec()
     }
 }

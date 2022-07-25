@@ -10,7 +10,7 @@ use rand::{
 use serde::Serialize;
 
 use super::{
-    characteristics::{Breed, DuplicateNew, FitnessScore, Generate, Mutate},
+    characteristics::{Breed, DuplicateNew, Generate, Mutate},
     inputs::ValidInput,
     instruction::{Instruction, InstructionGeneratorParameters},
     instructions::Instructions,
@@ -47,7 +47,7 @@ where
     #[derivative(Ord = "ignore", PartialOrd = "ignore", PartialEq = "ignore")]
     pub registers: Registers,
     #[derivative(Ord = "ignore")]
-    pub fitness: Option<FitnessScore>,
+    pub fitness: Option<f64>,
     #[derivative(PartialEq = "ignore", Ord = "ignore", PartialOrd = "ignore")]
     marker: PhantomData<T>,
 }

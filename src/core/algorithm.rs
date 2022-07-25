@@ -3,7 +3,6 @@ use std::path::PathBuf;
 
 use csv::ReaderBuilder;
 use more_asserts::assert_le;
-use noisy_float::prelude::{r64, Float};
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
 
@@ -96,7 +95,7 @@ where
 
         let pop_len = population.len();
 
-        let cutoff_index = ((r64(1.0) - gap) * (pop_len as f64)).floor().const_raw() as usize;
+        let cutoff_index = ((1.0 - gap) * (pop_len as f64)).floor() as usize;
 
         for _ in 0..cutoff_index {
             population.pop();
