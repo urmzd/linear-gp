@@ -24,7 +24,7 @@ cargo run --example <example_name>
 #### iris
 
 ```rust
-//examples/iris/main.rs#L16-L37
+//examples/iris/main.rs#L15-L35
 
 async fn main() -> Result<(), Box<dyn error::Error>> {
     let ContentFilePair(_, file) = get_iris_content().await?;
