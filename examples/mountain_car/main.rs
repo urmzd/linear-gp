@@ -61,8 +61,8 @@ mod tests {
         let mut hyper_params = HyperParameters {
             population_size: 100,
             gap: 0.5,
-            n_crossovers: 50,
-            n_mutations: 50,
+            n_crossovers: 25,
+            n_mutations: 25,
             max_generations: 100,
             fitness_parameters: ReinforcementLearningParameters::new(5, 200, input),
             program_parameters: ProgramGeneratorParameters::new(

@@ -62,11 +62,11 @@ mod tests {
 
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
-                population_size: 5,
+                population_size: 100,
                 max_generations: 100,
                 gap: 0.5,
-                n_mutations: 50,
-                n_crossovers: 50,
+                n_mutations: 25,
+                n_crossovers: 25,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -74,8 +74,8 @@ mod tests {
                 ),
             };
 
-        assert_eq!(hyper_params.n_crossovers, 50);
-        assert_eq!(hyper_params.n_mutations, 50);
+        assert_eq!(hyper_params.n_crossovers, 25);
+        assert_eq!(hyper_params.n_mutations, 25);
 
         let mut populations = vec![];
 
@@ -105,8 +105,8 @@ mod tests {
                 population_size: 100,
                 max_generations: 100,
                 gap: 0.5,
-                n_mutations: 50,
-                n_crossovers: 50,
+                n_mutations: 25,
+                n_crossovers: 25,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -114,8 +114,8 @@ mod tests {
                 ),
             };
 
-        assert_eq!(hyper_params.n_crossovers, 50);
-        assert_eq!(hyper_params.n_mutations, 50);
+        assert_eq!(hyper_params.n_crossovers, 25);
+        assert_eq!(hyper_params.n_mutations, 25);
 
         let mut populations = vec![];
 
