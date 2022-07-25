@@ -186,20 +186,22 @@ where
             (hook)(&mut population)?;
         }
 
-        let mut rank_step = |pop: &mut Population<Self::O>| {
+        let mut rank_step = |pop: &mut Population<Self::O>| -> VoidResultAnyError {
             if let Some(hook) = on_fitness_params_received {
-                (hook)(&mut hyper_params.fitness_parameters).expect("Closure to have returned ()");
+                (hook)(&mut hyper_params.fitness_parameters)?
             }
 
             Self::rank(pop, &mut hyper_params.fitness_parameters);
 
             if let Some(hook) = after_rank {
-                (hook)(pop).expect("Closure to have returned ()");
+                (hook)(pop)?
             }
+
+            Ok(())
         };
 
         for _generation in 0..hyper_params.max_generations {
-            rank_step(&mut population);
+            rank_step(&mut population)?;
 
             Self::apply_selection(&mut population, hyper_params.gap);
             if let Some(hook) = after_selection {
@@ -217,7 +219,7 @@ where
             }
         }
 
-        rank_step(&mut population);
+        rank_step(&mut population)?;
 
         Ok(population)
     }
@@ -356,7 +358,7 @@ mod tests {
                 }),
         )?;
 
-        pretty_assertions::assert_eq!(received.borrow().as_slice(), &[1, 2, 3, 4]);
+        pretty_assertions::assert_eq!(received.borrow().as_slice(), &[1, 2, 3, 4, 2]);
 
         Ok(())
     }
