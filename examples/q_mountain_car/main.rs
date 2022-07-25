@@ -38,10 +38,10 @@ fn main() {
         fitness_parameters: parameters,
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                100,
+                32,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
-            QConsts::new(0.5, 0.2, 0.05),
+            QConsts::new(0.75, 0.25, 0.05),
         ),
     };
 

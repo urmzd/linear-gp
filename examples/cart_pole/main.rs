@@ -64,7 +64,7 @@ mod tests {
             max_generations: 100,
             fitness_parameters: ReinforcementLearningParameters::new(5, 500, input),
             program_parameters: ProgramGeneratorParameters::new(
-                100,
+                32,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
         };
