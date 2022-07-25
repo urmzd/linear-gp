@@ -172,10 +172,11 @@ where
         Self::init_env();
 
         let EventHooks {
-            after_init,
-            after_rank,
-            after_selection,
-            after_breed,
+            on_post_init: after_init,
+            on_post_rank: after_rank,
+            on_post_selection: after_selection,
+            on_post_breed: after_breed,
+            on_fitness_params_received,
             ..
         } = &mut hooks;
 
@@ -185,11 +186,20 @@ where
             (hook)(&mut population)?;
         }
 
-        for _generation in 0..hyper_params.max_generations {
-            Self::rank(&mut population, &mut hyper_params.fitness_parameters);
-            if let Some(hook) = after_rank {
-                (hook)(&mut population)?;
+        let mut rank_step = |pop: &mut Population<Self::O>| {
+            if let Some(hook) = on_fitness_params_received {
+                (hook)(&mut hyper_params.fitness_parameters).expect("Closure to have returned ()");
             }
+
+            Self::rank(pop, &mut hyper_params.fitness_parameters);
+
+            if let Some(hook) = after_rank {
+                (hook)(pop).expect("Closure to have returned ()");
+            }
+        };
+
+        for _generation in 0..hyper_params.max_generations {
+            rank_step(&mut population);
 
             Self::apply_selection(&mut population, hyper_params.gap);
             if let Some(hook) = after_selection {
@@ -207,51 +217,61 @@ where
             }
         }
 
+        rank_step(&mut population);
+
         Ok(population)
     }
 }
 
-pub type GpHook<'a, O> =
-    &'a mut dyn FnMut(&mut Population<O>) -> Result<(), Box<dyn std::error::Error>>;
+type VoidResultAnyError = Result<(), Box<dyn std::error::Error>>;
+
+pub type GpHook<'a, O> = &'a mut dyn FnMut(&mut O) -> VoidResultAnyError;
+
 pub struct EventHooks<'a, O>
 where
-    O: PartialOrd + Clone,
+    O: PartialOrd + Clone + Fitness,
 {
-    pub after_init: Option<GpHook<'a, O>>,
-    pub after_evaluate: Option<GpHook<'a, O>>,
-    pub after_rank: Option<GpHook<'a, O>>,
-    pub after_selection: Option<GpHook<'a, O>>,
-    pub after_breed: Option<GpHook<'a, O>>,
+    pub on_post_init: Option<GpHook<'a, Population<O>>>,
+    pub on_post_rank: Option<GpHook<'a, Population<O>>>,
+    pub on_post_selection: Option<GpHook<'a, Population<O>>>,
+    pub on_post_breed: Option<GpHook<'a, Population<O>>>,
+    pub on_fitness_params_received: Option<GpHook<'a, O::FitnessParameters>>,
 }
 
 impl<'a, O> EventHooks<'a, O>
 where
-    O: PartialOrd + Clone,
+    O: PartialOrd + Clone + Fitness,
 {
-    pub fn with_after_init(self, f: GpHook<'a, O>) -> Self {
+    pub fn on_fitness_parameters_recieved(self, f: GpHook<'a, O::FitnessParameters>) -> Self {
         Self {
-            after_init: Some(f),
+            on_fitness_params_received: Some(f),
+            ..self
+        }
+    }
+    pub fn with_after_init(self, f: GpHook<'a, Population<O>>) -> Self {
+        Self {
+            on_post_init: Some(f),
             ..self
         }
     }
 
-    pub fn with_after_selection(self, f: GpHook<'a, O>) -> Self {
+    pub fn with_after_selection(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
-            after_selection: Some(f),
+            on_post_selection: Some(f),
             ..self
         }
     }
 
-    pub fn with_after_rank(self, f: GpHook<'a, O>) -> Self {
+    pub fn with_after_rank(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
-            after_rank: Some(f),
+            on_post_rank: Some(f),
             ..self
         }
     }
 
-    pub fn with_after_breed(self, f: GpHook<'a, O>) -> Self {
+    pub fn with_after_breed(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
-            after_breed: Some(f),
+            on_post_breed: Some(f),
             ..self
         }
     }
@@ -259,30 +279,24 @@ where
 
 impl<'a, O> fmt::Debug for EventHooks<'a, O>
 where
-    O: PartialOrd + Clone,
+    O: PartialOrd + Clone + Fitness,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("EventHooks")
-            .field("after_init", &"after_init")
-            .field("after_evaluate", &"after_evaluate")
-            .field("after_selection", &"after_selection")
-            .field("after_rank", &"after_rank")
-            .field("after_breed", &"after_breed")
-            .finish()
+        f.debug_struct("EventHooks").finish()
     }
 }
 
 impl<'a, O> Default for EventHooks<'a, O>
 where
-    O: PartialOrd + Clone,
+    O: PartialOrd + Clone + Fitness,
 {
     fn default() -> Self {
         Self {
-            after_init: None,
-            after_evaluate: None,
-            after_rank: None,
-            after_selection: None,
-            after_breed: None,
+            on_post_init: None,
+            on_post_rank: None,
+            on_post_selection: None,
+            on_post_breed: None,
+            on_fitness_params_received: None,
         }
     }
 }
