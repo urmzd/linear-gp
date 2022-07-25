@@ -70,7 +70,7 @@ impl Clone for Instruction {
 impl Generate for Instruction {
     type GeneratorParameters = InstructionGeneratorParameters;
 
-    fn generate<'a>(parameters: &'a Self::GeneratorParameters) -> Self {
+    fn generate(parameters: &Self::GeneratorParameters) -> Self {
         let InstructionGeneratorParameters {
             n_features: n_inputs,
             n_registers,
@@ -90,7 +90,7 @@ impl Generate for Instruction {
         let target_index =
             UniformInt::<usize>::new(0, upper_bound_target_index).sample(current_generator);
 
-        let exec = DEFAULT_EXECUTABLES
+        let executable = DEFAULT_EXECUTABLES
             .choose(current_generator)
             .unwrap()
             .to_owned();
@@ -98,7 +98,7 @@ impl Generate for Instruction {
         Instruction {
             source_index,
             target_index,
-            executable: exec,
+            executable,
             mode,
         }
     }
@@ -124,7 +124,7 @@ impl Debug for Instruction {
 }
 
 impl Mutate for Instruction {
-    fn mutate<'a>(&self, params: &'a Self::GeneratorParameters) -> Self {
+    fn mutate(&self, params: &Self::GeneratorParameters) -> Self {
         let mut mutated = Self::generate(&params);
 
         let swap_target = generator().gen_bool(0.5);
@@ -152,7 +152,7 @@ impl Mutate for Instruction {
 }
 
 impl Instruction {
-    fn get_target_data<'b, T>(&self, registers: Registers, data: &'b T) -> Registers
+    fn get_target_data<T>(&self, registers: Registers, data: &T) -> Registers
     where
         T: ValidInput,
     {

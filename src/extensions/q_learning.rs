@@ -264,7 +264,7 @@ where
     T: QLearningInput,
     T::State: Clone + Debug,
 {
-    fn mutate<'a>(&self, parameters: &'a Self::GeneratorParameters) -> Self {
+    fn mutate(&self, parameters: &Self::GeneratorParameters) -> Self {
         let mutated = self.program.mutate(&parameters.program_parameters);
         QProgram {
             program: mutated,
@@ -280,7 +280,7 @@ where
 {
     type GeneratorParameters = QProgramGeneratorParameters;
 
-    fn generate<'a>(parameters: &'a Self::GeneratorParameters) -> Self {
+    fn generate(parameters: &Self::GeneratorParameters) -> Self {
         let program = Program::<QLearningParameters<T>>::generate(&parameters.program_parameters);
 
         let InstructionGeneratorParameters {

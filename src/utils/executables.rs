@@ -17,9 +17,11 @@ pub fn subtract(a: RegisterValue, b: RegisterValue) -> RegisterValue {
 }
 
 pub fn multiply(a: RegisterValue, b: RegisterValue) -> RegisterValue {
+    // TODO: Revisit using a const.
     a * b
 }
 
 pub fn divide(a: RegisterValue, _b: RegisterValue) -> RegisterValue {
+    // TODO: Revisit using a const.
     a / r64(2.)
 }

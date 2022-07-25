@@ -121,6 +121,7 @@ where
             }
 
             scores.push(score);
+            self.registers.reset();
             parameters.environment.reset();
         }
 
