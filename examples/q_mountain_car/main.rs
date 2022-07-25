@@ -41,8 +41,16 @@ fn main() {
         ),
     };
 
-    let population = QMountainCarLgp::execute(&mut hyper_params, EventHooks::default())
-        .expect("Example to have been ran successfully.");
+    let mut pops = vec![];
+
+    let population = QMountainCarLgp::execute(
+        &mut hyper_params,
+        EventHooks::default().with_after_rank(&mut |population| {
+            pops.push(population.clone());
+            Ok(())
+        }),
+    )
+    .expect("Example to have been ran successfully.");
 
     println!(
         "{:?}",

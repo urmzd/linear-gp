@@ -35,6 +35,8 @@ jobs:
           toolchain: stable
           override: true
           default: true
+      - run: export RUST_BACKTRACE=1
+      - run: export RUST_LOG=debug
       - run: xvfb-run cargo test --no-fail-fast
       - uses: actions/upload-artifact@v3
         with:
