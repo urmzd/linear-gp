@@ -13,7 +13,7 @@ pub fn plot_population_benchmarks<T>(
     y_range: Range<f64>,
 ) -> Result<(), Box<dyn error::Error>>
 where
-    T: Fitness + Clone + Ord + fmt::Debug,
+    T: Fitness + Clone + PartialOrd + fmt::Debug,
 {
     let root = BitMapBackend::new(plot_path, (1280, 720)).into_drawing_area();
     root.fill(&WHITE)?;

@@ -5,7 +5,7 @@ pub type InnerPopulation<T> = Vec<T>;
 #[derive(Clone, Debug)]
 pub struct Population<T>
 where
-    T: PartialEq + PartialOrd + Clone,
+    T: PartialOrd + Clone,
 {
     list: InnerPopulation<T>,
     capacity: usize,

@@ -34,16 +34,26 @@ impl Mode {
 
 #[derive(Clone, Debug, Serialize, new)]
 pub struct InstructionGeneratorParameters {
-    pub n_registers: usize,
-    pub n_features: usize,
+    n_input_features: usize,
+    n_input_classes: usize,
+    n_extras: usize,
 }
 
 impl InstructionGeneratorParameters {
     pub fn from<T: ValidInput>(n_extras: usize) -> Self {
-        InstructionGeneratorParameters::new(
-            <T as ValidInput>::N_ACTION_REGISTERS + n_extras,
-            <T as ValidInput>::N_INPUT_REGISTERS,
-        )
+        InstructionGeneratorParameters::new(T::N_INPUT_REGISTERS, T::N_ACTION_REGISTERS, n_extras)
+    }
+
+    pub fn n_registers(&self) -> usize {
+        self.n_extras + self.n_input_classes
+    }
+
+    pub fn n_inputs(&self) -> usize {
+        self.n_input_features
+    }
+
+    pub fn n_actions(&self) -> usize {
+        self.n_input_classes
     }
 }
 
@@ -71,22 +81,18 @@ impl Generate for Instruction {
     type GeneratorParameters = InstructionGeneratorParameters;
 
     fn generate(parameters: &Self::GeneratorParameters) -> Self {
-        let InstructionGeneratorParameters {
-            n_features: n_inputs,
-            n_registers,
-        } = parameters;
-
         let current_generator = &mut generator();
 
-        let source_index = UniformInt::<usize>::new(0, n_registers).sample(current_generator);
+        let source_index =
+            UniformInt::<usize>::new(0, parameters.n_registers()).sample(current_generator);
 
         let mode = Mode::sample(current_generator);
 
-        let upper_bound_target_index = *(if mode == Mode::External {
-            n_inputs
+        let upper_bound_target_index = if mode == Mode::External {
+            parameters.n_input_features
         } else {
-            n_registers
-        });
+            parameters.n_registers()
+        };
         let target_index =
             UniformInt::<usize>::new(0, upper_bound_target_index).sample(current_generator);
 
