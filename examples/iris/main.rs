@@ -198,8 +198,6 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 0.);
 
-        let mut generations: usize = 0;
-
         let mut populations = vec![];
 
         let mut best = None;
@@ -215,7 +213,6 @@ mod tests {
                 median = population.middle().map(|v| v.clone());
                 best = population.first().map(|v| v.clone());
 
-                generations += 1;
                 Ok(())
             }),
         )?;
