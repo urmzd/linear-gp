@@ -24,9 +24,9 @@ where
 {
     pub population_size: usize,
     pub gap: f64,
-    pub n_mutations: usize,
-    pub n_crossovers: usize,
-    pub max_generations: usize,
+    pub mutation_percent: f64,
+    pub crossover_percent: f64,
+    pub n_generations: usize,
     pub fitness_parameters: OrganismType::FitnessParameters,
     pub program_parameters: OrganismType::GeneratorParameters,
 }
@@ -104,14 +104,17 @@ where
 
     fn breed(
         population: &mut Population<Self::O>,
-        mut n_mutations: usize,
-        mut n_crossovers: usize,
+        mutations_percent: f64,
+        crossover_percent: f64,
         mutation_parameters: &<Self::O as Generate>::GeneratorParameters,
     ) {
         let pop_cap = population.capacity();
         let pop_len = population.len();
 
-        let mut remaining_pool_spots: usize = pop_cap - pop_len;
+        let mut remaining_pool_spots = pop_cap - pop_len;
+
+        let mut n_mutations = (remaining_pool_spots as f64 * mutations_percent).floor() as usize;
+        let mut n_crossovers = (remaining_pool_spots as f64 * crossover_percent).floor() as usize;
 
         assert_le!(n_mutations + n_crossovers, remaining_pool_spots);
 
@@ -199,7 +202,7 @@ where
             Ok(())
         };
 
-        for _generation in 0..hyper_params.max_generations {
+        for _generation in 0..hyper_params.n_generations {
             rank_step(&mut population)?;
 
             Self::apply_selection(&mut population, hyper_params.gap);
@@ -209,8 +212,8 @@ where
 
             Self::breed(
                 &mut population,
-                hyper_params.n_mutations,
-                hyper_params.n_crossovers,
+                hyper_params.mutation_percent,
+                hyper_params.crossover_percent,
                 &hyper_params.program_parameters,
             );
             if let Some(hook) = after_breed {
@@ -326,9 +329,9 @@ mod tests {
         let mut hyper_params = HyperParameters {
             population_size: 10,
             gap: 0.5,
-            n_mutations: 5,
-            n_crossovers: 0,
-            max_generations: 1,
+            mutation_percent: 0.,
+            crossover_percent: 0.,
+            n_generations: 1,
             fitness_parameters: ClassificationParameters::new(inputs),
             program_parameters: ProgramGeneratorParameters::new(
                 10,

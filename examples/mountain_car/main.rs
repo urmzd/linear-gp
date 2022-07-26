@@ -27,9 +27,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut hyper_params = HyperParameters {
         population_size: 1,
         gap: 0.5,
-        n_crossovers: 0,
-        n_mutations: 0,
-        max_generations: 1,
+        crossover_percent: 0.,
+        mutation_percent: 0.,
+        n_generations: 1,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
         program_parameters: ProgramGeneratorParameters::new(
             100,
@@ -76,9 +76,9 @@ mod tests {
         let mut hyper_params = HyperParameters {
             population_size: 100,
             gap: 0.5,
-            n_crossovers: 25,
-            n_mutations: 25,
-            max_generations: 100,
+            crossover_percent: 0.5,
+            mutation_percent: 0.5,
+            n_generations: 100,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
                 32,
