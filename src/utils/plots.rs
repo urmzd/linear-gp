@@ -25,7 +25,7 @@ where
         .margin(5u32)
         .x_label_area_size(30u32)
         .y_label_area_size(30u32)
-        .build_cartesian_2d(0..n_benchmarks, y_range)?;
+        .build_cartesian_2d(0..n_benchmarks, y_range.clone())?;
 
     chart.configure_mesh().draw()?;
 
@@ -36,8 +36,8 @@ where
             let median = population.middle();
             let worst = population.last();
 
-            let benchmark =
-                [best, median, worst].map(|quantile| quantile.unwrap().get_fitness().unwrap());
+            let benchmark = [best, median, worst]
+                .map(|quantile| quantile.unwrap().get_fitness().unwrap_or(y_range.start));
 
             benchmark
         })
