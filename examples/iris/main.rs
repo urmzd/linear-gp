@@ -19,10 +19,10 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 
     let mut hyper_params = HyperParameters {
         population_size: 100,
-        max_generations: 100,
+        n_generations: 100,
         gap: 0.5,
-        n_mutations: 25,
-        n_crossovers: 25,
+        mutation_percent: 0.5,
+        crossover_percent: 0.5,
         fitness_parameters: ClassificationParameters::new(inputs),
         program_parameters: ProgramGeneratorParameters::new(
             100,
@@ -63,10 +63,10 @@ mod tests {
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                max_generations: 100,
+                n_generations: 100,
                 gap: 0.5,
-                n_mutations: 25,
-                n_crossovers: 25,
+                mutation_percent: 0.5,
+                crossover_percent: 0.5,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -74,8 +74,8 @@ mod tests {
                 ),
             };
 
-        assert_eq!(hyper_params.n_crossovers, 25);
-        assert_eq!(hyper_params.n_mutations, 25);
+        assert_eq!(hyper_params.crossover_percent, 0.5);
+        assert_eq!(hyper_params.mutation_percent, 0.5);
 
         let mut populations = vec![];
 
@@ -103,10 +103,10 @@ mod tests {
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                max_generations: 100,
+                n_generations: 100,
                 gap: 0.5,
-                n_mutations: 25,
-                n_crossovers: 25,
+                mutation_percent: 1.,
+                crossover_percent: 0.,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -114,8 +114,8 @@ mod tests {
                 ),
             };
 
-        assert_eq!(hyper_params.n_crossovers, 25);
-        assert_eq!(hyper_params.n_mutations, 25);
+        assert_eq!(hyper_params.crossover_percent, 0.);
+        assert_eq!(hyper_params.mutation_percent, 1.);
 
         let mut populations = vec![];
 
@@ -143,10 +143,10 @@ mod tests {
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                max_generations: 100,
+                n_generations: 100,
                 gap: 0.5,
-                n_mutations: 0,
-                n_crossovers: 50,
+                mutation_percent: 0.,
+                crossover_percent: 1.,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -154,8 +154,8 @@ mod tests {
                 ),
             };
 
-        assert_eq!(hyper_params.n_crossovers, 50);
-        assert_eq!(hyper_params.n_mutations, 0);
+        assert_eq!(hyper_params.crossover_percent, 1.);
+        assert_eq!(hyper_params.mutation_percent, 0.);
 
         let mut populations = vec![];
 
@@ -184,10 +184,10 @@ mod tests {
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                max_generations: 100,
+                n_generations: 100,
                 gap: 0.5,
-                n_mutations: 0,
-                n_crossovers: 0,
+                mutation_percent: 0.,
+                crossover_percent: 0.,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -195,8 +195,8 @@ mod tests {
                 ),
             };
 
-        assert_eq!(hyper_params.n_crossovers, 0);
-        assert_eq!(hyper_params.n_mutations, 0);
+        assert_eq!(hyper_params.crossover_percent, 0.);
+        assert_eq!(hyper_params.mutation_percent, 0.);
 
         let mut generations: usize = 0;
 
@@ -241,10 +241,10 @@ mod tests {
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                max_generations: 100,
+                n_generations: 100,
                 gap: 0.5,
-                n_mutations: 0,
-                n_crossovers: 50,
+                mutation_percent: 0.,
+                crossover_percent: 0.,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -261,7 +261,7 @@ mod tests {
 
         assert_lt!(dropped_pop_len, hyper_params.population_size);
 
-        IrisLgp::breed(&mut population, 0, 0, &hyper_params.program_parameters);
+        IrisLgp::breed(&mut population, 0., 0., &hyper_params.program_parameters);
 
         assert_eq!(population.len(), hyper_params.population_size);
 
@@ -278,10 +278,10 @@ mod tests {
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                max_generations: 100,
+                n_generations: 100,
                 gap: 0.5,
-                n_mutations: 0,
-                n_crossovers: 0,
+                mutation_percent: 0.,
+                crossover_percent: 0.,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -312,10 +312,10 @@ mod tests {
         let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                max_generations: 100,
+                n_generations: 100,
                 gap: 0.5,
-                n_mutations: 0,
-                n_crossovers: 0,
+                mutation_percent: 0.,
+                crossover_percent: 0.,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,

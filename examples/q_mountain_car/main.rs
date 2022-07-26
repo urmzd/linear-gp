@@ -35,9 +35,9 @@ fn main() {
     let mut hyper_params = HyperParameters {
         population_size: 10,
         gap: 0.5,
-        n_mutations: 1,
-        n_crossovers: 0,
-        max_generations: 100,
+        mutation_percent: 1.,
+        crossover_percent: 0.,
+        n_generations: 100,
         fitness_parameters: parameters,
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(

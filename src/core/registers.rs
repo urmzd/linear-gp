@@ -42,7 +42,7 @@ impl Registers {
             .reduce(f64::max)
             .expect("Sliced values to not be of cardinality 0.");
 
-        if max_value.is_nan() {
+        if max_value.is_infinite() || max_value.is_nan() {
             return None;
         }
 
