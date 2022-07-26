@@ -19,6 +19,15 @@ where
     pub environment: T,
 }
 
+impl<T> ReinforcementLearningParameters<T>
+where
+    T: ReinforcementLearningInput,
+{
+    pub fn update(&mut self, states: Vec<T::State>) {
+        self.initial_states = states;
+    }
+}
+
 #[derive(Debug, Serialize, Clone, Copy)]
 pub enum Reward {
     Continue(f64),
