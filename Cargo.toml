@@ -49,3 +49,9 @@ test = true
 name = "q_mountain_car"
 path = "examples/q_mountain_car/main.rs"
 test = true
+
+[[example]]
+name = "q_cart_pole"
+path = "examples/q_cart_pole/main.rs"
+test = true
+
