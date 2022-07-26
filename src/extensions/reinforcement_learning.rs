@@ -78,7 +78,17 @@ where
                 // Run program.
                 self.exec(&parameters.environment);
                 // Eval
-                let winning_registers = self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS));
+                let winning_registers =
+                    match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
+                        None => {
+                            return {
+                                let fitness = f64::NEG_INFINITY;
+                                self.fitness = Some(fitness);
+                                fitness
+                            }
+                        }
+                        Some(registers) => registers,
+                    };
                 let picked_action = winning_registers
                     .choose(&mut generator())
                     .map(|v| *v)

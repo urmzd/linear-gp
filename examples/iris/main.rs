@@ -21,8 +21,8 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         population_size: 100,
         max_generations: 100,
         gap: 0.5,
-        n_mutations: 50,
-        n_crossovers: 50,
+        n_mutations: 25,
+        n_crossovers: 25,
         fitness_parameters: ClassificationParameters::new(inputs),
         program_parameters: ProgramGeneratorParameters::new(
             100,

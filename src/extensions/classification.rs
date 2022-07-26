@@ -33,12 +33,24 @@ where
         for input in inputs {
             self.exec(input);
 
-            let mut winning_registers = self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS));
+            let mut winning_registers =
+                match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
+                    None => {
+                        return {
+                            let fitness = f64::NEG_INFINITY;
+                            self.fitness = Some(fitness);
+                            fitness
+                        }
+                    }
+                    Some(registers) => registers,
+                };
+
             let predicted_class = if winning_registers.len() == 1 {
                 winning_registers.pop().expect("Register to have exist") as i32
             } else {
                 -1
             };
+
             let correct_class = input.get_class() as i32;
 
             if predicted_class == correct_class {
