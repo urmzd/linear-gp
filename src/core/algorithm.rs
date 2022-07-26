@@ -83,7 +83,6 @@ where
         for individual in population.iter_mut() {
             if individual.get_fitness().is_none() {
                 individual.eval_fitness(fitness_parameters);
-                assert_ne!(individual.get_fitness(), None);
             }
         }
         population.sort();

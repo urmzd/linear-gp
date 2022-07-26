@@ -1,7 +1,7 @@
 pub trait Fitness {
     type FitnessParameters;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64;
+    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters);
     fn get_fitness(&self) -> Option<f64>;
 }
 
