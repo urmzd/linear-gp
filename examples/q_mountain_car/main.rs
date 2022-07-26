@@ -12,7 +12,7 @@ use lgp::{
     },
     extensions::{
         q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
-        reinforcement_learning::{ReinforcementLearningParameters},
+        reinforcement_learning::ReinforcementLearningParameters,
     },
     utils::random::generator,
 };
@@ -34,8 +34,8 @@ fn main() {
     let mut hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
         population_size: 100,
         gap: 0.5,
-        mutation_percent: 1.,
-        crossover_percent: 0.,
+        mutation_percent: 0.5,
+        crossover_percent: 0.5,
         n_generations: 100,
         lazy_evaluate: false,
         fitness_parameters: parameters,
@@ -57,10 +57,17 @@ fn main() {
                 pops.push(population.clone());
                 Ok(())
             })
-            .with_on_post_fitness_params(&mut |params| {
-                println!("{:?}", params);
-                Ok(())
-            }),
+            .with_on_post_fitness_params(
+                &mut &mut |params: &mut ReinforcementLearningParameters<MountainCarInput>| {
+                    params.update(
+                        (vec![0; 5])
+                            .into_iter()
+                            .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
+                            .collect_vec(),
+                    );
+                    Ok(())
+                },
+            ),
     )
     .expect("Example to have been ran successfully.");
 

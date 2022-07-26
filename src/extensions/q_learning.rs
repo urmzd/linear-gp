@@ -191,8 +191,7 @@ where
                 ) {
                     None => {
                         return {
-                            let fitness = f64::NEG_INFINITY;
-                            self.program.fitness = Some(fitness);
+                            self.program.fitness = None;
                         }
                     }
                     Some(action_state) => action_state,
