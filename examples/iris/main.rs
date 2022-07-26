@@ -184,7 +184,7 @@ mod tests {
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
-                n_generations: 100,
+                n_generations: 250,
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
