@@ -25,7 +25,7 @@ where
 {
     type FitnessParameters = ClassificationParameters<T>;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64 {
+    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let inputs = &parameters.inputs;
 
         let mut n_correct = 0.0;
@@ -37,9 +37,8 @@ where
                 match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
                     None => {
                         return {
-                            let fitness = f64::NEG_INFINITY;
+                            let fitness = 0.;
                             self.fitness = Some(fitness);
-                            fitness
                         }
                     }
                     Some(registers) => registers,
@@ -63,8 +62,6 @@ where
         let fitness = n_correct / inputs.len() as f64;
 
         self.fitness = Some(fitness);
-
-        fitness
     }
 
     fn get_fitness(&self) -> Option<f64> {

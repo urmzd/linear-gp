@@ -33,7 +33,7 @@ fn main() {
     );
 
     let mut hyper_params = HyperParameters {
-        population_size: 10,
+        population_size: 100,
         gap: 0.5,
         mutation_percent: 1.,
         crossover_percent: 0.,

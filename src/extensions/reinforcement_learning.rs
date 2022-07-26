@@ -64,7 +64,7 @@ where
 {
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64 {
+    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
 
         parameters.environment.init();
@@ -82,9 +82,7 @@ where
                     match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
                         None => {
                             return {
-                                let fitness = f64::NEG_INFINITY;
-                                self.fitness = Some(fitness);
-                                fitness
+                                self.fitness = None;
                             }
                         }
                         Some(registers) => registers,
@@ -113,8 +111,6 @@ where
         let median = scores.swap_remove(scores.len() / 2);
 
         self.fitness = Some(median);
-
-        median
     }
 
     fn get_fitness(&self) -> Option<f64> {
