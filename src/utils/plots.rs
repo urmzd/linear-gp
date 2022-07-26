@@ -1,9 +1,7 @@
 use std::{error, fmt, ops::Range};
 
 use plotters::{
-    prelude::{
-        BitMapBackend, ChartBuilder, IntoDrawingArea, LineSeries, Rectangle, SeriesLabelPosition,
-    },
+    prelude::{BitMapBackend, ChartBuilder, IntoDrawingArea, LineSeries, Rectangle},
     style::{Color, IntoFont, Palette, Palette99, BLACK, WHITE},
 };
 
