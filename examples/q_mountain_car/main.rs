@@ -47,27 +47,7 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    let mut pops = vec![];
-
-    QMountainCarLgp::execute(
-        &mut hyper_params,
-        EventHooks::default()
-            .with_on_after_rank(&mut |population| {
-                pops.push(population.clone());
-                Ok(())
-            })
-            .with_on_post_fitness_params(
-                &mut &mut |params: &mut ReinforcementLearningParameters<MountainCarInput>| {
-                    params.update(
-                        (vec![0; 5])
-                            .into_iter()
-                            .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
-                            .collect_vec(),
-                    );
-                    Ok(())
-                },
-            ),
-    )?;
+    QMountainCarLgp::execute(&mut hyper_params, EventHooks::default())?;
 
     Ok(())
 }
@@ -129,24 +109,10 @@ mod tests {
 
         QMountainCarLgp::execute(
             &mut hyper_params,
-            EventHooks::default()
-                .with_on_after_rank(&mut |population| {
-                    pops.push(population.clone());
-                    Ok(())
-                })
-                .with_on_post_fitness_params(
-                    &mut &mut |params: &mut ReinforcementLearningParameters<MountainCarInput>| {
-                        params.update(
-                            (vec![0; 5])
-                                .into_iter()
-                                .map(|_| {
-                                    MountainCarObservation::sample_between(&mut generator(), None)
-                                })
-                                .collect_vec(),
-                        );
-                        Ok(())
-                    },
-                ),
+            EventHooks::default().with_on_after_rank(&mut |population| {
+                pops.push(population.clone());
+                Ok(())
+            }),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/q_mountain_car.png";

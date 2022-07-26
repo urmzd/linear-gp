@@ -80,7 +80,7 @@ mod tests {
             crossover_percent: 0.5,
             mutation_percent: 0.5,
             n_generations: 100,
-            lazy_evaluate: true,
+            lazy_evaluate: false,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
                 32,
@@ -93,7 +93,21 @@ mod tests {
         MountainCarLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone()))),
+                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone())))
+                .with_on_post_fitness_params(
+                    &mut &mut |params: &mut ReinforcementLearningParameters<MountainCarInput>| {
+                        params.update(
+                            (vec![0; 5])
+                                .into_iter()
+                                .map(|_| {
+                                    MountainCarObservation::sample_between(&mut generator(), None)
+                                })
+                                .collect_vec(),
+                        );
+
+                        Ok(())
+                    },
+                ),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/mountain_car.png";

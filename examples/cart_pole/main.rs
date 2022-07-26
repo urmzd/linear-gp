@@ -93,7 +93,20 @@ mod tests {
         CartPoleLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone()))),
+                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone())))
+                .with_on_post_fitness_params(
+                    &mut &mut |params: &mut ReinforcementLearningParameters<CartPoleInput>| {
+                        params.update(
+                            (vec![0; 5])
+                                .into_iter()
+                                .map(|_| {
+                                    CartPoleObservation::sample_between(&mut generator(), None)
+                                })
+                                .collect_vec(),
+                        );
+                        Ok(())
+                    },
+                ),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "assets/tests/plots/cart_pole.png";
