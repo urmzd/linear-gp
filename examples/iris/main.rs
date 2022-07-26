@@ -266,6 +266,9 @@ mod tests {
             median_f.unwrap().partial_cmp(&best_f.unwrap())
         );
 
+        debug!("Normal: Compare Worst to Median {:?}", worst_f == median_f);
+        debug!("Normal: Compare Median to Best {:?}", median_f == best_f);
+
         if worst != median || median != best {
             // TODO: Create concrete error type; SNAFU or Failure?
             panic!("GP was unable to converge in given time... \n Best: {:b}, \n Median: {:b} \n Worst: {:b} \n", best.unwrap(), median.unwrap(), worst.unwrap());
