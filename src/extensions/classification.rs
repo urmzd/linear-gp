@@ -37,8 +37,7 @@ where
                 match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
                     None => {
                         return {
-                            let fitness = 0.;
-                            self.fitness = Some(fitness);
+                            self.fitness = None;
                         }
                     }
                     Some(registers) => registers,
