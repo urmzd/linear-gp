@@ -1,8 +1,8 @@
 use std::{error, fmt, ops::Range};
 
 use plotters::{
-    prelude::{BitMapBackend, ChartBuilder, ErrorBar, IntoDrawingArea},
-    style::{colors, IntoFont, WHITE},
+    prelude::{BitMapBackend, ChartBuilder, IntoDrawingArea, LineSeries, Rectangle},
+    style::{Color, IntoFont, Palette, Palette99, BLACK, WHITE},
 };
 
 use crate::core::{characteristics::Fitness, population::Population};
@@ -43,16 +43,22 @@ where
         })
         .collect();
 
+    for (idx, label) in [(0, "Best"), (1, "Median"), (2, "Worst")] {
+        let color = Palette99::pick(idx).mix(0.9);
+
+        chart
+            .draw_series(LineSeries::new(
+                benchmarks.iter().enumerate().map(|(i, b)| (i, b[idx])),
+                color.stroke_width(3),
+            ))?
+            .label(label)
+            .legend(move |(x, y)| Rectangle::new([(x, y - 5), (x + 10, y + 5)], color.filled()));
+    }
+
     chart
-        .draw_series(
-            benchmarks
-                .iter()
-                .enumerate()
-                .map(|(index, [best, median, worst])| {
-                    ErrorBar::new_vertical(index, *worst, *median, *best, colors::BLUE, 10)
-                }),
-        )
-        .unwrap();
+        .configure_series_labels()
+        .border_style(&BLACK)
+        .draw()?;
 
     root.present()?;
     Ok(())
