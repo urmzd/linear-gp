@@ -35,7 +35,7 @@ fn main() -> VoidResultAnyError {
         gap: 0.,
         mutation_percent: 0.,
         crossover_percent: 0.,
-        n_generations: 100,
+        n_generations: 1,
         lazy_evaluate: false,
         fitness_parameters: parameters,
         program_parameters: QProgramGeneratorParameters::new(

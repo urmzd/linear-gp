@@ -18,8 +18,8 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     let inputs = IrisLgp::load_inputs(file.path());
 
     let mut hyper_params = HyperParameters {
-        population_size: 100,
-        n_generations: 100,
+        population_size: 1,
+        n_generations: 1,
         gap: 0.5,
         mutation_percent: 0.5,
         lazy_evaluate: true,
