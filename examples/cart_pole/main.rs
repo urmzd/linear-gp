@@ -30,6 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         crossover_percent: 0.5,
         mutation_percent: 0.5,
         n_generations: 1,
+        lazy_evaluate: true,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
         program_parameters: ProgramGeneratorParameters::new(
             100,
@@ -78,6 +79,7 @@ mod tests {
             gap: 0.5,
             crossover_percent: 0.,
             mutation_percent: 1.,
+            lazy_evaluate: true,
             n_generations: 100,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
             program_parameters: ProgramGeneratorParameters::new(
@@ -91,7 +93,7 @@ mod tests {
         CartPoleLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_after_rank(&mut |population| Ok(populations.push(population.clone()))),
+                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone()))),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "assets/tests/plots/cart_pole.png";

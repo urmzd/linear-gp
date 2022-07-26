@@ -27,6 +27,7 @@ where
     pub mutation_percent: f64,
     pub crossover_percent: f64,
     pub n_generations: usize,
+    pub lazy_evaluate: bool,
     pub fitness_parameters: OrganismType::FitnessParameters,
     pub program_parameters: OrganismType::GeneratorParameters,
 }
@@ -79,10 +80,17 @@ where
     fn rank(
         population: &mut Population<Self::O>,
         fitness_parameters: &mut <Self::O as Fitness>::FitnessParameters,
+        lazy_evaluate: bool,
     ) {
         for individual in population.iter_mut() {
-            if individual.get_fitness().is_none() {
-                individual.eval_fitness(fitness_parameters);
+            let should_eval = if lazy_evaluate {
+                individual.get_fitness().is_none()
+            } else {
+                true
+            };
+
+            if should_eval {
+                individual.eval_fitness(fitness_parameters)
             }
         }
         population.sort();
@@ -177,7 +185,7 @@ where
             on_post_rank: after_rank,
             on_post_selection: after_selection,
             on_post_breed: after_breed,
-            on_fitness_params_received,
+            on_post_fitness_params: on_fitness_params_received,
             ..
         } = &mut hooks;
 
@@ -192,7 +200,11 @@ where
                 (hook)(&mut hyper_params.fitness_parameters)?
             }
 
-            Self::rank(pop, &mut hyper_params.fitness_parameters);
+            Self::rank(
+                pop,
+                &mut hyper_params.fitness_parameters,
+                hyper_params.lazy_evaluate,
+            );
 
             if let Some(hook) = after_rank {
                 (hook)(pop)?
@@ -238,41 +250,41 @@ where
     pub on_post_rank: Option<GpHook<'a, Population<O>>>,
     pub on_post_selection: Option<GpHook<'a, Population<O>>>,
     pub on_post_breed: Option<GpHook<'a, Population<O>>>,
-    pub on_fitness_params_received: Option<GpHook<'a, O::FitnessParameters>>,
+    pub on_post_fitness_params: Option<GpHook<'a, O::FitnessParameters>>,
 }
 
 impl<'a, O> EventHooks<'a, O>
 where
     O: PartialOrd + Clone + Fitness,
 {
-    pub fn on_fitness_parameters_recieved(self, f: GpHook<'a, O::FitnessParameters>) -> Self {
+    pub fn with_on_post_fitness_params(self, f: GpHook<'a, O::FitnessParameters>) -> Self {
         Self {
-            on_fitness_params_received: Some(f),
+            on_post_fitness_params: Some(f),
             ..self
         }
     }
-    pub fn with_after_init(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_init(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
             on_post_init: Some(f),
             ..self
         }
     }
 
-    pub fn with_after_selection(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_selection(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
             on_post_selection: Some(f),
             ..self
         }
     }
 
-    pub fn with_after_rank(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_after_rank(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
             on_post_rank: Some(f),
             ..self
         }
     }
 
-    pub fn with_after_breed(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_after_breed(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
             on_post_breed: Some(f),
             ..self
@@ -299,7 +311,7 @@ where
             on_post_rank: None,
             on_post_selection: None,
             on_post_breed: None,
-            on_fitness_params_received: None,
+            on_post_fitness_params: None,
         }
     }
 }
@@ -331,6 +343,7 @@ mod tests {
             mutation_percent: 0.,
             crossover_percent: 0.,
             n_generations: 1,
+            lazy_evaluate: true,
             fitness_parameters: ClassificationParameters::new(inputs),
             program_parameters: ProgramGeneratorParameters::new(
                 10,
@@ -341,19 +354,19 @@ mod tests {
         TestLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_after_init(&mut |_p| {
+                .with_on_post_init(&mut |_p| {
                     received.borrow_mut().push(1);
                     Ok(())
                 })
-                .with_after_rank(&mut |_p| {
+                .with_on_after_rank(&mut |_p| {
                     received.borrow_mut().push(2);
                     Ok(())
                 })
-                .with_after_selection(&mut |_p| {
+                .with_on_post_selection(&mut |_p| {
                     received.borrow_mut().push(3);
                     Ok(())
                 })
-                .with_after_breed(&mut |_p| {
+                .with_on_after_breed(&mut |_p| {
                     received.borrow_mut().push(4);
                     Ok(())
                 }),

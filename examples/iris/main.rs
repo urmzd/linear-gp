@@ -22,6 +22,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         n_generations: 100,
         gap: 0.5,
         mutation_percent: 0.5,
+        lazy_evaluate: true,
         crossover_percent: 0.5,
         fitness_parameters: ClassificationParameters::new(inputs),
         program_parameters: ProgramGeneratorParameters::new(
@@ -67,6 +68,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.5,
                 crossover_percent: 0.5,
+                lazy_evaluate: true,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -81,7 +83,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_after_rank(&mut |population| {
+            EventHooks::default().with_on_after_rank(&mut |population| {
                 populations.push(population.clone());
                 Ok(())
             }),
@@ -107,6 +109,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 1.,
                 crossover_percent: 0.,
+                lazy_evaluate: true,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -121,7 +124,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_after_rank(&mut |population| {
+            EventHooks::default().with_on_after_rank(&mut |population| {
                 populations.push(population.clone());
                 Ok(())
             }),
@@ -147,6 +150,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 1.,
+                lazy_evaluate: true,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -161,7 +165,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_after_rank(&mut |population| {
+            EventHooks::default().with_on_after_rank(&mut |population| {
                 populations.push(population.clone());
                 Ok(())
             }),
@@ -188,6 +192,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
+                lazy_evaluate: true,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -206,7 +211,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_after_rank(&mut |population| {
+            EventHooks::default().with_on_after_rank(&mut |population| {
                 populations.push(population.clone());
 
                 worst = population
@@ -254,6 +259,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
+                lazy_evaluate: true,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -263,7 +269,7 @@ mod tests {
 
         let mut population = IrisLgp::init_population(&hyper_params);
 
-        IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters);
+        IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters, true);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
 
         let dropped_pop_len = population.len();
@@ -291,6 +297,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
+                lazy_evaluate: true,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -300,7 +307,7 @@ mod tests {
 
         let mut population = IrisLgp::init_population(&hyper_params);
 
-        IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters);
+        IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters, true);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
 
         self::assert_eq!(
@@ -325,6 +332,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
+                lazy_evaluate: true,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
