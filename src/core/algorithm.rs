@@ -8,7 +8,7 @@ use serde::de::DeserializeOwned;
 
 use crate::{
     core::characteristics::{Breed, Fitness, Generate},
-    utils::random::generator,
+    utils::{random::generator, types::VoidResultAnyError},
 };
 
 use super::{
@@ -102,9 +102,10 @@ where
 
         let pop_len = population.len();
 
-        let cutoff_index = ((1.0 - gap) * (pop_len as f64)).floor() as usize;
+        let number_of_individuals_dropped =
+            pop_len - ((1.0 - gap) * (pop_len as f64)).floor() as usize;
 
-        for _ in 0..cutoff_index {
+        for _ in 0..number_of_individuals_dropped {
             population.pop();
         }
     }
@@ -119,6 +120,10 @@ where
         let pop_len = population.len();
 
         let mut remaining_pool_spots = pop_cap - pop_len;
+
+        if remaining_pool_spots == 0 {
+            return;
+        }
 
         let mut n_mutations = (remaining_pool_spots as f64 * mutations_percent).floor() as usize;
         let mut n_crossovers = (remaining_pool_spots as f64 * crossover_percent).floor() as usize;
@@ -237,8 +242,6 @@ where
         Ok(population)
     }
 }
-
-type VoidResultAnyError = Result<(), Box<dyn std::error::Error>>;
 
 pub type GpHook<'a, O> = &'a mut dyn FnMut(&mut O) -> VoidResultAnyError;
 

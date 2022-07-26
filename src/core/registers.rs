@@ -48,8 +48,9 @@ impl Registers {
 
         let max_indices = sliced_data
             .iter()
+            .copied()
             .enumerate()
-            .filter(|(_, v)| **v == max_value)
+            .filter(|(_, v)| v == &max_value)
             .map(|(i, _)| i)
             .collect_vec();
 

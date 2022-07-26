@@ -10,7 +10,6 @@ use rand::{
 use crate::{
     core::{
         characteristics::{Breed, DuplicateNew, Fitness, Generate, Mutate},
-        instruction::InstructionGeneratorParameters,
         program::{Program, ProgramGeneratorParameters},
         registers::Registers,
     },
@@ -72,7 +71,7 @@ impl QTable {
             None => return None,
             Some(registers) => registers
                 .choose(&mut generator())
-                .map(|v| *v)
+                .copied()
                 .expect("Register to have been chosen."),
         };
 
@@ -137,7 +136,7 @@ where
     T::State: Clone + fmt::Debug,
 {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.program.partial_cmp(&other.program)
+        self.program.fitness.partial_cmp(&other.program.fitness)
     }
 }
 
@@ -259,14 +258,15 @@ where
         let program =
             Program::<ReinforcementLearningParameters<T>>::generate(&parameters.program_parameters);
 
-        let InstructionGeneratorParameters {
-            n_features,
-            n_registers,
-        } = parameters
+        let instruction_params = &parameters
             .program_parameters
             .instruction_generator_parameters;
 
-        let q_table = QTable::new(n_features, n_registers, parameters.consts);
+        let q_table = QTable::new(
+            instruction_params.n_actions(),
+            instruction_params.n_registers(),
+            parameters.consts,
+        );
 
         QProgram { q_table, program }
     }

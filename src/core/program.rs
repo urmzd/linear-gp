@@ -66,7 +66,7 @@ impl<T> Generate for Program<T> {
             instruction_generator_parameters,
         } = &parameters;
 
-        let registers = Registers::new(instruction_generator_parameters.n_registers);
+        let registers = Registers::new(instruction_generator_parameters.n_registers());
         let n_instructions = Uniform::new_inclusive(1, max_instructions).sample(&mut generator());
         let instructions = (0..n_instructions)
             .into_iter()
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn given_instructions_when_breed_then_two_children_are_produced_using_genes_of_parents() {
-        let params = InstructionGeneratorParameters::new(5, 5);
+        let params = InstructionGeneratorParameters::new(5, 2, 1);
         let instructions_a: Instructions =
             (0..10).map(|_| Instruction::generate(&params)).collect();
         let instructions_b: Instructions =
@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     fn given_programs_when_two_point_crossover_then_two_children_are_produced() {
-        let instruction_params = InstructionGeneratorParameters::new(3, 4);
+        let instruction_params = InstructionGeneratorParameters::new(4, 2, 1);
         let program_params = ProgramGeneratorParameters::new(100, instruction_params);
 
         let program_a = Program::<ClassificationParameters<TestInput>>::generate(&program_params);
