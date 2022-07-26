@@ -30,6 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         crossover_percent: 0.,
         mutation_percent: 0.,
         n_generations: 1,
+        lazy_evaluate: true,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
         program_parameters: ProgramGeneratorParameters::new(
             100,
@@ -79,6 +80,7 @@ mod tests {
             crossover_percent: 0.5,
             mutation_percent: 0.5,
             n_generations: 100,
+            lazy_evaluate: true,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
                 32,
@@ -91,7 +93,7 @@ mod tests {
         MountainCarLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_after_rank(&mut |population| Ok(populations.push(population.clone()))),
+                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone()))),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/mountain_car.png";
