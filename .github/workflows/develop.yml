@@ -30,7 +30,6 @@ jobs:
       RUST_BACKTRACE: 1 
       RUST_LOG: debug
     steps:
-      - run: mkdir -p ./assets/tests/plots
       - run: sudo apt install libsdl2-gfx-dev xvfb -y
       - uses: actions/checkout@v2
       - uses: actions/cache@v3
@@ -47,9 +46,10 @@ jobs:
           toolchain: stable
           override: true
           default: true
+      - run: mkdir assets/tests/plots && ls
       - run: xvfb-run cargo test --no-fail-fast
       - uses: actions/upload-artifact@v3
         with:
           name: plots
-          path: ./assets/tests/plots
+          path: assets/tests/plots
           if-no-files-found: error
