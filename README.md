@@ -36,6 +36,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         n_generations: 100,
         gap: 0.5,
         mutation_percent: 0.5,
+        lazy_evaluate: true,
         crossover_percent: 0.5,
         fitness_parameters: ClassificationParameters::new(inputs),
         program_parameters: ProgramGeneratorParameters::new(
@@ -46,7 +47,6 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 
     IrisLgp::execute(&mut hyper_params, EventHooks::default())?;
     Ok(())
-}
 ```
 
 ### Reinforcement Learning
@@ -75,8 +75,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         crossover_percent: 0.,
         mutation_percent: 0.,
         n_generations: 1,
+        lazy_evaluate: true,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
-        program_parameters: ProgramGeneratorParameters::new(
 ```
 
 #### cart_pole
@@ -103,8 +103,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         crossover_percent: 0.5,
         mutation_percent: 0.5,
         n_generations: 1,
+        lazy_evaluate: true,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
-        program_parameters: ProgramGeneratorParameters::new(
 ```
 
 ## Building
