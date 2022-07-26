@@ -24,7 +24,7 @@ cargo run --example <example_name>
 #### iris
 
 ```rust
-//examples/iris/main.rs#L15-L35
+//examples/iris/main.rs#L15-L36
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 #### mountain_car
 
 ```rust
-//examples/mountain_car/main.rs#L14-L34
+//examples/mountain_car/main.rs#L18-L45
 
 };
 use set_up::{MountainCarInput, MountainCarLgp};
@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #### cart_pole
 
 ```rust
-//examples/cart_pole/main.rs#L14-L34
+//examples/cart_pole/main.rs#L18-L45
 
 };
 use set_up::{CartPoleInput, CartPoleLgp};
