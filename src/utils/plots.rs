@@ -1,7 +1,9 @@
 use std::{error, fmt, ops::Range};
 
 use plotters::{
-    prelude::{BitMapBackend, ChartBuilder, IntoDrawingArea, LineSeries, Rectangle},
+    prelude::{
+        BitMapBackend, ChartBuilder, IntoDrawingArea, LineSeries, Rectangle, SeriesLabelPosition,
+    },
     style::{Color, IntoFont, Palette, Palette99, BLACK, WHITE},
 };
 
@@ -21,10 +23,14 @@ where
     let n_benchmarks = populations.len();
 
     let mut chart = ChartBuilder::on(&root)
-        .caption("Fitness Over Generations", ("sans-serif", 50).into_font())
-        .margin(5u32)
-        .x_label_area_size(30u32)
-        .y_label_area_size(30u32)
+        .caption(
+            "Fitness Benchmarks per Generation",
+            ("sans-serif", 50).into_font(),
+        )
+        .margin(15)
+        .x_label_area_size(100)
+        .y_label_area_size(100)
+        .margin(20)
         .build_cartesian_2d(0..n_benchmarks, y_range.clone())?;
 
     chart
@@ -62,6 +68,8 @@ where
 
     chart
         .configure_series_labels()
+        .background_style(Color::filled(&WHITE.mix(0.9)))
+        .legend_area_size(50)
         .border_style(&BLACK)
         .draw()?;
 
