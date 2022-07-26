@@ -223,7 +223,7 @@ mod tests {
 
         if worst != median || median != best {
             // TODO: Create concrete error type; SNAFU or Failure?
-            panic!("GP was unable to converge in given time... \n Best: {:?}, \n Median: {:?} \n Worst: {:?} \n", best.map(|v| v.fitness), median.map(|v| v.fitness), worst.map(|v| v.fitness));
+            panic!("GP was unable to converge in given time... \n Best: {:?}, \n Median: {:?} \n Worst: {:?} \n", best.and_then(|v| v.fitness), median.and_then(|v| v.fitness), worst.and_then(|v| v.fitness));
         }
 
         Ok(())
