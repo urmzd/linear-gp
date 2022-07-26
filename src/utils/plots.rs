@@ -27,7 +27,12 @@ where
         .y_label_area_size(30u32)
         .build_cartesian_2d(0..n_benchmarks, y_range.clone())?;
 
-    chart.configure_mesh().draw()?;
+    chart
+        .configure_mesh()
+        .y_desc("Fitness")
+        .x_desc("Generation")
+        .axis_desc_style(("sans-serif", 15))
+        .draw()?;
 
     let benchmarks: Vec<[f64; 3]> = populations
         .into_iter()
