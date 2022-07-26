@@ -200,18 +200,30 @@ mod tests {
 
         let mut populations = vec![];
 
-        let mut best = None;
-        let mut median = None;
-        let mut worst = None;
+        let mut best: Option<u64> = None;
+        let mut median: Option<u64> = None;
+        let mut worst: Option<u64> = None;
 
         IrisLgp::execute(
             &mut hyper_params,
             EventHooks::default().with_after_rank(&mut |population| {
                 populations.push(population.clone());
 
-                worst = population.last().map(|v| v.clone());
-                median = population.middle().map(|v| v.clone());
-                best = population.first().map(|v| v.clone());
+                worst = population
+                    .last()
+                    .map(|v| v.clone())
+                    .and_then(|v| v.fitness)
+                    .map(|x| x.to_bits());
+                median = population
+                    .middle()
+                    .map(|v| v.clone())
+                    .and_then(|v| v.fitness)
+                    .map(|x| x.to_bits());
+                best = population
+                    .first()
+                    .map(|v| v.clone())
+                    .and_then(|v| v.fitness)
+                    .map(|x| x.to_bits());
 
                 Ok(())
             }),
@@ -223,7 +235,7 @@ mod tests {
 
         if worst != median || median != best {
             // TODO: Create concrete error type; SNAFU or Failure?
-            panic!("GP was unable to converge in given time... \n Best: {:b}, \n Median: {:b} \n Worst: {:b} \n", best.and_then(|v| v.fitness).unwrap().to_bits(), median.and_then(|v| v.fitness).unwrap().to_bits(), worst.and_then(|v| v.fitness).unwrap().to_bits());
+            panic!("GP was unable to converge in given time... \n Best: {:b}, \n Median: {:b} \n Worst: {:b} \n", best.unwrap(), median.unwrap(), worst.unwrap());
         }
 
         Ok(())
