@@ -65,12 +65,16 @@ impl QTable {
         max.expect("Available action to yield an index.")
     }
 
-    pub fn eval<T>(&self, registers: &Registers) -> ActionRegisterPair {
+    pub fn eval<T>(&self, registers: &Registers) -> Option<ActionRegisterPair> {
         let winning_registers = registers.all_argmax(None);
-        let winning_register = winning_registers
-            .choose(&mut generator())
-            .map(|v| *v)
-            .expect("Register to have been chosen.");
+
+        let winning_register = match winning_registers {
+            None => return None,
+            Some(registers) => registers
+                .choose(&mut generator())
+                .map(|v| *v)
+                .expect("Register to have been chosen."),
+        };
 
         assert_le!(self.q_consts.epsilon, 1.0);
         assert_ge!(self.q_consts.epsilon, 0.);
@@ -84,10 +88,10 @@ impl QTable {
             self.action_argmax(winning_register)
         };
 
-        ActionRegisterPair {
+        Some(ActionRegisterPair {
             action: winning_action,
             register: winning_register as usize,
-        }
+        })
     }
 
     pub fn update(
@@ -145,6 +149,17 @@ where
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) -> f64 {
+        let get_action_state =
+            |environment: &mut T,
+             q_table: &mut QTable,
+             program: &mut Program<ReinforcementLearningParameters<T>>| {
+                program.exec(environment);
+                let action_state =
+                    q_table.eval::<ReinforcementLearningParameters<T>>(&program.registers);
+
+                action_state
+            };
+
         let mut scores = vec![];
         // TODO: Call init and finish after `rank`
         for state in &parameters.initial_states {
@@ -152,10 +167,12 @@ where
             let mut score = 0.;
             parameters.environment.update_state(state.clone());
 
-            self.program.exec(&parameters.environment);
-            let mut c_action_state = self
-                .q_table
-                .eval::<ReinforcementLearningParameters<T>>(&self.program.registers);
+            let mut c_action_state = get_action_state(
+                &mut parameters.environment,
+                &mut self.q_table,
+                &mut self.program,
+            )
+            .unwrap();
 
             for _step in 0..parameters.max_episode_length {
                 let state_reward_pair = parameters.environment.sim(c_action_state.action);
@@ -167,10 +184,20 @@ where
                     break;
                 }
 
-                self.program.exec(&parameters.environment);
-                let n_action_state = self
-                    .q_table
-                    .eval::<ReinforcementLearningParameters<T>>(&self.program.registers);
+                let n_action_state = match get_action_state(
+                    &mut parameters.environment,
+                    &mut self.q_table,
+                    &mut self.program,
+                ) {
+                    None => {
+                        return {
+                            let fitness = f64::NEG_INFINITY;
+                            self.program.fitness = Some(fitness);
+                            fitness
+                        }
+                    }
+                    Some(action_state) => action_state,
+                };
 
                 if c_action_state.register != n_action_state.register {
                     self.q_table.update(c_action_state, reward, n_action_state)

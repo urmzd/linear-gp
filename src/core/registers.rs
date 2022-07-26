@@ -32,7 +32,7 @@ impl Registers {
         Registers { data }
     }
 
-    pub fn all_argmax(&self, range: Option<Range<usize>>) -> Vec<usize> {
+    pub fn all_argmax(&self, range: Option<Range<usize>>) -> Option<Vec<usize>> {
         let Registers { data } = self;
         let range_to_use = range.unwrap_or(0..data.len());
         let sliced_data = &data[range_to_use];
@@ -42,6 +42,10 @@ impl Registers {
             .reduce(f64::max)
             .expect("Sliced values to not be of cardinality 0.");
 
+        if max_value.is_nan() {
+            return None;
+        }
+
         let max_indices = sliced_data
             .iter()
             .enumerate()
@@ -49,7 +53,7 @@ impl Registers {
             .map(|(i, _)| i)
             .collect_vec();
 
-        max_indices
+        Some(max_indices)
     }
 
     pub fn reset(&mut self) {
