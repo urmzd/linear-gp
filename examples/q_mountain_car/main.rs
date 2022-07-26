@@ -12,7 +12,7 @@ use lgp::{
     },
     extensions::{
         q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
-        reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters},
+        reinforcement_learning::{ReinforcementLearningParameters},
     },
     utils::random::generator,
 };
@@ -57,7 +57,7 @@ fn main() {
                 pops.push(population.clone());
                 Ok(())
             })
-            .with_on_post_fitness_params(&mut &mut |params| {
+            .with_on_post_fitness_params(&mut |params| {
                 println!("{:?}", params);
                 Ok(())
             }),

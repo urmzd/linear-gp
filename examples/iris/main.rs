@@ -40,12 +40,14 @@ mod tests {
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
+            characteristics::Fitness,
             instruction::InstructionGeneratorParameters,
             program::{Program, ProgramGeneratorParameters},
         },
         extensions::classification::ClassificationParameters,
         utils::plots::plot_population_benchmarks,
     };
+    use log::debug;
     use more_asserts::{assert_le, assert_lt};
     use pretty_assertions::{assert_eq, assert_ne};
     use std::error;
@@ -209,10 +211,18 @@ mod tests {
         let mut median: Option<u64> = None;
         let mut worst: Option<u64> = None;
 
+        let mut worst_f = None;
+        let mut median_f = None;
+        let mut best_f = None;
+
         IrisLgp::execute(
             &mut hyper_params,
             EventHooks::default().with_on_after_rank(&mut |population| {
                 populations.push(population.clone());
+
+                worst_f = population.last().and_then(|v| v.clone().get_fitness());
+                median_f = population.middle().and_then(|v| v.clone().get_fitness());
+                best_f = population.first().and_then(|v| v.clone().get_fitness());
 
                 worst = population
                     .last()
@@ -237,6 +247,24 @@ mod tests {
         // TODO: Pull the graph section out into a seperate function.
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/lgp_smoke_test.png";
         plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+
+        debug!(
+            "Total: Compare Worst to Median {:?}",
+            worst_f.unwrap().total_cmp(&median_f.unwrap())
+        );
+        debug!(
+            "Total: Compare Median to Best {:?}",
+            median_f.unwrap().total_cmp(&best_f.unwrap())
+        );
+
+        debug!(
+            "Partial: Compare Worst to Median {:?}",
+            worst_f.unwrap().partial_cmp(&median_f.unwrap())
+        );
+        debug!(
+            "Partial: Compare Median to Best {:?}",
+            median_f.unwrap().partial_cmp(&best_f.unwrap())
+        );
 
         if worst != median || median != best {
             // TODO: Create concrete error type; SNAFU or Failure?
