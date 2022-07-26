@@ -53,7 +53,3 @@ jobs:
           name: plots
           path: ./assets/tests/plots
           if-no-files-found: error
-      - uses: EndBug/add-and-commit@v9
-        with:
-          add: "assets/tests/plots"
-          pull: "--rebase --autostash"
