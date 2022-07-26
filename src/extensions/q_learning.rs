@@ -287,3 +287,13 @@ pub struct QConsts {
     /// Greedy selection.
     epsilon: f64,
 }
+
+impl Default for QConsts {
+    fn default() -> Self {
+        Self {
+            alpha: 0.25,
+            gamma: 0.125,
+            epsilon: 0.05,
+        }
+    }
+}
