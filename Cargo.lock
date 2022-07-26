@@ -594,10 +594,10 @@ dependencies = [
  "failure",
  "find_folder",
  "log",
- "nalgebra",
+ "nalgebra 0.31.0",
  "num",
  "num-traits",
- "ordered-float",
+ "ordered-float 3.0.0",
  "plotters",
  "pretty_env_logger",
  "rand",
@@ -846,6 +846,7 @@ dependencies = [
  "tempfile",
  "tokio",
  "toml",
+ "tpe",
 ]
 
 [[package]]
@@ -853,6 +854,12 @@ name = "libc"
 version = "0.2.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5916d2ae698f6de9bfb891ad7a8d65c09d232dc58cc4ac433c7da3b2fd84bc2b"
+
+[[package]]
+name = "libm"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33a33a362ce288760ec6a508b94caaec573ae7d3bbbd91b87aa0bad4456839db"
 
 [[package]]
 name = "lock_api"
@@ -938,6 +945,24 @@ checksum = "7843ec2de400bcbc6a6328c958dc38e5359da6e93e72e37bc5246bf1ae776389"
 
 [[package]]
 name = "nalgebra"
+version = "0.27.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "462fffe4002f4f2e1f6a9dcf12cc1a6fc0e15989014efc02a941d3e0f5dc2120"
+dependencies = [
+ "approx",
+ "matrixmultiply",
+ "nalgebra-macros",
+ "num-complex 0.4.1",
+ "num-rational 0.4.0",
+ "num-traits",
+ "rand",
+ "rand_distr",
+ "simba 0.5.1",
+ "typenum",
+]
+
+[[package]]
+name = "nalgebra"
 version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "18a89248335f688e4bd994e6d030fd7e185eb41769b8c435395075425e100ac6"
@@ -948,7 +973,7 @@ dependencies = [
  "num-complex 0.4.1",
  "num-rational 0.4.0",
  "num-traits",
- "simba",
+ "simba 0.7.1",
  "typenum",
 ]
 
@@ -1075,6 +1100,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "578ede34cf02f8924ab9447f50c28075b4d3e5b269972345e7e0372b38c6cdcd"
 dependencies = [
  "autocfg",
+ "libm",
 ]
 
 [[package]]
@@ -1145,6 +1171,15 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "ordered-float"
+version = "2.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7940cf2ca942593318d07fcf2596cdca60a85c9e7fab408a5e21a4f9dcd40d87"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -1394,6 +1429,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "rand_distr"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32cb0b9bc82b0a0876c2dd994a7e7a2683d3e7390ca40e6886785ef0c7e3ee31"
+dependencies = [
+ "num-traits",
+ "rand",
 ]
 
 [[package]]
@@ -1716,6 +1761,18 @@ dependencies = [
 
 [[package]]
 name = "simba"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e82063457853d00243beda9952e910b82593e4b07ae9f721b9278a99a0d3d5c"
+dependencies = [
+ "approx",
+ "num-complex 0.4.1",
+ "num-traits",
+ "paste",
+]
+
+[[package]]
+name = "simba"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13a2609e876d4f77f6ab7ff5254fc39b4f1927ba8e6db3d18be7c32534d3725e"
@@ -1747,6 +1804,19 @@ checksum = "ca642ba17f8b2995138b1d7711829c92e98c0a25ea019de790f4f09279c4e296"
 dependencies = [
  "libc",
  "windows-sys",
+]
+
+[[package]]
+name = "statrs"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05bdbb8e4e78216a85785a85d3ec3183144f98d0097b9281802c019bb07a6f05"
+dependencies = [
+ "approx",
+ "lazy_static",
+ "nalgebra 0.27.1",
+ "num-traits",
+ "rand",
 ]
 
 [[package]]
@@ -1953,6 +2023,19 @@ name = "tower-service"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "360dfd1d6d30e05fda32ace2c8c70e9c0a9da713275777f5a4dbb8a1893930c6"
+
+[[package]]
+name = "tpe"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01850406776cd3109d0ea1fc20d752c2074a3f0bd9266e14613c0b8b6085bfee"
+dependencies = [
+ "ordered-float 2.10.0",
+ "rand",
+ "rand_distr",
+ "statrs",
+ "thiserror",
+]
 
 [[package]]
 name = "tracing"
