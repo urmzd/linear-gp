@@ -23,6 +23,32 @@ jobs:
         with:
           add: "README.md"
 
+  run:
+    name: Execute Examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          default: true
+      - run: mkdir -p assets/tests/plots && ls
+      - run: xvfb-run cargo run --example=iris
+      - run: xvfb-run cargo run --example=mountain_car
+      - run: xvfb-run cargo run --example=q_mountain_car
+      - run: xvfb-run cargo run --example=cart_pole
+      - run: xvfb-run cargo run --example=q_cart_pole
+
   test:
     name: Execute Tests
     runs-on: ubuntu-latest
