@@ -33,10 +33,10 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 
     let mut hyper_params = HyperParameters {
         population_size: 100,
-        max_generations: 100,
+        n_generations: 100,
         gap: 0.5,
-        n_mutations: 50,
-        n_crossovers: 50,
+        mutation_percent: 0.5,
+        crossover_percent: 0.5,
         fitness_parameters: ClassificationParameters::new(inputs),
         program_parameters: ProgramGeneratorParameters::new(
             100,
@@ -72,9 +72,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut hyper_params = HyperParameters {
         population_size: 1,
         gap: 0.5,
-        n_crossovers: 0,
-        n_mutations: 0,
-        max_generations: 1,
+        crossover_percent: 0.,
+        mutation_percent: 0.,
+        n_generations: 1,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
         program_parameters: ProgramGeneratorParameters::new(
 ```
@@ -100,9 +100,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut hyper_params = HyperParameters {
         population_size: 1,
         gap: 0.5,
-        n_crossovers: 50,
-        n_mutations: 50,
-        max_generations: 1,
+        crossover_percent: 0.5,
+        mutation_percent: 0.5,
+        n_generations: 1,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
         program_parameters: ProgramGeneratorParameters::new(
 ```
