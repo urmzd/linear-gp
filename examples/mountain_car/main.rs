@@ -1,8 +1,8 @@
 use gym_rs::{
-    envs::classical_control::mountain_car::{MountainCarEnv, MountainCarObservation},
-    utils::{custom::Sample, renderer::RenderMode},
+    envs::classical_control::mountain_car::{MountainCarEnv},
+    utils::{renderer::RenderMode},
 };
-use itertools::Itertools;
+
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -12,7 +12,6 @@ use lgp::{
     extensions::{
         gym_rs::ExtendedGymRsEnvironment, reinforcement_learning::ReinforcementLearningParameters,
     },
-    utils::random::generator,
 };
 use set_up::{MountainCarInput, MountainCarLgp};
 
@@ -47,10 +46,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(test)]
 mod tests {
     use gym_rs::{
-        envs::classical_control::mountain_car::{MountainCarEnv, MountainCarObservation},
-        utils::{custom::Sample, renderer::RenderMode},
+        envs::classical_control::mountain_car::{MountainCarEnv},
+        utils::{renderer::RenderMode},
     };
-    use itertools::Itertools;
+    
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -61,7 +60,7 @@ mod tests {
             gym_rs::ExtendedGymRsEnvironment,
             reinforcement_learning::ReinforcementLearningParameters,
         },
-        utils::{plots::plot_population_benchmarks, random::generator},
+        utils::{plots::plot_population_benchmarks},
     };
 
     use crate::set_up::{MountainCarInput, MountainCarLgp};
