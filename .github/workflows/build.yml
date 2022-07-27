@@ -26,6 +26,9 @@ jobs:
   run:
     name: Execute Examples
     runs-on: ubuntu-latest
+    env:
+      RUST_BACKTRACE: 1 
+      RUST_LOG: debug
     steps:
       - run: sudo apt install libsdl2-gfx-dev xvfb -y
       - uses: actions/checkout@v2

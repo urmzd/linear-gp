@@ -21,6 +21,8 @@ use set_up::{MountainCarInput, QMountainCarLgp};
 mod set_up;
 
 fn main() -> VoidResultAnyError {
+    pretty_env_logger::init();
+
     let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut epsilon_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
@@ -92,12 +94,8 @@ fn main() -> VoidResultAnyError {
         epsilon_optim.tell(epsilon, result)?;
 
         debug!(
-            "Current - Fitness: {}, Alpha: {}, Gamma: {}, Epsilon: {}",
+            "Fitness: {}, Alpha: {}, Gamma: {}, Epsilon: {}",
             result, alpha, gamma, epsilon
-        );
-        debug!(
-            "Best So Far - Fitness: {}, Alpha: {}, Gamma: {}, Epsilon: {}",
-            best_result, best_alpha, best_gamma, best_epsilon
         );
         if result > best_result {
             best_alpha = alpha;
@@ -106,6 +104,10 @@ fn main() -> VoidResultAnyError {
             best_result = result;
         }
     }
+    debug!(
+        "Best -- Fitness: {}, Alpha: {}, Gamma: {}, Epsilon: {}",
+        best_result, best_alpha, best_gamma, best_epsilon
+    );
 
     Ok(())
 }
