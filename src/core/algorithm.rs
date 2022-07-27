@@ -180,23 +180,20 @@ where
         let mut population = Self::init_population(hyper_params);
 
         if let Some(hook) = hooks.on_post_init {
-            hook(&mut population);
+            hook(&mut population, &mut hyper_params);
         }
 
         let mut rank_step =
-            |population: &mut Population<Self::O>, params: &mut HyperParameters<Self::O>| -> () {
-                if let Some(hook) = hooks.on_pre_rank.as_mut() {
-                    hook(params);
-                }
-
+            |rank_population: &mut Population<Self::O>,
+             rank_hyper_params: &mut HyperParameters<Self::O>| {
                 Self::rank(
-                    population,
-                    &mut params.fitness_parameters,
-                    params.lazy_evaluate,
+                    rank_population,
+                    &mut rank_hyper_params.fitness_parameters,
+                    rank_hyper_params.lazy_evaluate,
                 );
 
                 if let Some(hook) = hooks.on_post_rank.as_mut() {
-                    hook(population)
+                    hook(rank_population, rank_hyper_params);
                 }
             };
 
@@ -205,7 +202,7 @@ where
 
             Self::apply_selection(&mut population, hyper_params.gap);
             if let Some(hook) = hooks.on_post_selection.as_mut() {
-                hook(&mut population);
+                hook(&mut population, &mut hyper_params);
             }
 
             Self::breed(
@@ -215,7 +212,7 @@ where
                 &hyper_params.program_parameters,
             );
             if let Some(hook) = hooks.on_post_breed.as_mut() {
-                hook(&mut population);
+                hook(&mut population, &mut hyper_params);
             }
         }
 
@@ -225,51 +222,45 @@ where
     }
 }
 
-pub type GpHook<'a, O> = &'a mut dyn FnMut(&mut O);
+pub type GpHook<'a, O> = &'a mut dyn FnMut(&mut Population<O>, &mut HyperParameters<O>);
 
 pub struct EventHooks<'a, O>
 where
     O: PartialOrd + Fitness + Mutate + Generate,
 {
-    pub on_post_init: Option<GpHook<'a, Population<O>>>,
-    pub on_post_rank: Option<GpHook<'a, Population<O>>>,
-    pub on_post_selection: Option<GpHook<'a, Population<O>>>,
-    pub on_post_breed: Option<GpHook<'a, Population<O>>>,
-    pub on_pre_rank: Option<GpHook<'a, HyperParameters<O>>>,
+    pub on_post_init: Option<GpHook<'a, O>>,
+    pub on_post_rank: Option<GpHook<'a, O>>,
+    pub on_post_selection: Option<GpHook<'a, O>>,
+    pub on_post_breed: Option<GpHook<'a, O>>,
+    pub on_pre_rank: Option<GpHook<'a, O>>,
 }
 
 impl<'a, O> EventHooks<'a, O>
 where
     O: PartialOrd + Clone + Fitness + Mutate + Generate,
 {
-    pub fn with_on_pre_rank(self, f: GpHook<'a, HyperParameters<O>>) -> Self {
-        Self {
-            on_pre_rank: Some(f),
-            ..self
-        }
-    }
-    pub fn with_on_post_init(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_init(self, f: GpHook<'a, O>) -> Self {
         Self {
             on_post_init: Some(f),
             ..self
         }
     }
 
-    pub fn with_on_post_selection(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_selection(self, f: GpHook<'a, O>) -> Self {
         Self {
             on_post_selection: Some(f),
             ..self
         }
     }
 
-    pub fn with_on_post_rank(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_rank(self, f: GpHook<'a, O>) -> Self {
         Self {
             on_post_rank: Some(f),
             ..self
         }
     }
 
-    pub fn with_on_post_breed(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_breed(self, f: GpHook<'a, O>) -> Self {
         Self {
             on_post_breed: Some(f),
             ..self
@@ -339,16 +330,16 @@ mod tests {
         TestLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_on_post_init(&mut |_p| {
+                .with_on_post_init(&mut |_, _| {
                     received.borrow_mut().push(1);
                 })
-                .with_on_post_rank(&mut |_p| {
+                .with_on_post_rank(&mut |_, _| {
                     received.borrow_mut().push(2);
                 })
-                .with_on_post_selection(&mut |_p| {
+                .with_on_post_selection(&mut |_, _| {
                     received.borrow_mut().push(3);
                 })
-                .with_on_post_breed(&mut |_p| {
+                .with_on_post_breed(&mut |_, _| {
                     received.borrow_mut().push(4);
                 }),
         )?;

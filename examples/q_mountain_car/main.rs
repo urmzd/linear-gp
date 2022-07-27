@@ -11,6 +11,7 @@ use lgp::{
         program::ProgramGeneratorParameters,
     },
     extensions::{
+        gym_rs::ExtendedGymRsEnvironment,
         q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
     },
@@ -31,17 +32,8 @@ fn main() -> VoidResultAnyError {
     let environment = MountainCarInput::new(game);
 
     let n_generations = 100;
-    let initial_states = (vec![0..n_generations])
-        .iter()
-        .map(|_| {
-            (vec![0; 5])
-                .into_iter()
-                .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
-                .collect_vec()
-        })
-        .collect_vec();
-
-    let mut parameter_cycle = initial_states.iter().cycle();
+    let n_trials = 5;
+    let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
 
     let mut best_alpha = 0.25;
     let mut best_gamma = 0.5;
@@ -53,11 +45,8 @@ fn main() -> VoidResultAnyError {
         let gamma = gamma_optim.ask(&mut generator())?;
         let epsilon = epsilon_optim.ask(&mut generator())?;
 
-        let parameters = ReinforcementLearningParameters::new(
-            parameter_cycle.next().unwrap().clone(),
-            200,
-            environment.clone(),
-        );
+        let parameters =
+            ReinforcementLearningParameters::new(initial_states.clone(), 200, environment.clone());
 
         let mut hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
             population_size: 10,
@@ -78,10 +67,8 @@ fn main() -> VoidResultAnyError {
 
         let population = QMountainCarLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_pre_rank(&mut |params| {
-                params
-                    .fitness_parameters
-                    .update(parameter_cycle.next().unwrap().clone());
+            EventHooks::default().with_on_post_rank(&mut |_, params| {
+                params.fitness_parameters.next_generation();
             }),
         )?;
         let result = population
@@ -126,6 +113,7 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::{
+            gym_rs::ExtendedGymRsEnvironment,
             q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
             reinforcement_learning::ReinforcementLearningParameters,
         },
@@ -139,21 +127,17 @@ mod tests {
     ) -> VoidResultAnyError {
         let game = MountainCarEnv::new(RenderMode::None, None);
         let environment = MountainCarInput::new(game);
-        let parameters = ReinforcementLearningParameters::new(
-            (vec![0; 5])
-                .into_iter()
-                .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
-                .collect_vec(),
-            200,
-            environment,
-        );
+        let n_generations = 100;
+        let n_trials = 5;
+        let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
+        let parameters = ReinforcementLearningParameters::new(initial_states, 200, environment);
 
         let mut hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
             population_size: 100,
             gap: 0.5,
             mutation_percent: 0.5,
             crossover_percent: 0.5,
-            n_generations: 100,
+            n_generations: n_generations,
             lazy_evaluate: false,
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
@@ -169,7 +153,8 @@ mod tests {
 
         QMountainCarLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population, params| {
+                params.fitness_parameters.next_generation();
                 pops.push(population.clone());
             }),
         )?;

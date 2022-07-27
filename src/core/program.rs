@@ -99,14 +99,10 @@ impl<T> Mutate for Program<T> {
 
 impl<T> Breed for Program<T> {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
-        let [child_a_instructions, child_b_instructions] =
-            self.instructions.two_point_crossover(&mate.instructions);
+        let child_instructions = self.instructions.two_point_crossover(&mate.instructions);
 
-        let program_a = Program::new(child_a_instructions, self.registers.duplicate_new(), None);
-
-        let program_b = Program::new(child_b_instructions, self.registers.duplicate_new(), None);
-
-        [program_a, program_b]
+        child_instructions
+            .map(|instructions| Program::new(instructions, self.registers.duplicate_new(), None))
     }
 }
 

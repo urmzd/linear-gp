@@ -161,10 +161,10 @@ where
 
         let mut scores = vec![];
         // TODO: Call init and finish after `rank`
-        for state in &parameters.initial_states {
+        for state in parameters.get_state().clone() {
             // INIT STEPS.
             let mut score = 0.;
-            parameters.environment.update_state(state.clone());
+            parameters.environment.update_state(state);
 
             let mut c_action_state = get_action_state(
                 &mut parameters.environment,
