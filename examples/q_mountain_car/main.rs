@@ -1,8 +1,8 @@
 use gym_rs::{
-    envs::classical_control::mountain_car::{MountainCarEnv, MountainCarObservation},
-    utils::{custom::Sample, renderer::RenderMode},
+    envs::classical_control::mountain_car::{MountainCarEnv},
+    utils::{renderer::RenderMode},
 };
-use itertools::Itertools;
+
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -102,10 +102,10 @@ fn main() -> VoidResultAnyError {
 #[cfg(test)]
 mod tests {
     use gym_rs::{
-        envs::classical_control::mountain_car::{MountainCarEnv, MountainCarObservation},
-        utils::{custom::Sample, renderer::RenderMode},
+        envs::classical_control::mountain_car::{MountainCarEnv},
+        utils::{renderer::RenderMode},
     };
-    use itertools::Itertools;
+    
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -117,7 +117,7 @@ mod tests {
             q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
             reinforcement_learning::ReinforcementLearningParameters,
         },
-        utils::{plots::plot_population_benchmarks, random::generator, types::VoidResultAnyError},
+        utils::{plots::plot_population_benchmarks, types::VoidResultAnyError},
     };
 
     use crate::set_up::{MountainCarInput, QMountainCarLgp};
