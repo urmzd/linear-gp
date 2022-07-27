@@ -83,7 +83,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
             }),
         )?;
@@ -121,7 +121,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
             }),
         )?;
@@ -159,7 +159,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
             }),
         )?;
@@ -206,7 +206,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
 
                 worst_f = population.last().and_then(|v| v.clone().get_fitness());

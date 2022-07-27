@@ -10,6 +10,7 @@ use lgp::{
         program::ProgramGeneratorParameters,
     },
     extensions::{
+        gym_rs::ExtendedGymRsEnvironment,
         q_learning::{QConsts, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
     },
@@ -22,10 +23,9 @@ mod set_up;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let environment = CartPoleEnv::new(RenderMode::Human);
     let input = CartPoleInput::new(environment);
-    let initial_states = (vec![0; 5])
-        .into_iter()
-        .map(|_| CartPoleObservation::sample_between(&mut generator(), None))
-        .collect_vec();
+    let n_generations = 1;
+    let n_trials = 5;
+    let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
     let mut hyper_params = HyperParameters {
         population_size: 1,
@@ -65,6 +65,7 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::{
+            gym_rs::ExtendedGymRsEnvironment,
             q_learning::{QConsts, QProgramGeneratorParameters},
             reinforcement_learning::ReinforcementLearningParameters,
         },
@@ -78,10 +79,9 @@ mod tests {
     {
         let environment = CartPoleEnv::new(RenderMode::None);
         let input = CartPoleInput::new(environment);
-        let initial_states = (vec![0; 5])
-            .into_iter()
-            .map(|_| CartPoleObservation::sample_between(&mut generator(), None))
-            .collect_vec();
+        let n_generations = 1;
+        let n_trials = 5;
+        let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
         let mut hyper_params = HyperParameters {
             population_size: 10,
@@ -89,7 +89,7 @@ mod tests {
             crossover_percent: 0.,
             mutation_percent: 1.,
             lazy_evaluate: true,
-            n_generations: 100,
+            n_generations,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
@@ -104,16 +104,10 @@ mod tests {
 
         QCartPoleLgp::execute(
             &mut hyper_params,
-            EventHooks::default()
-                .with_on_post_rank(&mut |population| populations.push(population.clone()))
-                .with_on_pre_rank(&mut |params| {
-                    params.fitness_parameters.update(
-                        (vec![0; 5])
-                            .into_iter()
-                            .map(|_| CartPoleObservation::sample_between(&mut generator(), None))
-                            .collect_vec(),
-                    );
-                }),
+            EventHooks::default().with_on_post_rank(&mut |population, params| {
+                populations.push(population.clone());
+                params.fitness_parameters.next_generation()
+            }),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "assets/tests/plots/q_cart_pole.png";

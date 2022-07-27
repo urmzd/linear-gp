@@ -14,17 +14,23 @@ pub struct ReinforcementLearningParameters<T>
 where
     T: ReinforcementLearningInput,
 {
-    pub initial_states: Vec<T::State>,
+    initial_states: Vec<Vec<T::State>>,
     pub max_episode_length: usize,
     pub environment: T,
+    #[new(value = "0")]
+    generations: usize,
 }
 
 impl<T> ReinforcementLearningParameters<T>
 where
     T: ReinforcementLearningInput,
 {
-    pub fn update(&mut self, states: Vec<T::State>) {
-        self.initial_states = states;
+    pub fn get_state(&self) -> &Vec<T::State> {
+        self.initial_states.get(self.generations).unwrap()
+    }
+
+    pub fn next_generation(&mut self) {
+        self.generations += 1;
     }
 }
 
@@ -78,7 +84,7 @@ where
 
         parameters.environment.init();
 
-        for initial_state in parameters.initial_states.clone() {
+        for initial_state in parameters.get_state().clone() {
             let mut score = 0.;
 
             parameters.environment.update_state(initial_state);
