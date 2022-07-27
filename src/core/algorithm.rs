@@ -8,7 +8,7 @@ use serde::de::DeserializeOwned;
 
 use crate::{
     core::characteristics::{Breed, Fitness, Generate},
-    utils::{random::generator, types::VoidResultAnyError},
+    utils::random::generator,
 };
 
 use super::{
@@ -17,10 +17,10 @@ use super::{
     population::Population,
 };
 
-#[derive(Debug)]
-pub struct HyperParameters<OrganismType>
+#[derive(Debug, Clone)]
+pub struct HyperParameters<T>
 where
-    OrganismType: Fitness + Mutate + Generate,
+    T: Fitness + Mutate + Generate,
 {
     pub population_size: usize,
     pub gap: f64,
@@ -28,8 +28,8 @@ where
     pub crossover_percent: f64,
     pub n_generations: usize,
     pub lazy_evaluate: bool,
-    pub fitness_parameters: OrganismType::FitnessParameters,
-    pub program_parameters: OrganismType::GeneratorParameters,
+    pub fitness_parameters: T::FitnessParameters,
+    pub program_parameters: T::GeneratorParameters,
 }
 
 pub trait Loader
@@ -59,12 +59,6 @@ where
     Self::O: Fitness + Generate + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug,
 {
     type O;
-
-    /// Prevent errors from being thrown when "multple" initializations occur.
-    /// TODO: Remove monkey patch.
-    fn init_env() -> () {
-        pretty_env_logger::try_init().unwrap_or(());
-    }
 
     fn init_population(hyper_params: &HyperParameters<Self::O>) -> Population<Self::O> {
         let mut population = Population::with_capacity(hyper_params.population_size);
@@ -180,50 +174,38 @@ where
     }
 
     fn execute<'b>(
-        hyper_params: &mut HyperParameters<Self::O>,
+        mut hyper_params: &mut HyperParameters<Self::O>,
         mut hooks: EventHooks<'b, Self::O>,
     ) -> Result<Population<Self::O>, Box<dyn std::error::Error>> {
-        Self::init_env();
-
-        let EventHooks {
-            on_post_init: after_init,
-            on_post_rank: after_rank,
-            on_post_selection: after_selection,
-            on_post_breed: after_breed,
-            on_post_fitness_params: on_fitness_params_received,
-            ..
-        } = &mut hooks;
-
         let mut population = Self::init_population(hyper_params);
 
-        if let Some(hook) = after_init {
-            (hook)(&mut population)?;
+        if let Some(hook) = hooks.on_post_init {
+            hook(&mut population);
         }
 
-        let mut rank_step = |pop: &mut Population<Self::O>| -> VoidResultAnyError {
-            if let Some(hook) = on_fitness_params_received {
-                (hook)(&mut hyper_params.fitness_parameters)?
-            }
+        let mut rank_step =
+            |population: &mut Population<Self::O>, params: &mut HyperParameters<Self::O>| -> () {
+                if let Some(hook) = hooks.on_pre_rank.as_mut() {
+                    hook(params);
+                }
 
-            Self::rank(
-                pop,
-                &mut hyper_params.fitness_parameters,
-                hyper_params.lazy_evaluate,
-            );
+                Self::rank(
+                    population,
+                    &mut params.fitness_parameters,
+                    params.lazy_evaluate,
+                );
 
-            if let Some(hook) = after_rank {
-                (hook)(pop)?
-            }
-
-            Ok(())
-        };
+                if let Some(hook) = hooks.on_post_rank.as_mut() {
+                    hook(population)
+                }
+            };
 
         for _generation in 0..hyper_params.n_generations {
-            rank_step(&mut population)?;
+            rank_step(&mut population, &mut hyper_params);
 
             Self::apply_selection(&mut population, hyper_params.gap);
-            if let Some(hook) = after_selection {
-                (hook)(&mut population)?;
+            if let Some(hook) = hooks.on_post_selection.as_mut() {
+                hook(&mut population);
             }
 
             Self::breed(
@@ -232,37 +214,37 @@ where
                 hyper_params.crossover_percent,
                 &hyper_params.program_parameters,
             );
-            if let Some(hook) = after_breed {
-                (hook)(&mut population)?;
+            if let Some(hook) = hooks.on_post_breed.as_mut() {
+                hook(&mut population);
             }
         }
 
-        rank_step(&mut population)?;
+        rank_step(&mut population, &mut hyper_params);
 
         Ok(population)
     }
 }
 
-pub type GpHook<'a, O> = &'a mut dyn FnMut(&mut O) -> VoidResultAnyError;
+pub type GpHook<'a, O> = &'a mut dyn FnMut(&mut O);
 
 pub struct EventHooks<'a, O>
 where
-    O: PartialOrd + Clone + Fitness,
+    O: PartialOrd + Fitness + Mutate + Generate,
 {
     pub on_post_init: Option<GpHook<'a, Population<O>>>,
     pub on_post_rank: Option<GpHook<'a, Population<O>>>,
     pub on_post_selection: Option<GpHook<'a, Population<O>>>,
     pub on_post_breed: Option<GpHook<'a, Population<O>>>,
-    pub on_post_fitness_params: Option<GpHook<'a, O::FitnessParameters>>,
+    pub on_pre_rank: Option<GpHook<'a, HyperParameters<O>>>,
 }
 
 impl<'a, O> EventHooks<'a, O>
 where
-    O: PartialOrd + Clone + Fitness,
+    O: PartialOrd + Clone + Fitness + Mutate + Generate,
 {
-    pub fn with_on_post_fitness_params(self, f: GpHook<'a, O::FitnessParameters>) -> Self {
+    pub fn with_on_pre_rank(self, f: GpHook<'a, HyperParameters<O>>) -> Self {
         Self {
-            on_post_fitness_params: Some(f),
+            on_pre_rank: Some(f),
             ..self
         }
     }
@@ -280,14 +262,14 @@ where
         }
     }
 
-    pub fn with_on_after_rank(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_rank(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
             on_post_rank: Some(f),
             ..self
         }
     }
 
-    pub fn with_on_after_breed(self, f: GpHook<'a, Population<O>>) -> Self {
+    pub fn with_on_post_breed(self, f: GpHook<'a, Population<O>>) -> Self {
         Self {
             on_post_breed: Some(f),
             ..self
@@ -297,16 +279,16 @@ where
 
 impl<'a, O> fmt::Debug for EventHooks<'a, O>
 where
-    O: PartialOrd + Clone + Fitness,
+    O: PartialOrd + Fitness + Mutate + Generate,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("EventHooks").finish()
     }
 }
 
-impl<'a, O> Default for EventHooks<'a, O>
+impl<O> Default for EventHooks<'_, O>
 where
-    O: PartialOrd + Clone + Fitness,
+    O: PartialOrd + Clone + Fitness + Mutate + Generate,
 {
     fn default() -> Self {
         Self {
@@ -314,7 +296,7 @@ where
             on_post_rank: None,
             on_post_selection: None,
             on_post_breed: None,
-            on_post_fitness_params: None,
+            on_pre_rank: None,
         }
     }
 }
@@ -359,19 +341,15 @@ mod tests {
             EventHooks::default()
                 .with_on_post_init(&mut |_p| {
                     received.borrow_mut().push(1);
-                    Ok(())
                 })
-                .with_on_after_rank(&mut |_p| {
+                .with_on_post_rank(&mut |_p| {
                     received.borrow_mut().push(2);
-                    Ok(())
                 })
                 .with_on_post_selection(&mut |_p| {
                     received.borrow_mut().push(3);
-                    Ok(())
                 })
-                .with_on_after_breed(&mut |_p| {
+                .with_on_post_breed(&mut |_p| {
                     received.borrow_mut().push(4);
-                    Ok(())
                 }),
         )?;
 

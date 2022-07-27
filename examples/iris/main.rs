@@ -58,8 +58,6 @@ mod tests {
     #[tokio::test]
     async fn given_lgp_instance_with_mutation_and_crossover_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_median_and_best_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
-        IrisLgp::init_env();
-
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_inputs(tmp_file.path());
 
@@ -85,9 +83,8 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_after_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population| {
                 populations.push(population.clone());
-                Ok(())
             }),
         )?;
 
@@ -99,8 +96,6 @@ mod tests {
     #[tokio::test]
     async fn given_lgp_instance_with_mutation_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_median_and_best_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
-        IrisLgp::init_env();
-
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_inputs(tmp_file.path());
 
@@ -126,9 +121,8 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_after_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population| {
                 populations.push(population.clone());
-                Ok(())
             }),
         )?;
 
@@ -140,8 +134,6 @@ mod tests {
     #[tokio::test]
     async fn given_lgp_instance_with_crossover_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_worst_and_median_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
-        IrisLgp::init_env();
-
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_inputs(tmp_file.path());
 
@@ -167,9 +159,8 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_after_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population| {
                 populations.push(population.clone());
-                Ok(())
             }),
         )?;
 
@@ -182,8 +173,6 @@ mod tests {
     #[tokio::test]
     async fn given_lgp_instance_when_sufficient_iterations_have_been_used_then_population_contains_the_same_benchmark_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
-        IrisLgp::init_env();
-
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_inputs(tmp_file.path());
 
@@ -217,7 +206,7 @@ mod tests {
 
         IrisLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_after_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population| {
                 populations.push(population.clone());
 
                 worst_f = population.last().and_then(|v| v.clone().get_fitness());
@@ -239,8 +228,6 @@ mod tests {
                     .map(|v| v.clone())
                     .and_then(|v| v.fitness)
                     .map(|x| x.to_bits());
-
-                Ok(())
             }),
         )?;
 
