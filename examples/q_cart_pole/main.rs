@@ -105,20 +105,15 @@ mod tests {
         QCartPoleLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone())))
-                .with_on_post_fitness_params(
-                    &mut &mut |params: &mut ReinforcementLearningParameters<CartPoleInput>| {
-                        params.update(
-                            (vec![0; 5])
-                                .into_iter()
-                                .map(|_| {
-                                    CartPoleObservation::sample_between(&mut generator(), None)
-                                })
-                                .collect_vec(),
-                        );
-                        Ok(())
-                    },
-                ),
+                .with_on_post_rank(&mut |population| populations.push(population.clone()))
+                .with_on_pre_rank(&mut |params| {
+                    params.fitness_parameters.update(
+                        (vec![0; 5])
+                            .into_iter()
+                            .map(|_| CartPoleObservation::sample_between(&mut generator(), None))
+                            .collect_vec(),
+                    );
+                }),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "assets/tests/plots/q_cart_pole.png";

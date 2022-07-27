@@ -7,7 +7,6 @@ use rand::{
     distributions::Uniform,
     prelude::{Distribution, IteratorRandom},
 };
-use serde::Serialize;
 
 use super::{
     characteristics::{Breed, DuplicateNew, Generate, Mutate},
@@ -16,7 +15,7 @@ use super::{
     instructions::Instructions,
     registers::Registers,
 };
-#[derive(Clone, Debug, Serialize, new)]
+#[derive(Clone, Debug, new)]
 pub struct ProgramGeneratorParameters {
     pub max_instructions: usize,
     pub instruction_generator_parameters: InstructionGeneratorParameters,

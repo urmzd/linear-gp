@@ -65,8 +65,6 @@ mod tests {
     #[test]
     fn given_mountain_car_example_when_lgp_executed_then_task_is_solved(
     ) -> Result<(), Box<dyn std::error::Error>> {
-        MountainCarLgp::init_env();
-
         let environment = MountainCarEnv::new(RenderMode::None, None);
         let input = MountainCarInput::new(environment);
         let initial_states = (vec![0; 5])
@@ -93,21 +91,15 @@ mod tests {
         MountainCarLgp::execute(
             &mut hyper_params,
             EventHooks::default()
-                .with_on_after_rank(&mut |population| Ok(populations.push(population.clone())))
-                .with_on_post_fitness_params(
-                    &mut &mut |params: &mut ReinforcementLearningParameters<MountainCarInput>| {
-                        params.update(
-                            (vec![0; 5])
-                                .into_iter()
-                                .map(|_| {
-                                    MountainCarObservation::sample_between(&mut generator(), None)
-                                })
-                                .collect_vec(),
-                        );
-
-                        Ok(())
-                    },
-                ),
+                .with_on_post_rank(&mut |population| populations.push(population.clone()))
+                .with_on_pre_rank(&mut |params| {
+                    params.fitness_parameters.update(
+                        (vec![0; 5])
+                            .into_iter()
+                            .map(|_| MountainCarObservation::sample_between(&mut generator(), None))
+                            .collect_vec(),
+                    );
+                }),
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/mountain_car.png";

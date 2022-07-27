@@ -76,12 +76,11 @@ fn main() -> VoidResultAnyError {
 
         let population = QMountainCarLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_post_fitness_params(
-                &mut &mut |params: &mut ReinforcementLearningParameters<MountainCarInput>| {
-                    params.update(parameter_cycle.next().unwrap().clone());
-                    Ok(())
-                },
-            ),
+            EventHooks::default().with_on_pre_rank(&mut |params| {
+                params
+                    .fitness_parameters
+                    .update(parameter_cycle.next().unwrap().clone());
+            }),
         )?;
         let result = population
             .first()
@@ -93,11 +92,11 @@ fn main() -> VoidResultAnyError {
         epsilon_optim.tell(epsilon, result)?;
 
         debug!(
-            "Current - Fitness: {:.32}, Alpha: {:.32}, Gamma: {:.32}, Epsilon: {:.32}",
+            "Current - Fitness: {}, Alpha: {}, Gamma: {}, Epsilon: {}",
             result, alpha, gamma, epsilon
         );
         debug!(
-            "Best So Far - Fitness: {:.32}, Alpha: {:.32}, Gamma: {:.32}, Epsilon: {:.32}",
+            "Best So Far - Fitness: {}, Alpha: {}, Gamma: {}, Epsilon: {}",
             best_result, best_alpha, best_gamma, best_epsilon
         );
         if result > best_result {
@@ -168,9 +167,8 @@ mod tests {
 
         QMountainCarLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_after_rank(&mut |population| {
+            EventHooks::default().with_on_post_rank(&mut |population| {
                 pops.push(population.clone());
-                Ok(())
             }),
         )?;
 
