@@ -99,13 +99,26 @@ where
         let mut n_of_individuals_to_drop =
             pop_len - ((1.0 - gap) * (pop_len as f64)).floor() as usize;
 
-        while let Some(FitnessScore::OutOfBounds) = population.pop().map(|v| v.get_fitness()) {
-            n_of_individuals_to_drop -= 1;
+        loop {
+            if population.last().is_some() {
+                if population
+                    .last()
+                    .map(|v| v.get_fitness().is_invalid())
+                    .unwrap()
+                {
+                    population.pop();
+                    n_of_individuals_to_drop -= 1;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
         }
 
         while n_of_individuals_to_drop > 0 {
-            population.pop();
             n_of_individuals_to_drop -= 1;
+            population.pop();
         }
     }
 

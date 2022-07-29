@@ -208,13 +208,18 @@ mod tests {
             EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
 
-                worst_f = population.last().get_fitness();
-                median_f = population.middle().get_fitness();
-                best_f = population.first().get_fitness();
+                worst_f = population.last().unwrap().get_fitness();
+                median_f = population.middle().unwrap().get_fitness();
+                best_f = population.first().unwrap().get_fitness();
 
-                worst = population.last().get_fitness().unwrap().to_bits();
-                median = population.middle().get_fitness().unwrap().to_bits();
-                best = population.first().get_fitness().unwrap().to_bits();
+                worst = population.last().unwrap().get_fitness().unwrap().to_bits();
+                median = population
+                    .middle()
+                    .unwrap()
+                    .get_fitness()
+                    .unwrap()
+                    .to_bits();
+                best = population.first().unwrap().get_fitness().unwrap().to_bits();
             }),
         )?;
 
