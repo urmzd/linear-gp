@@ -77,10 +77,10 @@ mod tests {
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
         let mut hyper_params = HyperParameters {
-            population_size: 10,
+            population_size: 100,
             gap: 0.5,
-            crossover_percent: 0.,
-            mutation_percent: 1.,
+            crossover_percent: 0.5,
+            mutation_percent: 0.5,
             lazy_evaluate: true,
             n_generations,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
@@ -116,10 +116,10 @@ mod tests {
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
         let mut hyper_params = HyperParameters {
-            population_size: 10,
+            population_size: 100,
             gap: 0.5,
-            crossover_percent: 0.,
-            mutation_percent: 1.,
+            crossover_percent: 0.5,
+            mutation_percent: 0.5,
             lazy_evaluate: true,
             n_generations,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),

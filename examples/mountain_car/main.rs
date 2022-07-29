@@ -65,6 +65,7 @@ mod tests {
         },
         utils::{plots::plot_population_benchmarks, types::VoidResultAnyError},
     };
+    use log::debug;
 
     use crate::set_up::{MountainCarInput, MountainCarLgp, QMountainCarLgp};
 
@@ -138,6 +139,7 @@ mod tests {
         QMountainCarLgp::execute(
             &mut hyper_params,
             EventHooks::default().with_on_post_rank(&mut |population, params| {
+                debug!("{:?}", population);
                 params.fitness_parameters.next_generation();
                 pops.push(population.clone());
             }),
