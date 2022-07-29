@@ -327,6 +327,7 @@ mod tests {
             ),
         };
 
+        // TODO: Add prerank.
         TestLgp::execute(
             &mut hyper_params,
             EventHooks::default()
