@@ -7,7 +7,7 @@ use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
 
 use crate::{
-    core::characteristics::{Breed, Fitness, FitnessScore, Generate},
+    core::characteristics::{Breed, Fitness, Generate},
     utils::random::generator,
 };
 
