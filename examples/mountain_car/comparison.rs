@@ -80,10 +80,10 @@ fn main() -> VoidResultAnyError {
         }),
     )?;
 
-    const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/mountain_car.png";
+    const PLOT_FILE_NAME: &'static str = "plots/comparisons/mountain_car.png";
     plot_population_benchmarks(lgp_pops, PLOT_FILE_NAME, -200.0..0.0)?;
 
-    const Q_PLOT_FILE_NAME: &'static str = "./assets/tests/plots/mountain_car.png";
+    const Q_PLOT_FILE_NAME: &'static str = "plots/comparisons/q_mountain_car.png";
     plot_population_benchmarks(q_pops, Q_PLOT_FILE_NAME, -200.0..0.0)?;
     Ok(())
 }

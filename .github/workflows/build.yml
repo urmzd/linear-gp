@@ -46,12 +46,16 @@ jobs:
           toolchain: stable
           override: true
           default: true
-      - run: mkdir -p assets/tests/plots && ls
+      - run: mkdir -p plots/comparisons
       - run: xvfb-run cargo run --example=iris
       - run: xvfb-run cargo run --example=mountain_car
-      - run: xvfb-run cargo run --example=q_mountain_car
       - run: xvfb-run cargo run --example=cart_pole
-      - run: xvfb-run cargo run --example=q_cart_pole
+      - run: xvfb-run cargo run --example=mountain_car_comparison
+      - uses: actions/upload-artifact@v3
+        with:
+          name: comparison_plots
+          path: plots/comparisons
+          if-no-files-found: error
 
   test:
     name: Execute Tests
@@ -76,10 +80,10 @@ jobs:
           toolchain: stable
           override: true
           default: true
-      - run: mkdir -p assets/tests/plots && ls
+      - run: mkdir -p plots/tests
       - run: xvfb-run cargo test --no-fail-fast
       - uses: actions/upload-artifact@v3
         with:
-          name: plots
-          path: assets/tests/plots
+          name: test_plots
+          path: plots/tests
           if-no-files-found: error
