@@ -45,8 +45,11 @@ where
             let median = population.middle();
             let worst = population.last();
 
-            let benchmark = [best, median, worst]
-                .map(|quantile| quantile.get_fitness().unwrap_or(y_range.start));
+            let benchmark = [best, median, worst].map(|quantile| {
+                quantile
+                    .map(|v| v.get_fitness().unwrap_or(y_range.start))
+                    .expect("Population should not be empty.")
+            });
 
             benchmark
         })
