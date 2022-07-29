@@ -7,7 +7,7 @@ use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
 
 use crate::{
-    core::characteristics::{Breed, Fitness, Generate},
+    core::characteristics::{Breed, Fitness, FitnessScore, Generate},
     utils::random::generator,
 };
 
@@ -96,11 +96,16 @@ where
 
         let pop_len = population.len();
 
-        let number_of_individuals_dropped =
+        let mut n_of_individuals_to_drop =
             pop_len - ((1.0 - gap) * (pop_len as f64)).floor() as usize;
 
-        for _ in 0..number_of_individuals_dropped {
+        while let Some(FitnessScore::OutOfBounds) = population.pop().map(|v| v.get_fitness()) {
+            n_of_individuals_to_drop -= 1;
+        }
+
+        while n_of_individuals_to_drop > 0 {
             population.pop();
+            n_of_individuals_to_drop -= 1;
         }
     }
 
