@@ -5,7 +5,11 @@ use rand::prelude::SliceRandom;
 use serde::Serialize;
 
 use crate::{
-    core::{characteristics::Fitness, inputs::ValidInput, program::Program},
+    core::{
+        characteristics::{Fitness, FitnessScore},
+        inputs::ValidInput,
+        program::Program,
+    },
     utils::random::generator,
 };
 
@@ -97,7 +101,7 @@ where
                     match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
                         None => {
                             return {
-                                self.fitness = None;
+                                self.fitness = FitnessScore::NotEvaluated;
                             }
                         }
                         Some(registers) => registers,
@@ -125,10 +129,10 @@ where
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let median = scores.swap_remove(scores.len() / 2);
 
-        self.fitness = Some(median);
+        self.fitness = FitnessScore::Valid(median);
     }
 
-    fn get_fitness(&self) -> Option<f64> {
+    fn get_fitness(&self) -> FitnessScore {
         self.fitness
     }
 }

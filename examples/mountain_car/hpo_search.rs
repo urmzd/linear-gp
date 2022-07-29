@@ -68,10 +68,7 @@ fn main() -> VoidResultAnyError {
                 params.fitness_parameters.next_generation();
             }),
         )?;
-        let result = population
-            .first()
-            .and_then(|r| r.get_fitness())
-            .unwrap_or(-200.);
+        let result = population.first().get_fitness().unwrap_or(-200.);
 
         alpha_optim.tell(alpha, result)?;
         gamma_optim.tell(gamma, result)?;

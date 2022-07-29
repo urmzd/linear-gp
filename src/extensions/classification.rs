@@ -2,7 +2,7 @@ use derive_new::new;
 use serde::Serialize;
 
 use crate::core::{
-    characteristics::Fitness,
+    characteristics::{Fitness, FitnessScore},
     inputs::{Inputs, ValidInput},
     program::Program,
 };
@@ -37,7 +37,7 @@ where
                 match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
                     None => {
                         return {
-                            self.fitness = None;
+                            self.fitness = FitnessScore::OutOfBounds;
                         }
                     }
                     Some(registers) => registers,
@@ -60,10 +60,10 @@ where
 
         let fitness = n_correct / inputs.len() as f64;
 
-        self.fitness = Some(fitness);
+        self.fitness = FitnessScore::Valid(fitness);
     }
 
-    fn get_fitness(&self) -> Option<f64> {
+    fn get_fitness(&self) -> FitnessScore {
         self.fitness
     }
 }

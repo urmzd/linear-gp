@@ -7,7 +7,7 @@ use plotters::{
 
 use crate::core::{characteristics::Fitness, population::Population};
 
-pub fn plot_population_benchmarks<T>(
+pub fn plot_benchmarks<T>(
     populations: Vec<Population<T>>,
     plot_path: &str,
     y_range: Range<f64>,
@@ -46,7 +46,7 @@ where
             let worst = population.last();
 
             let benchmark = [best, median, worst]
-                .map(|quantile| quantile.unwrap().get_fitness().unwrap_or(y_range.start));
+                .map(|quantile| quantile.get_fitness().unwrap_or(y_range.start));
 
             benchmark
         })

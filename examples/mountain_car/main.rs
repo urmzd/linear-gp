@@ -63,7 +63,7 @@ mod tests {
             q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
             reinforcement_learning::ReinforcementLearningParameters,
         },
-        utils::{plots::plot_population_benchmarks, types::VoidResultAnyError},
+        utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
     use log::debug;
 
@@ -103,7 +103,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "plots/tests/mountain_car.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
+        plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
         Ok(())
     }
 
@@ -146,7 +146,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "plots/tests/q_mountain_car.png";
-        plot_population_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;
+        plot_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;
         Ok(())
     }
 }
