@@ -1,18 +1,23 @@
 use derive_new::new;
 use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
+use lgp::core::program::Program;
+use lgp::core::{algorithm::GeneticAlgorithm, inputs::ValidInput};
 use lgp::extensions::gym_rs::ExtendedGymRsEnvironment;
-use lgp::{
-    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
-    extensions::reinforcement_learning::ReinforcementLearningParameters,
-};
+use lgp::extensions::q_learning::QProgram;
+use lgp::extensions::reinforcement_learning::ReinforcementLearningParameters;
 use serde::Serialize;
+
+pub struct QMountainCarLgp;
+
+impl GeneticAlgorithm for QMountainCarLgp {
+    type O = QProgram<MountainCarInput>;
+}
 
 pub struct MountainCarLgp;
 
 impl GeneticAlgorithm for MountainCarLgp {
     type O = Program<ReinforcementLearningParameters<MountainCarInput>>;
 }
-
 #[derive(Debug, Serialize, new, Clone)]
 pub struct MountainCarInput {
     environment: MountainCarEnv,

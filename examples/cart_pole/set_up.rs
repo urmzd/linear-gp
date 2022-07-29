@@ -3,12 +3,11 @@ use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
 use lgp::{
     core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
     extensions::{
-        gym_rs::ExtendedGymRsEnvironment, reinforcement_learning::ReinforcementLearningParameters,
+        gym_rs::ExtendedGymRsEnvironment, q_learning::QProgram,
+        reinforcement_learning::ReinforcementLearningParameters,
     },
 };
 use serde::Serialize;
-
-pub struct CartPoleLgp;
 
 #[derive(Clone, Debug, Serialize, new)]
 pub struct CartPoleInput {
@@ -40,6 +39,13 @@ impl ExtendedGymRsEnvironment for CartPoleInput {
     }
 }
 
+pub struct QCartPoleLgp;
+
+impl GeneticAlgorithm for QCartPoleLgp {
+    type O = QProgram<CartPoleInput>;
+}
+
 impl GeneticAlgorithm for CartPoleLgp {
     type O = Program<ReinforcementLearningParameters<CartPoleInput>>;
 }
+pub struct CartPoleLgp;
