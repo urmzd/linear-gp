@@ -111,7 +111,7 @@ mod tests {
     ) -> Result<(), Box<dyn error::Error>> {
         let environment = CartPoleEnv::new(RenderMode::None);
         let input = CartPoleInput::new(environment);
-        let n_generations = 1;
+        let n_generations = 100;
         let n_trials = 5;
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
