@@ -43,17 +43,19 @@ where
         self.list.sort_by(|a, b| b.partial_cmp(a).unwrap());
     }
 
-    pub fn first(&self) -> Option<&T> {
-        self.list.first()
+    pub fn first(&self) -> &T {
+        self.list.first().expect("First element to exist.")
     }
 
-    pub fn middle(&self) -> Option<&T> {
+    pub fn middle(&self) -> &T {
         let middle_index = (((self.list.len() - 1) as f64) / 2.).floor() as usize;
-        self.list.get(middle_index)
+        self.list
+            .get(middle_index)
+            .expect("Middle element to exist")
     }
 
-    pub fn last(&self) -> Option<&T> {
-        self.list.last()
+    pub fn last(&self) -> &T {
+        self.list.last().expect("Last element to exist.")
     }
 
     pub fn push(&mut self, value: T) -> () {

@@ -9,7 +9,7 @@ use rand::{
 
 use crate::{
     core::{
-        characteristics::{Breed, DuplicateNew, Fitness, Generate, Mutate},
+        characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
         program::{Program, ProgramGeneratorParameters},
         registers::Registers,
     },
@@ -190,7 +190,7 @@ where
                 ) {
                     None => {
                         return {
-                            self.program.fitness = None;
+                            self.program.fitness = FitnessScore::OutOfBounds;
                         }
                     }
                     Some(action_state) => action_state,
@@ -211,10 +211,10 @@ where
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let median = scores.swap_remove(scores.len() / 2);
 
-        self.program.fitness = Some(median);
+        self.program.fitness = FitnessScore::Valid(median);
     }
 
-    fn get_fitness(&self) -> Option<f64> {
+    fn get_fitness(&self) -> FitnessScore {
         self.program.fitness
     }
 }

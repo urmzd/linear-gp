@@ -78,7 +78,7 @@ where
     ) {
         for individual in population.iter_mut() {
             let should_eval = if lazy_evaluate {
-                individual.get_fitness().is_none()
+                individual.get_fitness().is_not_evaluated()
             } else {
                 true
             };

@@ -1,8 +1,38 @@
+#[derive(Clone, Debug, Copy, PartialEq, PartialOrd)]
+pub enum FitnessScore {
+    OutOfBounds,
+    NotEvaluated,
+    Valid(f64),
+}
+
+impl FitnessScore {
+    pub fn is_not_evaluated(&self) -> bool {
+        match self {
+            FitnessScore::Valid(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn unwrap_or(&self, value: f64) -> f64 {
+        match self {
+            FitnessScore::Valid(fitness_score) => *fitness_score,
+            _ => value,
+        }
+    }
+
+    pub fn unwrap(&self) -> f64 {
+        match self {
+            FitnessScore::Valid(fitness_score) => *fitness_score,
+            _ => panic!("Tried to unwrap a value from an invalid FitnessScore."),
+        }
+    }
+}
+
 pub trait Fitness {
     type FitnessParameters;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters);
-    fn get_fitness(&self) -> Option<f64>;
+    fn get_fitness(&self) -> FitnessScore;
 }
 
 pub trait Breed: Clone {

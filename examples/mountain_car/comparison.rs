@@ -10,7 +10,7 @@ use lgp::{
         q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
     },
-    utils::{plots::plot_population_benchmarks, types::VoidResultAnyError},
+    utils::{plots::plot_benchmarks, types::VoidResultAnyError},
 };
 mod set_up;
 use set_up::{MountainCarInput, MountainCarLgp, QMountainCarLgp};
@@ -81,9 +81,9 @@ fn main() -> VoidResultAnyError {
     )?;
 
     const PLOT_FILE_NAME: &'static str = "plots/comparisons/mountain_car.png";
-    plot_population_benchmarks(lgp_pops, PLOT_FILE_NAME, -200.0..0.0)?;
+    plot_benchmarks(lgp_pops, PLOT_FILE_NAME, -200.0..0.0)?;
 
     const Q_PLOT_FILE_NAME: &'static str = "plots/comparisons/q_mountain_car.png";
-    plot_population_benchmarks(q_pops, Q_PLOT_FILE_NAME, -200.0..0.0)?;
+    plot_benchmarks(q_pops, Q_PLOT_FILE_NAME, -200.0..0.0)?;
     Ok(())
 }

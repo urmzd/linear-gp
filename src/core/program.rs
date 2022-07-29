@@ -9,7 +9,7 @@ use rand::{
 };
 
 use super::{
-    characteristics::{Breed, DuplicateNew, Generate, Mutate},
+    characteristics::{Breed, DuplicateNew, FitnessScore, Generate, Mutate},
     inputs::ValidInput,
     instruction::{Instruction, InstructionGeneratorParameters},
     instructions::Instructions,
@@ -40,7 +40,7 @@ pub struct Program<T> {
     #[derivative(Ord = "ignore", PartialOrd = "ignore", PartialEq = "ignore")]
     pub registers: Registers,
     #[derivative(Ord = "ignore")]
-    pub fitness: Option<f64>,
+    pub fitness: FitnessScore,
     #[derivative(PartialEq = "ignore", Ord = "ignore", PartialOrd = "ignore")]
     marker: PhantomData<T>,
 }
@@ -72,7 +72,7 @@ impl<T> Generate for Program<T> {
             .map(|_| Instruction::generate(instruction_generator_parameters))
             .collect();
 
-        Self::new(instructions, registers, None)
+        Self::new(instructions, registers, FitnessScore::NotEvaluated)
     }
 }
 
@@ -91,7 +91,7 @@ impl<T> Mutate for Program<T> {
         *instruction = mutated_instruction;
 
         // IMPORTANT: Reset fitness to force evaluation.
-        mutated.fitness = None;
+        mutated.fitness = FitnessScore::NotEvaluated;
 
         mutated
     }
@@ -101,8 +101,13 @@ impl<T> Breed for Program<T> {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
         let child_instructions = self.instructions.two_point_crossover(&mate.instructions);
 
-        child_instructions
-            .map(|instructions| Program::new(instructions, self.registers.duplicate_new(), None))
+        child_instructions.map(|instructions| {
+            Program::new(
+                instructions,
+                self.registers.duplicate_new(),
+                FitnessScore::NotEvaluated,
+            )
+        })
     }
 }
 

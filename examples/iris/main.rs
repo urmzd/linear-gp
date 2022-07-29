@@ -40,12 +40,12 @@ mod tests {
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
-            characteristics::Fitness,
+            characteristics::{Fitness, FitnessScore},
             instruction::InstructionGeneratorParameters,
             program::{Program, ProgramGeneratorParameters},
         },
         extensions::classification::ClassificationParameters,
-        utils::plots::plot_population_benchmarks,
+        utils::plots::plot_benchmarks,
     };
     use log::debug;
     use more_asserts::{assert_le, assert_lt};
@@ -89,7 +89,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "plots/tests/lgp_with_mutate_crossover_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
     #[tokio::test]
@@ -126,7 +126,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "plots/tests/lgp_with_mutate_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
 
@@ -164,7 +164,7 @@ mod tests {
         )?;
 
         const PLOT_FILE_NAME: &'static str = "./plots/tests/lgp_with_crossover_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         Ok(())
     }
@@ -195,44 +195,32 @@ mod tests {
 
         let mut populations = vec![];
 
-        let mut best: Option<u64> = None;
-        let mut median: Option<u64> = None;
-        let mut worst: Option<u64> = None;
+        let mut best = 0;
+        let mut median = 0;
+        let mut worst = 0;
 
-        let mut worst_f = None;
-        let mut median_f = None;
-        let mut best_f = None;
+        let mut best_f = FitnessScore::NotEvaluated;
+        let mut median_f = FitnessScore::NotEvaluated;
+        let mut worst_f = FitnessScore::NotEvaluated;
 
         IrisLgp::execute(
             &mut hyper_params,
             EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
 
-                worst_f = population.last().and_then(|v| v.clone().get_fitness());
-                median_f = population.middle().and_then(|v| v.clone().get_fitness());
-                best_f = population.first().and_then(|v| v.clone().get_fitness());
+                worst_f = population.last().get_fitness();
+                median_f = population.middle().get_fitness();
+                best_f = population.first().get_fitness();
 
-                worst = population
-                    .last()
-                    .map(|v| v.clone())
-                    .and_then(|v| v.fitness)
-                    .map(|x| x.to_bits());
-                median = population
-                    .middle()
-                    .map(|v| v.clone())
-                    .and_then(|v| v.fitness)
-                    .map(|x| x.to_bits());
-                best = population
-                    .first()
-                    .map(|v| v.clone())
-                    .and_then(|v| v.fitness)
-                    .map(|x| x.to_bits());
+                worst = population.last().get_fitness().unwrap().to_bits();
+                median = population.middle().get_fitness().unwrap().to_bits();
+                best = population.first().get_fitness().unwrap().to_bits();
             }),
         )?;
 
         // TODO: Pull the graph section out into a seperate function.
         const PLOT_FILE_NAME: &'static str = "plots/tests/lgp_smoke_test.png";
-        plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         debug!(
             "Total: Compare Worst to Median {:?}",
@@ -257,7 +245,7 @@ mod tests {
 
         if worst != median || median != best {
             // TODO: Create concrete error type; SNAFU or Failure?
-            panic!("GP was unable to converge in given time... \n Best: {:b}, \n Median: {:b} \n Worst: {:b} \n", best.unwrap(), median.unwrap(), worst.unwrap());
+            panic!("GP was unable to converge in given time... \n Best: {:b}, \n Median: {:b} \n Worst: {:b} \n", best, median, worst);
         }
 
         Ok(())
