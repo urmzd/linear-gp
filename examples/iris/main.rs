@@ -212,14 +212,24 @@ mod tests {
                 median_f = population.middle().unwrap().get_fitness();
                 best_f = population.first().unwrap().get_fitness();
 
-                worst = population.last().unwrap().get_fitness().unwrap().to_bits();
+                worst = population
+                    .last()
+                    .unwrap()
+                    .get_fitness()
+                    .unwrap_or(-200.)
+                    .to_bits();
                 median = population
                     .middle()
                     .unwrap()
                     .get_fitness()
-                    .unwrap()
+                    .unwrap_or(-200.)
                     .to_bits();
-                best = population.first().unwrap().get_fitness().unwrap().to_bits();
+                best = population
+                    .first()
+                    .unwrap()
+                    .get_fitness()
+                    .unwrap_or(-200.)
+                    .to_bits();
             }),
         )?;
 
