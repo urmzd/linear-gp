@@ -47,15 +47,9 @@ path = "examples/cart_pole/main.rs"
 test = true
 
 [[example]]
-name = "q_mountain_car"
-path = "examples/q_mountain_car/main.rs"
-test = true
-
-[[example]]
-name = "q_cart_pole"
-path = "examples/q_cart_pole/main.rs"
-test = true
-
-[[example]]
 name = "q_mountain_car_hpo_search"
-path = "examples/q_mountain_car/hpo_search.rs"
+path = "examples/mountain_car/hpo_search.rs"
+
+[[example]]
+name = "mountain_car_comparison"
+path = "examples/mountain_car/comparison.rs"
