@@ -56,3 +56,6 @@ name = "q_cart_pole"
 path = "examples/q_cart_pole/main.rs"
 test = true
 
+[[example]]
+name = "q_mountain_car_hpo_search"
+path = "examples/q_mountain_car/hpo_search.rs"

@@ -1,7 +1,4 @@
-use gym_rs::{
-    envs::classical_control::cartpole::{CartPoleEnv},
-    utils::{renderer::RenderMode},
-};
+use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
 
 use lgp::{
     core::{
@@ -46,11 +43,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 mod tests {
     use std::error;
 
-    use gym_rs::{
-        envs::classical_control::cartpole::{CartPoleEnv},
-        utils::{renderer::RenderMode},
-    };
-    
+    use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
+
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -61,7 +55,7 @@ mod tests {
             gym_rs::ExtendedGymRsEnvironment,
             reinforcement_learning::ReinforcementLearningParameters,
         },
-        utils::{plots::plot_population_benchmarks},
+        utils::plots::plot_population_benchmarks,
     };
 
     use crate::set_up::{CartPoleInput, CartPoleLgp};
