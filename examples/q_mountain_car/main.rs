@@ -3,7 +3,6 @@ use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::rende
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
-        characteristics::Fitness,
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
@@ -12,9 +11,8 @@ use lgp::{
         q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
     },
-    utils::{random::generator, types::VoidResultAnyError},
+    utils::types::VoidResultAnyError,
 };
-use log::debug;
 use set_up::{MountainCarInput, QMountainCarLgp};
 mod set_up;
 
@@ -39,7 +37,7 @@ fn main() -> VoidResultAnyError {
                 32,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
-            QConsts::new(0.05, 0.125, 0.05),
+            QConsts::new(0.48, 0.25, 0.035),
         ),
     };
 
@@ -93,7 +91,7 @@ mod tests {
                     32,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
-                QConsts::new(0.05, 0.125, 0.05),
+                QConsts::new(0.48, 0.25, 0.035),
             ),
         };
 
