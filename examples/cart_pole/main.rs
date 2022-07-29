@@ -100,7 +100,7 @@ mod tests {
             }),
         )?;
 
-        const PLOT_FILE_NAME: &'static str = "assets/tests/plots/cart_pole.png";
+        const PLOT_FILE_NAME: &'static str = "plots/tests/cart_pole.png";
         let range = (0.)..(hyper_params.fitness_parameters.max_episode_length as f64);
         plot_population_benchmarks(populations, PLOT_FILE_NAME, range)?;
         Ok(())
@@ -142,7 +142,7 @@ mod tests {
             }),
         )?;
 
-        const PLOT_FILE_NAME: &'static str = "assets/tests/plots/q_cart_pole.png";
+        const PLOT_FILE_NAME: &'static str = "plots/tests/q_cart_pole.png";
         let range = (0.)..(hyper_params.fitness_parameters.max_episode_length as f64);
         plot_population_benchmarks(populations, PLOT_FILE_NAME, range)?;
         Ok(())

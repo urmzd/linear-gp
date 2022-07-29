@@ -88,8 +88,7 @@ mod tests {
             }),
         )?;
 
-        const PLOT_FILE_NAME: &'static str =
-            "./assets/tests/plots/lgp_with_mutate_crossover_test.png";
+        const PLOT_FILE_NAME: &'static str = "plots/tests/lgp_with_mutate_crossover_test.png";
         plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
@@ -126,7 +125,7 @@ mod tests {
             }),
         )?;
 
-        const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/lgp_with_mutate_test.png";
+        const PLOT_FILE_NAME: &'static str = "plots/tests/lgp_with_mutate_test.png";
         plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
@@ -164,7 +163,7 @@ mod tests {
             }),
         )?;
 
-        const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/lgp_with_crossover_test.png";
+        const PLOT_FILE_NAME: &'static str = "./plots/tests/lgp_with_crossover_test.png";
         plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         Ok(())
@@ -232,7 +231,7 @@ mod tests {
         )?;
 
         // TODO: Pull the graph section out into a seperate function.
-        const PLOT_FILE_NAME: &'static str = "./assets/tests/plots/lgp_smoke_test.png";
+        const PLOT_FILE_NAME: &'static str = "plots/tests/lgp_smoke_test.png";
         plot_population_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         debug!(
