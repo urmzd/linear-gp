@@ -8,7 +8,7 @@ pub enum FitnessScore {
 impl FitnessScore {
     pub fn is_not_evaluated(&self) -> bool {
         match self {
-            FitnessScore::Valid(_) | FitnessScore::OutOfBounds => true,
+            Self::NotEvaluated => true,
             _ => false,
         }
     }

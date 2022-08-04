@@ -37,6 +37,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
@@ -95,6 +96,7 @@ mod tests {
     #[tokio::test]
     async fn given_lgp_instance_with_mutation_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_median_and_best_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
+        pretty_env_logger::init();
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_inputs(tmp_file.path());
 
@@ -122,6 +124,7 @@ mod tests {
             &mut hyper_params,
             EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
+                debug!("{:?}", population.iter().map(|v| v.fitness).collect_vec())
             }),
         )?;
 
