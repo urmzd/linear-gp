@@ -57,7 +57,7 @@ where
             true => Reward::Terminal(reward),
             false => Reward::Continue(reward),
         };
-        let state = self.flat_input();
+        let state = self.flat();
 
         StateRewardPair {
             state,

@@ -1,5 +1,5 @@
-#![warn(rustdoc::all)]
-#![warn(missing_docs)]
+//#![warn(rustdoc::all)]
+//#![warn(missing_docs)]
 
 //! A library to solve problems using linear genetic programming!
 //! 

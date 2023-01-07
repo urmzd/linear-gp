@@ -15,7 +15,7 @@ use set_up::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
     let ContentFilePair(_, file) = get_iris_content().await?;
-    let inputs = IrisLgp::load_inputs(file.path());
+    let inputs = IrisLgp::load_from_csv(file.path());
 
     let mut hyper_params = HyperParameters {
         population_size: 1,
@@ -60,7 +60,7 @@ mod tests {
     async fn given_lgp_instance_with_mutation_and_crossover_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_median_and_best_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
-        let inputs = IrisLgp::load_inputs(tmp_file.path());
+        let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
@@ -98,7 +98,7 @@ mod tests {
     ) -> Result<(), Box<dyn error::Error>> {
         pretty_env_logger::init();
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
-        let inputs = IrisLgp::load_inputs(tmp_file.path());
+        let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
@@ -137,7 +137,7 @@ mod tests {
     async fn given_lgp_instance_with_crossover_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_worst_and_median_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
-        let inputs = IrisLgp::load_inputs(tmp_file.path());
+        let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
@@ -176,7 +176,7 @@ mod tests {
     async fn given_lgp_instance_when_sufficient_iterations_have_been_used_then_population_contains_the_same_benchmark_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
-        let inputs = IrisLgp::load_inputs(tmp_file.path());
+        let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
@@ -274,7 +274,7 @@ mod tests {
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
 
-        let inputs = IrisLgp::load_inputs(tmp_file.path());
+        let inputs = IrisLgp::load_from_csv(tmp_file.path());
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
@@ -311,7 +311,7 @@ mod tests {
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
 
-        let inputs = IrisLgp::load_inputs(tmp_file.path());
+        let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
         let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
@@ -346,7 +346,7 @@ mod tests {
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
 
-        let inputs = IrisLgp::load_inputs(tmp_file.path());
+        let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
         let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
@@ -403,7 +403,7 @@ mod tests {
     async fn given_iris_dataset_when_csv_path_is_provided_then_collection_of_iris_structs_are_returned(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmpfile) = get_iris_content().await?;
-        let inputs = IrisLgp::load_inputs(tmpfile.path());
+        let inputs = IrisLgp::load_from_csv(tmpfile.path());
         assert_ne!(inputs.len(), 0);
         Ok(())
     }

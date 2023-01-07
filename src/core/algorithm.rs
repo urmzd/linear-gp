@@ -32,13 +32,15 @@ where
     pub program_parameters: T::GeneratorParameters,
 }
 
+/// Defines a program capable of loading inputs from various sources.
 pub trait Loader
 where
     Self::InputType: ValidInput + DeserializeOwned,
 {
     type InputType;
 
-    fn load_inputs(file_path: impl Into<PathBuf>) -> Inputs<Self::InputType> {
+    /// Loads entities from a csv file found on the local file system. 
+    fn load_from_csv(file_path: impl Into<PathBuf>) -> Inputs<Self::InputType> {
         let mut csv_reader = ReaderBuilder::new()
             .has_headers(false)
             .from_path(file_path.into())
@@ -60,6 +62,7 @@ where
 {
     type O;
 
+    /// Generates a set of random individuals to undergo the evolutionary process.
     fn init_population(hyper_params: &HyperParameters<Self::O>) -> Population<Self::O> {
         let mut population = Population::with_capacity(hyper_params.population_size);
 
@@ -71,12 +74,15 @@ where
         population
     }
 
+    /// Evaluates the individuals found in the current population.
     fn rank(
         population: &mut Population<Self::O>,
         fitness_parameters: &mut <Self::O as Fitness>::FitnessParameters,
         lazy_evaluate: bool,
     ) {
         for individual in population.iter_mut() {
+            // Only evaluate when lazy evaluation is set off or in cases 
+            // where lazy evaluation is desired, evaluate individuals who haven't changed.
             let should_eval = if lazy_evaluate {
                 individual.get_fitness().is_not_evaluated()
             } else {
@@ -87,6 +93,8 @@ where
                 individual.eval_fitness(fitness_parameters)
             }
         }
+        
+        // Organize individuals by their fitness score.
         population.sort();
     }
 

@@ -27,7 +27,7 @@ impl ValidInput for MountainCarInput {
     const N_INPUT_REGISTERS: usize = 2;
     const N_ACTION_REGISTERS: usize = 3;
 
-    fn flat_input(&self) -> Vec<f64> {
+    fn flat(&self) -> Vec<f64> {
         self.environment.state.into()
     }
 }
