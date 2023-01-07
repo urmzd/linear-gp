@@ -18,7 +18,7 @@ impl ValidInput for CartPoleInput {
     const N_INPUT_REGISTERS: usize = 4;
     const N_ACTION_REGISTERS: usize = 2;
 
-    fn flat_input(&self) -> Vec<f64> {
+    fn flat(&self) -> Vec<f64> {
         self.environment.state.into()
     }
 }
