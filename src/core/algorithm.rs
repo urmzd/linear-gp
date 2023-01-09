@@ -155,10 +155,13 @@ where
         // Crossover + Mutation
         // TODO: Add a way to priortize mutations or crossovers.
         while (n_crossovers + n_mutations) > 0 {
+            // Step 1: Choose Parents
             let selected_a = population.iter().choose(&mut generator());
             let selected_b = population.iter().choose(&mut generator());
 
+            // Step 2: Transform Children
             if let (Some(parent_a), Some(parent_b)) = (selected_a, selected_b) {
+                // Step 2A: Crossover
                 if n_crossovers > 0 {
                     let crossover_child = parent_a
                         .two_point_crossover(parent_b)
@@ -171,6 +174,7 @@ where
                     children.push(crossover_child)
                 }
 
+                // Step 2B: Mutate
                 if n_mutations > 0 {
                     let parents = [parent_a, parent_b];
                     let selected_parent = parents.choose(&mut generator());

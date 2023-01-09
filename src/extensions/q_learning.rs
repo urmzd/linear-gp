@@ -168,11 +168,8 @@ where
         let mut scores = vec![];
 
         // TODO: Call init and finish after `rank`
-        for state in parameters.get_state().clone() {
-            // INIT STEPS.
-            let mut score = 0.;
-
-            parameters.environment.update_state(state);
+        for initial_state in parameters.get_state().clone() {
+            parameters.environment.update_state(initial_state);
 
             let mut c_action_state = get_action_state(
                 &mut parameters.environment,
@@ -181,7 +178,10 @@ where
             )
             .unwrap();
 
+            let mut score = 0.;
+            // Execute program.
             for _step in 0..parameters.max_episode_length {
+                // Act.
                 let state_reward_pair = parameters.environment.sim(c_action_state.action);
 
                 let reward = state_reward_pair.get_value();
@@ -197,9 +197,11 @@ where
                     &mut self.program,
                 ) {
                     None => {
+                        // We've encountered numerical instability. The program is not considered valid, and thus
+                        // has the lowest score.
                         return {
                             self.program.fitness = FitnessScore::OutOfBounds;
-                        }
+                        };
                     }
                     Some(action_state) => action_state,
                 };
@@ -211,6 +213,7 @@ where
                 c_action_state = n_action_state;
             }
 
+            // Reset for next evaluation.
             self.program.registers.reset();
             parameters.environment.reset();
 
