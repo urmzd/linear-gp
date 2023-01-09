@@ -53,8 +53,8 @@ impl QTable {
     }
 
     pub fn action_argmax(&self, register_number: usize) -> usize {
-        let QTable { table, .. } = &self;
-        let available_actions = table
+        let available_actions = self
+            .table
             .get(register_number)
             .expect("Register number to be less than length of QTable.");
 
@@ -140,6 +140,23 @@ where
     }
 }
 
+fn get_action_state<T>(
+    environment: &mut T,
+    q_table: &mut QTable,
+    program: &mut Program<ReinforcementLearningParameters<T>>,
+) -> Option<ActionRegisterPair>
+where
+    T: ReinforcementLearningInput,
+{
+    // Run the program.
+    program.exec(environment);
+
+    // Get the winning action-register pair.
+    let action_state = q_table.eval::<ReinforcementLearningParameters<T>>(&program.registers);
+
+    action_state
+}
+
 impl<T> Fitness for QProgram<T>
 where
     T: ReinforcementLearningInput,
@@ -148,22 +165,13 @@ where
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
-        let get_action_state =
-            |environment: &mut T,
-             q_table: &mut QTable,
-             program: &mut Program<ReinforcementLearningParameters<T>>| {
-                program.exec(environment);
-                let action_state =
-                    q_table.eval::<ReinforcementLearningParameters<T>>(&program.registers);
-
-                action_state
-            };
-
         let mut scores = vec![];
+
         // TODO: Call init and finish after `rank`
         for state in parameters.get_state().clone() {
             // INIT STEPS.
             let mut score = 0.;
+
             parameters.environment.update_state(state);
 
             let mut c_action_state = get_action_state(
@@ -205,6 +213,7 @@ where
 
             self.program.registers.reset();
             parameters.environment.reset();
+
             scores.push(score);
         }
 
