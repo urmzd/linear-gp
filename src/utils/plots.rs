@@ -1,4 +1,4 @@
-use std::{error, fmt, ops::Range};
+use std::{error, fmt, fs, ops::Range, path::Path};
 
 use plotters::{
     prelude::{BitMapBackend, ChartBuilder, IntoDrawingArea, LineSeries, Rectangle},
@@ -15,6 +15,9 @@ pub fn plot_benchmarks<T>(
 where
     T: Fitness + Clone + PartialOrd + fmt::Debug,
 {
+    let parent_path = Path::new(plot_path).parent().expect("Parent folder.");
+    fs::create_dir_all(parent_path)?;
+
     let root = BitMapBackend::new(plot_path, (1280, 720)).into_drawing_area();
     root.fill(&WHITE)?;
 

@@ -102,7 +102,7 @@ mod tests {
             }),
         )?;
 
-        const PLOT_FILE_NAME: &'static str = "plots/tests/mountain_car_smoke.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
         Ok(())
     }
@@ -145,7 +145,7 @@ mod tests {
             }),
         )?;
 
-        const PLOT_FILE_NAME: &'static str = "plots/tests/mountain_car_smoke_q.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/q.png";
         plot_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;
         Ok(())
     }
