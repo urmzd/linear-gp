@@ -18,6 +18,7 @@ pub struct ReinforcementLearningParameters<T>
 where
     T: ReinforcementLearningInput,
 {
+    // Collection of X intial states per generation.
     initial_states: Vec<Vec<T::State>>,
     pub max_episode_length: usize,
     pub environment: T,

@@ -15,7 +15,6 @@ impl Breed for Instructions {
             None
         } else {
             let tmp_end = Uniform::new(a_start + 1, instructions_a.len()).sample(current_generator);
-
             Some(tmp_end)
         };
 
