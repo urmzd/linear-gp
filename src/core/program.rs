@@ -8,6 +8,8 @@ use rand::{
     prelude::{Distribution, IteratorRandom},
 };
 
+use uuid::Uuid;
+
 use super::{
     characteristics::{Breed, DuplicateNew, FitnessScore, Generate, Mutate},
     inputs::ValidInput,
@@ -15,6 +17,7 @@ use super::{
     instructions::Instructions,
     registers::Registers,
 };
+
 #[derive(Clone, Debug, new)]
 pub struct ProgramGeneratorParameters {
     pub max_instructions: usize,
@@ -28,6 +31,7 @@ impl<T> Clone for Program<T> {
             registers: self.registers.clone(),
             fitness: self.fitness.clone(),
             marker: self.marker.clone(),
+            id: self.id.clone()
         }
     }
 }
@@ -35,6 +39,7 @@ impl<T> Clone for Program<T> {
 #[derive(Debug, new, Derivative)]
 #[derivative(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Program<T> {
+    pub id: Uuid,
     #[derivative(Ord = "ignore", PartialOrd = "ignore")]
     pub instructions: Instructions,
     #[derivative(Ord = "ignore", PartialOrd = "ignore", PartialEq = "ignore")]
@@ -72,7 +77,13 @@ impl<T> Generate for Program<T> {
             .map(|_| Instruction::generate(instruction_generator_parameters))
             .collect();
 
-        Self::new(instructions, registers, FitnessScore::NotEvaluated)
+        Self::new(
+            Uuid::new_v4(),
+            instructions, 
+            registers,
+            FitnessScore::NotEvaluated,
+        )
+
     }
 }
 
@@ -103,6 +114,7 @@ impl<T> Breed for Program<T> {
 
         child_instructions.map(|instructions| {
             Program::new(
+                Uuid::new_v4(),
                 instructions,
                 self.registers.duplicate_new(),
                 FitnessScore::NotEvaluated,
