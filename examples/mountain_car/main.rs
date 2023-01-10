@@ -127,7 +127,7 @@ mod tests {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    32,
+                    16,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
                 QConsts::new(0.48, 0.25, 0.035),
