@@ -1,6 +1,7 @@
 use std::fmt::{self, Debug};
 
 use derive_new::new;
+use log::debug;
 use more_asserts::{assert_ge, assert_le};
 use rand::{
     distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
@@ -18,13 +19,20 @@ use crate::{
 
 use super::reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters};
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct QTable {
     table: Vec<Vec<f64>>,
     n_actions: usize,
     n_registers: usize,
     q_consts: QConsts,
 }
+
+impl Debug for QTable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.table.iter()).finish()
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct ActionRegisterPair {
     action: usize,
@@ -169,6 +177,11 @@ where
 
         // TODO: Call init and finish after `rank`
         for initial_state in parameters.get_state().clone() {
+            debug!(
+                "Program ID: {} | Initial State: {:?}",
+                self.program.id, initial_state
+            );
+
             parameters.environment.update_state(initial_state);
 
             let mut c_action_state = get_action_state(
@@ -178,7 +191,17 @@ where
             )
             .unwrap();
 
+            debug!(
+                "Program ID: {} | Action Register Pair: {:?}",
+                self.program.id, c_action_state
+            );
+
             let mut score = 0.;
+
+            debug!(
+                "Program ID: {} | Q Table: {:?} ",
+                self.program.id, self.q_table
+            );
             // Execute program.
             for _step in 0..parameters.max_episode_length {
                 // Act.
@@ -220,10 +243,18 @@ where
             scores.push(score);
         }
 
+        debug!(
+            "Program ID: {} | Q Table: {:?} ",
+            self.program.id, self.q_table
+        );
+
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let median = scores.swap_remove(scores.len() / 2);
 
         self.program.fitness = FitnessScore::Valid(median);
+
+        debug!("Program ID: {} | Fitness: {}", self.program.id, self.program.fitness);
+
     }
 
     fn get_fitness(&self) -> FitnessScore {

@@ -44,9 +44,9 @@ where
     let benchmarks: Vec<[f64; 3]> = populations
         .into_iter()
         .map(|population| {
-            let best = population.first();
-            let median = population.middle();
-            let worst = population.last();
+            let best = population.best();
+            let median = population.median();
+            let worst = population.worst();
 
             let benchmark = [best, median, worst].map(|quantile| {
                 quantile

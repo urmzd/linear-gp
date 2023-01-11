@@ -1,8 +1,20 @@
+use std::fmt::Display;
+
 #[derive(Clone, Debug, Copy, PartialEq, PartialOrd)]
 pub enum FitnessScore {
     OutOfBounds,
     NotEvaluated,
     Valid(f64),
+}
+
+impl Display for FitnessScore {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FitnessScore::OutOfBounds => write!(f, "Out of Bounds!"),
+            FitnessScore::NotEvaluated => write!(f, "Not Evaluated"),
+            FitnessScore::Valid(value) => write!(f, "{}", value)
+        }
+    }
 }
 
 impl FitnessScore {

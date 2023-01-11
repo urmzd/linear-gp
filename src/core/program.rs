@@ -31,7 +31,7 @@ impl<T> Clone for Program<T> {
             registers: self.registers.clone(),
             fitness: self.fitness.clone(),
             marker: self.marker.clone(),
-            id: self.id.clone()
+            id: self.id.clone(),
         }
     }
 }
@@ -79,11 +79,10 @@ impl<T> Generate for Program<T> {
 
         Self::new(
             Uuid::new_v4(),
-            instructions, 
+            instructions,
             registers,
             FitnessScore::NotEvaluated,
         )
-
     }
 }
 
@@ -113,7 +112,7 @@ impl<T> Breed for Program<T> {
         let child_instructions = self.instructions.two_point_crossover(&mate.instructions);
 
         child_instructions.map(|instructions| {
-            Program::new(
+            Self::new(
                 Uuid::new_v4(),
                 instructions,
                 self.registers.duplicate_new(),
