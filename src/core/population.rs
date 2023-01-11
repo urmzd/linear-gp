@@ -39,20 +39,21 @@ where
         self.list.get_mut(index)
     }
 
+    /// Sort by descending order.
     pub fn sort(&mut self) -> () {
         self.list.sort_by(|a, b| b.partial_cmp(a).unwrap());
     }
 
-    pub fn first(&self) -> Option<&T> {
+    pub fn best(&self) -> Option<&T> {
         self.list.first()
     }
 
-    pub fn middle(&self) -> Option<&T> {
+    pub fn median(&self) -> Option<&T> {
         let middle_index = (((self.list.len() - 1) as f64) / 2.).floor() as usize;
         self.list.get(middle_index)
     }
 
-    pub fn last(&self) -> Option<&T> {
+    pub fn worst(&self) -> Option<&T> {
         self.list.last()
     }
 

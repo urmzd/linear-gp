@@ -39,7 +39,7 @@ where
 {
     type InputType;
 
-    /// Loads entities from a csv file found on the local file system. 
+    /// Loads entities from a csv file found on the local file system.
     fn load_from_csv(file_path: impl Into<PathBuf>) -> Inputs<Self::InputType> {
         let mut csv_reader = ReaderBuilder::new()
             .has_headers(false)
@@ -81,7 +81,7 @@ where
         lazy_evaluate: bool,
     ) {
         for individual in population.iter_mut() {
-            // Only evaluate when lazy evaluation is set off or in cases 
+            // Only force evaluation when lazy evaluation is set off or in cases
             // where lazy evaluation is desired, evaluate individuals who haven't changed.
             let should_eval = if lazy_evaluate {
                 individual.get_fitness().is_not_evaluated()
@@ -93,24 +93,25 @@ where
                 individual.eval_fitness(fitness_parameters)
             }
         }
-        
+
         // Organize individuals by their fitness score.
         population.sort();
     }
 
     fn apply_selection(population: &mut Population<Self::O>, gap: f64) {
         assert!(gap >= 0. && gap <= 1.);
-        assert_le!(population.last(), population.first());
+        assert_le!(population.worst(), population.best());
 
         let pop_len = population.len();
 
         let mut n_of_individuals_to_drop =
             pop_len - ((1.0 - gap) * (pop_len as f64)).floor() as usize;
 
+        // Drop invalid individuals.
         loop {
-            if population.last().is_some() {
+            if population.worst().is_some() {
                 if population
-                    .last()
+                    .worst()
                     .map(|v| v.get_fitness().is_invalid())
                     .unwrap()
                 {
@@ -124,6 +125,7 @@ where
             }
         }
 
+        // Drop remaining gap.
         while n_of_individuals_to_drop > 0 {
             n_of_individuals_to_drop -= 1;
             population.pop();
@@ -161,9 +163,10 @@ where
 
             // Step 2: Transform Children
             if let (Some(parent_a), Some(parent_b)) = (selected_a, selected_b) {
+                // NOTE: This can be done in parallel.
                 // Step 2A: Crossover
                 if n_crossovers > 0 {
-                    let crossover_child = parent_a
+                    let child = parent_a
                         .two_point_crossover(parent_b)
                         .choose(&mut generator())
                         .unwrap()
@@ -171,22 +174,23 @@ where
 
                     remaining_pool_spots -= 1;
                     n_crossovers -= 1;
-                    children.push(crossover_child)
+
+                    children.push(child)
                 }
 
                 // Step 2B: Mutate
                 if n_mutations > 0 {
                     let parents = [parent_a, parent_b];
-                    let selected_parent = parents.choose(&mut generator());
+                    let parent_to_mutate = parents.choose(&mut generator());
 
-                    let mutation_child = selected_parent
+                    let child = parent_to_mutate
                         .map(|parent| parent.mutate(mutation_parameters))
                         .unwrap();
 
                     remaining_pool_spots -= 1;
                     n_mutations -= 1;
 
-                    children.push(mutation_child)
+                    children.push(child)
                 }
             };
         }
