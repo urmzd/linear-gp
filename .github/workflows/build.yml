@@ -30,6 +30,7 @@ jobs:
       RUST_BACKTRACE: 1
       RUST_LOG: debug
     steps:
+      - run: sudo apt update -y
       - run: sudo apt install libsdl2-gfx-dev xvfb -y
       - uses: actions/checkout@v2
       - uses: actions/cache@v3
@@ -63,6 +64,7 @@ jobs:
       RUST_BACKTRACE: 1
       RUST_LOG: debug
     steps:
+      - run: sudo apt update -y
       - run: sudo apt install libsdl2-gfx-dev xvfb -y
       - uses: actions/checkout@v2
       - uses: actions/cache@v3
