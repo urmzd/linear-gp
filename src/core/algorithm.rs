@@ -1,5 +1,6 @@
 use core::fmt;
 use std::path::PathBuf;
+use test_log::test;
 
 use csv::ReaderBuilder;
 use more_asserts::assert_le;
@@ -211,6 +212,8 @@ where
         mut hyper_params: &mut HyperParameters<Self::O>,
         mut hooks: EventHooks<'b, Self::O>,
     ) -> Result<Population<Self::O>, Box<dyn std::error::Error>> {
+        tracing_subscriber::fmt::init();
+
         let mut population = Self::init_population(hyper_params);
 
         if let Some(hook) = hooks.on_post_init {

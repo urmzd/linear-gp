@@ -14,13 +14,11 @@ use lgp::{
     },
     utils::{random::generator, types::VoidResultAnyError},
 };
-use log::debug;
 use set_up::{MountainCarInput, QMountainCarLgp};
+use tracing::debug;
 mod set_up;
 
 fn main() -> VoidResultAnyError {
-    pretty_env_logger::init();
-
     let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut epsilon_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);

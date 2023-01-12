@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+use test_log::test;
+
 use crate::utils::random::generator;
 use derivative::Derivative;
 use derive_new::new;

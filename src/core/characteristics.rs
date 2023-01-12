@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use json::JsonValue;
+
 #[derive(Clone, Debug, Copy, PartialEq, PartialOrd)]
 pub enum FitnessScore {
     OutOfBounds,
@@ -7,12 +9,23 @@ pub enum FitnessScore {
     Valid(f64),
 }
 
+impl From<FitnessScore> for JsonValue {
+    fn from(o: FitnessScore) -> Self {
+        match o {
+            FitnessScore::OutOfBounds | FitnessScore::NotEvaluated => {
+                JsonValue::String("NaN".into())
+            }
+            FitnessScore::Valid(value) => JsonValue::Number(value.into()),
+        }
+    }
+}
+
 impl Display for FitnessScore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FitnessScore::OutOfBounds => write!(f, "Out of Bounds!"),
             FitnessScore::NotEvaluated => write!(f, "Not Evaluated"),
-            FitnessScore::Valid(value) => write!(f, "{}", value)
+            FitnessScore::Valid(value) => write!(f, "{}", value),
         }
     }
 }
