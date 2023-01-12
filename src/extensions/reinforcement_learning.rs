@@ -67,7 +67,7 @@ impl StateRewardPair {
     }
 }
 
-pub trait ReinforcementLearningInput: ValidInput + Sized {
+pub trait ReinforcementLearningInput: ValidInput + Sized where Self::State: Into<Vec<f64>> {
     type State;
 
     fn init(&mut self);

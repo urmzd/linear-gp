@@ -10,10 +10,8 @@ serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.18", features = ["full", "macros"] }
 rand = "0.8.5"
 rand_chacha = "0.3.1"
-log = "0.4.17"
 strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
-pretty_env_logger = "0.4"
 more-asserts = { version = "0.2" }
 toml = "0.5"
 lazy_static = "1.4.0"
@@ -22,15 +20,12 @@ derivative = "2.2.0"
 derive_more = { version = "0.99" }
 plotters = "0.3.1"
 itertools = "0.10"
-
-[dependencies.gym-rs]
-git = "https://github.com/urmzd/gym-rs" 
-
-[dependencies.uuid]
-version = "1.2.2"
-features = [
-  "v4"
-]
+json = "0.12.4"
+tracing = {version = "0.1", default-features=false }
+tracing-subscriber = { version = "0.3", default-features=false, features = ["env-filter", "fmt"] }
+test-log = {version="0.2.11", default-features=false, features=["trace"]}
+gym-rs = { git = "https://github.com/urmzd/gym-rs" }
+uuid = { version = "1.2.2", features = ["v4"] }
 
 [dev-dependencies]
 reqwest = "0.11"

@@ -1,12 +1,13 @@
 use std::fmt::{self, Debug};
 
 use derive_new::new;
-use log::debug;
 use more_asserts::{assert_ge, assert_le};
 use rand::{
     distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
     prelude::SliceRandom,
 };
+use json::{object, JsonValue};
+use tracing::debug;
 
 use crate::{
     core::{
@@ -27,6 +28,24 @@ pub struct QTable {
     q_consts: QConsts,
 }
 
+impl From<QTable> for JsonValue {
+    fn from(q: QTable) -> Self {
+        let mut data = json::JsonValue::new_array();
+
+        for row in q.table {
+            let mut r_data = json::JsonValue::new_array();
+
+            for column in row {
+                r_data.push(column).unwrap();
+            }
+
+            data.push(r_data).unwrap();
+        }
+
+        data
+    }
+}
+
 impl Debug for QTable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
@@ -38,6 +57,16 @@ pub struct ActionRegisterPair {
     action: usize,
     register: usize,
 }
+
+impl From<ActionRegisterPair> for JsonValue {
+    fn from(arp: ActionRegisterPair) -> Self {
+        return object! {
+            action: arp.action,
+            register: arp.action,
+        }
+    }
+}
+
 
 impl DuplicateNew for QTable {
     fn duplicate_new(&self) -> Self {
@@ -168,7 +197,7 @@ where
 impl<T> Fitness for QProgram<T>
 where
     T: ReinforcementLearningInput,
-    T::State: Clone + Debug,
+    T::State: Clone + Debug
 {
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
@@ -177,9 +206,13 @@ where
 
         // TODO: Call init and finish after `rank`
         for initial_state in parameters.get_state().clone() {
+            let initial_state_vec: Vec<f64> = initial_state.clone().into();
             debug!(
-                "Program ID: {} | Initial State: {:?}",
-                self.program.id, initial_state
+                "{:#}",
+                object!{ 
+                    program_id: self.program.id.to_string(),
+                    initial_state: initial_state_vec
+                }
             );
 
             parameters.environment.update_state(initial_state);
@@ -192,15 +225,21 @@ where
             .unwrap();
 
             debug!(
-                "Program ID: {} | Action Register Pair: {:?}",
-                self.program.id, c_action_state
+                "{:#}",
+                object! {
+                    program_id: self.program.id.to_string(),
+                    action_state: c_action_state
+                }
             );
 
             let mut score = 0.;
 
             debug!(
-                "Program ID: {} | Q Table: {:?} ",
-                self.program.id, self.q_table
+                "{:#}",
+                object! {
+                    program_id: self.program.id.to_string(),
+                    q_table: self.q_table.clone()
+                }
             );
             // Execute program.
             for _step in 0..parameters.max_episode_length {
@@ -244,8 +283,11 @@ where
         }
 
         debug!(
-            "Program ID: {} | Q Table: {:?} ",
-            self.program.id, self.q_table
+            "{:#}",
+            object! {
+                program_id: self.program.id.to_string(),
+                q_table: self.q_table.clone()
+            }
         );
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -253,8 +295,13 @@ where
 
         self.program.fitness = FitnessScore::Valid(median);
 
-        debug!("Program ID: {} | Fitness: {}", self.program.id, self.program.fitness);
-
+        debug!(
+            "{:#}",
+            object! {
+                program_id: self.program.id.to_string(),
+                fitness: self.program.fitness
+            }
+        )
     }
 
     fn get_fitness(&self) -> FitnessScore {

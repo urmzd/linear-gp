@@ -1,4 +1,5 @@
 use std::{fmt, marker::PhantomData, mem, ptr::NonNull};
+use test_log::test;
 
 use serde::{ser::SerializeSeq, Serialize};
 

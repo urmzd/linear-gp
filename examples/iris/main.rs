@@ -37,7 +37,6 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 
 #[cfg(test)]
 mod tests {
-    use itertools::Itertools;
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
@@ -48,9 +47,9 @@ mod tests {
         extensions::classification::ClassificationParameters,
         utils::plots::plot_benchmarks,
     };
-    use log::debug;
     use more_asserts::{assert_le, assert_lt};
     use pretty_assertions::{assert_eq, assert_ne};
+    use tracing::debug;
     use std::error;
 
     use crate::set_up::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
@@ -96,7 +95,6 @@ mod tests {
     #[tokio::test]
     async fn given_lgp_instance_with_mutation_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_median_and_best_fitness(
     ) -> Result<(), Box<dyn error::Error>> {
-        pretty_env_logger::init();
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
@@ -124,7 +122,6 @@ mod tests {
             &mut hyper_params,
             EventHooks::default().with_on_post_rank(&mut |population, _| {
                 populations.push(population.clone());
-                debug!("{:?}", population.iter().map(|v| v.fitness).collect_vec())
             }),
         )?;
 
@@ -248,7 +245,6 @@ mod tests {
             "Total: Compare Median to Best {:?}",
             median_f.unwrap().total_cmp(&best_f.unwrap())
         );
-
         debug!(
             "Partial: Compare Worst to Median {:?}",
             worst_f.unwrap().partial_cmp(&median_f.unwrap())

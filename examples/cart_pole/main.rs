@@ -1,5 +1,6 @@
 use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
 
+
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -47,6 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(test)]
 mod tests {
+    use test_log::test;
     use std::error;
 
     use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};

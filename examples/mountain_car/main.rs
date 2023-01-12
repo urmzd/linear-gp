@@ -1,5 +1,7 @@
 use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
 
+use test_log::test;
+
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
