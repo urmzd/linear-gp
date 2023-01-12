@@ -1,6 +1,5 @@
 use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
 
-
 use lgp::{
     core::{
         algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
@@ -49,7 +48,6 @@ fn main() -> VoidResultAnyError {
 
 #[cfg(test)]
 mod tests {
-    use test_log::test;
     use gym_rs::{
         envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode,
     };
@@ -67,6 +65,7 @@ mod tests {
         },
         utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
+    use tracing_subscriber::EnvFilter;
 
     use crate::set_up::{MountainCarInput, MountainCarLgp, QMountainCarLgp};
 
@@ -111,6 +110,13 @@ mod tests {
     #[test]
     fn given_mountain_car_task_when_q_learning_lgp_is_used_then_task_is_solved(
     ) -> VoidResultAnyError {
+        // Enable logging.
+        tracing_subscriber::fmt()
+            .json()
+            .with_env_filter(EnvFilter::from_default_env())
+            .try_init()
+            .unwrap_or(());
+
         let game = MountainCarEnv::new(RenderMode::None, None);
         let environment = MountainCarInput::new(game);
         let n_generations = 100;

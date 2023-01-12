@@ -329,7 +329,6 @@ where
 #[cfg(test)]
 mod tests {
     use std::{cell::RefCell, rc::Rc};
-    use test_log::test;
 
     use crate::{
         core::{instruction::InstructionGeneratorParameters, program::ProgramGeneratorParameters},
