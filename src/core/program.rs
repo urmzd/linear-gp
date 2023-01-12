@@ -130,7 +130,6 @@ mod tests {
         core::instruction::InstructionGeneratorParameters,
         extensions::classification::ClassificationParameters, utils::test::TestInput,
     };
-    use test_log::test;
 
     use super::*;
 

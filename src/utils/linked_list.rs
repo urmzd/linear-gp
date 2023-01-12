@@ -631,7 +631,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::{LinkedList, Node};
-    use test_log::test;
 
     #[test]
     fn given_lists_when_swap_single_element_then_lists_are_mutated() {

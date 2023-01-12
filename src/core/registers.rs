@@ -98,7 +98,6 @@ where
 #[cfg(test)]
 mod tests {
     use crate::core::registers::Registers;
-    use test_log::test;
 
     #[test]
     fn given_registers_when_indexed_with_range_then_slice_is_returned() {
