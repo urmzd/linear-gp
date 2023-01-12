@@ -1,6 +1,5 @@
 use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
 
-use test_log::test;
 
 use lgp::{
     core::{
@@ -50,6 +49,7 @@ fn main() -> VoidResultAnyError {
 
 #[cfg(test)]
 mod tests {
+    use test_log::test;
     use gym_rs::{
         envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode,
     };

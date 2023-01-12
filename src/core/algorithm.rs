@@ -1,6 +1,5 @@
 use core::fmt;
 use std::path::PathBuf;
-use test_log::test;
 
 use csv::ReaderBuilder;
 use more_asserts::assert_le;
@@ -332,6 +331,7 @@ where
 #[cfg(test)]
 mod tests {
     use std::{cell::RefCell, rc::Rc};
+    use test_log::test;
 
     use crate::{
         core::{instruction::InstructionGeneratorParameters, program::ProgramGeneratorParameters},
