@@ -1,23 +1,12 @@
 use std::fmt::Display;
 
-use json::JsonValue;
+use valuable::Valuable;
 
-#[derive(Clone, Debug, Copy, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Copy, PartialEq, PartialOrd, Valuable)]
 pub enum FitnessScore {
     OutOfBounds,
     NotEvaluated,
     Valid(f64),
-}
-
-impl From<FitnessScore> for JsonValue {
-    fn from(o: FitnessScore) -> Self {
-        match o {
-            FitnessScore::OutOfBounds | FitnessScore::NotEvaluated => {
-                JsonValue::String("NaN".into())
-            }
-            FitnessScore::Valid(value) => JsonValue::Number(value.into()),
-        }
-    }
 }
 
 impl Display for FitnessScore {

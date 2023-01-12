@@ -20,9 +20,9 @@ derivative = "2.2.0"
 derive_more = { version = "0.99" }
 plotters = "0.3.1"
 itertools = "0.10"
-json = "0.12.4"
 tracing = {version = "0.1", default-features=false }
-tracing-subscriber = { version = "0.3", default-features=false, features = ["env-filter", "fmt", "json", "std"] }
+tracing-subscriber = { version = "0.3", default-features=false, features = ["env-filter", "fmt", "json", "std", "valuable"] }
+valuable = { version = "0.1.0", features = ["derive"] } 
 gym-rs = { git = "https://github.com/urmzd/gym-rs" }
 uuid = { version = "1.2.2", features = ["v4"] }
 
