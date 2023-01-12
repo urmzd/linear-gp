@@ -208,7 +208,7 @@ where
         for initial_state in parameters.get_state().clone() {
             let initial_state_vec: Vec<f64> = initial_state.clone().into();
             debug!(
-                "{:#}",
+                "{}",
                 object!{ 
                     program_id: self.program.id.to_string(),
                     initial_state: initial_state_vec
@@ -225,7 +225,7 @@ where
             .unwrap();
 
             debug!(
-                "{:#}",
+                "{}",
                 object! {
                     program_id: self.program.id.to_string(),
                     action_state: c_action_state
@@ -235,7 +235,7 @@ where
             let mut score = 0.;
 
             debug!(
-                "{:#}",
+                "{}",
                 object! {
                     program_id: self.program.id.to_string(),
                     q_table: self.q_table.clone()
@@ -283,7 +283,7 @@ where
         }
 
         debug!(
-            "{:#}",
+            "{}",
             object! {
                 program_id: self.program.id.to_string(),
                 q_table: self.q_table.clone()
@@ -296,7 +296,7 @@ where
         self.program.fitness = FitnessScore::Valid(median);
 
         debug!(
-            "{:#}",
+            "{}",
             object! {
                 program_id: self.program.id.to_string(),
                 fitness: self.program.fitness
