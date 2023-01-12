@@ -1,5 +1,4 @@
 use std::{fmt, marker::PhantomData, mem, ptr::NonNull};
-use test_log::test;
 
 use serde::{ser::SerializeSeq, Serialize};
 
@@ -632,6 +631,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::{LinkedList, Node};
+    use test_log::test;
 
     #[test]
     fn given_lists_when_swap_single_element_then_lists_are_mutated() {

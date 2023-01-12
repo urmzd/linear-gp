@@ -1,5 +1,3 @@
-use test_log::test;
-
 pub fn argmax<I: Iterator<Item = f64>>(iter: I) -> Option<usize> {
     let mut current_max = None;
     let mut max_index = -1;
@@ -28,6 +26,7 @@ pub fn max_val<I: Iterator<Item = f64>>(iter: I) -> Option<f64> {
 #[cfg(test)]
 mod tests {
     use super::argmax;
+    use test_log::test;
 
     #[test]
     fn given_iterator_of_floats_when_argmax_then_max_index_is_returned() {

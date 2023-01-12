@@ -1,6 +1,5 @@
 use std::marker::PhantomData;
 
-use test_log::test;
 
 use crate::utils::random::generator;
 use derivative::Derivative;
@@ -131,6 +130,7 @@ mod tests {
         core::instruction::InstructionGeneratorParameters,
         extensions::classification::ClassificationParameters, utils::test::TestInput,
     };
+    use test_log::test;
 
     use super::*;
 
