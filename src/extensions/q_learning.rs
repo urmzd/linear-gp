@@ -6,8 +6,9 @@ use rand::{
     distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
     prelude::SliceRandom,
 };
-use json::{object, JsonValue};
 use tracing::debug;
+use tracing::field::valuable;
+use valuable::Valuable;
 
 use crate::{
     core::{
@@ -20,7 +21,7 @@ use crate::{
 
 use super::reinforcement_learning::{ReinforcementLearningInput, ReinforcementLearningParameters};
 
-#[derive(Clone)]
+#[derive(Clone, Valuable)]
 pub struct QTable {
     table: Vec<Vec<f64>>,
     n_actions: usize,
@@ -28,23 +29,6 @@ pub struct QTable {
     q_consts: QConsts,
 }
 
-impl From<QTable> for JsonValue {
-    fn from(q: QTable) -> Self {
-        let mut data = json::JsonValue::new_array();
-
-        for row in q.table {
-            let mut r_data = json::JsonValue::new_array();
-
-            for column in row {
-                r_data.push(column).unwrap();
-            }
-
-            data.push(r_data).unwrap();
-        }
-
-        data
-    }
-}
 
 impl Debug for QTable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -52,19 +36,10 @@ impl Debug for QTable {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Valuable)]
 pub struct ActionRegisterPair {
     action: usize,
     register: usize,
-}
-
-impl From<ActionRegisterPair> for JsonValue {
-    fn from(arp: ActionRegisterPair) -> Self {
-        return object! {
-            action: arp.action,
-            register: arp.action,
-        }
-    }
 }
 
 
@@ -153,8 +128,8 @@ where
     T: ReinforcementLearningInput,
     T::State: Clone + fmt::Debug,
 {
-    q_table: QTable,
-    program: Program<ReinforcementLearningParameters<T>>,
+    pub q_table: QTable,
+    pub program: Program<ReinforcementLearningParameters<T>>,
 }
 
 impl<T> PartialEq for QProgram<T>
@@ -208,11 +183,8 @@ where
         for initial_state in parameters.get_state().clone() {
             let initial_state_vec: Vec<f64> = initial_state.clone().into();
             debug!(
-                "{}",
-                object!{ 
-                    program_id: self.program.id.to_string(),
-                    initial_state: initial_state_vec
-                }
+                program_id=valuable(&self.program.id.to_string()),
+                initial_state=valuable(&initial_state_vec)
             );
 
             parameters.environment.update_state(initial_state);
@@ -225,21 +197,15 @@ where
             .unwrap();
 
             debug!(
-                "{}",
-                object! {
-                    program_id: self.program.id.to_string(),
-                    action_state: c_action_state
-                }
+                    program_id=valuable(&self.program.id.to_string()),
+                    action_state=valuable(&c_action_state)
             );
 
             let mut score = 0.;
 
             debug!(
-                "{}",
-                object! {
-                    program_id: self.program.id.to_string(),
-                    q_table: self.q_table.clone()
-                }
+                    program_id=valuable(&self.program.id.to_string()),
+                    q_table=valuable(&self.q_table)
             );
             // Execute program.
             for _step in 0..parameters.max_episode_length {
@@ -283,11 +249,8 @@ where
         }
 
         debug!(
-            "{}",
-            object! {
-                program_id: self.program.id.to_string(),
-                q_table: self.q_table.clone()
-            }
+                program_id=valuable(&self.program.id.to_string()),
+                q_table=valuable(&self.q_table)
         );
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -296,11 +259,8 @@ where
         self.program.fitness = FitnessScore::Valid(median);
 
         debug!(
-            "{}",
-            object! {
-                program_id: self.program.id.to_string(),
-                fitness: self.program.fitness
-            }
+            program_id=valuable(&self.program.id.to_string()),
+            fitness=valuable(&self.program.fitness)
         )
     }
 
@@ -368,7 +328,7 @@ pub struct QProgramGeneratorParameters {
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy, new)]
+#[derive(Debug, Clone, Copy, new, Valuable)]
 pub struct QConsts {
     /// Step size parameter.
     alpha: f64,
