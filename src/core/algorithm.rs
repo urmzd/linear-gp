@@ -5,6 +5,8 @@ use csv::ReaderBuilder;
 use more_asserts::assert_le;
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
+use tracing::debug;
+use tracing::field::valuable;
 
 use crate::{
     core::characteristics::{Breed, Fitness, Generate},
@@ -232,6 +234,7 @@ where
             };
 
         for _generation in 0..hyper_params.n_generations {
+            debug!(generation=valuable(&_generation));
             rank_step(&mut population, &mut hyper_params);
 
             Self::apply_selection(&mut population, hyper_params.gap);
@@ -311,7 +314,7 @@ where
     }
 }
 
-impl<O> Default for EventHooks<'_, O>
+impl<'a, O> Default for EventHooks<'a, O>
 where
     O: PartialOrd + Clone + Fitness + Mutate + Generate,
 {
