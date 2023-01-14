@@ -183,34 +183,25 @@ where
         for initial_state in parameters.get_state().clone() {
             let initial_state_vec: Vec<f64> = initial_state.clone().into();
             debug!(
-                program_id=valuable(&self.program.id.to_string()),
+                id=valuable(&self.program.id.to_string()),
                 initial_state=valuable(&initial_state_vec)
             );
 
             parameters.environment.update_state(initial_state);
 
-            let mut c_action_state = get_action_state(
+            let mut current_action_state = get_action_state(
                 &mut parameters.environment,
                 &mut self.q_table,
                 &mut self.program,
             )
             .unwrap();
 
-            debug!(
-                    program_id=valuable(&self.program.id.to_string()),
-                    action_state=valuable(&c_action_state)
-            );
-
             let mut score = 0.;
 
-            debug!(
-                    program_id=valuable(&self.program.id.to_string()),
-                    q_table=valuable(&self.q_table)
-            );
             // Execute program.
             for _step in 0..parameters.max_episode_length {
                 // Act.
-                let state_reward_pair = parameters.environment.sim(c_action_state.action);
+                let state_reward_pair = parameters.environment.sim(current_action_state.action);
 
                 let reward = state_reward_pair.get_value();
                 score += reward;
@@ -219,7 +210,7 @@ where
                     break;
                 }
 
-                let n_action_state = match get_action_state(
+                let next_action_state = match get_action_state(
                     &mut parameters.environment,
                     &mut self.q_table,
                     &mut self.program,
@@ -234,11 +225,19 @@ where
                     Some(action_state) => action_state,
                 };
 
-                if c_action_state.register != n_action_state.register {
-                    self.q_table.update(c_action_state, reward, n_action_state)
+
+                if current_action_state.register != next_action_state.register {
+                    self.q_table.update(current_action_state, reward, next_action_state)
                 }
 
-                c_action_state = n_action_state;
+                //debug!(
+                        //id=valuable(&self.program.id.to_string()),
+                        //next_action_state=valuable(&next_action_state),
+                        //current_action_state=valuable(&current_action_state),
+                        //q_table=valuable(&self.q_table)
+                //);
+
+                current_action_state = next_action_state;
             }
 
             // Reset for next evaluation.
@@ -246,12 +245,13 @@ where
             parameters.environment.reset();
 
             scores.push(score);
-        }
 
-        debug!(
-                program_id=valuable(&self.program.id.to_string()),
-                q_table=valuable(&self.q_table)
-        );
+            debug!(
+                    id=valuable(&self.program.id.to_string()),
+                    q_table=valuable(&self.q_table),
+                    score=valuable(&score)
+            );
+        }
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let median = scores.swap_remove(scores.len() / 2);
@@ -259,7 +259,7 @@ where
         self.program.fitness = FitnessScore::Valid(median);
 
         debug!(
-            program_id=valuable(&self.program.id.to_string()),
+            id=valuable(&self.program.id.to_string()),
             fitness=valuable(&self.program.fitness)
         )
     }

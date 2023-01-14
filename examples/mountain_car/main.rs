@@ -51,12 +51,12 @@ mod tests {
     use gym_rs::{
         envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode,
     };
-    use tracing::field::valuable;
 
     use lgp::{
         core::{
             algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
-            instruction::InstructionGeneratorParameters, program::ProgramGeneratorParameters,
+            instruction::InstructionGeneratorParameters,
+            program::ProgramGeneratorParameters,
         },
         extensions::{
             gym_rs::ExtendedGymRsEnvironment,
@@ -65,7 +65,6 @@ mod tests {
         },
         utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
-    use tracing::debug;
     use tracing_subscriber::EnvFilter;
 
     use crate::set_up::{MountainCarInput, MountainCarLgp, QMountainCarLgp};
@@ -146,15 +145,11 @@ mod tests {
 
         QMountainCarLgp::execute(
             &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, params| {
-                params.fitness_parameters.next_generation();
-                pops.push(population.clone());
-
-                debug!("New Generation");
-                for p in population.iter() {
-                    debug!(fitness=valuable(&p.program.fitness), id=valuable(&p.program.id.to_string()))
-                }
-            }),
+            EventHooks::default()
+                .with_on_post_rank(&mut |population, params: &mut HyperParameters<QProgram<MountainCarInput>>| {
+                    params.fitness_parameters.next_generation();
+                    pops.push(population.clone());
+                })
         )?;
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/q.png";
