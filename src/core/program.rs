@@ -35,6 +35,18 @@ impl<T> Clone for Program<T> {
     }
 }
 
+impl<T> DuplicateNew for Program<T> {
+    fn duplicate_new(&self) -> Self {
+        Self {
+            instructions: self.instructions.clone(),
+            registers: self.registers.duplicate_new(),
+            fitness: self.fitness.clone(),
+            marker: self.marker.clone(),
+            id: Uuid::new_v4(),
+        }
+    }
+}
+
 #[derive(Debug, new)]
 pub struct Program<T> {
     pub id: Uuid,

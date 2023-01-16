@@ -28,6 +28,8 @@ where
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let inputs = &parameters.inputs;
 
+        self.registers.reset();
+
         let mut n_correct = 0.0;
 
         for input in inputs {

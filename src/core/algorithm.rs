@@ -11,12 +11,12 @@ use tracing::trace;
 use tracing_subscriber::EnvFilter;
 
 use crate::{
-    core::characteristics::{Breed, Fitness, FitnessScore, Generate},
+    core::characteristics::{Breed, Fitness, Generate},
     utils::random::generator,
 };
 
 use super::{
-    characteristics::Mutate,
+    characteristics::{DuplicateNew, Mutate},
     inputs::{Inputs, ValidInput},
     population::Population,
 };
@@ -99,8 +99,9 @@ where
             G::rank(&mut population);
             G::on_post_rank(&mut population, &mut self.params);
 
-            Some(population)
+            population
         } else if self.generation < self.params.n_generations {
+            // Freeze for now.
             let mut population = self.current_population.clone().unwrap();
 
             G::apply_selection(&mut population, self.params.gap);
@@ -116,21 +117,40 @@ where
             G::rank(&mut population);
             G::on_post_rank(&mut population, &mut self.params);
 
-            Some(population)
+            // Produce new populaiton.
+            population
         } else {
             return None;
         };
 
-        self.current_population = item.clone();
+        assert!(item.iter().all(|p| !p.get_fitness().is_not_evaluated()));
+
+        trace!(
+            best_score = valuable(&item.best().map(|p| p.get_fitness().unwrap_or(f64::NAN))),
+            median_score = valuable(&item.median().map(|p| p.get_fitness().unwrap_or(f64::NAN))),
+            worst_score = valuable(&item.worst().map(|p| p.get_fitness().unwrap_or(f64::NAN))),
+            generation = valuable(&self.generation)
+        );
+
+        // Freeze population and store it.
+        self.current_population = Some(item.clone());
         self.generation += 1;
 
-        return item;
+        return Some(item);
     }
 }
 
 pub trait GeneticAlgorithm
 where
-    Self::O: Fitness + Generate + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug,
+    Self::O: Fitness
+        + Generate
+        + DuplicateNew
+        + PartialOrd
+        + Sized
+        + Clone
+        + Mutate
+        + Breed
+        + fmt::Debug,
 {
     type O;
 
@@ -174,15 +194,6 @@ where
         // Organize individuals by their fitness score.
         population.sort();
         assert_le!(population.worst(), population.best());
-        trace!(
-            "{:?}",
-            population = valuable(
-                &population
-                    .iter()
-                    .map(|p| p.get_fitness())
-                    .collect::<Vec<FitnessScore>>()
-            )
-        );
     }
 
     fn on_pre_eval_fitness(
@@ -296,10 +307,9 @@ where
         // Fill reset with clones
         for individual in population
             .iter()
-            .cloned()
             .choose_multiple(&mut generator(), remaining_pool_spots)
         {
-            population.push(individual)
+            children.push(individual.duplicate_new())
         }
 
         population.extend(children)

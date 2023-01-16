@@ -1,11 +1,27 @@
+use std::cmp::Ordering;
+
 use derive_more::Display;
 use valuable::Valuable;
 
-#[derive(Clone, Debug, Copy, PartialEq, PartialOrd, Valuable, Display)]
+#[derive(Clone, Debug, Copy, PartialEq, Valuable, Display)]
 pub enum FitnessScore {
+    #[display(fmt = "valid: {}", _0)]
     Valid(f64),
+    #[display(format = "out-of-bounds")]
     OutOfBounds,
+    #[display(format = "not-evaluated")]
     NotEvaluated,
+}
+
+impl PartialOrd for FitnessScore {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match (self, other) {
+            (Self::Valid(a), Self::Valid(b)) => a.partial_cmp(b),
+            (Self::Valid(_), _) => Some(Ordering::Greater),
+            (_, Self::Valid(_)) => Some(Ordering::Less),
+            _ => Some(Ordering::Equal),
+        }
+    }
 }
 
 impl FitnessScore {
