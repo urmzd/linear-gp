@@ -236,9 +236,8 @@ where
                     None => {
                         // We've encountered numerical instability. The program is not considered valid, and thus
                         // has the lowest score.
-                        return {
-                            self.program.fitness = FitnessScore::OutOfBounds;
-                        };
+                        self.program.fitness = FitnessScore::OutOfBounds;
+                        return;
                     }
                     Some(action_state) => action_state,
                 };

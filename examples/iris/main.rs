@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         n_generations: 1,
         gap: 0.5,
         mutation_percent: 0.5,
-        lazy_evaluate: true,
+        lazy_evaluate: false,
         crossover_percent: 0.5,
         fitness_parameters: ClassificationParameters::new(inputs),
         program_parameters: ProgramGeneratorParameters::new(
@@ -67,7 +67,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.5,
                 crossover_percent: 0.5,
-                lazy_evaluate: true,
+                lazy_evaluate: false,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -97,7 +97,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 1.,
                 crossover_percent: 0.,
-                lazy_evaluate: true,
+                lazy_evaluate: false,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -128,7 +128,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 1.,
-                lazy_evaluate: true,
+                lazy_evaluate: false,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -160,7 +160,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
-                lazy_evaluate: true,
+                lazy_evaluate: false,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -202,7 +202,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
-                lazy_evaluate: true,
+                lazy_evaluate: false,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -241,7 +241,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
-                lazy_evaluate: true,
+                lazy_evaluate: false,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
@@ -277,7 +277,7 @@ mod tests {
                 gap: 0.5,
                 mutation_percent: 0.,
                 crossover_percent: 0.,
-                lazy_evaluate: true,
+                lazy_evaluate: false,
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
