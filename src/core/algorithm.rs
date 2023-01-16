@@ -1,13 +1,16 @@
 use core::fmt;
+use std::marker::PhantomData;
 use std::path::PathBuf;
 
 use csv::ReaderBuilder;
 use more_asserts::assert_le;
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
-use tracing::debug;
 use tracing::field::valuable;
+use tracing::trace;
+use tracing_subscriber::EnvFilter;
 
+use crate::core::characteristics::FitnessScore;
 use crate::{
     core::characteristics::{Breed, Fitness, Generate},
     utils::random::generator,
@@ -58,22 +61,98 @@ where
     }
 }
 
+pub struct GeneticAlgorithmIter<G>
+where
+    G: GeneticAlgorithm + ?Sized,
+{
+    generation: usize,
+    current_population: Option<Population<G::O>>,
+    marker: PhantomData<G>,
+    params: HyperParameters<G::O>,
+}
+
+impl<G> GeneticAlgorithmIter<G>
+where
+    G: GeneticAlgorithm + ?Sized,
+{
+    pub fn new(params: HyperParameters<G::O>) -> Self {
+        return GeneticAlgorithmIter {
+            generation: 0,
+            current_population: None,
+            marker: PhantomData,
+            params,
+        };
+    }
+}
+
+impl<G> Iterator for GeneticAlgorithmIter<G>
+where
+    G: GeneticAlgorithm,
+{
+    type Item = Population<G::O>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let item = if self.generation == 0 {
+            let mut population = G::init_pop(&self.params);
+
+            G::rank(
+                &mut population,
+                &mut self.params.fitness_parameters,
+                self.params.lazy_evaluate,
+            );
+
+            Some(population)
+        } else if self.generation < self.params.n_generations {
+            let mut current_population = self.current_population.clone().unwrap();
+
+            G::apply_selection(&mut current_population, self.params.gap);
+            G::breed(
+                &mut current_population,
+                self.params.mutation_percent,
+                self.params.crossover_percent,
+                &self.params.program_parameters,
+            );
+            G::rank(
+                &mut current_population,
+                &mut self.params.fitness_parameters,
+                self.params.lazy_evaluate,
+            );
+
+            Some(current_population)
+        } else {
+            return None;
+        };
+
+        self.current_population = item.clone();
+        self.generation += 1;
+
+        return item;
+    }
+}
+
 pub trait GeneticAlgorithm
 where
     Self::O: Fitness + Generate + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug,
 {
     type O;
 
-    /// Generates a set of random individuals to undergo the evolutionary process.
-    fn init_population(hyper_params: &HyperParameters<Self::O>) -> Population<Self::O> {
-        let mut population = Population::with_capacity(hyper_params.population_size);
+    fn init_sys() {
+        tracing_subscriber::fmt()
+            .json()
+            .with_env_filter(EnvFilter::from_default_env())
+            .try_init()
+            .unwrap_or(());
+    }
 
-        for _ in 0..hyper_params.population_size {
-            let program = Self::O::generate(&hyper_params.program_parameters);
+    fn init_pop(hyperparams: &HyperParameters<Self::O>) -> Population<Self::O> {
+        let mut population = Population::with_capacity(hyperparams.population_size);
+
+        for _ in 0..hyperparams.population_size {
+            let program = Self::O::generate(&hyperparams.program_parameters);
             population.push(program)
         }
 
-        population
+        return population;
     }
 
     /// Evaluates the individuals found in the current population.
@@ -98,11 +177,29 @@ where
 
         // Organize individuals by their fitness score.
         population.sort();
+        assert_le!(population.worst(), population.best());
+
+        // trace!(
+        //     "{:?}",
+        //     population = valuable(
+        //         &population
+        //             .iter()
+        //             .map(|p| p.get_fitness())
+        //             .collect::<Vec<FitnessScore>>()
+        //     )
+        // );
+
+        Self::on_post_rank(population, fitness_parameters)
+    }
+
+    fn on_post_rank(
+        _population: &mut Population<Self::O>,
+        _fitness_params: &mut <Self::O as Fitness>::FitnessParameters,
+    ) {
     }
 
     fn apply_selection(population: &mut Population<Self::O>, gap: f64) {
         assert!(gap >= 0. && gap <= 1.);
-        assert_le!(population.worst(), population.best());
 
         let pop_len = population.len();
 
@@ -209,181 +306,7 @@ where
         population.extend(children)
     }
 
-    fn execute<'b>(
-        mut hyper_params: &mut HyperParameters<Self::O>,
-        mut hooks: EventHooks<'b, Self::O>,
-    ) -> Result<Population<Self::O>, Box<dyn std::error::Error>> {
-        let mut population = Self::init_population(hyper_params);
-
-        if let Some(hook) = hooks.on_post_init {
-            hook(&mut population, &mut hyper_params);
-        }
-
-        let mut rank_step =
-            |rank_population: &mut Population<Self::O>,
-             rank_hyper_params: &mut HyperParameters<Self::O>| {
-                Self::rank(
-                    rank_population,
-                    &mut rank_hyper_params.fitness_parameters,
-                    rank_hyper_params.lazy_evaluate,
-                );
-
-                if let Some(hook) = hooks.on_post_rank.as_mut() {
-                    hook(rank_population, rank_hyper_params);
-                }
-            };
-
-        for _generation in 0..hyper_params.n_generations {
-            debug!(generation=valuable(&_generation));
-            rank_step(&mut population, &mut hyper_params);
-
-            Self::apply_selection(&mut population, hyper_params.gap);
-            if let Some(hook) = hooks.on_post_selection.as_mut() {
-                hook(&mut population, &mut hyper_params);
-            }
-
-            Self::breed(
-                &mut population,
-                hyper_params.mutation_percent,
-                hyper_params.crossover_percent,
-                &hyper_params.program_parameters,
-            );
-            if let Some(hook) = hooks.on_post_breed.as_mut() {
-                hook(&mut population, &mut hyper_params);
-            }
-        }
-
-        rank_step(&mut population, &mut hyper_params);
-
-        Ok(population)
-    }
-}
-
-pub type GpHook<'a, O> = &'a mut dyn FnMut(&mut Population<O>, &mut HyperParameters<O>);
-
-pub struct EventHooks<'a, O>
-where
-    O: PartialOrd + Fitness + Mutate + Generate,
-{
-    pub on_post_init: Option<GpHook<'a, O>>,
-    pub on_post_rank: Option<GpHook<'a, O>>,
-    pub on_post_selection: Option<GpHook<'a, O>>,
-    pub on_post_breed: Option<GpHook<'a, O>>,
-    pub on_pre_rank: Option<GpHook<'a, O>>,
-}
-
-impl<'a, O> EventHooks<'a, O>
-where
-    O: PartialOrd + Clone + Fitness + Mutate + Generate,
-{
-    pub fn with_on_post_init(self, f: GpHook<'a, O>) -> Self {
-        Self {
-            on_post_init: Some(f),
-            ..self
-        }
-    }
-
-    pub fn with_on_post_selection(self, f: GpHook<'a, O>) -> Self {
-        Self {
-            on_post_selection: Some(f),
-            ..self
-        }
-    }
-
-    pub fn with_on_post_rank(self, f: GpHook<'a, O>) -> Self {
-        Self {
-            on_post_rank: Some(f),
-            ..self
-        }
-    }
-
-    pub fn with_on_post_breed(self, f: GpHook<'a, O>) -> Self {
-        Self {
-            on_post_breed: Some(f),
-            ..self
-        }
-    }
-}
-
-impl<'a, O> fmt::Debug for EventHooks<'a, O>
-where
-    O: PartialOrd + Fitness + Mutate + Generate,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("EventHooks").finish()
-    }
-}
-
-impl<'a, O> Default for EventHooks<'a, O>
-where
-    O: PartialOrd + Clone + Fitness + Mutate + Generate,
-{
-    fn default() -> Self {
-        Self {
-            on_post_init: None,
-            on_post_rank: None,
-            on_post_selection: None,
-            on_post_breed: None,
-            on_pre_rank: None,
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::{cell::RefCell, rc::Rc};
-
-    use crate::{
-        core::{instruction::InstructionGeneratorParameters, program::ProgramGeneratorParameters},
-        extensions::classification::ClassificationParameters,
-        utils::{
-            random::generator,
-            test::{TestInput, TestLgp},
-        },
-    };
-    use rand::{distributions::Standard, Rng};
-
-    use super::{EventHooks, GeneticAlgorithm, HyperParameters};
-
-    #[test]
-    fn given_lgp_instance_with_event_hooks_when_execute_then_closures_are_executed(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let inputs = [0; 5].map(|_| generator().sample(Standard)).to_vec();
-        let received = Rc::new(RefCell::new(Vec::new()));
-        let mut hyper_params = HyperParameters {
-            population_size: 10,
-            gap: 0.5,
-            mutation_percent: 0.,
-            crossover_percent: 0.,
-            n_generations: 1,
-            lazy_evaluate: true,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
-                10,
-                InstructionGeneratorParameters::from::<TestInput>(1),
-            ),
-        };
-
-        // TODO: Add prerank.
-        TestLgp::execute(
-            &mut hyper_params,
-            EventHooks::default()
-                .with_on_post_init(&mut |_, _| {
-                    received.borrow_mut().push(1);
-                })
-                .with_on_post_rank(&mut |_, _| {
-                    received.borrow_mut().push(2);
-                })
-                .with_on_post_selection(&mut |_, _| {
-                    received.borrow_mut().push(3);
-                })
-                .with_on_post_breed(&mut |_, _| {
-                    received.borrow_mut().push(4);
-                }),
-        )?;
-
-        pretty_assertions::assert_eq!(received.borrow().as_slice(), &[1, 2, 3, 4, 2]);
-
-        Ok(())
+    fn execute<'b>(hyper_params: HyperParameters<Self::O>) -> GeneticAlgorithmIter<Self> {
+        return GeneticAlgorithmIter::new(hyper_params);
     }
 }

@@ -1,6 +1,5 @@
 use std::marker::PhantomData;
 
-
 use crate::utils::random::generator;
 use derivative::Derivative;
 use derive_new::new;
@@ -37,18 +36,25 @@ impl<T> Clone for Program<T> {
     }
 }
 
-#[derive(Debug, new, Derivative)]
-#[derivative(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, new)]
 pub struct Program<T> {
     pub id: Uuid,
-    #[derivative(Ord = "ignore", PartialOrd = "ignore")]
     pub instructions: Instructions,
-    #[derivative(Ord = "ignore", PartialOrd = "ignore", PartialEq = "ignore")]
     pub registers: Registers,
-    #[derivative(Ord = "ignore")]
     pub fitness: FitnessScore,
-    #[derivative(PartialEq = "ignore", Ord = "ignore", PartialOrd = "ignore")]
     marker: PhantomData<T>,
+}
+
+impl<T> PartialEq for Program<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl<T> PartialOrd for Program<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        return self.fitness.partial_cmp(&other.fitness);
+    }
 }
 
 impl<T> Program<T> {
@@ -103,6 +109,8 @@ impl<T> Mutate for Program<T> {
 
         // IMPORTANT: Reset fitness to force evaluation.
         mutated.fitness = FitnessScore::NotEvaluated;
+        // IMPORTANT: New UUID.
+        mutated.id = Uuid::new_v4();
 
         mutated
     }

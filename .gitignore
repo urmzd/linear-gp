@@ -1,5 +1,9 @@
 /target
+
 .vscode
 .idea
+
 assets/plots
+assets/logs
+
 *.log
