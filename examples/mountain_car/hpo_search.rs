@@ -9,12 +9,12 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
-        q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
+        q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
     },
     utils::{random::generator, types::VoidResultAnyError},
 };
-use set_up::{MountainCarInput, QMountainCarLgp};
+use set_up::MountainCarInput;
 use tracing::debug;
 mod set_up;
 
@@ -23,7 +23,7 @@ fn main() -> VoidResultAnyError {
     let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut epsilon_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
 
-    let game = MountainCarEnv::new(RenderMode::None, None);
+    let game = MountainCarEnv::new(RenderMode::None);
     let environment = MountainCarInput::new(game);
 
     let n_generations = 100;
@@ -60,7 +60,9 @@ fn main() -> VoidResultAnyError {
             ),
         };
 
-        let population = QMountainCarLgp::execute(hyper_params).last().unwrap();
+        let population = QLgp::<MountainCarInput>::execute(hyper_params)
+            .last()
+            .unwrap();
         let result = population.best().unwrap().get_fitness().unwrap_or(-200.);
 
         alpha_optim.tell(alpha, result)?;

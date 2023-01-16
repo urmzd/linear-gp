@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
 
 use crate::utils::random::generator;
-use derivative::Derivative;
 use derive_new::new;
 use rand::{
     distributions::Uniform,
@@ -107,10 +106,9 @@ impl<T> Mutate for Program<T> {
         let mutated_instruction = instruction.mutate(&params.instruction_generator_parameters);
         *instruction = mutated_instruction;
 
-        // IMPORTANT: Reset fitness to force evaluation.
         mutated.fitness = FitnessScore::NotEvaluated;
-        // IMPORTANT: New UUID.
         mutated.id = Uuid::new_v4();
+        mutated.registers = mutated.registers.duplicate_new();
 
         mutated
     }

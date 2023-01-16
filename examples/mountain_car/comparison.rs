@@ -8,16 +8,16 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
-        q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
-        reinforcement_learning::ReinforcementLearningParameters,
+        q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
+        reinforcement_learning::{RLgp, ReinforcementLearningParameters},
     },
     utils::{plots::plot_benchmarks, types::VoidResultAnyError},
 };
 mod set_up;
-use set_up::{MountainCarInput, MountainCarLgp, QMountainCarLgp};
+use set_up::MountainCarInput;
 
 fn main() -> VoidResultAnyError {
-    let environment = MountainCarEnv::new(RenderMode::None, None);
+    let environment = MountainCarEnv::new(RenderMode::None);
     let input = MountainCarInput::new(environment.clone());
     let n_generations = 100;
     let n_trials = 5;
@@ -62,8 +62,8 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    let lgp_pops = MountainCarLgp::execute(lgp_hyper_params).collect_vec();
-    let q_pops = QMountainCarLgp::execute(q_params).collect_vec();
+    let lgp_pops = RLgp::execute(lgp_hyper_params).collect_vec();
+    let q_pops = QLgp::execute(q_params).collect_vec();
 
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/mountain_car/default.png";
     plot_benchmarks(lgp_pops, PLOT_FILE_NAME, -200.0..0.0)?;
