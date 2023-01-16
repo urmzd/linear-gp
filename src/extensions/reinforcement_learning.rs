@@ -152,4 +152,18 @@ where
     T::State: Clone + fmt::Debug,
 {
     type O = Program<ReinforcementLearningParameters<T>>;
+
+    fn on_post_rank(
+        _population: &mut crate::core::population::Population<Self::O>,
+        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
+    ) {
+        parameters.fitness_parameters.environment.finish();
+    }
+
+    fn on_pre_eval_fitness(
+        _population: &mut crate::core::population::Population<Self::O>,
+        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
+    ) {
+        parameters.fitness_parameters.environment.init();
+    }
 }

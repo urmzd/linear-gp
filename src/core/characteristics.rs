@@ -1,6 +1,7 @@
+use derive_more::Display;
 use valuable::Valuable;
 
-#[derive(Clone, Debug, Copy, PartialEq, PartialOrd, Valuable)]
+#[derive(Clone, Debug, Copy, PartialEq, PartialOrd, Valuable, Display)]
 pub enum FitnessScore {
     Valid(f64),
     OutOfBounds,

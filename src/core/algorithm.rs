@@ -94,13 +94,8 @@ where
         let item = if self.generation == 0 {
             let mut population = G::init_pop(&self.params);
 
-            G::eval_fitness(
-                &mut population,
-                &mut self.params.fitness_parameters,
-                self.params.lazy_evaluate,
-            );
-
-            G::on_pre_rank(&mut population, &mut self.params);
+            G::on_pre_eval_fitness(&mut population, &mut self.params);
+            G::eval_fitness(&mut population, &mut self.params);
             G::rank(&mut population);
             G::on_post_rank(&mut population, &mut self.params);
 
@@ -115,13 +110,9 @@ where
                 self.params.crossover_percent,
                 &self.params.program_parameters,
             );
-            G::eval_fitness(
-                &mut population,
-                &mut self.params.fitness_parameters,
-                self.params.lazy_evaluate,
-            );
 
-            G::on_pre_rank(&mut population, &mut self.params);
+            G::on_pre_eval_fitness(&mut population, &mut self.params);
+            G::eval_fitness(&mut population, &mut self.params);
             G::rank(&mut population);
             G::on_post_rank(&mut population, &mut self.params);
 
@@ -162,22 +153,18 @@ where
         return population;
     }
 
-    fn eval_fitness(
-        p: &mut Population<Self::O>,
-        fitness_parameters: &mut <Self::O as Fitness>::FitnessParameters,
-        lazy_evaluate: bool,
-    ) {
+    fn eval_fitness(p: &mut Population<Self::O>, params: &mut HyperParameters<Self::O>) {
         for individual in p.iter_mut() {
             // Only force evaluation when lazy evaluation is set off or in cases
             // where lazy evaluation is desired, evaluate individuals who haven't changed.
-            let should_eval = if lazy_evaluate {
+            let should_eval = if params.lazy_evaluate {
                 individual.get_fitness().is_not_evaluated()
             } else {
                 true
             };
 
             if should_eval {
-                individual.eval_fitness(fitness_parameters)
+                individual.eval_fitness(&mut params.fitness_parameters)
             }
         }
     }
@@ -198,7 +185,7 @@ where
         );
     }
 
-    fn on_pre_rank(
+    fn on_pre_eval_fitness(
         _population: &mut Population<Self::O>,
         _parameters: &mut HyperParameters<Self::O>,
     ) {

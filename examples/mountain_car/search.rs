@@ -14,9 +14,11 @@ use lgp::{
     },
     utils::{random::generator, types::VoidResultAnyError},
 };
-use set_up::MountainCarInput;
+
 use tracing::debug;
-mod set_up;
+
+mod config;
+use config::MountainCarInput;
 
 fn main() -> VoidResultAnyError {
     let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);

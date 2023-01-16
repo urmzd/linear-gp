@@ -12,9 +12,9 @@ use lgp::{
         reinforcement_learning::ReinforcementLearningParameters,
     },
 };
-use set_up::CartPoleInput;
+use config::CartPoleInput;
 
-mod set_up;
+mod config;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let environment = CartPoleEnv::new(RenderMode::Human);
@@ -66,7 +66,7 @@ mod tests {
         utils::plots::plot_benchmarks,
     };
 
-    use crate::set_up::CartPoleInput;
+    use crate::config::CartPoleInput;
 
     #[test]
     fn given_cart_pole_when_lgp_executed_then_task_is_solved() -> Result<(), Box<dyn error::Error>>

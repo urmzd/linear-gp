@@ -1,6 +1,6 @@
 [package]
 name = "lgp"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 authors = ["Urmzd Mukhammadnaim; urmzd@dal.ca"]
 
@@ -49,9 +49,9 @@ path = "examples/cart_pole/main.rs"
 test = true
 
 [[example]]
-name = "q_mountain_car_hpo_search"
-path = "examples/mountain_car/hpo_search.rs"
+name = "mountain_car_search"
+path = "examples/mountain_car/search.rs"
 
 [[example]]
-name = "mountain_car_comparison"
-path = "examples/mountain_car/comparison.rs"
+name = "mountain_car_compare"
+path = "examples/mountain_car/compare.rs"
