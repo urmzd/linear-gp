@@ -1,4 +1,4 @@
-mod set_up;
+mod config;
 
 use std::error;
 
@@ -10,7 +10,7 @@ use lgp::{
     },
     extensions::classification::ClassificationParameters,
 };
-use set_up::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
+use config::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
@@ -51,7 +51,7 @@ mod tests {
     use pretty_assertions::{assert_eq, assert_ne};
     use std::error;
 
-    use crate::set_up::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
+    use crate::config::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
 
     // TODO: Update tests to include assertions about benchmark trends.
     #[tokio::test]
@@ -212,7 +212,7 @@ mod tests {
 
         let mut population = IrisLgp::init_pop(&hyper_params);
 
-        IrisLgp::eval_fitness(&mut population, &mut hyper_params.fitness_parameters, true);
+        IrisLgp::eval_fitness(&mut population, &mut hyper_params);
         IrisLgp::rank(&mut population);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
 
@@ -251,7 +251,7 @@ mod tests {
 
         let mut population = IrisLgp::init_pop(&hyper_params);
 
-        IrisLgp::eval_fitness(&mut population, &mut hyper_params.fitness_parameters, true);
+        IrisLgp::eval_fitness(&mut population, &mut hyper_params);
         IrisLgp::rank(&mut population);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
 

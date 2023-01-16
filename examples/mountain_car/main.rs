@@ -14,8 +14,8 @@ use lgp::{
     },
     utils::types::VoidResultAnyError,
 };
-use set_up::MountainCarInput;
-mod set_up;
+use config::MountainCarInput;
+mod config;
 
 fn main() -> VoidResultAnyError {
     let game = MountainCarEnv::new(RenderMode::None);
@@ -69,7 +69,7 @@ mod tests {
         utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
 
-    use crate::set_up::MountainCarInput;
+    use crate::config::MountainCarInput;
 
     #[test]
     fn given_mountain_car_example_when_lgp_executed_then_task_is_solved(

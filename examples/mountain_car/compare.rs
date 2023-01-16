@@ -13,8 +13,8 @@ use lgp::{
     },
     utils::{plots::plot_benchmarks, types::VoidResultAnyError},
 };
-mod set_up;
-use set_up::MountainCarInput;
+mod config;
+use config::MountainCarInput;
 
 fn main() -> VoidResultAnyError {
     let environment = MountainCarEnv::new(RenderMode::None);

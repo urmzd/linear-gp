@@ -363,7 +363,7 @@ where
         parameters.fitness_parameters.environment.finish();
     }
 
-    fn on_pre_rank(
+    fn on_pre_eval_fitness(
         _population: &mut crate::core::population::Population<Self::O>,
         parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
     ) {
