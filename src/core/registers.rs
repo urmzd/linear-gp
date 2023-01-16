@@ -33,9 +33,8 @@ impl Registers {
     }
 
     pub fn all_argmax(&self, range: Option<Range<usize>>) -> Option<Vec<usize>> {
-        let Registers { data } = self;
-        let range_to_use = range.unwrap_or(0..data.len());
-        let sliced_data = &data[range_to_use];
+        let range_to_use = range.unwrap_or(0..self.data.len());
+        let sliced_data = &self.data[range_to_use];
         let max_value = sliced_data
             .iter()
             .copied()

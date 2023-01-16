@@ -8,11 +8,11 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
-        q_learning::{QConsts, QProgramGeneratorParameters},
+        q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
     },
 };
-use set_up::{CartPoleInput, QCartPoleLgp};
+use set_up::CartPoleInput;
 
 mod set_up;
 
@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
     };
 
-    QCartPoleLgp::execute(hyper_params);
+    QLgp::<CartPoleInput>::execute(hyper_params).last();
 
     Ok(())
 }
@@ -60,13 +60,13 @@ mod tests {
         },
         extensions::{
             gym_rs::ExtendedGymRsEnvironment,
-            q_learning::{QConsts, QProgramGeneratorParameters},
-            reinforcement_learning::ReinforcementLearningParameters,
+            q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
+            reinforcement_learning::{RLgp, ReinforcementLearningParameters},
         },
         utils::plots::plot_benchmarks,
     };
 
-    use crate::set_up::{CartPoleInput, CartPoleLgp, QCartPoleLgp};
+    use crate::set_up::CartPoleInput;
 
     #[test]
     fn given_cart_pole_when_lgp_executed_then_task_is_solved() -> Result<(), Box<dyn error::Error>>
@@ -97,7 +97,7 @@ mod tests {
             ),
         };
 
-        let populations = CartPoleLgp::execute(hyper_params).collect_vec();
+        let populations = RLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/default.png";
         let range = (0.)..(max_episode_length as f64);
@@ -137,7 +137,7 @@ mod tests {
             ),
         };
 
-        let populations = QCartPoleLgp::execute(hyper_params).collect_vec();
+        let populations = QLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/q.png";
         let range = (0.)..(max_episode_length as f64);

@@ -1,7 +1,7 @@
 use std::usize;
 
 use gym_rs::core::{ActionReward, Env};
-use gym_rs::utils::custom::Sample;
+use gym_rs::utils::custom::traits::Sample;
 use itertools::Itertools;
 
 use crate::core::inputs::ValidInput;

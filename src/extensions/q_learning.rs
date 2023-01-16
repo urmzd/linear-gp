@@ -1,4 +1,7 @@
-use std::fmt::{self, Debug};
+use std::{
+    fmt::{self, Debug},
+    marker::PhantomData,
+};
 
 use derive_new::new;
 use more_asserts::{assert_ge, assert_le};
@@ -12,6 +15,7 @@ use valuable::Valuable;
 
 use crate::{
     core::{
+        algorithm::GeneticAlgorithm,
         characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
         program::{Program, ProgramGeneratorParameters},
         registers::Registers,
@@ -29,7 +33,6 @@ pub struct QTable {
     q_consts: QConsts,
 }
 
-
 impl Debug for QTable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_list().entries(self.table.iter()).finish()
@@ -41,7 +44,6 @@ pub struct ActionRegisterPair {
     action: usize,
     register: usize,
 }
-
 
 impl DuplicateNew for QTable {
     fn duplicate_new(&self) -> Self {
@@ -80,10 +82,13 @@ impl QTable {
         let winning_registers = registers.all_argmax(None);
 
         let winning_register = match winning_registers {
+            // NOTE: Should we panic instead?
             None => return None,
+            // Select any register.
+            // NOTE: Does choosing a random register make it harder to converge?
             Some(registers) => registers
                 .choose(&mut generator())
-                .copied()
+                .cloned()
                 .expect("Register to have been chosen."),
         };
 
@@ -172,28 +177,31 @@ where
 impl<T> Fitness for QProgram<T>
 where
     T: ReinforcementLearningInput,
-    T::State: Clone + Debug
+    T::State: Clone + Debug,
 {
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut score_q_table_pairs = vec![];
 
-        // TODO: Call init and finish after `rank`
         for initial_state in parameters.get_state().clone() {
-
             let mut current_q_table = self.q_table.clone();
             let mut score = 0.;
 
             parameters.environment.update_state(initial_state.clone());
 
             // We run the program and determine what action to take at the current step.
-            let mut current_action_state = get_action_state(
+            let mut current_action_state = match get_action_state(
                 &mut parameters.environment,
                 &mut current_q_table,
                 &mut self.program,
-            )
-            .unwrap();
+            ) {
+                Some(action_state) => action_state,
+                None => {
+                    self.program.fitness = FitnessScore::OutOfBounds;
+                    return;
+                }
+            };
 
             // We execute the selected action and continue to repeat the cycle until termination.
             for _step in 0..parameters.max_episode_length {
@@ -222,7 +230,6 @@ where
                     Some(action_state) => action_state,
                 };
 
-
                 if current_action_state.register != next_action_state.register {
                     current_q_table.update(current_action_state, reward, next_action_state)
                 }
@@ -237,10 +244,10 @@ where
             let initial_state_vec: &Vec<f64> = &initial_state.into();
 
             debug!(
-                    id=valuable(&self.program.id.to_string()),
-                    q_table=valuable(&current_q_table),
-                    initial_state=valuable(&initial_state_vec),
-                    score=valuable(&score)
+                id = valuable(&self.program.id.to_string()),
+                q_table = valuable(&current_q_table),
+                initial_state = valuable(&initial_state_vec),
+                score = valuable(&score)
             );
 
             score_q_table_pairs.push((score, current_q_table));
@@ -249,14 +256,11 @@ where
         score_q_table_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
         let median = score_q_table_pairs.swap_remove(score_q_table_pairs.len() / 2);
 
-        // Update with the "chosen" q table and "chosen" score. 
+        // Update with the "chosen" q table and "chosen" score.
         self.program.fitness = FitnessScore::Valid(median.0);
         self.q_table = median.1;
 
-        //debug!(
-            //id=valuable(&self.program.id.to_string()),
-            //fitness=valuable(&self.program.fitness)
-        //)
+        parameters.environment.finish();
     }
 
     fn get_fitness(&self) -> FitnessScore {
@@ -340,5 +344,29 @@ impl Default for QConsts {
             gamma: 0.125,
             epsilon: 0.05,
         }
+    }
+}
+
+pub struct QLgp<T>(PhantomData<T>);
+
+impl<T> GeneticAlgorithm for QLgp<T>
+where
+    T: ReinforcementLearningInput + fmt::Debug,
+    T::State: Clone + fmt::Debug,
+{
+    type O = QProgram<T>;
+
+    fn on_post_rank(
+        _population: &mut crate::core::population::Population<Self::O>,
+        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
+    ) {
+        parameters.fitness_parameters.environment.finish();
+    }
+
+    fn on_pre_rank(
+        _population: &mut crate::core::population::Population<Self::O>,
+        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
+    ) {
+        parameters.fitness_parameters.environment.init();
     }
 }

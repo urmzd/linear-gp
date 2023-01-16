@@ -10,9 +10,8 @@ use tracing::field::valuable;
 use tracing::trace;
 use tracing_subscriber::EnvFilter;
 
-use crate::core::characteristics::FitnessScore;
 use crate::{
-    core::characteristics::{Breed, Fitness, Generate},
+    core::characteristics::{Breed, Fitness, FitnessScore, Generate},
     utils::random::generator,
 };
 
@@ -95,30 +94,38 @@ where
         let item = if self.generation == 0 {
             let mut population = G::init_pop(&self.params);
 
-            G::rank(
+            G::eval_fitness(
                 &mut population,
                 &mut self.params.fitness_parameters,
                 self.params.lazy_evaluate,
             );
 
+            G::on_pre_rank(&mut population, &mut self.params);
+            G::rank(&mut population);
+            G::on_post_rank(&mut population, &mut self.params);
+
             Some(population)
         } else if self.generation < self.params.n_generations {
-            let mut current_population = self.current_population.clone().unwrap();
+            let mut population = self.current_population.clone().unwrap();
 
-            G::apply_selection(&mut current_population, self.params.gap);
+            G::apply_selection(&mut population, self.params.gap);
             G::breed(
-                &mut current_population,
+                &mut population,
                 self.params.mutation_percent,
                 self.params.crossover_percent,
                 &self.params.program_parameters,
             );
-            G::rank(
-                &mut current_population,
+            G::eval_fitness(
+                &mut population,
                 &mut self.params.fitness_parameters,
                 self.params.lazy_evaluate,
             );
 
-            Some(current_population)
+            G::on_pre_rank(&mut population, &mut self.params);
+            G::rank(&mut population);
+            G::on_post_rank(&mut population, &mut self.params);
+
+            Some(population)
         } else {
             return None;
         };
@@ -155,13 +162,12 @@ where
         return population;
     }
 
-    /// Evaluates the individuals found in the current population.
-    fn rank(
-        population: &mut Population<Self::O>,
+    fn eval_fitness(
+        p: &mut Population<Self::O>,
         fitness_parameters: &mut <Self::O as Fitness>::FitnessParameters,
         lazy_evaluate: bool,
     ) {
-        for individual in population.iter_mut() {
+        for individual in p.iter_mut() {
             // Only force evaluation when lazy evaluation is set off or in cases
             // where lazy evaluation is desired, evaluate individuals who haven't changed.
             let should_eval = if lazy_evaluate {
@@ -174,27 +180,33 @@ where
                 individual.eval_fitness(fitness_parameters)
             }
         }
+    }
 
+    /// Evaluates the individuals found in the current population.
+    fn rank(population: &mut Population<Self::O>) {
         // Organize individuals by their fitness score.
         population.sort();
         assert_le!(population.worst(), population.best());
+        trace!(
+            "{:?}",
+            population = valuable(
+                &population
+                    .iter()
+                    .map(|p| p.get_fitness())
+                    .collect::<Vec<FitnessScore>>()
+            )
+        );
+    }
 
-        // trace!(
-        //     "{:?}",
-        //     population = valuable(
-        //         &population
-        //             .iter()
-        //             .map(|p| p.get_fitness())
-        //             .collect::<Vec<FitnessScore>>()
-        //     )
-        // );
-
-        Self::on_post_rank(population, fitness_parameters)
+    fn on_pre_rank(
+        _population: &mut Population<Self::O>,
+        _parameters: &mut HyperParameters<Self::O>,
+    ) {
     }
 
     fn on_post_rank(
         _population: &mut Population<Self::O>,
-        _fitness_params: &mut <Self::O as Fitness>::FitnessParameters,
+        _parameters: &mut HyperParameters<Self::O>,
     ) {
     }
 
@@ -307,6 +319,7 @@ where
     }
 
     fn execute<'b>(hyper_params: HyperParameters<Self::O>) -> GeneticAlgorithmIter<Self> {
+        Self::init_sys();
         return GeneticAlgorithmIter::new(hyper_params);
     }
 }

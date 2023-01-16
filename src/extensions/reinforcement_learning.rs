@@ -1,4 +1,7 @@
-use std::fmt::Debug;
+use std::{
+    fmt::{self, Debug},
+    marker::PhantomData,
+};
 
 use derive_new::new;
 use rand::prelude::SliceRandom;
@@ -6,6 +9,7 @@ use serde::Serialize;
 
 use crate::{
     core::{
+        algorithm::GeneticAlgorithm,
         characteristics::{Fitness, FitnessScore},
         inputs::ValidInput,
         program::Program,
@@ -67,7 +71,10 @@ impl StateRewardPair {
     }
 }
 
-pub trait ReinforcementLearningInput: ValidInput + Sized where Self::State: Into<Vec<f64>> {
+pub trait ReinforcementLearningInput: ValidInput + Sized
+where
+    Self::State: Into<Vec<f64>>,
+{
     type State;
 
     fn init(&mut self);
@@ -121,11 +128,10 @@ where
             }
 
             scores.push(score);
+
             self.registers.reset();
             parameters.environment.reset();
         }
-
-        parameters.environment.finish();
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let median = scores.swap_remove(scores.len() / 2);
@@ -136,4 +142,14 @@ where
     fn get_fitness(&self) -> FitnessScore {
         self.fitness
     }
+}
+
+pub struct RLgp<T>(PhantomData<T>);
+
+impl<T> GeneticAlgorithm for RLgp<T>
+where
+    T: ReinforcementLearningInput + fmt::Debug,
+    T::State: Clone + fmt::Debug,
+{
+    type O = Program<ReinforcementLearningParameters<T>>;
 }

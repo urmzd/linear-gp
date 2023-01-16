@@ -9,16 +9,16 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
-        q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
+        q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
     },
     utils::types::VoidResultAnyError,
 };
-use set_up::{MountainCarInput, QMountainCarLgp};
+use set_up::MountainCarInput;
 mod set_up;
 
 fn main() -> VoidResultAnyError {
-    let game = MountainCarEnv::new(RenderMode::None, None);
+    let game = MountainCarEnv::new(RenderMode::None);
     let environment = MountainCarInput::new(game);
     let n_generations = 1;
     let n_trials = 5;
@@ -42,7 +42,7 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    QMountainCarLgp::execute(hyper_params).collect_vec();
+    QLgp::execute(hyper_params).collect_vec();
 
     Ok(())
 }
@@ -63,18 +63,18 @@ mod tests {
         },
         extensions::{
             gym_rs::ExtendedGymRsEnvironment,
-            q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
-            reinforcement_learning::ReinforcementLearningParameters,
+            q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
+            reinforcement_learning::{RLgp, ReinforcementLearningParameters},
         },
         utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
 
-    use crate::set_up::{MountainCarInput, MountainCarLgp, QMountainCarLgp};
+    use crate::set_up::MountainCarInput;
 
     #[test]
     fn given_mountain_car_example_when_lgp_executed_then_task_is_solved(
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let environment = MountainCarEnv::new(RenderMode::None, None);
+        let environment = MountainCarEnv::new(RenderMode::None);
         let input = MountainCarInput::new(environment);
         let n_generations = 100;
         let n_trials = 5;
@@ -94,7 +94,7 @@ mod tests {
             ),
         };
 
-        let populations = MountainCarLgp::execute(hyper_params).collect_vec();
+        let populations = RLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
@@ -104,7 +104,7 @@ mod tests {
     #[test]
     fn given_mountain_car_task_when_q_learning_lgp_is_used_then_task_is_solved(
     ) -> VoidResultAnyError {
-        let game = MountainCarEnv::new(RenderMode::None, None);
+        let game = MountainCarEnv::new(RenderMode::None);
         let environment = MountainCarInput::new(game);
         let n_generations = 100;
         let n_trials = 5;
@@ -128,7 +128,7 @@ mod tests {
             ),
         };
 
-        let pops = QMountainCarLgp::execute(hyper_params).collect_vec();
+        let pops = QLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/q.png";
         plot_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;

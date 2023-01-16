@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         ),
     };
 
-    IrisLgp::execute(hyper_params).count();
+    IrisLgp::execute(hyper_params).last();
     Ok(())
 }
 
@@ -212,7 +212,8 @@ mod tests {
 
         let mut population = IrisLgp::init_pop(&hyper_params);
 
-        IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters, true);
+        IrisLgp::eval_fitness(&mut population, &mut hyper_params.fitness_parameters, true);
+        IrisLgp::rank(&mut population);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
 
         let dropped_pop_len = population.len();
@@ -250,7 +251,8 @@ mod tests {
 
         let mut population = IrisLgp::init_pop(&hyper_params);
 
-        IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters, true);
+        IrisLgp::eval_fitness(&mut population, &mut hyper_params.fitness_parameters, true);
+        IrisLgp::rank(&mut population);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
 
         self::assert_eq!(
