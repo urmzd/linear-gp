@@ -2,7 +2,7 @@ use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::rende
 
 use lgp::{
     core::{
-        algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
+        algorithm::{GeneticAlgorithm, HyperParameters},
         characteristics::Fitness,
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
@@ -43,7 +43,7 @@ fn main() -> VoidResultAnyError {
         let parameters =
             ReinforcementLearningParameters::new(initial_states.clone(), 200, environment.clone());
 
-        let mut hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
+        let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
             population_size: 10,
             gap: 0.5,
             mutation_percent: 0.5,
@@ -60,12 +60,7 @@ fn main() -> VoidResultAnyError {
             ),
         };
 
-        let population = QMountainCarLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |_, params| {
-                params.fitness_parameters.next_generation();
-            }),
-        )?;
+        let population = QMountainCarLgp::execute(hyper_params).last().unwrap();
         let result = population.best().unwrap().get_fitness().unwrap_or(-200.);
 
         alpha_optim.tell(alpha, result)?;

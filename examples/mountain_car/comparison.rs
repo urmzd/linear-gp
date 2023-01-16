@@ -1,7 +1,8 @@
 use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
+use itertools::Itertools;
 use lgp::{
     core::{
-        algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
+        algorithm::{GeneticAlgorithm, HyperParameters},
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
@@ -22,7 +23,7 @@ fn main() -> VoidResultAnyError {
     let n_trials = 5;
     let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
 
-    let mut lgp_hyper_params = HyperParameters {
+    let lgp_hyper_params = HyperParameters {
         population_size: 100,
         gap: 0.5,
         crossover_percent: 0.5,
@@ -40,7 +41,7 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    let mut q_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
+    let q_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
         population_size: lgp_hyper_params.population_size,
         gap: lgp_hyper_params.gap,
         crossover_percent: lgp_hyper_params.crossover_percent,
@@ -61,24 +62,8 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    let mut lgp_pops = vec![];
-    let mut q_pops = vec![];
-
-    MountainCarLgp::execute(
-        &mut lgp_hyper_params,
-        EventHooks::default().with_on_post_rank(&mut |population, params| {
-            lgp_pops.push(population.clone());
-            params.fitness_parameters.next_generation()
-        }),
-    )?;
-
-    QMountainCarLgp::execute(
-        &mut q_params,
-        EventHooks::default().with_on_post_rank(&mut |population, params| {
-            q_pops.push(population.clone());
-            params.fitness_parameters.next_generation()
-        }),
-    )?;
+    let lgp_pops = MountainCarLgp::execute(lgp_hyper_params).collect_vec();
+    let q_pops = QMountainCarLgp::execute(q_params).collect_vec();
 
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/mountain_car/default.png";
     plot_benchmarks(lgp_pops, PLOT_FILE_NAME, -200.0..0.0)?;

@@ -1,9 +1,8 @@
 use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
 
-
 use lgp::{
     core::{
-        algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
+        algorithm::{GeneticAlgorithm, HyperParameters},
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
@@ -24,7 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let n_trials = 5;
     let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
-    let mut hyper_params = HyperParameters {
+    let hyper_params = HyperParameters {
         population_size: 1,
         gap: 0.5,
         crossover_percent: 0.5,
@@ -41,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
     };
 
-    QCartPoleLgp::execute(&mut hyper_params, EventHooks::default())?;
+    QCartPoleLgp::execute(hyper_params);
 
     Ok(())
 }
@@ -52,9 +51,10 @@ mod tests {
 
     use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
 
+    use itertools::Itertools;
     use lgp::{
         core::{
-            algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
+            algorithm::{GeneticAlgorithm, HyperParameters},
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
@@ -77,32 +77,30 @@ mod tests {
         let n_trials = 5;
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
-        let mut hyper_params = HyperParameters {
+        let max_episode_length = 500;
+
+        let hyper_params = HyperParameters {
             population_size: 100,
             gap: 0.5,
             crossover_percent: 0.5,
             mutation_percent: 0.5,
             lazy_evaluate: true,
             n_generations,
-            fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
+            fitness_parameters: ReinforcementLearningParameters::new(
+                initial_states,
+                max_episode_length,
+                input,
+            ),
             program_parameters: ProgramGeneratorParameters::new(
                 32,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
         };
 
-        let mut populations = vec![];
-
-        CartPoleLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, params| {
-                populations.push(population.clone());
-                params.fitness_parameters.next_generation();
-            }),
-        )?;
+        let populations = CartPoleLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/default.png";
-        let range = (0.)..(hyper_params.fitness_parameters.max_episode_length as f64);
+        let range = (0.)..(max_episode_length as f64);
         plot_benchmarks(populations, PLOT_FILE_NAME, range)?;
         Ok(())
     }
@@ -116,14 +114,20 @@ mod tests {
         let n_trials = 5;
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
-        let mut hyper_params = HyperParameters {
+        let max_episode_length = 500;
+
+        let hyper_params = HyperParameters {
             population_size: 100,
             gap: 0.5,
             crossover_percent: 0.5,
             mutation_percent: 0.5,
             lazy_evaluate: true,
             n_generations,
-            fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
+            fitness_parameters: ReinforcementLearningParameters::new(
+                initial_states,
+                max_episode_length,
+                input,
+            ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
                     32,
@@ -133,18 +137,10 @@ mod tests {
             ),
         };
 
-        let mut populations = vec![];
-
-        QCartPoleLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, params| {
-                populations.push(population.clone());
-                params.fitness_parameters.next_generation()
-            }),
-        )?;
+        let populations = QCartPoleLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/q.png";
-        let range = (0.)..(hyper_params.fitness_parameters.max_episode_length as f64);
+        let range = (0.)..(max_episode_length as f64);
         plot_benchmarks(populations, PLOT_FILE_NAME, range)?;
         Ok(())
     }

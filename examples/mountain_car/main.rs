@@ -1,8 +1,9 @@
 use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
 
+use itertools::Itertools;
 use lgp::{
     core::{
-        algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
+        algorithm::{GeneticAlgorithm, HyperParameters},
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
@@ -24,7 +25,7 @@ fn main() -> VoidResultAnyError {
     let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
     let parameters = ReinforcementLearningParameters::new(initial_states, 200, environment);
 
-    let mut hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
+    let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
         population_size: 100,
         gap: 0.5,
         mutation_percent: 0.5,
@@ -41,20 +42,22 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    QMountainCarLgp::execute(&mut hyper_params, EventHooks::default())?;
+    QMountainCarLgp::execute(hyper_params).collect_vec();
 
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
+
     use gym_rs::{
         envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode,
     };
 
+    use itertools::Itertools;
     use lgp::{
         core::{
-            algorithm::{EventHooks, GeneticAlgorithm, HyperParameters},
+            algorithm::{GeneticAlgorithm, HyperParameters},
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
@@ -65,7 +68,6 @@ mod tests {
         },
         utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
-    use tracing_subscriber::EnvFilter;
 
     use crate::set_up::{MountainCarInput, MountainCarLgp, QMountainCarLgp};
 
@@ -78,7 +80,7 @@ mod tests {
         let n_trials = 5;
         let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
 
-        let mut hyper_params = HyperParameters {
+        let hyper_params = HyperParameters {
             population_size: 100,
             gap: 0.5,
             crossover_percent: 0.5,
@@ -92,15 +94,7 @@ mod tests {
             ),
         };
 
-        let mut populations = vec![];
-
-        MountainCarLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, params| {
-                populations.push(population.clone());
-                params.fitness_parameters.next_generation()
-            }),
-        )?;
+        let populations = MountainCarLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
@@ -110,13 +104,6 @@ mod tests {
     #[test]
     fn given_mountain_car_task_when_q_learning_lgp_is_used_then_task_is_solved(
     ) -> VoidResultAnyError {
-        // Enable logging.
-        tracing_subscriber::fmt()
-            .json()
-            .with_env_filter(EnvFilter::from_default_env())
-            .try_init()
-            .unwrap_or(());
-
         let game = MountainCarEnv::new(RenderMode::None, None);
         let environment = MountainCarInput::new(game);
         let n_generations = 100;
@@ -124,7 +111,7 @@ mod tests {
         let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
         let parameters = ReinforcementLearningParameters::new(initial_states, 200, environment);
 
-        let mut hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
+        let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
             population_size: 100,
             gap: 0.5,
             mutation_percent: 0.5,
@@ -141,16 +128,7 @@ mod tests {
             ),
         };
 
-        let mut pops = vec![];
-
-        QMountainCarLgp::execute(
-            &mut hyper_params,
-            EventHooks::default()
-                .with_on_post_rank(&mut |population, params: &mut HyperParameters<QProgram<MountainCarInput>>| {
-                    params.fitness_parameters.next_generation();
-                    pops.push(population.clone());
-                })
-        )?;
+        let pops = QMountainCarLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/q.png";
         plot_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;

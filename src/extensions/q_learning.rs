@@ -160,7 +160,7 @@ fn get_action_state<T>(
 where
     T: ReinforcementLearningInput,
 {
-    // Run the program.
+    // Run the program on the current state.
     program.exec(environment);
 
     // Get the winning action-register pair.
@@ -177,28 +177,25 @@ where
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
-        let mut scores = vec![];
+        let mut score_q_table_pairs = vec![];
 
         // TODO: Call init and finish after `rank`
         for initial_state in parameters.get_state().clone() {
-            let initial_state_vec: Vec<f64> = initial_state.clone().into();
-            debug!(
-                id=valuable(&self.program.id.to_string()),
-                initial_state=valuable(&initial_state_vec)
-            );
 
-            parameters.environment.update_state(initial_state);
+            let mut current_q_table = self.q_table.clone();
+            let mut score = 0.;
 
+            parameters.environment.update_state(initial_state.clone());
+
+            // We run the program and determine what action to take at the current step.
             let mut current_action_state = get_action_state(
                 &mut parameters.environment,
-                &mut self.q_table,
+                &mut current_q_table,
                 &mut self.program,
             )
             .unwrap();
 
-            let mut score = 0.;
-
-            // Execute program.
+            // We execute the selected action and continue to repeat the cycle until termination.
             for _step in 0..parameters.max_episode_length {
                 // Act.
                 let state_reward_pair = parameters.environment.sim(current_action_state.action);
@@ -212,7 +209,7 @@ where
 
                 let next_action_state = match get_action_state(
                     &mut parameters.environment,
-                    &mut self.q_table,
+                    &mut current_q_table,
                     &mut self.program,
                 ) {
                     None => {
@@ -227,15 +224,8 @@ where
 
 
                 if current_action_state.register != next_action_state.register {
-                    self.q_table.update(current_action_state, reward, next_action_state)
+                    current_q_table.update(current_action_state, reward, next_action_state)
                 }
-
-                //debug!(
-                        //id=valuable(&self.program.id.to_string()),
-                        //next_action_state=valuable(&next_action_state),
-                        //current_action_state=valuable(&current_action_state),
-                        //q_table=valuable(&self.q_table)
-                //);
 
                 current_action_state = next_action_state;
             }
@@ -244,24 +234,29 @@ where
             self.program.registers.reset();
             parameters.environment.reset();
 
-            scores.push(score);
+            let initial_state_vec: &Vec<f64> = &initial_state.into();
 
             debug!(
                     id=valuable(&self.program.id.to_string()),
-                    q_table=valuable(&self.q_table),
+                    q_table=valuable(&current_q_table),
+                    initial_state=valuable(&initial_state_vec),
                     score=valuable(&score)
             );
+
+            score_q_table_pairs.push((score, current_q_table));
         }
 
-        scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let median = scores.swap_remove(scores.len() / 2);
+        score_q_table_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        let median = score_q_table_pairs.swap_remove(score_q_table_pairs.len() / 2);
 
-        self.program.fitness = FitnessScore::Valid(median);
+        // Update with the "chosen" q table and "chosen" score. 
+        self.program.fitness = FitnessScore::Valid(median.0);
+        self.q_table = median.1;
 
-        debug!(
-            id=valuable(&self.program.id.to_string()),
-            fitness=valuable(&self.program.fitness)
-        )
+        //debug!(
+            //id=valuable(&self.program.id.to_string()),
+            //fitness=valuable(&self.program.fitness)
+        //)
     }
 
     fn get_fitness(&self) -> FitnessScore {

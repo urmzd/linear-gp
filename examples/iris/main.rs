@@ -4,7 +4,7 @@ use std::error;
 
 use lgp::{
     core::{
-        algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
+        algorithm::{GeneticAlgorithm, HyperParameters, Loader},
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     let ContentFilePair(_, file) = get_iris_content().await?;
     let inputs = IrisLgp::load_from_csv(file.path());
 
-    let mut hyper_params = HyperParameters {
+    let hyper_params = HyperParameters {
         population_size: 1,
         n_generations: 1,
         gap: 0.5,
@@ -31,16 +31,16 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         ),
     };
 
-    IrisLgp::execute(&mut hyper_params, EventHooks::default())?;
+    IrisLgp::execute(hyper_params).count();
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
     use lgp::{
         core::{
-            algorithm::{EventHooks, GeneticAlgorithm, HyperParameters, Loader},
-            characteristics::{Fitness, FitnessScore},
+            algorithm::{GeneticAlgorithm, HyperParameters, Loader},
             instruction::InstructionGeneratorParameters,
             program::{Program, ProgramGeneratorParameters},
         },
@@ -49,7 +49,6 @@ mod tests {
     };
     use more_asserts::{assert_le, assert_lt};
     use pretty_assertions::{assert_eq, assert_ne};
-    use tracing::debug;
     use std::error;
 
     use crate::set_up::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
@@ -61,7 +60,7 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
+        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
                 n_generations: 100,
@@ -79,14 +78,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.5);
         assert_eq!(hyper_params.mutation_percent, 0.5);
 
-        let mut populations = vec![];
-
-        IrisLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, _| {
-                populations.push(population.clone());
-            }),
-        )?;
+        let populations = IrisLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/mutate_crossover.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
@@ -98,7 +90,7 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
+        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
                 n_generations: 100,
@@ -116,14 +108,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 1.);
 
-        let mut populations = vec![];
-
-        IrisLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, _| {
-                populations.push(population.clone());
-            }),
-        )?;
+        let populations = IrisLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/mutate.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
@@ -136,7 +121,7 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
+        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
                 n_generations: 100,
@@ -154,14 +139,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 1.);
         assert_eq!(hyper_params.mutation_percent, 0.);
 
-        let mut populations = vec![];
-
-        IrisLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, _| {
-                populations.push(population.clone());
-            }),
-        )?;
+        let populations = IrisLgp::execute(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/crossover.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
@@ -175,7 +153,7 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
+        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
                 n_generations: 250,
@@ -193,73 +171,19 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 0.);
 
-        let mut populations = vec![];
+        let populations = IrisLgp::execute(hyper_params).collect_vec();
 
-        let mut best = 0;
-        let mut median = 0;
-        let mut worst = 0;
-
-        let mut best_f = FitnessScore::NotEvaluated;
-        let mut median_f = FitnessScore::NotEvaluated;
-        let mut worst_f = FitnessScore::NotEvaluated;
-
-        IrisLgp::execute(
-            &mut hyper_params,
-            EventHooks::default().with_on_post_rank(&mut |population, _| {
-                populations.push(population.clone());
-
-                worst_f = population.worst().unwrap().get_fitness();
-                median_f = population.median().unwrap().get_fitness();
-                best_f = population.best().unwrap().get_fitness();
-
-                worst = population
-                    .worst()
-                    .unwrap()
-                    .get_fitness()
-                    .unwrap_or(-200.)
-                    .to_bits();
-                median = population
-                    .median()
-                    .unwrap()
-                    .get_fitness()
-                    .unwrap_or(-200.)
-                    .to_bits();
-                best = population
-                    .best()
-                    .unwrap()
-                    .get_fitness()
-                    .unwrap_or(-200.)
-                    .to_bits();
-            }),
-        )?;
+        let worst = populations.last().unwrap().worst().unwrap().clone();
+        let median = populations.last().unwrap().median().unwrap().clone();
+        let best = populations.last().unwrap().best().unwrap().clone();
 
         // TODO: Pull the graph section out into a seperate function.
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
-        debug!(
-            "Total: Compare Worst to Median {:?}",
-            worst_f.unwrap().total_cmp(&median_f.unwrap())
-        );
-        debug!(
-            "Total: Compare Median to Best {:?}",
-            median_f.unwrap().total_cmp(&best_f.unwrap())
-        );
-        debug!(
-            "Partial: Compare Worst to Median {:?}",
-            worst_f.unwrap().partial_cmp(&median_f.unwrap())
-        );
-        debug!(
-            "Partial: Compare Median to Best {:?}",
-            median_f.unwrap().partial_cmp(&best_f.unwrap())
-        );
-
-        debug!("Normal: Compare Worst to Median {:?}", worst_f == median_f);
-        debug!("Normal: Compare Median to Best {:?}", median_f == best_f);
-
-        if worst != median || median != best {
+        if worst.fitness != median.fitness || median.fitness != best.fitness {
             // TODO: Create concrete error type; SNAFU or Failure?
-            panic!("GP was unable to converge in given time... \n Best: {:b}, \n Median: {:b} \n Worst: {:b} \n", best, median, worst);
+            panic!("GP was unable to converge in given time... \n Best: {:?}, \n Median: {:?} \n Worst: {:?} \n", best.fitness, median.fitness, worst.fitness);
         }
 
         Ok(())
@@ -286,7 +210,7 @@ mod tests {
                 ),
             };
 
-        let mut population = IrisLgp::init_population(&hyper_params);
+        let mut population = IrisLgp::init_pop(&hyper_params);
 
         IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters, true);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
@@ -324,7 +248,7 @@ mod tests {
                 ),
             };
 
-        let mut population = IrisLgp::init_population(&hyper_params);
+        let mut population = IrisLgp::init_pop(&hyper_params);
 
         IrisLgp::rank(&mut population, &mut hyper_params.fitness_parameters, true);
         IrisLgp::apply_selection(&mut population, hyper_params.gap);
@@ -359,7 +283,7 @@ mod tests {
                 ),
             };
 
-        let population = IrisLgp::init_population(&hyper_params);
+        let population = IrisLgp::init_pop(&hyper_params);
 
         self::assert_eq!(population.len(), hyper_params.population_size);
 

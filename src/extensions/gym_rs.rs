@@ -23,7 +23,7 @@ where
         number_of_generations: usize,
         n_trials: usize,
     ) -> Vec<Vec<<Self::Environment as Env>::Observation>> {
-        (0..(number_of_generations + 1))
+        (0..(number_of_generations))
             .map(|_| {
                 (0..n_trials)
                     .map(|_| {
