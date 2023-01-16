@@ -184,7 +184,8 @@ where
             };
 
             if should_eval {
-                individual.eval_fitness(&mut params.fitness_parameters)
+                individual.eval_fitness(&mut params.fitness_parameters);
+                assert!(!individual.get_fitness().is_not_evaluated());
             }
         }
     }

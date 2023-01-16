@@ -1,5 +1,6 @@
 use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
 
+use config::CartPoleInput;
 use lgp::{
     core::{
         algorithm::{GeneticAlgorithm, HyperParameters},
@@ -12,7 +13,6 @@ use lgp::{
         reinforcement_learning::ReinforcementLearningParameters,
     },
 };
-use config::CartPoleInput;
 
 mod config;
 
@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         crossover_percent: 0.5,
         mutation_percent: 0.5,
         n_generations: 1,
-        lazy_evaluate: true,
+        lazy_evaluate: false,
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
@@ -84,7 +84,7 @@ mod tests {
             gap: 0.5,
             crossover_percent: 0.5,
             mutation_percent: 0.5,
-            lazy_evaluate: true,
+            lazy_evaluate: false,
             n_generations,
             fitness_parameters: ReinforcementLearningParameters::new(
                 initial_states,
@@ -121,7 +121,7 @@ mod tests {
             gap: 0.5,
             crossover_percent: 0.5,
             mutation_percent: 0.5,
-            lazy_evaluate: true,
+            lazy_evaluate: false,
             n_generations,
             fitness_parameters: ReinforcementLearningParameters::new(
                 initial_states,

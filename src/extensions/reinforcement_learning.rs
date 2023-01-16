@@ -94,8 +94,6 @@ where
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
 
-        parameters.environment.init();
-
         for initial_state in parameters.get_state().clone() {
             let mut score = 0.;
 
@@ -109,7 +107,7 @@ where
                     match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
                         None => {
                             return {
-                                self.fitness = FitnessScore::NotEvaluated;
+                                self.fitness = FitnessScore::OutOfBounds;
                             }
                         }
                         Some(registers) => registers,
