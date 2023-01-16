@@ -137,6 +137,19 @@ where
     pub program: Program<ReinforcementLearningParameters<T>>,
 }
 
+impl<T> DuplicateNew for QProgram<T>
+where
+    T: ReinforcementLearningInput,
+    T::State: Clone + fmt::Debug,
+{
+    fn duplicate_new(&self) -> Self {
+        return Self {
+            q_table: self.q_table.duplicate_new(),
+            program: self.program.duplicate_new(),
+        };
+    }
+}
+
 impl<T> PartialEq for QProgram<T>
 where
     T: ReinforcementLearningInput,

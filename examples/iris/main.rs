@@ -2,6 +2,7 @@ mod config;
 
 use std::error;
 
+use config::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
 use lgp::{
     core::{
         algorithm::{GeneticAlgorithm, HyperParameters, Loader},
@@ -10,7 +11,6 @@ use lgp::{
     },
     extensions::classification::ClassificationParameters,
 };
-use config::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
