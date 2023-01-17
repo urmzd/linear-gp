@@ -92,7 +92,7 @@ mod tests {
                 input,
             ),
             program_parameters: ProgramGeneratorParameters::new(
-                32,
+                16,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
         };
@@ -130,7 +130,7 @@ mod tests {
             ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    32,
+                    16,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
                 QConsts::new(0.25, 0.125, 0.05),
