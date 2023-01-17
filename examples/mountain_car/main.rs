@@ -1,5 +1,6 @@
 use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
 
+use config::MountainCarInput;
 use itertools::Itertools;
 use lgp::{
     core::{
@@ -14,7 +15,6 @@ use lgp::{
     },
     utils::types::VoidResultAnyError,
 };
-use config::MountainCarInput;
 mod config;
 
 fn main() -> VoidResultAnyError {
@@ -89,7 +89,7 @@ mod tests {
             lazy_evaluate: false,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
-                32,
+                16,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
         };
