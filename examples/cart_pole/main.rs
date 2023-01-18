@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ),
     };
 
-    QLgp::<CartPoleInput>::execute(hyper_params).last();
+    QLgp::execute(hyper_params).last();
 
     Ok(())
 }
@@ -130,10 +130,10 @@ mod tests {
             ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    16,
+                    64,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
-                QConsts::new(0.25, 0.125, 0.05),
+                QConsts::default(),
             ),
         };
 
