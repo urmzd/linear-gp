@@ -195,10 +195,9 @@ where
     type FitnessParameters = ReinforcementLearningParameters<T>;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
-        let mut score_q_table_pairs = vec![];
+        let mut scores = vec![];
 
         for initial_state in parameters.get_state().clone() {
-            let mut current_q_table = self.q_table.clone();
             let mut score = 0.;
 
             parameters.environment.update_state(initial_state.clone());
@@ -206,7 +205,7 @@ where
             // We run the program and determine what action to take at the current step.
             let mut current_action_state = match get_action_state(
                 &mut parameters.environment,
-                &mut current_q_table,
+                &mut self.q_table,
                 &mut self.program,
             ) {
                 Some(action_state) => action_state,
@@ -230,7 +229,7 @@ where
 
                 let next_action_state = match get_action_state(
                     &mut parameters.environment,
-                    &mut current_q_table,
+                    &mut self.q_table,
                     &mut self.program,
                 ) {
                     None => {
@@ -243,7 +242,7 @@ where
                 };
 
                 if current_action_state.register != next_action_state.register {
-                    current_q_table.update(current_action_state, reward, next_action_state)
+                    self.q_table.update(current_action_state, reward, next_action_state)
                 }
 
                 current_action_state = next_action_state;
@@ -257,20 +256,18 @@ where
 
             debug!(
                 id = valuable(&self.program.id.to_string()),
-                q_table = valuable(&current_q_table),
+                q_table = valuable(&self.q_table),
                 initial_state = valuable(&initial_state_vec),
                 score = valuable(&score)
             );
 
-            score_q_table_pairs.push((score, current_q_table));
+            scores.push(score);
         }
 
-        score_q_table_pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-        let median = score_q_table_pairs.swap_remove(score_q_table_pairs.len() / 2);
+        scores.sort_by(|a, b| a.partial_cmp(&b).unwrap());
+        let median = scores.swap_remove(scores.len() / 2);
 
-        // Update with the "chosen" q table and "chosen" score.
-        self.program.fitness = FitnessScore::Valid(median.0);
-        self.q_table = median.1;
+        self.program.fitness = FitnessScore::Valid(median);
 
         parameters.environment.finish();
     }

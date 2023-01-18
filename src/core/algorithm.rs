@@ -6,7 +6,7 @@ use csv::ReaderBuilder;
 use more_asserts::assert_le;
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
-use tracing::field::valuable;
+use tracing::{field::valuable, debug};
 use tracing::trace;
 use tracing_subscriber::EnvFilter;
 
@@ -91,6 +91,8 @@ where
     type Item = Population<G::O>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        debug!(generation=valuable(&self.generation));
+
         let item = if self.generation == 0 {
             let mut population = G::init_pop(&self.params);
 
