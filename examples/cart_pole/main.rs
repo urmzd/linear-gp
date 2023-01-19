@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                32,
+                256,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
             QConsts::new(0.25, 0.125, 0.05),
@@ -92,7 +92,7 @@ mod tests {
                 input,
             ),
             program_parameters: ProgramGeneratorParameters::new(
-                16,
+                256,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
         };
@@ -130,7 +130,7 @@ mod tests {
             ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    64,
+                    256,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
                 QConsts::default(),

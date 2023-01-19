@@ -197,6 +197,7 @@ where
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
 
+        // NOTE: Should intitial_state be controlled like its done here or should it be randomly picked?
         for initial_state in parameters.get_state().clone() {
             let mut score = 0.;
 
@@ -242,7 +243,8 @@ where
                 };
 
                 if current_action_state.register != next_action_state.register {
-                    self.q_table.update(current_action_state, reward, next_action_state)
+                    self.q_table
+                        .update(current_action_state, reward, next_action_state)
                 }
 
                 current_action_state = next_action_state;
