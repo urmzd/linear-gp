@@ -15,7 +15,7 @@ use lgp::{
     utils::{random::generator, types::VoidResultAnyError},
 };
 use tracing::field::valuable;
-use tracing::{debug, info};
+use tracing::info;
 
 mod config;
 use config::CartPoleInput;
@@ -55,6 +55,7 @@ fn main() -> VoidResultAnyError {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
+                    // Note: Is a higher count needed here because the equation to solve the problem is more complex?
                     32,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),

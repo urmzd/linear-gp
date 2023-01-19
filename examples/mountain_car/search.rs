@@ -15,7 +15,7 @@ use lgp::{
     utils::{random::generator, types::VoidResultAnyError},
 };
 use tracing::field::valuable;
-use tracing::{debug, info};
+use tracing::info;
 
 mod config;
 use config::MountainCarInput;
