@@ -1,4 +1,4 @@
-use gym_rs::{envs::classical_control::mountain_car::MountainCarEnv, utils::renderer::RenderMode};
+use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
 
 use lgp::{
     core::{
@@ -18,19 +18,19 @@ use tracing::field::valuable;
 use tracing::{debug, info};
 
 mod config;
-use config::MountainCarInput;
+use config::CartPoleInput;
 
 fn main() -> VoidResultAnyError {
     let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut epsilon_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
 
-    let game = MountainCarEnv::new(RenderMode::None);
-    let environment = MountainCarInput::new(game);
+    let game = CartPoleEnv::new(RenderMode::None);
+    let environment = CartPoleInput::new(game);
 
     let n_generations = 100;
     let n_trials = 5;
-    let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
+    let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
     let mut best_alpha = 0.25;
     let mut best_gamma = 0.5;
@@ -55,8 +55,8 @@ fn main() -> VoidResultAnyError {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    200,
-                    InstructionGeneratorParameters::from::<MountainCarInput>(1),
+                    32,
+                    InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
                 QConsts::new(alpha, gamma, epsilon),
             ),

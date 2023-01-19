@@ -49,6 +49,10 @@ path = "examples/cart_pole/main.rs"
 test = true
 
 [[example]]
+name = "cart_pole_search"
+path = "examples/cart_pole/search.rs"
+
+[[example]]
 name = "mountain_car_search"
 path = "examples/mountain_car/search.rs"
 
