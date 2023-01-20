@@ -176,8 +176,16 @@ impl Instruction {
     {
         let cloned_registers = registers.clone();
         let data = self.get_target_data(cloned_registers, input);
-        let target_value = *data.get(self.target_index);
+
+        let EXTERNAL_FACTOR = 10.;
+
+        let target_value = match self.mode {
+            Mode::External => EXTERNAL_FACTOR * (*data.get(self.target_index)),
+            _ => *data.get(self.target_index)
+        };
+
         let source_value = *registers.get(self.source_index);
+
         let new_source_value = (self.executable)(source_value, target_value);
         registers.update(self.source_index, new_source_value);
     }

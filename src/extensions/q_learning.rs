@@ -121,7 +121,7 @@ impl QTable {
         let next_q_value = self.action_argmax(next_action_state.register) as f64;
 
         let new_q_value = self.q_consts.alpha
-            * (current_reward + self.q_consts.gamma * next_q_value - current_q_value);
+            * (current_reward + (self.q_consts.gamma * next_q_value) - current_q_value);
 
         self.table[current_action_state.register][current_action_state.action] += new_q_value;
     }
@@ -340,11 +340,13 @@ pub struct QProgramGeneratorParameters {
 
 #[derive(Debug, Clone, Copy, new, Valuable)]
 pub struct QConsts {
-    /// Step size parameter.
+    /// How big of a jump should be made between Q state transition.
     alpha: f64,
-    /// Discount.
+    /// How much the current reward should be discounted. If the gamma value is high, the agent
+    /// will value future rewards the same as current rewards, and if the value is low, only
+    /// immediate rewards will be considered.
     gamma: f64,
-    /// Greedy selection.
+    /// Exploration - how often should we explore instead of exploit.
     epsilon: f64,
 }
 
