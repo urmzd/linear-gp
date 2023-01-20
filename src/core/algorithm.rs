@@ -217,22 +217,26 @@ where
         let pop_len = population.len();
 
         let mut n_of_individuals_to_drop =
-            pop_len - ((1.0 - gap) * (pop_len as f64)).floor() as usize;
+            (pop_len as isize) - ((1.0 - gap) * (pop_len as f64)).floor() as isize;
 
         // Drop invalid individuals.
+        // NOTE: what if we drop all individuals?
         loop {
             if population.worst().is_some() {
                 if population
                     .worst()
                     .map(|v| v.get_fitness().is_invalid())
-                    .unwrap()
+                    .expect("Atleast one individual to exist.")
                 {
                     population.pop();
+
                     n_of_individuals_to_drop -= 1;
                 } else {
+                    // We've encountered a valid individual. Stop deleting.
                     break;
                 }
             } else {
+                // If the population is empty, there's nothing to drop.
                 break;
             }
         }
@@ -304,6 +308,10 @@ where
 
                     children.push(child)
                 }
+            } else {
+                // Generate new children?
+                // Or do we give up and panic?
+                panic!("Woah, this should never happen. The whole population died out.")
             };
         }
 

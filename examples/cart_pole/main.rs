@@ -130,10 +130,10 @@ mod tests {
             ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    32,
+                    16,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
-                QConsts::default(),
+                QConsts::new(0.25, 0.5, 0.05),
             ),
         };
 
