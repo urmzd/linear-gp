@@ -126,58 +126,6 @@ impl<'a, T> CursorMut<'a, T> {
         self.index = None
     }
 
-    /// Cases:
-    /// TODO: TEST TEST TEST
-    ///
-    /// 1. Self_Start, Other_Start
-    /// 2. ..., + Self End
-    /// 3. ..., + Other End
-    /// 4. ..., + Self End + Other End
-    ///
-    /// TODO: Ensure nodes are cleared if abandoned or prevent people from pointing to None.
-    ///
-    /// For instance, other_end points to None. Maybe not? Thinking of the two linked lists like a rope, if one gets bigger, the other gets smaller
-    ///
-    /// Actually, that is the case, but only if the same start index and end index are used for one pair and not the other, thats exactly what happens. Look below.
-    ///
-    /// Ex (happening):
-    ///
-    /// A: 1 -> 2 -> 3 -> 4 -> 5
-    /// B: 6 -> 7 -> 8 -> 9 -> 10
-    ///
-    /// swap(A, B, 2, 3, 4, 3) --> meaning (3->4) should be swapped with ()
-    ///
-    /// After:
-    ///
-    /// A: 1 -> 2
-    /// B: 6 -> 7 -> 3 -> 4
-    ///
-    /// As seen above, we have 4 -> None (losing 5) and 7 -> 3 -> 4 (losing 9 -> 10);
-    ///
-    /// Just assert that we never have the same start and end index.
-    ///
-    /// Ex (not happening):
-    ///
-    /// A: 1 -> 2 -> 3 -> 4 -> 5
-    /// B: 6 -> 7 -> 8 -> 9 -> 10
-    ///
-    /// swap(A, B, 2, 3, 4, 4) --> meaning (3->4) should be swapped with (9)
-    ///
-    /// After:
-    ///
-    /// A: 1 -> 2 -> 9 -> 5
-    /// B: 6 -> 7 -> 8 -> 3 -> 4 -> 10
-    ///
-    ///
-    /// NOTE: Start is inclusive, end is exclusive.
-    /// TODO: Update head and tails of linked list if needed, otherwise the references point to the incorrect nodes.
-    /// TODO: Update linked list lengths.
-    ///
-    /// Possible Options:
-    ///
-    ///
-    /// Swap with/without Head
-    /// Swap with/without Tail
     pub fn swap(
         &mut self,
         other: &mut CursorMut<'a, T>,
@@ -202,27 +150,11 @@ impl<'a, T> CursorMut<'a, T> {
             return None;
         }
 
-        // MRE:
-        //  A: 1 -> 2 -> 3 -> 4 -> 5
-        //  B: 5 -> 6 -> 7 -> 8 -> 9 -> 10
-        //
-        //  If we swap [0, 2) for both, we should end up with:
-        //
-        //    A: 6 -> 7 -> 3 -> 4 -> 5
-        //    B: 1 -> 2 -> 8 -> 9 -> 10
-        //
-        // What we want:
-        //
-        // A should have head be a reference to 6.
-        // B should have head to be a reference to 1.
-        //
-        // Start at the beginning;
         // TODO: optimize by finding quickest path to start_idx, and if end_idx is used, grab a reference to the pointer.
         self.reset();
         other.reset();
 
         // TODO: Use the cursor current method instead of the property to allow the head to be swapped.
-        // NOTE: This is concerning, how do we swap when the head is included?
         self.seek_before(start_idx);
         other.seek_before(other_start_idx);
 
@@ -241,10 +173,8 @@ impl<'a, T> CursorMut<'a, T> {
         let self_end = self.next();
         let other_end = other.next();
 
-        // Swaps starts
         {
             if start_idx == 0 {
-                // point self head to other
                 self.list.head = other_start
             } else {
                 unsafe {
@@ -261,7 +191,6 @@ impl<'a, T> CursorMut<'a, T> {
             }
         }
 
-        // Swap ends
         {
             if end_idx == Some(self.list.len()) {
                 self.list.tail = other_end
@@ -286,8 +215,6 @@ impl<'a, T> CursorMut<'a, T> {
             self.list.length = (self.list.length as isize + difference) as usize;
             other.list.length = (other.list.length as isize - difference) as usize;
         }
-
-        // TODO: Write a test to verify head, tail and length.
 
         Some(())
     }
