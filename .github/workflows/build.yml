@@ -17,10 +17,23 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        example: [iris, mountain_car, cart_pole, mountain_car_compare, cart_pole_compare, unit]
+        example:
+          [
+            iris,
+            mountain_car,
+            cart_pole,
+            mountain_car_compare,
+            cart_pole_compare,
+            unit,
+          ]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
+
+      - name: Install OS Dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt install --no-install-recommends libsdl2-gfx-dev xvfb -y
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -49,10 +62,10 @@ jobs:
           RUST_LOG: debug
         run: cargo test --no-fail-fast
 
-      - name: Upload Example Plots
+      - name: Upload Plots
         if: matrix.example != 'unit'
         uses: actions/upload-artifact@v2
         with:
-          name: example_plots
-          path: assets/plots/examples
+          name: plots
+          path: assets/plots
           if-no-files-found: error
