@@ -6,8 +6,8 @@ use csv::ReaderBuilder;
 use more_asserts::assert_le;
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
-use tracing::{field::valuable, debug};
 use tracing::trace;
+use tracing::{debug, field::valuable};
 use tracing_subscriber::EnvFilter;
 
 use crate::{
@@ -91,7 +91,7 @@ where
     type Item = Population<G::O>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        debug!(generation=valuable(&self.generation));
+        debug!(generation = valuable(&self.generation));
 
         let item = if self.generation == 0 {
             let mut population = G::init_pop(&self.params);
@@ -219,8 +219,6 @@ where
         let mut n_of_individuals_to_drop =
             (pop_len as isize) - ((1.0 - gap) * (pop_len as f64)).floor() as isize;
 
-        // Drop invalid individuals.
-        // NOTE: what if we drop all individuals?
         loop {
             if population.worst().is_some() {
                 if population

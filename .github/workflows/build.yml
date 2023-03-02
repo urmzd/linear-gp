@@ -48,7 +48,7 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Build and Run Example/Test
+      - name: Build and Run Example Tests
         if: matrix.example != 'unit'
         env:
           RUST_BACKTRACE: 1
@@ -63,7 +63,6 @@ jobs:
         run: cargo test --no-fail-fast
 
       - name: Upload Plots
-        if: matrix.example != 'unit'
         uses: actions/upload-artifact@v2
         with:
           name: plots
