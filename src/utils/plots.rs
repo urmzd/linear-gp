@@ -1,4 +1,4 @@
-use std::{error, fmt, fs, ops::Range, path::Path};
+use std::{fmt, fs, ops::Range, path::Path};
 
 use plotters::{
     prelude::{BitMapBackend, ChartBuilder, IntoDrawingArea, LineSeries, Rectangle},
@@ -7,11 +7,13 @@ use plotters::{
 
 use crate::core::{characteristics::Fitness, population::Population};
 
+use super::types::VoidResultAnyError;
+
 pub fn plot_benchmarks<T>(
     populations: Vec<Population<T>>,
     plot_path: &str,
     y_range: Range<f64>,
-) -> Result<(), Box<dyn error::Error>>
+) -> VoidResultAnyError
 where
     T: Fitness + Clone + PartialOrd + fmt::Debug,
 {

@@ -1,4 +1,5 @@
-name: build
+name: Rust Tests
+
 on:
   push:
     paths:
@@ -6,85 +7,52 @@ on:
       - "tests/**.rs"
       - "examples/**.rs"
       - ".github/**.yml"
-      - "cargo.toml"
+      - "Cargo.toml"
       - "Cargo.lock"
-jobs:
-  embed_code:
-    name: Embed Code
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-      - run: npm install -g embedme
-      - run: embedme README.md
-      - uses: EndBug/add-and-commit@v9
-        with:
-          add: "README.md"
 
-  run:
-    name: Execute Examples
+jobs:
+  test:
+    name: Run Tests and Examples
     runs-on: ubuntu-latest
-    env:
-      RUST_BACKTRACE: 1
-      RUST_LOG: debug
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        example: [iris, mountain_car, cart_pole, mountain_car_compare, cart_pole_compare, unit]
     steps:
-      - run: sudo apt update -y
-      - run: sudo apt install libsdl2-gfx-dev xvfb -y
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v3
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Cache Dependencies
+        uses: actions/cache@v2
         with:
           path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
+            ~/.cargo/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
+          key: ${{ matrix.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          override: true
-          default: true
-      - run: xvfb-run cargo run --example=iris
-      - run: xvfb-run cargo run --example=mountain_car
-      - run: xvfb-run cargo run --example=cart_pole
-      - run: xvfb-run cargo run --example=mountain_car_compare
-      - run: xvfb-run cargo run --example=cart_pole_compare
-      - uses: actions/upload-artifact@v3
+
+      - name: Build and Run Example/Test
+        if: matrix.example != 'unit'
+        env:
+          RUST_BACKTRACE: 1
+          RUST_LOG: debug
+        run: scripts/run_test.sh ${{ matrix.example }}
+
+      - name: Run Unit Tests
+        if: matrix.example == 'unit'
+        env:
+          RUST_BACKTRACE: 1
+          RUST_LOG: debug
+        run: cargo test --no-fail-fast
+
+      - name: Upload Example Plots
+        if: matrix.example != 'unit'
+        uses: actions/upload-artifact@v2
         with:
           name: example_plots
           path: assets/plots/examples
-          if-no-files-found: error
-
-  test:
-    name: Execute Tests
-    runs-on: ubuntu-latest
-    env:
-      RUST_BACKTRACE: 1
-      RUST_LOG: debug
-    steps:
-      - run: sudo apt update -y
-      - run: sudo apt install libsdl2-gfx-dev xvfb -y
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          default: true
-      - run: xvfb-run cargo test --no-fail-fast
-      - uses: actions/upload-artifact@v3
-        with:
-          name: test_plots
-          path: assets/plots/tests
           if-no-files-found: error

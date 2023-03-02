@@ -14,6 +14,11 @@ use super::characteristics::{Generate, Mutate};
 use super::inputs::ValidInput;
 use super::registers::Registers;
 
+/// The EXTERNAL_FACTOR is a constant float value that is used to amplify the effect of external inputs on the program's execution.
+/// Specifically, in the Instruction struct's apply method, if the Mode is Mode::External, then the target value (i.e., the value in the register that the instruction writes to) is multiplied by the EXTERNAL_FACTOR.
+/// This can be useful for giving more weight to external inputs, allowing the program to better respond to changes in the environment.
+const EXTERNAL_FACTOR: f64 = 10.;
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum Mode {
     External,
@@ -57,24 +62,13 @@ impl InstructionGeneratorParameters {
     }
 }
 
-#[derive(Serialize, Eq)]
+#[derive(Serialize, Eq, Clone)]
 pub struct Instruction {
     source_index: usize,
     target_index: usize,
     mode: Mode,
     #[serde(skip_serializing)]
     executable: Op,
-}
-
-impl Clone for Instruction {
-    fn clone(&self) -> Self {
-        Self {
-            source_index: self.source_index.clone(),
-            target_index: self.target_index.clone(),
-            mode: self.mode.clone(),
-            executable: self.executable.clone(),
-        }
-    }
 }
 
 impl Generate for Instruction {
@@ -158,31 +152,17 @@ impl Mutate for Instruction {
 }
 
 impl Instruction {
-    fn get_target_data<T>(&self, registers: Registers, data: &T) -> Registers
-    where
-        T: ValidInput,
-    {
-        let target_data: Registers = match self.mode {
-            Mode::Internal => registers,
-            Mode::External => data.into(),
-        };
-
-        target_data
-    }
-
     pub fn apply<'b, T>(&self, registers: &'b mut Registers, input: &'b T)
     where
         T: ValidInput,
     {
-        let cloned_registers = registers.clone();
-        let data = self.get_target_data(cloned_registers, input);
-
-        let EXTERNAL_FACTOR = 10.;
-
-        let target_value = match self.mode {
-            Mode::External => EXTERNAL_FACTOR * (*data.get(self.target_index)),
-            _ => *data.get(self.target_index)
+        let target_data = if self.mode == Mode::External {
+            Registers::from(input)
+        } else {
+            registers.clone()
         };
+
+        let target_value = EXTERNAL_FACTOR * (*target_data.get(self.target_index));
 
         let source_value = *registers.get(self.source_index);
 
