@@ -65,6 +65,5 @@ jobs:
       - name: Upload Plots
         uses: actions/upload-artifact@v3
         with:
-          name: plots
+          name: ${{matrix.example}}-plots
           path: assets/plots
-          if-no-files-found: error
