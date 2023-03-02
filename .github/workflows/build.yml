@@ -28,7 +28,7 @@ jobs:
           ]
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install OS Dependencies
         run: |
@@ -63,8 +63,8 @@ jobs:
         run: cargo test --no-fail-fast
 
       - name: Upload Plots
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: plots
-          path: assets/plots
+          path: assets/plots/
           if-no-files-found: error
