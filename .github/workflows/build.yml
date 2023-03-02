@@ -66,5 +66,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: plots
-          path: assets/plots/
+          path: assets/plots
           if-no-files-found: error
