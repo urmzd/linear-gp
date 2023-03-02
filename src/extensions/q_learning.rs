@@ -85,7 +85,6 @@ impl QTable {
             // NOTE: Should we panic instead?
             None => return None,
             // Select any register.
-            // NOTE: Does choosing a random register make it harder to converge?
             Some(registers) => registers
                 .choose(&mut generator())
                 .cloned()
@@ -197,7 +196,6 @@ where
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
 
-        // NOTE: Should intitial_state be controlled like its done here or should it be randomly picked?
         for initial_state in parameters.get_state().clone() {
             let mut score = 0.;
 
