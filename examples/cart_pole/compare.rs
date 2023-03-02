@@ -65,10 +65,10 @@ fn main() -> VoidResultAnyError {
     let lgp_pops = RLgp::execute(lgp_hyper_params).collect_vec();
     let q_pops = QLgp::execute(q_params).collect_vec();
 
-    const PLOT_FILE_NAME: &'static str = "assets/plots/examples/cartpole/default.png";
+    const PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/default.png";
     plot_benchmarks(lgp_pops, PLOT_FILE_NAME, -200.0..0.0)?;
 
-    const Q_PLOT_FILE_NAME: &'static str = "assets/plots/examples/cartpole/q.png";
+    const Q_PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/q.png";
     plot_benchmarks(q_pops, Q_PLOT_FILE_NAME, -200.0..0.0)?;
     Ok(())
 }

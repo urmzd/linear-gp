@@ -51,6 +51,7 @@ jobs:
       - run: xvfb-run cargo run --example=mountain_car
       - run: xvfb-run cargo run --example=cart_pole
       - run: xvfb-run cargo run --example=mountain_car_compare
+      - run: xvfb-run cargo run --example=cart_pole_compare
       - uses: actions/upload-artifact@v3
         with:
           name: example_plots

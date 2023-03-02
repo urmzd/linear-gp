@@ -57,5 +57,10 @@ name = "mountain_car_search"
 path = "examples/mountain_car/search.rs"
 
 [[example]]
+name = "cart_pole_compare"
+path = "examples/cart_pole/compare.rs"
+
+[[example]]
 name = "mountain_car_compare"
 path = "examples/mountain_car/compare.rs"
+
