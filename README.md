@@ -13,16 +13,6 @@ cargo build --example <example_name>
 cargo run --example <example_name>
 ```
 
-## Building
-
-Requirements:
-
-- Cargo
-- Stable Rust
-
-## TODO
-- [ ] Add comparison for cart pole. 
-
 ## Contributions
 
 Contributions are welcomed. The guidelines can be found in [CONTRIBUTING.md](./CONTRIBUTING.md).
