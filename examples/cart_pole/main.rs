@@ -11,12 +11,12 @@ use lgp::{
         gym_rs::ExtendedGymRsEnvironment,
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
-    },
+    }, utils::types::VoidResultAnyError,
 };
 
 mod config;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> VoidResultAnyError {
     let environment = CartPoleEnv::new(RenderMode::Human);
     let input = CartPoleInput::new(environment);
     let n_generations = 1;
