@@ -35,7 +35,7 @@ fn main() -> VoidResultAnyError {
     let mut best_alpha = 0.25;
     let mut best_gamma = 0.5;
     let mut best_epsilon = 0.05;
-    let mut best_result = -200.;
+    let mut best_result = 0.;
 
     for _ in 0..1000 {
         let alpha = alpha_optim.ask(&mut generator())?;
@@ -43,7 +43,7 @@ fn main() -> VoidResultAnyError {
         let epsilon = epsilon_optim.ask(&mut generator())?;
 
         let parameters =
-            ReinforcementLearningParameters::new(initial_states.clone(), 200, environment.clone());
+            ReinforcementLearningParameters::new(initial_states.clone(), 500, environment.clone());
 
         let hyper_params = HyperParameters {
             population_size: 10,
@@ -55,7 +55,7 @@ fn main() -> VoidResultAnyError {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    // Note: Is a higher count needed here because the equation to solve the problem is more complex?
+                    // NOTE: Is a higher count needed here because the equation to solve the problem is more complex?
                     32,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
@@ -64,7 +64,7 @@ fn main() -> VoidResultAnyError {
         };
 
         let population = QLgp::execute(hyper_params).last().unwrap();
-        let result = population.best().unwrap().get_fitness().unwrap_or(-200.);
+        let result = population.best().unwrap().get_fitness().unwrap_or(0.);
 
         alpha_optim.tell(alpha, result)?;
         gamma_optim.tell(gamma, result)?;

@@ -37,7 +37,7 @@ fn main() -> VoidResultAnyError {
             input.clone(),
         ),
         program_parameters: ProgramGeneratorParameters::new(
-            16,
+            32,
             InstructionGeneratorParameters::from::<CartPoleInput>(1),
         ),
     };
@@ -56,10 +56,10 @@ fn main() -> VoidResultAnyError {
         ),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                16,
+                32,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
-            QConsts::new(0.48, 0.25, 0.035),
+            QConsts::default(),
         ),
     };
 
