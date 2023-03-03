@@ -55,7 +55,7 @@ mod tests {
 
     // TODO: Update tests to include assertions about benchmark trends.
     #[tokio::test]
-    async fn given_lgp_instance_with_mutation_and_crossover_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_median_and_best_fitness(
+    async fn sanity_test_mutation_crossover(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
@@ -85,7 +85,7 @@ mod tests {
         Ok(())
     }
     #[tokio::test]
-    async fn given_lgp_instance_with_mutation_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_median_and_best_fitness(
+    async fn sanity_test_mutation(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
@@ -116,7 +116,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn given_lgp_instance_with_crossover_operations_when_sufficient_iterations_have_been_met_then_population_shows_increase_in_worst_and_median_fitness(
+    async fn sanity_test_crossover(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
@@ -148,7 +148,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn given_lgp_instance_when_sufficient_iterations_have_been_used_then_population_contains_the_same_benchmark_fitness(
+    async fn sanity_test_base(
     ) -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());

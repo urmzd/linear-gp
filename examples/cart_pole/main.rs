@@ -33,7 +33,7 @@ fn main() -> VoidResultAnyError {
         fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                256,
+                32,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
             QConsts::new(0.25, 0.125, 0.05),
@@ -69,7 +69,7 @@ mod tests {
     use crate::config::CartPoleInput;
 
     #[test]
-    fn given_cart_pole_when_lgp_executed_then_task_is_solved() -> Result<(), Box<dyn error::Error>>
+    fn solve_cart_pole_default() -> Result<(), Box<dyn error::Error>>
     {
         let environment = CartPoleEnv::new(RenderMode::None);
         let input = CartPoleInput::new(environment);
@@ -106,7 +106,7 @@ mod tests {
     }
 
     #[test]
-    fn given_cart_pole_when_lgp_with_q_learning_executed_then_task_is_solved(
+    fn solve_cart_pole_with_q_learning(
     ) -> Result<(), Box<dyn error::Error>> {
         let environment = CartPoleEnv::new(RenderMode::None);
         let input = CartPoleInput::new(environment);
