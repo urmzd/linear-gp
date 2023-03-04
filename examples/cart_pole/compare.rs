@@ -37,7 +37,7 @@ fn main() -> VoidResultAnyError {
             input.clone(),
         ),
         program_parameters: ProgramGeneratorParameters::new(
-            32,
+            8,
             InstructionGeneratorParameters::from::<CartPoleInput>(1),
         ),
     };
@@ -56,7 +56,7 @@ fn main() -> VoidResultAnyError {
         ),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                32,
+                8,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
             QConsts::default(),
@@ -67,9 +67,10 @@ fn main() -> VoidResultAnyError {
     let q_pops = QLgp::execute(q_params).collect_vec();
 
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/default.png";
-    plot_benchmarks(lgp_pops, PLOT_FILE_NAME, 0.0..(max_episode_length as f64))?;
-
     const Q_PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/q.png";
+
+    plot_benchmarks(lgp_pops, PLOT_FILE_NAME, 0.0..(max_episode_length as f64))?;
     plot_benchmarks(q_pops, Q_PLOT_FILE_NAME, 0.0..(max_episode_length as f64))?;
+
     Ok(())
 }

@@ -23,6 +23,7 @@ fn main() -> VoidResultAnyError {
     let n_generations = 1;
     let n_trials = 5;
     let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
+    let max_episodes = 500;
 
     let hyper_params = HyperParameters {
         population_size: 1,
@@ -31,13 +32,17 @@ fn main() -> VoidResultAnyError {
         mutation_percent: 0.5,
         n_generations: 1,
         lazy_evaluate: false,
-        fitness_parameters: ReinforcementLearningParameters::new(initial_states, 500, input),
+        fitness_parameters: ReinforcementLearningParameters::new(
+            initial_states,
+            max_episodes,
+            input,
+        ),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                32,
+                8,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
-            QConsts::new(0.25, 0.125, 0.05),
+            QConsts::default(),
         ),
     };
 
@@ -76,7 +81,6 @@ mod tests {
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
-
         let max_episode_length = 500;
 
         let hyper_params = HyperParameters {
@@ -92,7 +96,7 @@ mod tests {
                 input,
             ),
             program_parameters: ProgramGeneratorParameters::new(
-                32,
+                8,
                 InstructionGeneratorParameters::from::<CartPoleInput>(1),
             ),
         };
@@ -112,7 +116,6 @@ mod tests {
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
-
         let max_episode_length = 500;
 
         let hyper_params = HyperParameters {
@@ -129,10 +132,10 @@ mod tests {
             ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    16,
+                    8,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
-                QConsts::new(0.25, 0.5, 0.05),
+                QConsts::default(),
             ),
         };
 

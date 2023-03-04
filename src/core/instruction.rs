@@ -164,7 +164,7 @@ impl Instruction {
 
         let target_value = *target_data.get(self.target_index);
         let amplied_target_value = if self.mode == Mode::External {
-            EXTERNAL_FACTOR *  target_value
+            EXTERNAL_FACTOR * target_value
         } else {
             target_value
         };
