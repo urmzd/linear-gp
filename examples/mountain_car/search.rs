@@ -37,7 +37,7 @@ fn main() -> VoidResultAnyError {
     let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
 
     let mut best_alpha = 0.1;
-    let mut best_gamma = 0.99;
+    let mut best_gamma = 0.95;
     let mut best_epsilon = 0.05;
     let mut best_alpha_decay = 1e-3;
     let mut best_epsilon_decay = 1e-3;
@@ -45,8 +45,8 @@ fn main() -> VoidResultAnyError {
 
     for _ in 0..1000 {
         let alpha = alpha_optim.ask(&mut generator())?;
-        let gamma = gamma_optim.ask(&mut generator())?;
-        let epsilon = epsilon_optim.ask(&mut generator())?;
+        let alpha_decay = alpha_decay_optim.ask(&mut generator())?;
+        let epsilon_decay = epsilon_decay_optim.ask(&mut generator())?;
         let gamma = gamma_optim.ask(&mut generator())?;
         let epsilon = epsilon_optim.ask(&mut generator())?;
 
@@ -66,7 +66,7 @@ fn main() -> VoidResultAnyError {
                     12,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
-                QConsts::new(alpha, gamma, epsilon, 0.01, 0.01),
+                QConsts::new(alpha, gamma, epsilon, alpha_decay, epsilon_decay),
             ),
         };
 
@@ -84,7 +84,7 @@ fn main() -> VoidResultAnyError {
             alpha = valuable(&alpha),
             gamma = valuable(&gamma),
             epsilon = valuable(&epsilon),
-            epislon_decay = valuable(&epsilon_decay),
+            epsilon_decay = valuable(&epsilon_decay),
             alpha_decay = valuable(&alpha_decay)
         );
 

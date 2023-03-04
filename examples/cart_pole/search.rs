@@ -36,11 +36,11 @@ fn main() -> VoidResultAnyError {
     let n_trials = 5;
     let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
-    let mut best_alpha = 0.25;
-    let mut best_gamma = 0.5;
+    let mut best_alpha = 0.1;
+    let mut best_gamma = 0.95;
     let mut best_epsilon = 0.05;
-    let mut best_alpha_decay = 0.01;
-    let mut best_epsilon_decay = 0.01;
+    let mut best_alpha_decay = 1e-3;
+    let mut best_epsilon_decay = 1e-3;
     let mut best_result = 0.;
 
     for _ in 0..1000 {
@@ -54,7 +54,7 @@ fn main() -> VoidResultAnyError {
             InteractiveLearningParameters::new(initial_states.clone(), environment.clone());
 
         let hyper_params = HyperParameters {
-            population_size: 10,
+            population_size: 100,
             gap: 0.5,
             mutation_percent: 0.5,
             crossover_percent: 0.5,
@@ -84,7 +84,7 @@ fn main() -> VoidResultAnyError {
             alpha = valuable(&alpha),
             gamma = valuable(&gamma),
             epsilon = valuable(&epsilon),
-            epislon_decay = valuable(&epsilon_decay),
+            epsilon_decay = valuable(&epsilon_decay),
             alpha_decay = valuable(&alpha_decay)
         );
 
