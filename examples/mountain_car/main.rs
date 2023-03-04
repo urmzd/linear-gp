@@ -23,7 +23,7 @@ fn main() -> VoidResultAnyError {
     let n_generations = 1;
     let n_trials = 5;
     let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
-    let parameters = InteractiveLearningParameters::new(initial_states, 200, environment);
+    let parameters = InteractiveLearningParameters::new(initial_states, environment);
 
     let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
         population_size: 100,
@@ -87,7 +87,7 @@ mod tests {
             mutation_percent: 0.5,
             n_generations,
             lazy_evaluate: false,
-            fitness_parameters: InteractiveLearningParameters::new(initial_states, 200, input),
+            fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
             program_parameters: ProgramGeneratorParameters::new(
                 12,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
@@ -109,7 +109,7 @@ mod tests {
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
-        let parameters = InteractiveLearningParameters::new(initial_states, 200, environment);
+        let parameters = InteractiveLearningParameters::new(initial_states, environment);
 
         let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
             population_size: 100,

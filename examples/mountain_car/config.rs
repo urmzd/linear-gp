@@ -21,6 +21,8 @@ impl ValidInput for MountainCarInput {
 impl ExtendedGymRsEnvironment for MountainCarInput {
     type Environment = MountainCarEnv;
 
+    const EPISODE_LENGTH: usize = 200;
+
     fn get_state(&self) -> <Self::Environment as Env>::Observation {
         self.environment.state
     }

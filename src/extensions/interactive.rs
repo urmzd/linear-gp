@@ -24,7 +24,6 @@ where
 {
     // Collection of X intial states per generation.
     initial_states: Vec<Vec<T::State>>,
-    pub max_episode_length: usize,
     pub environment: T,
     #[new(value = "0")]
     generations: usize,
@@ -77,6 +76,8 @@ where
 {
     type State;
 
+    const MAX_EPISODE_LENGTH: usize;
+
     fn init(&mut self);
     fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
@@ -99,7 +100,7 @@ where
 
             parameters.environment.update_state(initial_state);
 
-            for _ in 0..parameters.max_episode_length {
+            for _ in 0..T::MAX_EPISODE_LENGTH {
                 // Run program.
                 self.exec(&parameters.environment);
                 // Eval
