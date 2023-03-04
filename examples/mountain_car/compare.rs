@@ -36,7 +36,7 @@ fn main() -> VoidResultAnyError {
             input.clone(),
         ),
         program_parameters: ProgramGeneratorParameters::new(
-            16,
+            12,
             InstructionGeneratorParameters::from::<MountainCarInput>(1),
         ),
     };
@@ -55,7 +55,7 @@ fn main() -> VoidResultAnyError {
         ),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                16,
+                12,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
             QConsts::new(0.48, 0.25, 0.035),

@@ -89,7 +89,7 @@ mod tests {
             lazy_evaluate: false,
             fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
-                16,
+                12,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
         };
@@ -121,7 +121,7 @@ mod tests {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    16,
+                    12,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
                 QConsts::new(0.48, 0.25, 0.035),
