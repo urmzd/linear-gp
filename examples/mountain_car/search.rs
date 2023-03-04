@@ -22,8 +22,8 @@ use config::MountainCarInput;
 
 fn main() -> VoidResultAnyError {
     let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
-    let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut epsilon_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
+    let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
 
     let game = MountainCarEnv::new(RenderMode::None);
     let environment = MountainCarInput::new(game);
@@ -55,14 +55,14 @@ fn main() -> VoidResultAnyError {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    16,
+                    12,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
-                QConsts::new(alpha, gamma, epsilon),
+                QConsts::new(alpha, gamma, epsilon, 0.01, 0.01),
             ),
         };
 
-        let population = QLgp::execute(hyper_params).last().unwrap();
+        let population = QLgp::build(hyper_params).last().unwrap();
         let result = population.best().unwrap().get_fitness().unwrap_or(-200.);
 
         alpha_optim.tell(alpha, result)?;

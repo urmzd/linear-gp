@@ -63,8 +63,8 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    let lgp_pops = RLgp::execute(lgp_hyper_params).collect_vec();
-    let q_pops = QLgp::execute(q_params).collect_vec();
+    let lgp_pops = RLgp::build(lgp_hyper_params).collect_vec();
+    let q_pops = QLgp::build(q_params).collect_vec();
 
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/default.png";
     const Q_PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/q.png";

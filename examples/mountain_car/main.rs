@@ -38,11 +38,11 @@ fn main() -> VoidResultAnyError {
                 32,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
-            QConsts::new(0.48, 0.25, 0.035),
+            QConsts::new(0.48, 0.25, 0.035, 0.01, 0.01),
         ),
     };
 
-    QLgp::execute(hyper_params).collect_vec();
+    QLgp::build(hyper_params).collect_vec();
 
     Ok(())
 }
@@ -94,7 +94,7 @@ mod tests {
             ),
         };
 
-        let populations = RLgp::execute(hyper_params).collect_vec();
+        let populations = RLgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
@@ -124,11 +124,11 @@ mod tests {
                     12,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
-                QConsts::new(0.48, 0.25, 0.035),
+                QConsts::new(0.48, 0.25, 0.035, 0.01, 0.01),
             ),
         };
 
-        let pops = QLgp::execute(hyper_params).collect_vec();
+        let pops = QLgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/q.png";
         plot_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;

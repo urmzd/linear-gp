@@ -324,7 +324,8 @@ where
         population.extend(children)
     }
 
-    fn execute<'b>(hyper_params: HyperParameters<Self::O>) -> GeneticAlgorithmIter<Self> {
+    /// Build generator.
+    fn build<'b>(hyper_params: HyperParameters<Self::O>) -> GeneticAlgorithmIter<Self> {
         Self::init_sys();
         return GeneticAlgorithmIter::new(hyper_params);
     }
