@@ -41,6 +41,8 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
+    let q_consts = QConsts::new(0.3, 0.8, 0.7, 0.01, 0.01);
+
     let q_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
         population_size: lgp_hyper_params.population_size,
         gap: lgp_hyper_params.gap,
@@ -58,12 +60,12 @@ fn main() -> VoidResultAnyError {
                 12,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
-            QConsts::new(0.48, 0.25, 0.035),
+            q_consts,
         ),
     };
 
-    let lgp_pops = RLgp::execute(lgp_hyper_params).collect_vec();
-    let q_pops = QLgp::execute(q_params).collect_vec();
+    let lgp_pops = RLgp::build(lgp_hyper_params).collect_vec();
+    let q_pops = QLgp::build(q_params).collect_vec();
 
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/mountain_car/default.png";
     plot_benchmarks(lgp_pops, PLOT_FILE_NAME, -200.0..0.0)?;

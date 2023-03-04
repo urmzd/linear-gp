@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         ),
     };
 
-    IrisLgp::execute(hyper_params).last();
+    IrisLgp::build(hyper_params).last();
     Ok(())
 }
 
@@ -77,7 +77,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.5);
         assert_eq!(hyper_params.mutation_percent, 0.5);
 
-        let populations = IrisLgp::execute(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/mutate_crossover.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
@@ -106,7 +106,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 1.);
 
-        let populations = IrisLgp::execute(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/mutate.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
@@ -136,7 +136,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 1.);
         assert_eq!(hyper_params.mutation_percent, 0.);
 
-        let populations = IrisLgp::execute(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/crossover.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
@@ -167,7 +167,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 0.);
 
-        let populations = IrisLgp::execute(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params).collect_vec();
 
         let worst = populations.last().unwrap().worst().unwrap().clone();
         let median = populations.last().unwrap().median().unwrap().clone();

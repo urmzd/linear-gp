@@ -251,6 +251,7 @@ where
             // Reset for next evaluation.
             self.program.registers.reset();
             parameters.environment.reset();
+            self.q_table.q_consts.decay();
 
             let initial_state_vec: &Vec<f64> = &initial_state.into();
 
@@ -338,22 +339,33 @@ pub struct QProgramGeneratorParameters {
 
 #[derive(Debug, Clone, Copy, new, Valuable)]
 pub struct QConsts {
-    /// How big of a jump should be made between Q state transition.
+    /// Learning Factor
     alpha: f64,
-    /// How much the current reward should be discounted. If the gamma value is high, the agent
-    /// will value future rewards the same as current rewards, and if the value is low, only
-    /// immediate rewards will be considered.
+    /// Discount Factor
     gamma: f64,
-    /// Exploration - how often should we explore instead of exploit.
+    /// Exploration Factor
     epsilon: f64,
+    /// Learning Rate Decay
+    alpha_decay: f64,
+    /// Exploration Decay
+    epsilon_decay: f64,
+}
+
+impl QConsts {
+    pub fn decay(&mut self) {
+        self.alpha *= 1. - self.alpha_decay;
+        self.epsilon *= 1. - self.epsilon_decay
+    }
 }
 
 impl Default for QConsts {
     fn default() -> Self {
         Self {
             alpha: 0.25,
-            gamma: 0.125,
+            gamma: 0.99,
             epsilon: 0.05,
+            alpha_decay: 0.01,
+            epsilon_decay: 0.01,
         }
     }
 }

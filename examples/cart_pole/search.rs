@@ -58,11 +58,11 @@ fn main() -> VoidResultAnyError {
                     64,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
-                QConsts::new(alpha, gamma, epsilon),
+                QConsts::new(alpha, gamma, epsilon, 0.01, 0.01),
             ),
         };
 
-        let population = QLgp::execute(hyper_params).last().unwrap();
+        let population = QLgp::build(hyper_params).last().unwrap();
         let result = population.best().unwrap().get_fitness().unwrap_or(0.);
 
         alpha_optim.tell(alpha, result)?;

@@ -46,7 +46,7 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    QLgp::execute(hyper_params).last();
+    QLgp::build(hyper_params).last();
 
     Ok(())
 }
@@ -101,7 +101,7 @@ mod tests {
             ),
         };
 
-        let populations = RLgp::execute(hyper_params).collect_vec();
+        let populations = RLgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/default.png";
         let range = (0.)..(max_episode_length as f64);
@@ -139,7 +139,7 @@ mod tests {
             ),
         };
 
-        let populations = QLgp::execute(hyper_params).collect_vec();
+        let populations = QLgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/q.png";
         let range = (0.)..(max_episode_length as f64);

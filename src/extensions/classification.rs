@@ -2,7 +2,6 @@ use derive_new::new;
 use serde::Serialize;
 
 use crate::core::{
-    algorithm::HyperParameters,
     characteristics::{Fitness, FitnessScore},
     inputs::{Inputs, ValidInput},
     program::Program,
