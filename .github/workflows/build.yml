@@ -26,6 +26,10 @@ jobs:
             cart_pole_compare,
             unit,
           ]
+
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -62,8 +66,5 @@ jobs:
           RUST_LOG: debug
         run: cargo test --no-fail-fast
 
-      - name: Upload Plots
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{matrix.example}}-plots
-          path: assets/plots
+      - name: Upload Assets
+        uses: stefanzweifel/git-auto-commit-action@v4
