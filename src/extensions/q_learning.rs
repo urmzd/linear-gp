@@ -215,7 +215,7 @@ where
             };
 
             // We execute the selected action and continue to repeat the cycle until termination.
-            for _step in 0..parameters.max_episode_length {
+            for _step in 0..T::MAX_EPISODE_LENGTH {
                 // Act.
                 let state_reward_pair = parameters.environment.sim(current_action_state.action);
 

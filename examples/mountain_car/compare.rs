@@ -32,7 +32,6 @@ fn main() -> VoidResultAnyError {
         lazy_evaluate: false,
         fitness_parameters: InteractiveLearningParameters::new(
             initial_states.clone(),
-            200,
             input.clone(),
         ),
         program_parameters: ProgramGeneratorParameters::new(
@@ -52,7 +51,6 @@ fn main() -> VoidResultAnyError {
         lazy_evaluate: lgp_hyper_params.lazy_evaluate,
         fitness_parameters: InteractiveLearningParameters::new(
             initial_states.clone(),
-            200,
             input.clone(),
         ),
         program_parameters: QProgramGeneratorParameters::new(

@@ -15,6 +15,8 @@ where
 {
     type Environment;
 
+    const EPISODE_LENGTH: usize;
+
     fn get_state(&self) -> <Self::Environment as Env>::Observation;
     fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation);
     fn get_env(&mut self) -> &mut Self::Environment;
@@ -45,6 +47,7 @@ where
     <T::Environment as Env>::Action: From<usize>,
 {
     type State = <T::Environment as Env>::Observation;
+    const MAX_EPISODE_LENGTH: usize = T::EPISODE_LENGTH;
 
     fn init(&mut self) {
         self.get_env().reset(Some(0), false, None);

@@ -43,7 +43,7 @@ fn main() -> VoidResultAnyError {
         let epsilon = epsilon_optim.ask(&mut generator())?;
 
         let parameters =
-            InteractiveLearningParameters::new(initial_states.clone(), 200, environment.clone());
+            InteractiveLearningParameters::new(initial_states.clone(), environment.clone());
 
         let hyper_params = HyperParameters {
             population_size: 100,

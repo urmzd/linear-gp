@@ -8,7 +8,7 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
-        interactive::{ILgp, InteractiveLearningParameters},
+        interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
         q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
     },
     utils::{plots::plot_benchmarks, types::VoidResultAnyError},
@@ -22,7 +22,6 @@ fn main() -> VoidResultAnyError {
     let n_generations = 100;
     let n_trials = 5;
     let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
-    let max_episode_length = 500;
 
     let lgp_hyper_params = HyperParameters {
         population_size: 100,
@@ -33,7 +32,6 @@ fn main() -> VoidResultAnyError {
         lazy_evaluate: false,
         fitness_parameters: InteractiveLearningParameters::new(
             initial_states.clone(),
-            max_episode_length,
             input.clone(),
         ),
         program_parameters: ProgramGeneratorParameters::new(
@@ -51,7 +49,6 @@ fn main() -> VoidResultAnyError {
         lazy_evaluate: lgp_hyper_params.lazy_evaluate,
         fitness_parameters: InteractiveLearningParameters::new(
             initial_states.clone(),
-            max_episode_length,
             input.clone(),
         ),
         program_parameters: QProgramGeneratorParameters::new(
@@ -69,8 +66,16 @@ fn main() -> VoidResultAnyError {
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/default.png";
     const Q_PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/q.png";
 
-    plot_benchmarks(lgp_pops, PLOT_FILE_NAME, 0.0..(max_episode_length as f64))?;
-    plot_benchmarks(q_pops, Q_PLOT_FILE_NAME, 0.0..(max_episode_length as f64))?;
+    plot_benchmarks(
+        lgp_pops,
+        PLOT_FILE_NAME,
+        0.0..(CartPoleInput::MAX_EPISODE_LENGTH as f64),
+    )?;
+    plot_benchmarks(
+        q_pops,
+        Q_PLOT_FILE_NAME,
+        0.0..(CartPoleInput::MAX_EPISODE_LENGTH as f64),
+    )?;
 
     Ok(())
 }
