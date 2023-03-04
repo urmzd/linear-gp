@@ -9,8 +9,8 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
+        interactive::InteractiveLearningParameters,
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
-        reinforcement_learning::ReinforcementLearningParameters,
     },
     utils::{random::generator, types::VoidResultAnyError},
 };
@@ -24,6 +24,10 @@ fn main() -> VoidResultAnyError {
     let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut epsilon_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
+    let mut epsilon_decay_optim =
+        tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 0.01)?);
+    let mut alpha_decay_optim =
+        tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 0.01)?);
 
     let game = CartPoleEnv::new(RenderMode::None);
     let environment = CartPoleInput::new(game);
@@ -35,15 +39,19 @@ fn main() -> VoidResultAnyError {
     let mut best_alpha = 0.25;
     let mut best_gamma = 0.5;
     let mut best_epsilon = 0.05;
+    let mut best_alpha_decay = 0.01;
+    let mut best_epsilon_decay = 0.01;
     let mut best_result = 0.;
 
     for _ in 0..1000 {
         let alpha = alpha_optim.ask(&mut generator())?;
+        let alpha_decay = alpha_decay_optim.ask(&mut generator())?;
+        let epsilon_decay = epsilon_decay_optim.ask(&mut generator())?;
         let gamma = gamma_optim.ask(&mut generator())?;
         let epsilon = epsilon_optim.ask(&mut generator())?;
 
         let parameters =
-            ReinforcementLearningParameters::new(initial_states.clone(), 500, environment.clone());
+            InteractiveLearningParameters::new(initial_states.clone(), 500, environment.clone());
 
         let hyper_params = HyperParameters {
             population_size: 10,
@@ -55,10 +63,10 @@ fn main() -> VoidResultAnyError {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    64,
+                    8,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1),
                 ),
-                QConsts::new(alpha, gamma, epsilon, 0.01, 0.01),
+                QConsts::new(alpha, gamma, epsilon, alpha_decay, epsilon_decay),
             ),
         };
 
@@ -68,12 +76,16 @@ fn main() -> VoidResultAnyError {
         alpha_optim.tell(alpha, result)?;
         gamma_optim.tell(gamma, result)?;
         epsilon_optim.tell(epsilon, result)?;
+        alpha_optim.tell(epsilon, result)?;
+        epsilon_optim.tell(epsilon, result)?;
 
         info!(
             fitness = valuable(&result),
             alpha = valuable(&alpha),
             gamma = valuable(&gamma),
-            epsilon = valuable(&epsilon)
+            epsilon = valuable(&epsilon),
+            epislon_decay = valuable(&epsilon_decay),
+            alpha_decay = valuable(&alpha_decay)
         );
 
         if result > best_result {
@@ -81,13 +93,17 @@ fn main() -> VoidResultAnyError {
             best_gamma = gamma;
             best_epsilon = epsilon;
             best_result = result;
+            best_alpha_decay = alpha_decay;
+            best_epsilon_decay = epsilon_decay;
         }
     }
     info!(
         best_result = valuable(&best_result),
         best_alpha = valuable(&best_alpha),
         best_gamma = valuable(&best_gamma),
-        best_epsilon = valuable(&best_epsilon)
+        best_epsilon = valuable(&best_epsilon),
+        best_alpha_decay = valuable(&best_alpha_decay),
+        best_epsilon_decay = valuable(&best_epsilon_decay),
     );
 
     Ok(())

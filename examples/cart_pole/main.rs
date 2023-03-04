@@ -9,8 +9,8 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
+        interactive::InteractiveLearningParameters,
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
-        reinforcement_learning::ReinforcementLearningParameters,
     },
     utils::types::VoidResultAnyError,
 };
@@ -32,11 +32,7 @@ fn main() -> VoidResultAnyError {
         mutation_percent: 0.5,
         n_generations: 1,
         lazy_evaluate: false,
-        fitness_parameters: ReinforcementLearningParameters::new(
-            initial_states,
-            max_episodes,
-            input,
-        ),
+        fitness_parameters: InteractiveLearningParameters::new(initial_states, max_episodes, input),
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
                 8,
@@ -66,8 +62,8 @@ mod tests {
         },
         extensions::{
             gym_rs::ExtendedGymRsEnvironment,
+            interactive::{ILgp, InteractiveLearningParameters},
             q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
-            reinforcement_learning::{RLgp, ReinforcementLearningParameters},
         },
         utils::plots::plot_benchmarks,
     };
@@ -90,7 +86,7 @@ mod tests {
             mutation_percent: 0.5,
             lazy_evaluate: false,
             n_generations,
-            fitness_parameters: ReinforcementLearningParameters::new(
+            fitness_parameters: InteractiveLearningParameters::new(
                 initial_states,
                 max_episode_length,
                 input,
@@ -101,7 +97,7 @@ mod tests {
             ),
         };
 
-        let populations = RLgp::build(hyper_params).collect_vec();
+        let populations = ILgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/default.png";
         let range = (0.)..(max_episode_length as f64);
@@ -125,7 +121,7 @@ mod tests {
             mutation_percent: 0.5,
             lazy_evaluate: false,
             n_generations,
-            fitness_parameters: ReinforcementLearningParameters::new(
+            fitness_parameters: InteractiveLearningParameters::new(
                 initial_states,
                 max_episode_length,
                 input,

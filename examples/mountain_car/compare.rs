@@ -8,8 +8,8 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
+        interactive::{ILgp, InteractiveLearningParameters},
         q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
-        reinforcement_learning::{RLgp, ReinforcementLearningParameters},
     },
     utils::{plots::plot_benchmarks, types::VoidResultAnyError},
 };
@@ -30,7 +30,7 @@ fn main() -> VoidResultAnyError {
         mutation_percent: 0.5,
         n_generations,
         lazy_evaluate: false,
-        fitness_parameters: ReinforcementLearningParameters::new(
+        fitness_parameters: InteractiveLearningParameters::new(
             initial_states.clone(),
             200,
             input.clone(),
@@ -50,7 +50,7 @@ fn main() -> VoidResultAnyError {
         mutation_percent: lgp_hyper_params.mutation_percent,
         n_generations: lgp_hyper_params.n_generations,
         lazy_evaluate: lgp_hyper_params.lazy_evaluate,
-        fitness_parameters: ReinforcementLearningParameters::new(
+        fitness_parameters: InteractiveLearningParameters::new(
             initial_states.clone(),
             200,
             input.clone(),
@@ -64,7 +64,7 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    let lgp_pops = RLgp::build(lgp_hyper_params).collect_vec();
+    let lgp_pops = ILgp::build(lgp_hyper_params).collect_vec();
     let q_pops = QLgp::build(q_params).collect_vec();
 
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/mountain_car/default.png";

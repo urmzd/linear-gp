@@ -10,8 +10,8 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
+        interactive::InteractiveLearningParameters,
         q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
-        reinforcement_learning::ReinforcementLearningParameters,
     },
     utils::types::VoidResultAnyError,
 };
@@ -23,7 +23,7 @@ fn main() -> VoidResultAnyError {
     let n_generations = 1;
     let n_trials = 5;
     let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
-    let parameters = ReinforcementLearningParameters::new(initial_states, 200, environment);
+    let parameters = InteractiveLearningParameters::new(initial_states, 200, environment);
 
     let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
         population_size: 100,
@@ -63,8 +63,8 @@ mod tests {
         },
         extensions::{
             gym_rs::ExtendedGymRsEnvironment,
+            interactive::{ILgp, InteractiveLearningParameters},
             q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
-            reinforcement_learning::{RLgp, ReinforcementLearningParameters},
         },
         utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
@@ -87,14 +87,14 @@ mod tests {
             mutation_percent: 0.5,
             n_generations,
             lazy_evaluate: false,
-            fitness_parameters: ReinforcementLearningParameters::new(initial_states, 200, input),
+            fitness_parameters: InteractiveLearningParameters::new(initial_states, 200, input),
             program_parameters: ProgramGeneratorParameters::new(
                 12,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
         };
 
-        let populations = RLgp::build(hyper_params).collect_vec();
+        let populations = ILgp::build(hyper_params).collect_vec();
 
         const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
@@ -109,7 +109,7 @@ mod tests {
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
-        let parameters = ReinforcementLearningParameters::new(initial_states, 200, environment);
+        let parameters = InteractiveLearningParameters::new(initial_states, 200, environment);
 
         let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
             population_size: 100,

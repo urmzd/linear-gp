@@ -7,7 +7,7 @@ use itertools::Itertools;
 use crate::core::inputs::ValidInput;
 use crate::utils::random::generator;
 
-use super::reinforcement_learning::{ReinforcementLearningInput, Reward, StateRewardPair};
+use super::interactive::{InteractiveLearningInput, Reward, StateRewardPair};
 
 pub trait ExtendedGymRsEnvironment
 where
@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<T> ReinforcementLearningInput for T
+impl<T> InteractiveLearningInput for T
 where
     Self: ValidInput,
     T: ExtendedGymRsEnvironment,
