@@ -268,12 +268,9 @@ where
         let median = scores.swap_remove(scores.len() / 2);
 
         let fitness_score = FitnessScore::Valid(median);
-        self.q_table
-            .q_consts
-            .decay(self.program.fitness.clone(), fitness_score);
-        self.program.fitness = fitness_score;
 
-        parameters.environment.finish();
+        self.program.fitness = fitness_score;
+        self.q_table.q_consts.decay();
     }
 
     fn get_fitness(&self) -> FitnessScore {
@@ -355,11 +352,9 @@ pub struct QConsts {
 }
 
 impl QConsts {
-    pub fn decay(&mut self, previous_fitness: FitnessScore, new_fitness: FitnessScore) {
-        if new_fitness > previous_fitness {
-            self.alpha *= 1. - self.alpha_decay;
-            self.epsilon *= 1. - self.epsilon_decay
-        }
+    pub fn decay(&mut self) {
+        self.alpha *= 1. - self.alpha_decay;
+        self.epsilon *= 1. - self.epsilon_decay
     }
 }
 
@@ -369,8 +364,8 @@ impl Default for QConsts {
             alpha: 0.1,
             gamma: 0.99,
             epsilon: 0.05,
-            alpha_decay: 0.01,
-            epsilon_decay: 0.01,
+            alpha_decay: 0.001,
+            epsilon_decay: 0.001,
         }
     }
 }
