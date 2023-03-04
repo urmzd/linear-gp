@@ -11,7 +11,8 @@ use lgp::{
         gym_rs::ExtendedGymRsEnvironment,
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
         reinforcement_learning::ReinforcementLearningParameters,
-    }, utils::types::VoidResultAnyError,
+    },
+    utils::types::VoidResultAnyError,
 };
 
 mod config;
@@ -69,8 +70,7 @@ mod tests {
     use crate::config::CartPoleInput;
 
     #[test]
-    fn solve_cart_pole_default() -> Result<(), Box<dyn error::Error>>
-    {
+    fn solve_cart_pole_default() -> Result<(), Box<dyn error::Error>> {
         let environment = CartPoleEnv::new(RenderMode::None);
         let input = CartPoleInput::new(environment);
         let n_generations = 100;
@@ -106,8 +106,7 @@ mod tests {
     }
 
     #[test]
-    fn solve_cart_pole_with_q_learning(
-    ) -> Result<(), Box<dyn error::Error>> {
+    fn solve_cart_pole_with_q_learning() -> Result<(), Box<dyn error::Error>> {
         let environment = CartPoleEnv::new(RenderMode::None);
         let input = CartPoleInput::new(environment);
         let n_generations = 100;

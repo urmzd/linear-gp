@@ -55,8 +55,7 @@ mod tests {
 
     // TODO: Update tests to include assertions about benchmark trends.
     #[tokio::test]
-    async fn sanity_test_mutation_crossover(
-    ) -> Result<(), Box<dyn error::Error>> {
+    async fn sanity_test_mutation_crossover() -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
@@ -85,8 +84,7 @@ mod tests {
         Ok(())
     }
     #[tokio::test]
-    async fn sanity_test_mutation(
-    ) -> Result<(), Box<dyn error::Error>> {
+    async fn sanity_test_mutation() -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
@@ -116,8 +114,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn sanity_test_crossover(
-    ) -> Result<(), Box<dyn error::Error>> {
+    async fn sanity_test_crossover() -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
@@ -148,8 +145,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn sanity_test_base(
-    ) -> Result<(), Box<dyn error::Error>> {
+    async fn sanity_test_base() -> Result<(), Box<dyn error::Error>> {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 

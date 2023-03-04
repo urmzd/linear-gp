@@ -46,7 +46,7 @@ fn main() -> VoidResultAnyError {
             ReinforcementLearningParameters::new(initial_states.clone(), 200, environment.clone());
 
         let hyper_params = HyperParameters {
-            population_size: 10,
+            population_size: 100,
             gap: 0.5,
             mutation_percent: 0.5,
             crossover_percent: 0.5,
@@ -55,7 +55,7 @@ fn main() -> VoidResultAnyError {
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
-                    200,
+                    16,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
                 QConsts::new(alpha, gamma, epsilon),
