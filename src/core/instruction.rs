@@ -162,11 +162,16 @@ impl Instruction {
             registers.clone()
         };
 
-        let target_value = EXTERNAL_FACTOR * (*target_data.get(self.target_index));
+        let target_value = *target_data.get(self.target_index);
+        let amplied_target_value = if self.mode == Mode::External {
+            EXTERNAL_FACTOR *  target_value
+        } else {
+            target_value
+        };
 
         let source_value = *registers.get(self.source_index);
 
-        let new_source_value = (self.executable)(source_value, target_value);
+        let new_source_value = (self.executable)(source_value, amplied_target_value);
         registers.update(self.source_index, new_source_value);
     }
 }
