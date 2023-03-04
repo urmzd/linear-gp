@@ -18,9 +18,9 @@ use crate::{
 };
 
 #[derive(Debug, Clone, new)]
-pub struct ReinforcementLearningParameters<T>
+pub struct InteractiveLearningParameters<T>
 where
-    T: ReinforcementLearningInput,
+    T: InteractiveLearningInput,
 {
     // Collection of X intial states per generation.
     initial_states: Vec<Vec<T::State>>,
@@ -30,9 +30,9 @@ where
     generations: usize,
 }
 
-impl<T> ReinforcementLearningParameters<T>
+impl<T> InteractiveLearningParameters<T>
 where
-    T: ReinforcementLearningInput,
+    T: InteractiveLearningInput,
 {
     pub fn get_state(&self) -> &Vec<T::State> {
         self.initial_states.get(self.generations).unwrap()
@@ -71,7 +71,7 @@ impl StateRewardPair {
     }
 }
 
-pub trait ReinforcementLearningInput: ValidInput + Sized
+pub trait InteractiveLearningInput: ValidInput + Sized
 where
     Self::State: Into<Vec<f64>>,
 {
@@ -84,12 +84,12 @@ where
     fn finish(&mut self);
 }
 
-impl<T> Fitness for Program<ReinforcementLearningParameters<T>>
+impl<T> Fitness for Program<InteractiveLearningParameters<T>>
 where
-    T: ReinforcementLearningInput,
+    T: InteractiveLearningInput,
     T::State: Clone,
 {
-    type FitnessParameters = ReinforcementLearningParameters<T>;
+    type FitnessParameters = InteractiveLearningParameters<T>;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
@@ -142,14 +142,14 @@ where
     }
 }
 
-pub struct RLgp<T>(PhantomData<T>);
+pub struct ILgp<T>(PhantomData<T>);
 
-impl<T> GeneticAlgorithm for RLgp<T>
+impl<T> GeneticAlgorithm for ILgp<T>
 where
-    T: ReinforcementLearningInput + fmt::Debug,
+    T: InteractiveLearningInput + fmt::Debug,
     T::State: Clone + fmt::Debug,
 {
-    type O = Program<ReinforcementLearningParameters<T>>;
+    type O = Program<InteractiveLearningParameters<T>>;
 
     fn on_post_rank(
         _population: &mut crate::core::population::Population<Self::O>,

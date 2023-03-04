@@ -9,8 +9,8 @@ use lgp::{
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
+        interactive::InteractiveLearningParameters,
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
-        reinforcement_learning::ReinforcementLearningParameters,
     },
     utils::{random::generator, types::VoidResultAnyError},
 };
@@ -43,7 +43,7 @@ fn main() -> VoidResultAnyError {
         let epsilon = epsilon_optim.ask(&mut generator())?;
 
         let parameters =
-            ReinforcementLearningParameters::new(initial_states.clone(), 200, environment.clone());
+            InteractiveLearningParameters::new(initial_states.clone(), 200, environment.clone());
 
         let hyper_params = HyperParameters {
             population_size: 100,

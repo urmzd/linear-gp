@@ -30,7 +30,6 @@ uuid = { version = "1.2.2", features = ["v4"] }
 reqwest = "0.11"
 tempfile = "3.3"
 pretty_assertions = { version = "1.2" }
-tabled = "0.7"
 tpe = "0.2"
 
 [[example]]
