@@ -40,7 +40,7 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    let q_consts = QConsts::new(0.3, 0.8, 0.7, 0.01, 0.01);
+    let q_consts = QConsts::default();
 
     let q_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
         population_size: lgp_hyper_params.population_size,
