@@ -51,7 +51,7 @@ fn main() -> VoidResultAnyError {
         lazy_evaluate: lgp_hyper_params.lazy_evaluate,
         fitness_parameters: ReinforcementLearningParameters::new(
             initial_states.clone(),
-            max_episode_length as usize,
+            max_episode_length,
             input.clone(),
         ),
         program_parameters: QProgramGeneratorParameters::new(
