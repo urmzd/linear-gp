@@ -35,10 +35,10 @@ fn main() -> VoidResultAnyError {
         fitness_parameters: parameters,
         program_parameters: QProgramGeneratorParameters::new(
             ProgramGeneratorParameters::new(
-                32,
+                12,
                 InstructionGeneratorParameters::from::<MountainCarInput>(1),
             ),
-            QConsts::new(0.48, 0.25, 0.035, 0.01, 0.01),
+            QConsts::default(),
         ),
     };
 
@@ -124,7 +124,7 @@ mod tests {
                     12,
                     InstructionGeneratorParameters::from::<MountainCarInput>(1),
                 ),
-                QConsts::new(0.48, 0.25, 0.035, 0.01, 0.01),
+                QConsts::default(),
             ),
         };
 

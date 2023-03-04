@@ -21,13 +21,13 @@ mod config;
 use config::CartPoleInput;
 
 fn main() -> VoidResultAnyError {
-    let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
-    let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
+    let mut alpha_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0.1, 0.5)?);
+    let mut gamma_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0.9, 0.99)?);
     let mut epsilon_optim = tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 1.)?);
     let mut epsilon_decay_optim =
-        tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 0.01)?);
+        tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(1e-5, 1e-2)?);
     let mut alpha_decay_optim =
-        tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(0., 0.01)?);
+        tpe::TpeOptimizer::new(tpe::parzen_estimator(), tpe::range(1e-5, 1e-2)?);
 
     let game = CartPoleEnv::new(RenderMode::None);
     let environment = CartPoleInput::new(game);
@@ -97,6 +97,7 @@ fn main() -> VoidResultAnyError {
             best_epsilon_decay = epsilon_decay;
         }
     }
+
     info!(
         best_result = valuable(&best_result),
         best_alpha = valuable(&best_alpha),
