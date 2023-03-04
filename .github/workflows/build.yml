@@ -27,9 +27,6 @@ jobs:
             unit,
           ]
 
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -67,4 +64,7 @@ jobs:
         run: cargo test --no-fail-fast
 
       - name: Upload Assets
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: EndBug/add-and-commit@v9
+        with:
+          add : "assets/plots"
+          pull: "--rebase"
