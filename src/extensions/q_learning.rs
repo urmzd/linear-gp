@@ -251,7 +251,6 @@ where
             // Reset for next evaluation.
             self.program.registers.reset();
             parameters.environment.reset();
-            self.q_table.q_consts.decay();
 
             let initial_state_vec: &Vec<f64> = &initial_state.into();
 
@@ -268,7 +267,11 @@ where
         scores.sort_by(|a, b| a.partial_cmp(&b).unwrap());
         let median = scores.swap_remove(scores.len() / 2);
 
-        self.program.fitness = FitnessScore::Valid(median);
+        let fitness_score = FitnessScore::Valid(median);
+        self.q_table
+            .q_consts
+            .decay(self.program.fitness.clone(), fitness_score);
+        self.program.fitness = fitness_score;
 
         parameters.environment.finish();
     }
@@ -352,9 +355,11 @@ pub struct QConsts {
 }
 
 impl QConsts {
-    pub fn decay(&mut self) {
-        self.alpha *= 1. - self.alpha_decay;
-        self.epsilon *= 1. - self.epsilon_decay
+    pub fn decay(&mut self, previous_fitness: FitnessScore, new_fitness: FitnessScore) {
+        if new_fitness > previous_fitness {
+            self.alpha *= 1. - self.alpha_decay;
+            self.epsilon *= 1. - self.epsilon_decay
+        }
     }
 }
 
