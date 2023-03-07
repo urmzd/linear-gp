@@ -6,6 +6,8 @@ use std::{
 use derive_new::new;
 use rand::prelude::SliceRandom;
 use serde::Serialize;
+use tracing::field::valuable;
+use tracing::trace;
 
 use crate::{
     core::{
@@ -130,9 +132,10 @@ where
         }
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let median = scores.swap_remove(scores.len() / 2);
+        trace!(scores = valuable(&scores));
+        let median = scores.get(scores.len() / 2).take().unwrap();
 
-        self.fitness = FitnessScore::Valid(median);
+        self.fitness = FitnessScore::Valid(*median);
     }
 
     fn get_fitness(&self) -> FitnessScore {

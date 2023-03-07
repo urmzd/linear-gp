@@ -31,7 +31,6 @@ where
     pub mutation_percent: f64,
     pub crossover_percent: f64,
     pub n_generations: usize,
-    pub lazy_evaluate: bool,
     pub fitness_parameters: T::FitnessParameters,
     pub program_parameters: T::GeneratorParameters,
 }
@@ -119,7 +118,6 @@ where
             G::rank(&mut population);
             G::on_post_rank(&mut population, &mut self.params);
 
-            // Produce new populaiton.
             population
         } else {
             return None;
@@ -177,18 +175,8 @@ where
 
     fn eval_fitness(p: &mut Population<Self::O>, params: &mut HyperParameters<Self::O>) {
         for individual in p.iter_mut() {
-            // Only force evaluation when lazy evaluation is set off or in cases
-            // where lazy evaluation is desired, evaluate individuals who haven't changed.
-            let should_eval = if params.lazy_evaluate {
-                individual.get_fitness().is_not_evaluated()
-            } else {
-                true
-            };
-
-            if should_eval {
-                individual.eval_fitness(&mut params.fitness_parameters);
-                assert!(!individual.get_fitness().is_not_evaluated());
-            }
+            individual.eval_fitness(&mut params.fitness_parameters);
+            assert!(!individual.get_fitness().is_not_evaluated());
         }
     }
 
