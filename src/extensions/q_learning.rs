@@ -9,8 +9,8 @@ use rand::{
     distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
     prelude::SliceRandom,
 };
-use tracing::debug;
 use tracing::field::valuable;
+use tracing::{debug, trace};
 use valuable::Valuable;
 
 use crate::{
@@ -264,9 +264,10 @@ where
         }
 
         scores.sort_by(|a, b| a.partial_cmp(&b).unwrap());
-        let median = scores.swap_remove(scores.len() / 2);
+        trace!(scores = valuable(&scores));
+        let median = scores.get(scores.len() / 2).take().unwrap();
 
-        let fitness_score = FitnessScore::Valid(median);
+        let fitness_score = FitnessScore::Valid(*median);
 
         self.program.fitness = fitness_score;
         self.q_table.q_consts.decay();
@@ -360,7 +361,7 @@ impl QConsts {
 impl Default for QConsts {
     fn default() -> Self {
         Self {
-            alpha: 0.1,
+            alpha: 0.25,
             gamma: 0.90,
             epsilon: 0.05,
             alpha_decay: 0.01,

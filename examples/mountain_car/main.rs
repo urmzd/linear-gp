@@ -32,7 +32,6 @@ fn main() -> VoidResultAnyError {
         crossover_percent: 0.5,
         mutation_percent: 0.5,
         n_generations,
-        lazy_evaluate: false,
         fitness_parameters: fitness_parameters.clone(),
         program_parameters,
     };
@@ -43,7 +42,6 @@ fn main() -> VoidResultAnyError {
         mutation_percent: lgp_hp.mutation_percent,
         crossover_percent: lgp_hp.crossover_percent,
         n_generations: lgp_hp.n_generations,
-        lazy_evaluate: lgp_hp.lazy_evaluate,
         fitness_parameters: fitness_parameters.clone(),
         program_parameters: QProgramGeneratorParameters::new(
             lgp_hp.program_parameters,
@@ -109,7 +107,6 @@ mod tests {
             crossover_percent: 0.5,
             mutation_percent: 0.5,
             n_generations,
-            lazy_evaluate: false,
             fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
             program_parameters: ProgramGeneratorParameters::new(
                 12,
@@ -140,7 +137,6 @@ mod tests {
             mutation_percent: 0.5,
             crossover_percent: 0.5,
             n_generations,
-            lazy_evaluate: false,
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(

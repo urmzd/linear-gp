@@ -52,7 +52,6 @@ fn main() -> VoidResultAnyError {
             mutation_percent: 0.5,
             crossover_percent: 0.5,
             n_generations,
-            lazy_evaluate: false,
             fitness_parameters: parameters,
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
