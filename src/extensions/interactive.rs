@@ -33,8 +33,8 @@ impl<T> InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
 {
-    pub fn get_state(&self) -> &Vec<T::State> {
-        self.initial_states.get(self.generations).unwrap()
+    pub fn get_states(&self) -> Vec<T::State> {
+        self.initial_states.get(self.generations).cloned().unwrap()
     }
 
     pub fn next_generation(&mut self) {
@@ -72,7 +72,7 @@ impl StateRewardPair {
 
 pub trait InteractiveLearningInput: ValidInput + Sized
 where
-    Self::State: Into<Vec<f64>>,
+    Self::State: Into<Vec<f64>> + Clone,
 {
     type State;
 
@@ -96,10 +96,10 @@ where
 
         parameters.environment.reset();
 
-        for initial_state in parameters.get_state().clone() {
-            let mut score = 0.;
+        for initial_state in parameters.get_states() {
+            parameters.environment.set_state(initial_state.clone());
 
-            parameters.environment.set_state(initial_state);
+            let mut score = 0.;
 
             for _ in 0..T::MAX_EPISODE_LENGTH {
                 // Run program.
