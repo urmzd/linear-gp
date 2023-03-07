@@ -78,10 +78,9 @@ where
 
     const MAX_EPISODE_LENGTH: usize;
 
-    fn init(&mut self);
     fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
-    fn update_state(&mut self, state: Self::State);
+    fn set_state(&mut self, state: Self::State);
     fn finish(&mut self);
 }
 
@@ -95,10 +94,12 @@ where
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
 
+        parameters.environment.reset();
+
         for initial_state in parameters.get_state().clone() {
             let mut score = 0.;
 
-            parameters.environment.update_state(initial_state);
+            parameters.environment.set_state(initial_state);
 
             for _ in 0..T::MAX_EPISODE_LENGTH {
                 // Run program.
@@ -151,18 +152,4 @@ where
     T::State: Clone + fmt::Debug,
 {
     type O = Program<InteractiveLearningParameters<T>>;
-
-    fn on_post_rank(
-        _population: &mut crate::core::population::Population<Self::O>,
-        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
-    ) {
-        parameters.fitness_parameters.environment.finish();
-    }
-
-    fn on_pre_eval_fitness(
-        _population: &mut crate::core::population::Population<Self::O>,
-        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
-    ) {
-        parameters.fitness_parameters.environment.init();
-    }
 }

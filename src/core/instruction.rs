@@ -38,7 +38,7 @@ impl Mode {
     }
 }
 
-#[derive(Clone, Debug, Serialize, new)]
+#[derive(Clone, Debug, Serialize, new, Copy)]
 pub struct InstructionGeneratorParameters {
     n_input_features: usize,
     n_input_classes: usize,

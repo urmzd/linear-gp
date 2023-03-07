@@ -25,9 +25,9 @@ where
         number_of_generations: usize,
         n_trials: usize,
     ) -> Vec<Vec<<Self::Environment as Env>::Observation>> {
-        (0..(number_of_generations))
+        itertools::repeat_n((), number_of_generations)
             .map(|_| {
-                (0..n_trials)
+                itertools::repeat_n((), n_trials)
                     .map(|_| {
                         <<Self::Environment as Env>::Observation>::sample_between(
                             &mut generator(),
@@ -49,17 +49,16 @@ where
     type State = <T::Environment as Env>::Observation;
     const MAX_EPISODE_LENGTH: usize = T::EPISODE_LENGTH;
 
-    fn init(&mut self) {
-        self.get_env().reset(Some(0), false, None);
-    }
-
     fn sim(&mut self, action: usize) -> StateRewardPair {
         let ActionReward { reward, done, .. } = self.get_env().step(action.into());
+
         let reward = reward.into_inner();
+
         let wrapped_reward = match done {
             true => Reward::Terminal(reward),
             false => Reward::Continue(reward),
         };
+
         let state = self.flat();
 
         StateRewardPair {
@@ -76,7 +75,7 @@ where
         self.get_env().reset(None, false, None);
     }
 
-    fn update_state(&mut self, state: Self::State) {
+    fn set_state(&mut self, state: Self::State) {
         self.update_state(state)
     }
 }

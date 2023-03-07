@@ -19,6 +19,7 @@ impl ValidInput for CartPoleInput {
 
 impl ExtendedGymRsEnvironment for CartPoleInput {
     type Environment = CartPoleEnv;
+
     const EPISODE_LENGTH: usize = 500;
 
     fn get_state(&self) -> <Self::Environment as Env>::Observation {

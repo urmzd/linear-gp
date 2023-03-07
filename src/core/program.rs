@@ -17,7 +17,7 @@ use super::{
     registers::Registers,
 };
 
-#[derive(Clone, Debug, new)]
+#[derive(Clone, Debug, new, Copy)]
 pub struct ProgramGeneratorParameters {
     pub max_instructions: usize,
     pub instruction_generator_parameters: InstructionGeneratorParameters,
