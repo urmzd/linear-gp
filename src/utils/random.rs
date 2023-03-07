@@ -15,7 +15,8 @@ type InternalGenerator = Rc<UnsafeCell<ReseedingRng<ChaCha8Core, OsRng>>>;
 
 thread_local! {
     static GENERATOR: InternalGenerator = {
-        let prng = ChaCha8Core::from_entropy();
+        // NOTE: SEED
+        let prng = ChaCha8Core::seed_from_u64(0);
         let reseeding_rng = ReseedingRng::new(prng, 0, OsRng);
 
         Rc::new(UnsafeCell::new(reseeding_rng))

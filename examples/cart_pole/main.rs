@@ -54,17 +54,17 @@ fn main() -> VoidResultAnyError {
         ),
     };
 
-    // let lgp_pops = ILgp::build(lgp_hp).collect_vec();
+    let lgp_pops = ILgp::build(lgp_hp).collect_vec();
     let q_pops = QLgp::build(lgpq_hp).collect_vec();
 
     const PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/default.png";
     const Q_PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/q.png";
 
-    // plot_benchmarks(
-    //     lgp_pops,
-    //     PLOT_FILE_NAME,
-    //     0.0..(CartPoleInput::MAX_EPISODE_LENGTH as f64),
-    // )?;
+    plot_benchmarks(
+        lgp_pops,
+        PLOT_FILE_NAME,
+        0.0..(CartPoleInput::MAX_EPISODE_LENGTH as f64),
+    )?;
     plot_benchmarks(
         q_pops,
         Q_PLOT_FILE_NAME,
