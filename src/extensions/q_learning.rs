@@ -361,11 +361,11 @@ impl QConsts {
 impl Default for QConsts {
     fn default() -> Self {
         Self {
-            alpha: 1e-1,
-            gamma: 99e-2,
-            epsilon: 5e-2,
-            alpha_decay: 1e-5,
-            epsilon_decay: 1e-3,
+            alpha: 0.1,
+            gamma: 0.99,
+            epsilon: 0.05,
+            alpha_decay: 0.01,
+            epsilon_decay: 0.001,
         }
     }
 }

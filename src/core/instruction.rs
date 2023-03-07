@@ -15,7 +15,8 @@ use super::inputs::ValidInput;
 use super::registers::Registers;
 
 /// The EXTERNAL_FACTOR is a constant float value that is used to amplify the effect of external inputs on the program's execution.
-/// Specifically, in the Instruction struct's apply method, if the Mode is Mode::External, then the target value (i.e., the value in the register that the instruction writes to) is multiplied by the EXTERNAL_FACTOR.
+/// Specifically, in the Instruction struct's apply method, if the Mode is Mode::External,
+/// then the target value (i.e., the value in the register that the instruction writes to) is multiplied by the EXTERNAL_FACTOR.
 /// This can be useful for giving more weight to external inputs, allowing the program to better respond to changes in the environment.
 const EXTERNAL_FACTOR: f64 = 10.;
 
@@ -163,6 +164,7 @@ impl Instruction {
         };
 
         let target_value = *target_data.get(self.target_index);
+
         let amplied_target_value = if self.mode == Mode::External {
             EXTERNAL_FACTOR * target_value
         } else {
