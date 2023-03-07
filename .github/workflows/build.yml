@@ -22,8 +22,6 @@ jobs:
             iris,
             mountain_car,
             cart_pole,
-            mountain_car_compare,
-            cart_pole_compare,
             unit,
           ]
 
