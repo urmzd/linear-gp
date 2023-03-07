@@ -67,10 +67,6 @@ where
         }
     }
 
-    fn finish(&mut self) {
-        self.get_env().close();
-    }
-
     fn reset(&mut self) {
         self.get_env().reset(None, false, None);
     }
