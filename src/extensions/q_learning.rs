@@ -199,7 +199,7 @@ where
         for initial_state in parameters.get_state().clone() {
             let mut score = 0.;
 
-            parameters.environment.update_state(initial_state.clone());
+            parameters.environment.set_state(initial_state.clone());
 
             // We run the program and determine what action to take at the current step.
             let mut current_action_state = match get_action_state(
@@ -390,6 +390,6 @@ where
         _population: &mut crate::core::population::Population<Self::O>,
         parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
     ) {
-        parameters.fitness_parameters.environment.init();
+        parameters.fitness_parameters.environment.reset();
     }
 }
