@@ -362,10 +362,10 @@ impl Default for QConsts {
     fn default() -> Self {
         Self {
             alpha: 0.1,
-            gamma: 0.99,
+            gamma: 0.90,
             epsilon: 0.05,
             alpha_decay: 0.01,
-            epsilon_decay: 0.001,
+            epsilon_decay: 0.0001,
         }
     }
 }
