@@ -40,7 +40,7 @@ fn main() -> VoidResultAnyError {
     let mut best_result = 0.;
 
     for instruction_count in 6..16 {
-        for _ in 0..50 {
+        for _ in 0..100 {
             let alpha = alpha_optim.ask(&mut generator())?;
             let alpha_decay = alpha_decay_optim.ask(&mut generator())?;
             let gamma = gamma_optim.ask(&mut generator())?;

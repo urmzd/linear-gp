@@ -197,9 +197,9 @@ where
         let mut scores = vec![];
 
         for initial_state in parameters.get_states() {
-            let mut score = 0.;
-
+            parameters.environment.reset();
             parameters.environment.set_state(initial_state.clone());
+            let mut score = 0.;
 
             // We run the program and determine what action to take at the current step.
             let mut current_action_state = match get_action_state(
@@ -250,7 +250,6 @@ where
 
             // Reset for next evaluation.
             self.program.registers.reset();
-            parameters.environment.reset();
 
             let initial_state_vec: &Vec<f64> = &initial_state.into();
 
@@ -378,18 +377,4 @@ where
     T::State: Clone + fmt::Debug,
 {
     type O = QProgram<T>;
-
-    fn on_post_rank(
-        _population: &mut crate::core::population::Population<Self::O>,
-        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
-    ) {
-        parameters.fitness_parameters.environment.finish();
-    }
-
-    fn on_pre_eval_fitness(
-        _population: &mut crate::core::population::Population<Self::O>,
-        parameters: &mut crate::core::algorithm::HyperParameters<Self::O>,
-    ) {
-        parameters.fitness_parameters.environment.reset();
-    }
 }

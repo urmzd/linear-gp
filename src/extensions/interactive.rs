@@ -81,7 +81,6 @@ where
     fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
     fn set_state(&mut self, state: Self::State);
-    fn finish(&mut self);
 }
 
 impl<T> Fitness for Program<InteractiveLearningParameters<T>>
@@ -94,9 +93,8 @@ where
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
 
-        parameters.environment.reset();
-
         for initial_state in parameters.get_states() {
+            parameters.environment.reset();
             parameters.environment.set_state(initial_state.clone());
 
             let mut score = 0.;
@@ -128,9 +126,7 @@ where
             }
 
             scores.push(score);
-
             self.registers.reset();
-            parameters.environment.reset();
         }
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
