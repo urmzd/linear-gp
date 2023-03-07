@@ -196,7 +196,7 @@ where
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
         let mut scores = vec![];
 
-        for initial_state in parameters.get_state().clone() {
+        for initial_state in parameters.get_states() {
             let mut score = 0.;
 
             parameters.environment.set_state(initial_state.clone());
