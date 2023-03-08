@@ -1,82 +1,51 @@
-use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
-use itertools::Itertools;
-use lgp::{
-    core::{
-        algorithm::{GeneticAlgorithm, HyperParameters},
-        instruction::InstructionGeneratorParameters,
-        program::{Program, ProgramGeneratorParameters},
-    },
-    extensions::{
-        gym_rs::ExtendedGymRsEnvironment,
-        interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
-        q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
-    },
-    utils::{plots::plot_benchmarks, types::VoidResultAnyError},
-};
-mod config;
-use config::CartPoleInput;
+use derive_new::new;
+use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
+use lgp::{core::inputs::ValidInput, extensions::gym_rs::ExtendedGymRsEnvironment};
+use serde::Serialize;
 
-fn main() -> VoidResultAnyError {
-    let environment = CartPoleEnv::new();
-    let input = CartPoleInput::new(environment);
-    let n_generations = 100;
-    let n_trials = 5;
-    let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
-    let fitness_parameters = InteractiveLearningParameters::new(initial_states, input);
-    let program_parameters = ProgramGeneratorParameters::new(
-        8,
-        InstructionGeneratorParameters::from::<CartPoleInput>(1),
-    );
+#[derive(Clone, Debug, Serialize, new)]
+pub struct CartPoleInput {
+    environment: CartPoleEnv,
+}
 
-    let lgp_hp: HyperParameters<Program<InteractiveLearningParameters<CartPoleInput>>> =
-        HyperParameters {
-            population_size: 100,
-            gap: 0.5,
-            crossover_percent: 0.5,
-            mutation_percent: 0.5,
-            n_generations,
-            fitness_parameters,
-            program_parameters,
-        };
+impl ValidInput for CartPoleInput {
+    const N_INPUT_REGISTERS: usize = 4;
+    const N_ACTION_REGISTERS: usize = 2;
 
-    let lgpq_hp: HyperParameters<QProgram<CartPoleInput>> = HyperParameters {
-        population_size: lgp_hp.population_size,
-        gap: lgp_hp.gap,
-        crossover_percent: lgp_hp.crossover_percent,
-        mutation_percent: lgp_hp.mutation_percent,
-        n_generations: lgp_hp.n_generations,
-        fitness_parameters: lgp_hp.fitness_parameters.clone(),
-        program_parameters: QProgramGeneratorParameters::new(
-            lgp_hp.program_parameters.clone(),
-            QConsts::default(),
-        ),
-    };
+    fn flat(&self) -> Vec<f64> {
+        self.environment.state.into()
+    }
+}
 
-    let lgp_pops = ILgp::build(lgp_hp).collect_vec();
-    let q_pops = QLgp::build(lgpq_hp).collect_vec();
+impl ExtendedGymRsEnvironment for CartPoleInput {
+    type Environment = CartPoleEnv;
 
-    const PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/default.png";
-    const Q_PLOT_FILE_NAME: &'static str = "assets/plots/examples/cart_pole/q.png";
+    const EPISODE_LENGTH: usize = 500;
 
-    plot_benchmarks(
-        lgp_pops,
-        PLOT_FILE_NAME,
-        0.0..(CartPoleInput::MAX_EPISODE_LENGTH as f64),
-    )?;
-    plot_benchmarks(
-        q_pops,
-        Q_PLOT_FILE_NAME,
-        0.0..(CartPoleInput::MAX_EPISODE_LENGTH as f64),
-    )?;
+    fn get_state(&self) -> <Self::Environment as Env>::Observation {
+        self.environment.state
+    }
 
-    Ok(())
+    fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation) {
+        self.environment.state = new_state;
+    }
+
+    fn get_env(&mut self) -> &mut Self::Environment {
+        &mut self.environment
+    }
+
+    fn new(environment: Self::Environment) -> Self {
+        Self {
+            environment
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::error;
 
-    use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
+    use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
 
     use itertools::Itertools;
     use lgp::{

@@ -339,7 +339,7 @@ where
     }
 }
 
-#[derive(Debug, new)]
+#[derive(Debug, new, Clone)]
 pub struct QProgramGeneratorParameters {
     program_parameters: ProgramGeneratorParameters,
     consts: QConsts,

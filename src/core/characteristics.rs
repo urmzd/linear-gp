@@ -54,9 +54,9 @@ impl FitnessScore {
     }
 }
 
-pub trait Fitness: Send
+pub trait Fitness
 where
-    Self::FitnessParameters: Send,
+    Self::FitnessParameters: Send + Clone,
 {
     type FitnessParameters;
 
@@ -74,7 +74,7 @@ pub trait Mutate: Generate + Clone {
 
 pub trait Generate
 where
-    Self::GeneratorParameters: Send,
+    Self::GeneratorParameters: Send + Clone,
 {
     type GeneratorParameters;
 

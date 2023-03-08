@@ -10,7 +10,6 @@ use rand::{
 use uuid::Uuid;
 
 use super::{
-    algorithm::Organism,
     characteristics::{Breed, DuplicateNew, FitnessScore, Generate, Mutate},
     inputs::ValidInput,
     instruction::{Instruction, InstructionGeneratorParameters},
