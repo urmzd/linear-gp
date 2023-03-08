@@ -656,10 +656,10 @@ dependencies = [
  "failure",
  "find_folder",
  "log",
- "nalgebra 0.31.4",
+ "nalgebra",
  "num",
  "num-traits",
- "ordered-float 3.0.0",
+ "ordered-float",
  "plotters",
  "pretty_env_logger",
  "rand",
@@ -940,7 +940,6 @@ dependencies = [
  "tempfile",
  "tokio",
  "toml",
- "tpe",
  "tracing",
  "tracing-subscriber",
  "uuid",
@@ -962,12 +961,6 @@ dependencies = [
  "cfg-if",
  "winapi",
 ]
-
-[[package]]
-name = "libm"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "348108ab3fba42ec82ff6e9564fc4ca0247bdccdc68dd8af9764bbc79c3c8ffb"
 
 [[package]]
 name = "link-cplusplus"
@@ -1062,24 +1055,6 @@ checksum = "7843ec2de400bcbc6a6328c958dc38e5359da6e93e72e37bc5246bf1ae776389"
 
 [[package]]
 name = "nalgebra"
-version = "0.27.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "462fffe4002f4f2e1f6a9dcf12cc1a6fc0e15989014efc02a941d3e0f5dc2120"
-dependencies = [
- "approx",
- "matrixmultiply",
- "nalgebra-macros",
- "num-complex 0.4.3",
- "num-rational 0.4.1",
- "num-traits",
- "rand",
- "rand_distr",
- "simba 0.5.1",
- "typenum",
-]
-
-[[package]]
-name = "nalgebra"
 version = "0.31.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20bd243ab3dbb395b39ee730402d2e5405e448c75133ec49cc977762c4cba3d1"
@@ -1090,7 +1065,7 @@ dependencies = [
  "num-complex 0.4.3",
  "num-rational 0.4.1",
  "num-traits",
- "simba 0.7.3",
+ "simba",
  "typenum",
 ]
 
@@ -1217,7 +1192,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "578ede34cf02f8924ab9447f50c28075b4d3e5b269972345e7e0372b38c6cdcd"
 dependencies = [
  "autocfg",
- "libm",
 ]
 
 [[package]]
@@ -1288,15 +1262,6 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
-]
-
-[[package]]
-name = "ordered-float"
-version = "2.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7940cf2ca942593318d07fcf2596cdca60a85c9e7fab408a5e21a4f9dcd40d87"
-dependencies = [
- "num-traits",
 ]
 
 [[package]]
@@ -1538,16 +1503,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
-]
-
-[[package]]
-name = "rand_distr"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32cb0b9bc82b0a0876c2dd994a7e7a2683d3e7390ca40e6886785ef0c7e3ee31"
-dependencies = [
- "num-traits",
- "rand",
 ]
 
 [[package]]
@@ -1881,18 +1836,6 @@ dependencies = [
 
 [[package]]
 name = "simba"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e82063457853d00243beda9952e910b82593e4b07ae9f721b9278a99a0d3d5c"
-dependencies = [
- "approx",
- "num-complex 0.4.3",
- "num-traits",
- "paste",
-]
-
-[[package]]
-name = "simba"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f3fd720c48c53cace224ae62bef1bbff363a70c68c4802a78b5cc6159618176"
@@ -1927,19 +1870,6 @@ checksum = "64a4a911eed85daf18834cfaa86a79b7d266ff93ff5ba14005426219480ed662"
 dependencies = [
  "libc",
  "winapi",
-]
-
-[[package]]
-name = "statrs"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05bdbb8e4e78216a85785a85d3ec3183144f98d0097b9281802c019bb07a6f05"
-dependencies = [
- "approx",
- "lazy_static",
- "nalgebra 0.27.1",
- "num-traits",
- "rand",
 ]
 
 [[package]]
@@ -2134,19 +2064,6 @@ name = "tower-service"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6bc1c9ce2b5135ac7f93c72918fc37feb872bdc6a5533a8b85eb4b86bfdae52"
-
-[[package]]
-name = "tpe"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01850406776cd3109d0ea1fc20d752c2074a3f0bd9266e14613c0b8b6085bfee"
-dependencies = [
- "ordered-float 2.10.0",
- "rand",
- "rand_distr",
- "statrs",
- "thiserror",
-]
 
 [[package]]
 name = "tracing"

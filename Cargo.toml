@@ -30,7 +30,6 @@ uuid = { version = "1.2.2", features = ["v4"] }
 reqwest = "0.11"
 tempfile = "3.3"
 pretty_assertions = { version = "1.2" }
-tpe = "0.2"
 
 [[example]]
 name = "mountain_car"
@@ -46,11 +45,3 @@ test = true
 name = "cart_pole"
 path = "examples/cart_pole/main.rs"
 test = true
-
-[[example]]
-name = "cart_pole_search"
-path = "examples/cart_pole/search.rs"
-
-[[example]]
-name = "mountain_car_search"
-path = "examples/mountain_car/search.rs"
