@@ -17,6 +17,7 @@ where
 
     const EPISODE_LENGTH: usize;
 
+    fn new(environment: Self::Environment) -> Self;
     fn get_state(&self) -> <Self::Environment as Env>::Observation;
     fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation);
     fn get_env(&mut self) -> &mut Self::Environment;

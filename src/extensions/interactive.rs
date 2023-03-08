@@ -74,7 +74,7 @@ impl StateRewardPair {
 
 pub trait InteractiveLearningInput: ValidInput + Sized
 where
-    Self::State: Into<Vec<f64>> + Clone,
+    Self::State: Into<Vec<f64>> + Clone + Send,
 {
     type State;
 

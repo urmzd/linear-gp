@@ -24,7 +24,7 @@ use super::{
 #[derive(Debug, Clone)]
 pub struct HyperParameters<T>
 where
-    T: Fitness + Mutate + Generate,
+    T: Fitness + Mutate + Generate + Clone,
 {
     pub population_size: usize,
     pub gap: f64,
