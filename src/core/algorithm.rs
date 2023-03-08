@@ -141,11 +141,11 @@ where
 }
 
 pub trait Organism:
-    Fitness + Generate + DuplicateNew + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug
+    Fitness + Generate + DuplicateNew + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug + Send
 {
 }
 
-pub trait GeneticAlgorithm
+pub trait GeneticAlgorithm: Send
 where
     Self::O: Organism,
 {

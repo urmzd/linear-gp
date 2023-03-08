@@ -2,7 +2,7 @@ use super::registers::Registers;
 
 pub type Inputs<InputType> = Vec<InputType>;
 
-pub trait ValidInput: Clone
+pub trait ValidInput: Clone + Send
 where
     for<'a> Registers: From<&'a Self>,
 {

@@ -1,4 +1,4 @@
-use gym_rs::{envs::classical_control::cartpole::CartPoleEnv, utils::renderer::RenderMode};
+use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
 use itertools::Itertools;
 use lgp::{
     core::{
@@ -17,7 +17,7 @@ mod config;
 use config::CartPoleInput;
 
 fn main() -> VoidResultAnyError {
-    let environment = CartPoleEnv::new(RenderMode::None);
+    let environment = CartPoleEnv::new();
     let input = CartPoleInput::new(environment);
     let n_generations = 100;
     let n_trials = 5;
@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn solve_cart_pole_default() -> Result<(), Box<dyn error::Error>> {
-        let environment = CartPoleEnv::new(RenderMode::None);
+        let environment = CartPoleEnv::new();
         let input = CartPoleInput::new(environment);
         let n_generations = 100;
         let n_trials = 5;
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn solve_cart_pole_with_q_learning() -> Result<(), Box<dyn error::Error>> {
-        let environment = CartPoleEnv::new(RenderMode::None);
+        let environment = CartPoleEnv::new();
         let input = CartPoleInput::new(environment);
         let n_generations = 100;
         let n_trials = 5;

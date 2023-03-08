@@ -17,7 +17,7 @@ mod config;
 use config::MountainCarInput;
 
 fn main() -> VoidResultAnyError {
-    let environment = MountainCarEnv::new(RenderMode::None);
+    let environment = MountainCarEnv::new();
     let input = MountainCarInput::new(environment);
     let n_generations = 100;
     let n_trials = 5;
@@ -95,7 +95,7 @@ mod tests {
     #[test]
     fn given_mountain_car_example_when_lgp_executed_then_task_is_solved(
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let environment = MountainCarEnv::new(RenderMode::None);
+        let environment = MountainCarEnv::new();
         let input = MountainCarInput::new(environment);
         let n_generations = 100;
         let n_trials = 5;
@@ -124,7 +124,7 @@ mod tests {
     #[test]
     fn given_mountain_car_task_when_q_learning_lgp_is_used_then_task_is_solved(
     ) -> VoidResultAnyError {
-        let game = MountainCarEnv::new(RenderMode::None);
+        let game = MountainCarEnv::new();
         let environment = MountainCarInput::new(game);
         let n_generations = 100;
         let n_trials = 5;

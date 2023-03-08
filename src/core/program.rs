@@ -10,11 +10,12 @@ use rand::{
 use uuid::Uuid;
 
 use super::{
+    algorithm::Organism,
     characteristics::{Breed, DuplicateNew, FitnessScore, Generate, Mutate},
     inputs::ValidInput,
     instruction::{Instruction, InstructionGeneratorParameters},
     instructions::Instructions,
-    registers::Registers, algorithm::Organism,
+    registers::Registers,
 };
 
 #[derive(Clone, Debug, new, Copy)]
@@ -55,7 +56,6 @@ pub struct Program<T> {
     pub fitness: FitnessScore,
     marker: PhantomData<T>,
 }
-
 
 impl<T> PartialEq for Program<T> {
     fn eq(&self, other: &Self) -> bool {

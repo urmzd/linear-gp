@@ -139,7 +139,7 @@ where
 impl<T> Organism for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + fmt::Debug,
+    T::State: Clone + fmt::Debug + Send,
     T: fmt::Debug,
 {
 }
@@ -197,7 +197,7 @@ where
 impl<T> Fitness for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + Debug,
+    T::State: Clone + Debug + Send,
 {
     type FitnessParameters = InteractiveLearningParameters<T>;
 
@@ -383,7 +383,7 @@ pub struct QLgp<T>(PhantomData<T>);
 impl<T> GeneticAlgorithm for QLgp<T>
 where
     T: InteractiveLearningInput + fmt::Debug,
-    T::State: Clone + fmt::Debug,
+    T::State: Clone + fmt::Debug + Send,
 {
     type O = QProgram<T>;
 }

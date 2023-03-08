@@ -54,7 +54,10 @@ impl FitnessScore {
     }
 }
 
-pub trait Fitness {
+pub trait Fitness: Send
+where
+    Self::FitnessParameters: Send,
+{
     type FitnessParameters;
 
     fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters);
@@ -69,7 +72,10 @@ pub trait Mutate: Generate + Clone {
     fn mutate(&self, parameters: &Self::GeneratorParameters) -> Self;
 }
 
-pub trait Generate {
+pub trait Generate
+where
+    Self::GeneratorParameters: Send,
+{
     type GeneratorParameters;
 
     fn generate(parameters: &Self::GeneratorParameters) -> Self;

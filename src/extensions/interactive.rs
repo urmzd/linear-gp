@@ -88,14 +88,14 @@ where
 impl<T> Organism for Program<InteractiveLearningParameters<T>>
 where
     T: InteractiveLearningInput + fmt::Debug,
-    T::State: Clone + fmt::Debug,
+    T::State: Clone + fmt::Debug + Send,
 {
 }
 
 impl<T> Fitness for Program<InteractiveLearningParameters<T>>
 where
     T: InteractiveLearningInput,
-    T::State: Clone,
+    T::State: Clone + Send,
 {
     type FitnessParameters = InteractiveLearningParameters<T>;
 
@@ -155,7 +155,7 @@ pub struct ILgp<T>(PhantomData<T>);
 impl<T> GeneticAlgorithm for ILgp<T>
 where
     T: InteractiveLearningInput + fmt::Debug,
-    T::State: Clone + fmt::Debug,
+    T::State: Clone + fmt::Debug + Send,
 {
     type O = Program<InteractiveLearningParameters<T>>;
 }
