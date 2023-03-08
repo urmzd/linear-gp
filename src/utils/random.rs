@@ -1,24 +1,20 @@
 use std::{cell::UnsafeCell, rc::Rc};
 
-use rand::{
-    rngs::{adapter::ReseedingRng, OsRng},
-    RngCore, SeedableRng,
-};
-use rand_chacha::ChaCha8Core;
+use rand::{RngCore, SeedableRng};
+use rand_xoshiro::Xoshiro256PlusPlus;
 
 #[derive(Clone, Debug)]
 pub struct Random {
     rng: InternalGenerator,
 }
 
-type InternalGenerator = Rc<UnsafeCell<ReseedingRng<ChaCha8Core, OsRng>>>;
+type InternalGenerator = Rc<UnsafeCell<Xoshiro256PlusPlus>>;
 
 thread_local! {
     static GENERATOR: InternalGenerator = {
-        let prng = ChaCha8Core::from_entropy();
-        let reseeding_rng = ReseedingRng::new(prng, 10, OsRng);
+        let prng = Xoshiro256PlusPlus::from_entropy();
 
-        Rc::new(UnsafeCell::new(reseeding_rng))
+        Rc::new(UnsafeCell::new(prng))
     }
 }
 

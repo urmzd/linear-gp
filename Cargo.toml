@@ -9,7 +9,7 @@ csv = "1.1"
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.18", features = ["full", "macros"] }
 rand = "0.8.5"
-rand_chacha = "0.3.1"
+rand_xoshiro = "0.6.0"
 strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
 more-asserts = { version = "0.2" }
