@@ -1,14 +1,11 @@
-use std::{fmt, marker::PhantomData};
+use std::marker::PhantomData;
 
 use derive_more::Display;
 use kurobako_core::{
     domain::{self, Constraint},
-    problem::{Problem, ProblemFactory, ProblemSpecBuilder},
+    problem::{Evaluator, Problem, ProblemFactory, ProblemSpecBuilder},
 };
-use lgp::core::{
-    algorithm::{GeneticAlgorithm, Organism},
-    characteristics::{Breed, DuplicateNew, Fitness, Generate, Mutate},
-};
+use lgp::core::algorithm::{GeneticAlgorithm, HyperParameters, Organism};
 
 #[derive(Display, PartialEq, Eq)]
 pub enum Variant {
@@ -33,45 +30,50 @@ pub struct LgpProblemFactory<G, O> {
     o_marker: PhantomData<O>,
 }
 
-//let environment = MountainCarEnv::new(RenderMode::None);
-//let input = MountainCarInput::new(environment);
-//let n_generations = 100;
-//let n_trials = 5;
-//let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
-//let fitness_parameters = InteractiveLearningParameters::new(initial_states, input);
-//let instruction_parameters = InstructionGeneratorParameters::from::<MountainCarInput>(1);
-//let program_parameters = ProgramGeneratorParameters::new(12, instruction_parameters);
+pub struct LgpProblem<G, O>
+where
+    O: Organism,
+    G: GeneticAlgorithm<O = O> + Send,
+{
+    algorithm: G,
+}
 
-//let lgp_hp = HyperParameters {
-//population_size: 100,
-//gap: 0.5,
-//crossover_percent: 0.5,
-//mutation_percent: 0.5,
-//n_generations,
-//fitness_parameters: fitness_parameters.clone(),
-//program_parameters,
-//};
+pub struct LgpProblemEvaluator<G, O>
+where
+    O: Organism + Send,
+    G: GeneticAlgorithm<O = O> + Send,
+{
+    g_marker: PhantomData<G>,
+    o_marker: PhantomData<O>,
+    hyper_parameters: HyperParameters<O>,
+}
 
-//let lgpq_hp: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
-//population_size: lgp_hp.population_size,
-//gap: lgp_hp.gap,
-//mutation_percent: lgp_hp.mutation_percent,
-//crossover_percent: lgp_hp.crossover_percent,
-//n_generations: lgp_hp.n_generations,
-//fitness_parameters: fitness_parameters.clone(),
-//program_parameters: QProgramGeneratorParameters::new(
-//lgp_hp.program_parameters,
-//QConsts::default(),
-//),
-//};
-//
-
-struct LgpProblem<G, O>
+impl<G, O> Evaluator for LgpProblemEvaluator<G, O>
 where
     O: Organism,
     G: GeneticAlgorithm<O = O>,
 {
-    algorithm: G,
+    fn evaluate(
+        &mut self,
+        next_step: u64,
+    ) -> kurobako_core::Result<(u64, kurobako_core::trial::Values)> {
+        todo!()
+    }
+}
+
+impl<G, O> Problem for LgpProblem<G, O>
+where
+    O: Organism,
+    G: GeneticAlgorithm<O = O>,
+{
+    type Evaluator = LgpProblemEvaluator<G, O>;
+
+    fn create_evaluator(
+        &self,
+        params: kurobako_core::trial::Params,
+    ) -> kurobako_core::Result<Self::Evaluator> {
+        todo!()
+    }
 }
 
 impl<G, O> ProblemFactory for LgpProblemFactory<G, O>
@@ -85,7 +87,7 @@ where
         let name = format!("{}-{}", self.problem_type, self.variant);
 
         let mut spec = ProblemSpecBuilder::new(&name)
-            .param(domain::var("population_size").discrete(0, usize::MAX))
+            .param(domain::var("population_size").discrete(0, i64::MAX))
             .param(
                 domain::var("gap")
                     .continuous(0., 1.)
@@ -135,7 +137,16 @@ where
         &self,
         rng: kurobako_core::rng::ArcRng,
     ) -> kurobako_core::Result<Self::Problem> {
-        todo!()
+        let problem = match self.problem_type {
+            ProblemTypes::MountainCar => {
+                todo!()
+            }
+            _ => {
+                todo!()
+            }
+        };
+
+        return Ok(problem);
     }
 }
 

@@ -2,6 +2,10 @@ use std::{fmt, marker::PhantomData, mem, ptr::NonNull};
 
 use serde::{ser::SerializeSeq, Serialize};
 
+unsafe impl<T: Send> Send for LinkedList<T> {}
+unsafe impl<'a, T: Send> Send for Iter<'a, T> {}
+unsafe impl<'a, T: Send> Send for IterMut<'a, T> {}
+
 pub struct LinkedList<T> {
     pub head: Option<Pointer<T>>,
     pub tail: Option<Pointer<T>>,
