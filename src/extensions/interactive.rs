@@ -11,7 +11,7 @@ use tracing::trace;
 
 use crate::{
     core::{
-        algorithm::GeneticAlgorithm,
+        algorithm::{GeneticAlgorithm, Organism},
         characteristics::{Fitness, FitnessScore},
         inputs::ValidInput,
         program::Program,
@@ -83,6 +83,13 @@ where
     fn sim(&mut self, action: usize) -> StateRewardPair;
     fn reset(&mut self);
     fn set_state(&mut self, state: Self::State);
+}
+
+impl<T> Organism for Program<InteractiveLearningParameters<T>>
+where
+    T: InteractiveLearningInput + fmt::Debug,
+    T::State: Clone + fmt::Debug,
+{
 }
 
 impl<T> Fitness for Program<InteractiveLearningParameters<T>>

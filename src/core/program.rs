@@ -14,7 +14,7 @@ use super::{
     inputs::ValidInput,
     instruction::{Instruction, InstructionGeneratorParameters},
     instructions::Instructions,
-    registers::Registers,
+    registers::Registers, algorithm::Organism,
 };
 
 #[derive(Clone, Debug, new, Copy)]
@@ -55,6 +55,7 @@ pub struct Program<T> {
     pub fitness: FitnessScore,
     marker: PhantomData<T>,
 }
+
 
 impl<T> PartialEq for Program<T> {
     fn eq(&self, other: &Self) -> bool {

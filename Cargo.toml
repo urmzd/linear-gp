@@ -24,6 +24,7 @@ tracing = {version = "0.1", default-features=false }
 tracing-subscriber = { version = "0.3", default-features=false, features = ["env-filter", "fmt", "json", "std", "valuable"] }
 valuable = { version = "0.1.0", features = ["derive"] } 
 gym-rs = { git = "https://github.com/urmzd/gym-rs" }
+kurobako_core = "0.1"
 uuid = { version = "1.2.2", features = ["v4"] }
 
 [dev-dependencies]

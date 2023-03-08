@@ -1,7 +1,10 @@
+use core::fmt;
+
 use derive_new::new;
 use serde::Serialize;
 
 use crate::core::{
+    algorithm::Organism,
     characteristics::{Fitness, FitnessScore},
     inputs::{Inputs, ValidInput},
     program::Program,
@@ -18,6 +21,8 @@ where
 pub trait ClassificationInput: ValidInput {
     fn get_class(&self) -> usize;
 }
+
+impl<T> Organism for Program<ClassificationParameters<T>> where T: ClassificationInput + fmt::Debug {}
 
 impl<T> Fitness for Program<ClassificationParameters<T>>
 where
