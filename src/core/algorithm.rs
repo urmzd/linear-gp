@@ -140,17 +140,14 @@ where
     }
 }
 
+pub trait Organism:
+    Fitness + Generate + DuplicateNew + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug
+{
+}
+
 pub trait GeneticAlgorithm
 where
-    Self::O: Fitness
-        + Generate
-        + DuplicateNew
-        + PartialOrd
-        + Sized
-        + Clone
-        + Mutate
-        + Breed
-        + fmt::Debug,
+    Self::O: Organism,
 {
     type O;
 
@@ -212,7 +209,7 @@ where
                 if population
                     .worst()
                     .map(|v| v.get_fitness().is_invalid())
-                    .expect("Atleast one individual to exist.")
+                    .expect("At least one individual to exist.")
                 {
                     population.pop();
 

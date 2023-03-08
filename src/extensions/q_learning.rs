@@ -15,7 +15,7 @@ use valuable::Valuable;
 
 use crate::{
     core::{
-        algorithm::GeneticAlgorithm,
+        algorithm::{GeneticAlgorithm, Organism},
         characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
         program::{Program, ProgramGeneratorParameters},
         registers::Registers,
@@ -134,6 +134,14 @@ where
 {
     pub q_table: QTable,
     pub program: Program<InteractiveLearningParameters<T>>,
+}
+
+impl<T> Organism for QProgram<T>
+where
+    T: InteractiveLearningInput,
+    T::State: Clone + fmt::Debug,
+    T: fmt::Debug,
+{
 }
 
 impl<T> DuplicateNew for QProgram<T>
