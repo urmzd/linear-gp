@@ -1,43 +1,111 @@
-mod config;
+use core::fmt;
+use std::fmt::Display;
+
+use serde::{Deserialize, Serialize};
+use strum::EnumCount;
+
+use crate::{
+    core::{
+        algorithm::{GeneticAlgorithm, Loader},
+        inputs::ValidInput,
+        program::Program,
+    },
+    extensions::classification::{ClassificationInput, ClassificationParameters},
+};
 
 use std::error;
 
-use config::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
-use lgp::{
-    core::{
-        algorithm::{GeneticAlgorithm, HyperParameters, Loader},
-        instruction::InstructionGeneratorParameters,
-        program::ProgramGeneratorParameters,
-    },
-    extensions::classification::ClassificationParameters,
-};
+use tempfile::NamedTempFile;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn error::Error>> {
-    let ContentFilePair(_, file) = get_iris_content().await?;
-    let inputs = IrisLgp::load_from_csv(file.path());
+use std::io::Write;
 
-    let hyper_params = HyperParameters {
-        population_size: 1,
-        n_generations: 1,
-        gap: 0.5,
-        mutation_percent: 0.5,
-        crossover_percent: 0.5,
-        fitness_parameters: ClassificationParameters::new(inputs),
-        program_parameters: ProgramGeneratorParameters::new(
-            100,
-            InstructionGeneratorParameters::from::<IrisInput>(1),
-        ),
-    };
+pub struct ContentFilePair(pub String, pub NamedTempFile);
 
-    IrisLgp::build(hyper_params).last();
-    Ok(())
+pub async fn get_iris_content() -> Result<ContentFilePair, Box<dyn error::Error>> {
+    let tmp_file = NamedTempFile::new()?;
+    let response = reqwest::get(IRIS_DATASET_LINK).await?;
+    let content = response.text().await?;
+    writeln!(&tmp_file, "{}", &content)?;
+
+    Ok(ContentFilePair(content, tmp_file))
+}
+
+pub const IRIS_DATASET_LINK: &'static str =
+    "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/bezdekIris.data";
+
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    EnumCount,
+    PartialOrd,
+    Ord,
+    strum::Display,
+    Serialize,
+    Deserialize,
+    Hash,
+)]
+pub enum IrisClass {
+    #[serde(rename = "Iris-setosa")]
+    Setosa = 0,
+    #[serde(rename = "Iris-versicolor")]
+    Versicolour = 1,
+    #[serde(rename = "Iris-virginica")]
+    Virginica = 2,
+}
+
+pub struct IrisLgp;
+
+impl GeneticAlgorithm for IrisLgp {
+    type O = Program<ClassificationParameters<IrisInput>>;
+}
+
+impl<'a> Loader for IrisLgp {
+    type InputType = IrisInput;
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, PartialOrd, Serialize)]
+pub struct IrisInput {
+    sepal_length: f64,
+    sepal_width: f64,
+    petal_length: f64,
+    petal_width: f64,
+    class: IrisClass,
+}
+
+impl ClassificationInput for IrisInput {
+    fn get_class(&self) -> usize {
+        self.class as usize
+    }
+}
+
+impl Display for IrisInput {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let serialized = toml::to_string(&self).unwrap();
+        f.write_str(&serialized)
+    }
+}
+
+impl ValidInput for IrisInput {
+    const N_INPUT_REGISTERS: usize = 4;
+    const N_ACTION_REGISTERS: usize = 3;
+
+    fn flat(&self) -> Vec<f64> {
+        [
+            self.sepal_length,
+            self.sepal_width,
+            self.petal_length,
+            self.petal_width,
+        ]
+        .to_vec()
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use itertools::Itertools;
-    use lgp::{
+    use crate::{
         core::{
             algorithm::{GeneticAlgorithm, HyperParameters, Loader},
             instruction::InstructionGeneratorParameters,
@@ -46,11 +114,12 @@ mod tests {
         extensions::classification::ClassificationParameters,
         utils::plots::plot_benchmarks,
     };
+    use itertools::Itertools;
     use more_asserts::{assert_le, assert_lt};
     use pretty_assertions::{assert_eq, assert_ne};
     use std::error;
 
-    use crate::config::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
+    use super::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
 
     // TODO: Update tests to include assertions about benchmark trends.
     #[tokio::test]
@@ -68,7 +137,7 @@ mod tests {
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1),
+                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
                 ),
             };
 
@@ -96,7 +165,7 @@ mod tests {
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1),
+                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
                 ),
             };
 
@@ -125,7 +194,7 @@ mod tests {
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1),
+                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
                 ),
             };
 
@@ -155,7 +224,7 @@ mod tests {
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1),
+                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
                 ),
             };
 
@@ -186,7 +255,7 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
 
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
-        let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
+        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
                 n_generations: 100,
@@ -196,21 +265,21 @@ mod tests {
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1),
+                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
                 ),
             };
 
-        let mut population = IrisLgp::init_pop(&hyper_params);
+        let (mut population, mut hyper_params) = IrisLgp::init_pop(hyper_params);
 
-        IrisLgp::eval_fitness(&mut population, &mut hyper_params);
-        IrisLgp::rank(&mut population);
-        IrisLgp::apply_selection(&mut population, hyper_params.gap);
+        (population, hyper_params) = IrisLgp::eval_fitness(population, hyper_params);
+        (population, hyper_params) = IrisLgp::rank(population, hyper_params);
+        (population, hyper_params) = IrisLgp::survive(population, hyper_params);
 
         let dropped_pop_len = population.len();
 
         assert_lt!(dropped_pop_len, hyper_params.population_size);
 
-        IrisLgp::breed(&mut population, 0., 0., &hyper_params.program_parameters);
+        (population, hyper_params) = IrisLgp::variation(population, hyper_params);
 
         assert_eq!(population.len(), hyper_params.population_size);
 
@@ -224,7 +293,7 @@ mod tests {
 
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let mut hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
+        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
             HyperParameters {
                 population_size: 100,
                 n_generations: 100,
@@ -234,15 +303,15 @@ mod tests {
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1),
+                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
                 ),
             };
 
-        let mut population = IrisLgp::init_pop(&hyper_params);
+        let (mut population, mut hyper_params) = IrisLgp::init_pop(hyper_params);
 
-        IrisLgp::eval_fitness(&mut population, &mut hyper_params);
-        IrisLgp::rank(&mut population);
-        IrisLgp::apply_selection(&mut population, hyper_params.gap);
+        (population, hyper_params) = IrisLgp::eval_fitness(population, hyper_params);
+        (population, hyper_params) = IrisLgp::rank(population, hyper_params);
+        (population, hyper_params) = IrisLgp::survive(population, hyper_params);
 
         self::assert_eq!(
             population.len(),
@@ -269,11 +338,11 @@ mod tests {
                 fitness_parameters: ClassificationParameters::new(inputs),
                 program_parameters: ProgramGeneratorParameters::new(
                     100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1),
+                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
                 ),
             };
 
-        let population = IrisLgp::init_pop(&hyper_params);
+        let (population, hyper_params) = IrisLgp::init_pop(hyper_params);
 
         self::assert_eq!(population.len(), hyper_params.population_size);
 

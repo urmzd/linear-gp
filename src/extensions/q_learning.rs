@@ -195,7 +195,7 @@ where
 {
     type FitnessParameters = InteractiveLearningParameters<T>;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
+    fn eval_fitness(&mut self, mut parameters: Self::FitnessParameters) {
         let mut scores = vec![];
 
         for initial_state in parameters.get_states() {
@@ -373,7 +373,9 @@ pub struct QLgp<T>(PhantomData<T>);
 
 impl<T> GeneticAlgorithm for QLgp<T>
 where
-    T: InteractiveLearningInput + fmt::Debug,
+    T: InteractiveLearningInput,
 {
     type O = QProgram<T>;
 }
+
+// TODO: ENSURE NEXT_GENERATIONS IS USED

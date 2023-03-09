@@ -111,6 +111,7 @@ where
     }
 
     fn get_env(&mut self) -> &mut Self::Environment;
+
     fn new() -> Self;
 
     fn sim(&mut self, action: usize) -> StateRewardPair {
@@ -143,7 +144,7 @@ where
 {
     type FitnessParameters = InteractiveLearningParameters<T>;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
+    fn eval_fitness(&mut self, mut parameters: Self::FitnessParameters) {
         let mut scores = vec![];
 
         for initial_state in parameters.get_states() {

@@ -1,9 +1,8 @@
-use derive_new::new;
+use crate::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
-use lgp::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use serde::Serialize;
 
-#[derive(Debug, Serialize, new, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct MountainCarInput {
     environment: MountainCarEnv,
 }
@@ -36,30 +35,26 @@ impl InteractiveLearningInput for MountainCarInput {
 #[cfg(test)]
 mod tests {
 
-    use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
-
-    use itertools::Itertools;
-    use lgp::{
+    use crate::{
         core::{
             algorithm::{GeneticAlgorithm, HyperParameters},
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
         extensions::{
-            gym_rs::ExtendedGymRsEnvironment,
-            interactive::{ILgp, InteractiveLearningParameters},
+            interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
             q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
         },
         utils::{plots::plot_benchmarks, types::VoidResultAnyError},
     };
+    use itertools::Itertools;
 
-    use crate::config::MountainCarInput;
+    use crate::problems::mountain_car::MountainCarInput;
 
     #[test]
     fn given_mountain_car_example_when_lgp_executed_then_task_is_solved(
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let environment = MountainCarEnv::new();
-        let input = MountainCarInput::new(environment);
+        let input = MountainCarInput::new();
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
@@ -73,7 +68,7 @@ mod tests {
             fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
             program_parameters: ProgramGeneratorParameters::new(
                 12,
-                InstructionGeneratorParameters::from::<MountainCarInput>(1),
+                InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
             ),
         };
 
@@ -87,8 +82,7 @@ mod tests {
     #[test]
     fn given_mountain_car_task_when_q_learning_lgp_is_used_then_task_is_solved(
     ) -> VoidResultAnyError {
-        let game = MountainCarEnv::new();
-        let environment = MountainCarInput::new(game);
+        let environment = MountainCarInput::new();
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
@@ -104,7 +98,7 @@ mod tests {
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
                     12,
-                    InstructionGeneratorParameters::from::<MountainCarInput>(1),
+                    InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
                 ),
                 QConsts::default(),
             ),
