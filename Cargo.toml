@@ -33,16 +33,7 @@ tempfile = "3.3"
 pretty_assertions = { version = "1.2" }
 
 [[example]]
-name = "mountain_car"
-path = "examples/mountain_car/main.rs"
-test = true
-
-[[example]]
 name = "iris"
 path = "examples/iris/main.rs"
 test = true
 
-[[example]]
-name = "cart_pole"
-path = "examples/cart_pole/main.rs"
-test = true
