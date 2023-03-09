@@ -20,7 +20,6 @@ use lgp::{
         program::{Program, ProgramGeneratorParameters},
     },
     extensions::{
-        gym_rs::ExtendedGymRsEnvironment,
         interactive::{InteractiveLearningInput, InteractiveLearningParameters},
         q_learning::{QConsts, QProgramGeneratorParameters},
     },
@@ -56,7 +55,7 @@ pub struct LgpProblemFactory<G, O, P> {
 
 pub struct LgpProblem<G, O, P>
 where
-    P: ExtendedGymRsEnvironment,
+    P: InteractiveLearningInput,
     O: Organism<FitnessParameters = InteractiveLearningParameters<P>>,
     G: GeneticAlgorithm<O = O>,
 {
@@ -67,7 +66,7 @@ where
 
 pub struct LgpProblemEvaluator<G, O, P>
 where
-    P: ExtendedGymRsEnvironment + InteractiveLearningInput,
+    P: InteractiveLearningInput,
     O: Organism<FitnessParameters = InteractiveLearningParameters<P>>,
     G: GeneticAlgorithm<O = O>,
 {
@@ -77,7 +76,7 @@ where
 
 impl<G, O, P> Evaluator for LgpProblemEvaluator<G, O, P>
 where
-    P: ExtendedGymRsEnvironment + InteractiveLearningInput,
+    P: InteractiveLearningInput,
     O: Organism<FitnessParameters = InteractiveLearningParameters<P>>,
     G: GeneticAlgorithm<O = O>,
 {
@@ -103,7 +102,7 @@ where
 
 impl<G, O, P> Problem for LgpProblem<G, O, P>
 where
-    P: ExtendedGymRsEnvironment + InteractiveLearningInput,
+    P: InteractiveLearningInput,
     O: Organism<FitnessParameters = InteractiveLearningParameters<P>>,
     G: GeneticAlgorithm<O = O>,
 {
@@ -185,7 +184,7 @@ pub enum ParamMapping {
 
 impl<G, O, P> ProblemFactory for LgpProblemFactory<G, O, P>
 where
-    P: ExtendedGymRsEnvironment + InteractiveLearningInput,
+    P: InteractiveLearningInput,
     O: Organism<FitnessParameters = InteractiveLearningParameters<P>>,
     G: GeneticAlgorithm<O = O>,
 {

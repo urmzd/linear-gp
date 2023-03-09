@@ -1,6 +1,6 @@
 use derive_new::new;
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
-use lgp::{core::inputs::ValidInput, extensions::gym_rs::ExtendedGymRsEnvironment};
+use lgp::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use serde::Serialize;
 
 #[derive(Clone, Debug, Serialize, new)]
@@ -17,18 +17,10 @@ impl ValidInput for CartPoleInput {
     }
 }
 
-impl ExtendedGymRsEnvironment for CartPoleInput {
+impl InteractiveLearningInput for CartPoleInput {
     type Environment = CartPoleEnv;
 
-    const EPISODE_LENGTH: usize = 500;
-
-    fn get_state(&self) -> <Self::Environment as Env>::Observation {
-        self.environment.state
-    }
-
-    fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation) {
-        self.environment.state = new_state;
-    }
+    const MAX_EPISODE_LENGTH: usize = 500;
 
     fn get_env(&mut self) -> &mut Self::Environment {
         &mut self.environment
@@ -36,7 +28,7 @@ impl ExtendedGymRsEnvironment for CartPoleInput {
 
     fn new() -> Self {
         Self {
-            environment: CartPoleEnv::new()
+            environment: CartPoleEnv::new(),
         }
     }
 }

@@ -4,6 +4,10 @@ use std::{
 };
 
 use derive_new::new;
+use gym_rs::core::ActionReward;
+use gym_rs::core::Env;
+use gym_rs::utils::custom::traits::Sample;
+use itertools::Itertools;
 use rand::prelude::SliceRandom;
 use serde::Serialize;
 use tracing::field::valuable;
@@ -25,7 +29,7 @@ where
     T: InteractiveLearningInput,
 {
     // Collection of X intial states per generation.
-    initial_states: Vec<Vec<T::State>>,
+    initial_states: Vec<Vec<<T::Environment as Env>::Observation>>,
     pub environment: T,
     #[new(value = "0")]
     generations: usize,
@@ -35,7 +39,7 @@ impl<T> InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
 {
-    pub fn get_states(&self) -> Vec<T::State> {
+    pub fn get_states(&self) -> Vec<<T::Environment as Env>::Observation> {
         self.initial_states.get(self.generations).cloned().unwrap()
     }
 
@@ -73,28 +77,69 @@ impl StateRewardPair {
 }
 
 pub trait InteractiveLearningInput: ValidInput + Sized
-    where Self::State: Send + Into<Vec<f64>> + Clone
+where
+    Self::Environment: Env,
 {
-    type State;
+    type Environment;
 
     const MAX_EPISODE_LENGTH: usize;
 
-    fn sim(&mut self, action: usize) -> StateRewardPair;
-    fn reset(&mut self);
-    fn set_state(&mut self, state: Self::State);
+    fn reset(&mut self) {
+        self.get_env().reset(None, false, None);
+    }
+
+    fn set_state(&mut self, state: <Self::Environment as Env>::Observation) {
+        self.get_env().set_state(state)
+    }
+
+    fn get_initial_states(
+        number_of_generations: usize,
+        n_trials: usize,
+    ) -> Vec<Vec<<Self::Environment as Env>::Observation>> {
+        itertools::repeat_n((), number_of_generations)
+            .map(|_| {
+                itertools::repeat_n((), n_trials)
+                    .map(|_| {
+                        <<Self::Environment as Env>::Observation>::sample_between(
+                            &mut generator(),
+                            None,
+                        )
+                    })
+                    .collect_vec()
+            })
+            .collect_vec()
+    }
+
+    fn get_env(&mut self) -> &mut Self::Environment;
+    fn new() -> Self;
+
+    fn sim(&mut self, action: usize) -> StateRewardPair {
+        let ActionReward { reward, done, .. } = self.get_env().step(action.into());
+
+        let reward = reward.into_inner();
+
+        let wrapped_reward = match done {
+            true => Reward::Terminal(reward),
+            false => Reward::Continue(reward),
+        };
+
+        let state = self.flat();
+
+        StateRewardPair {
+            state,
+            reward: wrapped_reward,
+        }
+    }
 }
 
-impl<T> Organism for Program<InteractiveLearningParameters<T>>
-where
-    T: InteractiveLearningInput + fmt::Debug,
-    T::State: Clone + fmt::Debug + Send,
+impl<T> Organism for Program<InteractiveLearningParameters<T>> where
+    T: InteractiveLearningInput + fmt::Debug
 {
 }
 
 impl<T> Fitness for Program<InteractiveLearningParameters<T>>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + Send,
 {
     type FitnessParameters = InteractiveLearningParameters<T>;
 
@@ -154,7 +199,6 @@ pub struct ILgp<T>(PhantomData<T>);
 impl<T> GeneticAlgorithm for ILgp<T>
 where
     T: InteractiveLearningInput + fmt::Debug,
-    T::State: Clone + fmt::Debug + Send,
 {
     type O = Program<InteractiveLearningParameters<T>>;
 }
