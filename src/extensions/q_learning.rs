@@ -130,7 +130,6 @@ impl QTable {
 pub struct QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + fmt::Debug,
 {
     pub q_table: QTable,
     pub program: Program<InteractiveLearningParameters<T>>,
@@ -139,7 +138,6 @@ where
 impl<T> Organism for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + fmt::Debug + Send,
     T: fmt::Debug,
 {
 }
@@ -147,7 +145,6 @@ where
 impl<T> DuplicateNew for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + fmt::Debug,
 {
     fn duplicate_new(&self) -> Self {
         return Self {
@@ -160,7 +157,6 @@ where
 impl<T> PartialEq for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + fmt::Debug,
 {
     fn eq(&self, other: &Self) -> bool {
         self.program == other.program
@@ -170,7 +166,6 @@ where
 impl<T> PartialOrd for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + fmt::Debug,
 {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.program.fitness.partial_cmp(&other.program.fitness)
@@ -197,7 +192,6 @@ where
 impl<T> Fitness for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + Debug + Send,
 {
     type FitnessParameters = InteractiveLearningParameters<T>;
 
@@ -289,7 +283,6 @@ where
 impl<T> Breed for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + Debug,
 {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
         let children = self.program.two_point_crossover(&mate.program);
@@ -303,7 +296,6 @@ where
 impl<T> Mutate for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + Debug,
 {
     fn mutate(&self, parameters: &Self::GeneratorParameters) -> Self {
         let mutated = self.program.mutate(&parameters.program_parameters);
@@ -317,7 +309,6 @@ where
 impl<T> Generate for QProgram<T>
 where
     T: InteractiveLearningInput,
-    T::State: Clone + Debug,
 {
     type GeneratorParameters = QProgramGeneratorParameters;
 
@@ -383,7 +374,6 @@ pub struct QLgp<T>(PhantomData<T>);
 impl<T> GeneticAlgorithm for QLgp<T>
 where
     T: InteractiveLearningInput + fmt::Debug,
-    T::State: Clone + fmt::Debug + Send,
 {
     type O = QProgram<T>;
 }
