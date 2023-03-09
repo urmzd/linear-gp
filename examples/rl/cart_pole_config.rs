@@ -34,9 +34,9 @@ impl ExtendedGymRsEnvironment for CartPoleInput {
         &mut self.environment
     }
 
-    fn new(environment: Self::Environment) -> Self {
+    fn new() -> Self {
         Self {
-            environment
+            environment: CartPoleEnv::new()
         }
     }
 }
