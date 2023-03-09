@@ -34,14 +34,18 @@ impl ExtendedGymRsEnvironment for MountainCarInput {
     fn get_env(&mut self) -> &mut Self::Environment {
         &mut self.environment
     }
+
+    fn new() -> Self {
+        Self {
+            environment: MountainCarEnv::new()
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use gym_rs::{
-        envs::classical_control::mountain_car::MountainCarEnv,
-    };
+    use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
 
     use itertools::Itertools;
     use lgp::{

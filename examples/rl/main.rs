@@ -2,7 +2,10 @@ use std::marker::PhantomData;
 
 use cart_pole_config::CartPoleInput;
 use derive_more::Display;
-use gym_rs::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
+use gym_rs::{
+    core::Env,
+    envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv},
+};
 use itertools::Itertools;
 use kurobako_core::{
     domain::{self, Constraint},
@@ -12,12 +15,13 @@ use kurobako_core::{
 use lgp::{
     core::{
         algorithm::{GeneticAlgorithm, HyperParameters, Organism},
+        inputs::ValidInput,
         instruction::InstructionGeneratorParameters,
-        program::{Program, ProgramGeneratorParameters}, inputs::ValidInput,
+        program::{Program, ProgramGeneratorParameters},
     },
     extensions::{
         gym_rs::ExtendedGymRsEnvironment,
-        interactive::{InteractiveLearningParameters, InteractiveLearningInput},
+        interactive::{InteractiveLearningInput, InteractiveLearningParameters},
         q_learning::{QConsts, QProgramGeneratorParameters},
     },
 };
@@ -52,7 +56,7 @@ pub struct LgpProblemFactory<G, O, P> {
 
 pub struct LgpProblem<G, O, P>
 where
-    P: ExtendedGymRsEnvironment + InteractiveLearningInput,
+    P: ExtendedGymRsEnvironment,
     O: Organism<FitnessParameters = InteractiveLearningParameters<P>>,
     G: GeneticAlgorithm<O = O>,
 {
@@ -112,24 +116,22 @@ where
         let n_generations = params[ParamMapping::Gens as usize] as usize;
         let n_trials = params[ParamMapping::Trials as usize] as usize;
 
-        if self.problem_type == ProblemTypes::CartPole {
-            let environment = P::Environment::new();
-            let input = P::new(environment);
-            let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
+        let input = P::new();
+        let initial_states = P::get_initial_states(n_generations, n_trials);
 
-            let fitness_parameters = InteractiveLearningParameters::new(initial_states, input);
+        let fitness_parameters = InteractiveLearningParameters::new(initial_states, input);
 
-            let basic_params = ProgramGeneratorParameters::new(
-                params[ParamMapping::Instructions as usize] as usize,
-                InstructionGeneratorParameters::from::<CartPoleInput>(
-                    params[ParamMapping::Registers as usize] as usize,
-                ),
-            );
+        let basic_params = ProgramGeneratorParameters::new(
+            params[ParamMapping::Instructions as usize] as usize,
+            InstructionGeneratorParameters::from::<P>(
+                params[ParamMapping::Registers as usize] as usize,
+            ),
+        );
 
-            if self.variant == Variant::Q {
-                return Ok(LgpProblemEvaluator {
-                    g_marker: PhantomData,
-                    hyper_parameters: HyperParameters {
+        if self.variant == Variant::Q {
+            return Ok(LgpProblemEvaluator {
+                g_marker: PhantomData,
+                hyper_parameters: HyperParameters {
                     population_size: params[ParamMapping::PopSize as usize] as usize,
                     gap: params[ParamMapping::Gap as usize],
                     crossover_percent: params[ParamMapping::Crossover as usize],
@@ -140,30 +142,27 @@ where
                         basic_params,
                         QConsts::new(
                             params[ParamMapping::Alpha as usize],
-                            params[ParamMapping::Epsilon as usize],
                             params[ParamMapping::Gamma as usize],
+                            params[ParamMapping::Epsilon as usize],
                             params[ParamMapping::AlphaDecay as usize],
                             params[ParamMapping::EpsilonDecay as usize],
                         ),
                     ),
-                }
-                })
-
-            } else {
-                return Ok(LgpProblemEvaluator {
-                    g_marker: PhantomData,
-                    hyper_parameters: HyperParameters {
+                },
+            });
+        } else {
+            return Ok(LgpProblemEvaluator {
+                g_marker: PhantomData,
+                hyper_parameters: HyperParameters {
                     population_size: params[ParamMapping::PopSize as usize] as usize,
                     gap: params[ParamMapping::Gap as usize],
                     crossover_percent: params[ParamMapping::Crossover as usize],
                     mutation_percent: params[ParamMapping::Mutation as usize],
                     n_generations,
                     fitness_parameters,
-                    program_parameters: basic_params
-                }
-                })
-            }
-        } else {
+                    program_parameters: basic_params,
+                },
+            });
         }
     }
 }

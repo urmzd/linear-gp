@@ -9,7 +9,7 @@ use crate::utils::random::generator;
 
 use super::interactive::{InteractiveLearningInput, Reward, StateRewardPair};
 
-pub trait ExtendedGymRsEnvironment
+pub trait ExtendedGymRsEnvironment: ValidInput
 where
     Self::Environment: Env,
 {
@@ -17,7 +17,7 @@ where
 
     const EPISODE_LENGTH: usize;
 
-    fn new(environment: Self::Environment) -> Self;
+    fn new() -> Self;
     fn get_state(&self) -> <Self::Environment as Env>::Observation;
     fn update_state(&mut self, new_state: <Self::Environment as Env>::Observation);
     fn get_env(&mut self) -> &mut Self::Environment;
@@ -43,11 +43,10 @@ where
 
 impl<T> InteractiveLearningInput for T
 where
-    Self: ValidInput,
     T: ExtendedGymRsEnvironment,
-    <T::Environment as Env>::Action: From<usize>,
 {
     type State = <T::Environment as Env>::Observation;
+
     const MAX_EPISODE_LENGTH: usize = T::EPISODE_LENGTH;
 
     fn sim(&mut self, action: usize) -> StateRewardPair {
@@ -72,7 +71,7 @@ where
         self.get_env().reset(None, false, None);
     }
 
-    fn set_state(&mut self, state: Self::State) {
+    fn set_state(&mut self, state: <Self as InteractiveLearningInput>::State) {
         self.update_state(state)
     }
 }
