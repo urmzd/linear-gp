@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{iter::repeat_with, marker::PhantomData};
 
 use crate::utils::random::generator;
 use derive_new::new;
@@ -90,9 +90,8 @@ impl<T> Generate for Program<T> {
 
         let registers = Registers::new(instruction_generator_parameters.n_registers());
         let n_instructions = Uniform::new_inclusive(1, max_instructions).sample(&mut generator());
-        let instructions = (0..n_instructions)
-            .into_iter()
-            .map(|_| Instruction::generate(instruction_generator_parameters))
+        let instructions = repeat_with(|| Instruction::generate(instruction_generator_parameters))
+            .take(n_instructions)
             .collect();
 
         Self::new(
@@ -153,7 +152,7 @@ mod tests {
 
     #[test]
     fn given_instructions_when_breed_then_two_children_are_produced_using_genes_of_parents() {
-        let params = InstructionGeneratorParameters::new(5, 2, 1);
+        let params = InstructionGeneratorParameters::new(5, 2, 1, 10.);
         let instructions_a: Instructions =
             (0..10).map(|_| Instruction::generate(&params)).collect();
         let instructions_b: Instructions =
@@ -172,7 +171,7 @@ mod tests {
 
     #[test]
     fn given_programs_when_two_point_crossover_then_two_children_are_produced() {
-        let instruction_params = InstructionGeneratorParameters::new(4, 2, 1);
+        let instruction_params = InstructionGeneratorParameters::new(4, 2, 1, 10.);
         let program_params = ProgramGeneratorParameters::new(100, instruction_params);
 
         let program_a = Program::<ClassificationParameters<TestInput>>::generate(&program_params);

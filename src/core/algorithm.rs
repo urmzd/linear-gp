@@ -1,4 +1,5 @@
 use core::fmt;
+use std::iter::repeat_with;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
@@ -64,7 +65,7 @@ where
     G: GeneticAlgorithm + ?Sized,
 {
     generation: usize,
-    current_population: Option<Population<G::O>>,
+    next_population: Option<Population<G::O>>,
     marker: PhantomData<G>,
     params: HyperParameters<G::O>,
 }
@@ -74,12 +75,13 @@ where
     G: GeneticAlgorithm + ?Sized,
 {
     pub fn new(params: HyperParameters<G::O>) -> Self {
-        return GeneticAlgorithmIter {
+        let (current_population, params) = G::init_pop(params.clone());
+        Self {
             generation: 0,
-            current_population: None,
+            next_population: Some(current_population),
             marker: PhantomData,
             params,
-        };
+        }
     }
 }
 
@@ -90,53 +92,51 @@ where
     type Item = Population<G::O>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.generation >= self.params.n_generations {
+            return None;
+        }
+
         debug!(generation = valuable(&self.generation));
 
-        let item = if self.generation == 0 {
-            let mut population = G::init_pop(&self.params);
+        // Freeze population.
+        let mut population = self.next_population.clone().unwrap();
+        let mut params = self.params.clone();
 
-            G::on_pre_eval_fitness(&mut population, &mut self.params);
-            G::eval_fitness(&mut population, &mut self.params);
-            G::rank(&mut population);
-            G::on_post_rank(&mut population, &mut self.params);
+        (population, params) = G::on_pre_eval_fitness(population, params);
+        (population, params) = G::eval_fitness(population, params);
+        (population, params) = G::rank(population, params);
+        (population, params) = G::on_post_rank(population, params);
 
-            population
-        } else if self.generation < self.params.n_generations {
-            // Freeze for now.
-            let mut population = self.current_population.clone().unwrap();
-
-            G::apply_selection(&mut population, self.params.gap);
-            G::breed(
-                &mut population,
-                self.params.mutation_percent,
-                self.params.crossover_percent,
-                &self.params.program_parameters,
-            );
-
-            G::on_pre_eval_fitness(&mut population, &mut self.params);
-            G::eval_fitness(&mut population, &mut self.params);
-            G::rank(&mut population);
-            G::on_post_rank(&mut population, &mut self.params);
-
-            population
-        } else {
-            return None;
-        };
-
-        assert!(item.iter().all(|p| !p.get_fitness().is_not_evaluated()));
+        assert!(population
+            .iter()
+            .all(|p| !p.get_fitness().is_not_evaluated()));
 
         trace!(
-            best_score = valuable(&item.best().map(|p| p.get_fitness().unwrap_or(f64::NAN))),
-            median_score = valuable(&item.median().map(|p| p.get_fitness().unwrap_or(f64::NAN))),
-            worst_score = valuable(&item.worst().map(|p| p.get_fitness().unwrap_or(f64::NAN))),
+            best_score = valuable(
+                &population
+                    .best()
+                    .map(|p| p.get_fitness().unwrap_or(f64::NAN))
+            ),
+            median_score = valuable(
+                &population
+                    .median()
+                    .map(|p| p.get_fitness().unwrap_or(f64::NAN))
+            ),
+            worst_score = valuable(
+                &population
+                    .worst()
+                    .map(|p| p.get_fitness().unwrap_or(f64::NAN))
+            ),
             generation = valuable(&self.generation)
         );
 
-        // Freeze population and store it.
-        self.current_population = Some(item.clone());
+        let (new_population, params) = G::survive(population.clone(), params);
+        let (new_population, ..) = G::variation(new_population, params);
+
+        self.next_population = Some(new_population.clone());
         self.generation += 1;
 
-        return Some(item);
+        return Some(population.clone());
     }
 }
 
@@ -159,50 +159,61 @@ where
             .unwrap_or(());
     }
 
-    fn init_pop(hyperparams: &HyperParameters<Self::O>) -> Population<Self::O> {
-        let mut population = Population::with_capacity(hyperparams.population_size);
+    fn init_pop(
+        hyperparams: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+        let population = repeat_with(|| Self::O::generate(&hyperparams.program_parameters))
+            .take(hyperparams.population_size)
+            .collect();
 
-        for _ in 0..hyperparams.population_size {
-            let program = Self::O::generate(&hyperparams.program_parameters);
-            population.push(program)
-        }
-
-        return population;
+        (population, hyperparams)
     }
 
-    fn eval_fitness(p: &mut Population<Self::O>, params: &mut HyperParameters<Self::O>) {
-        for individual in p.iter_mut() {
-            individual.eval_fitness(&mut params.fitness_parameters);
+    fn eval_fitness(
+        mut population: Population<Self::O>,
+        params: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+        for individual in population.iter_mut() {
+            individual.eval_fitness(params.fitness_parameters.clone());
             assert!(!individual.get_fitness().is_not_evaluated());
         }
+
+        (population, params)
     }
 
     /// Evaluates the individuals found in the current population.
-    fn rank(population: &mut Population<Self::O>) {
-        // Organize individuals by their fitness score.
+    fn rank(
+        mut population: Population<Self::O>,
+        params: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
         population.sort();
+        // Organize individuals by their fitness score.
         assert_le!(population.worst(), population.best());
+        (population, params)
     }
 
     fn on_pre_eval_fitness(
-        _population: &mut Population<Self::O>,
-        _parameters: &mut HyperParameters<Self::O>,
-    ) {
+        population: Population<Self::O>,
+        params: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+        (population, params)
     }
 
     fn on_post_rank(
-        _population: &mut Population<Self::O>,
-        _parameters: &mut HyperParameters<Self::O>,
-    ) {
+        population: Population<Self::O>,
+        _parameters: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+        (population, _parameters)
     }
 
-    fn apply_selection(population: &mut Population<Self::O>, gap: f64) {
-        assert!(gap >= 0. && gap <= 1.);
-
+    fn survive(
+        mut population: Population<Self::O>,
+        parameters: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
         let pop_len = population.len();
 
         let mut n_of_individuals_to_drop =
-            (pop_len as isize) - ((1.0 - gap) * (pop_len as f64)).floor() as isize;
+            (pop_len as isize) - ((1.0 - parameters.gap) * (pop_len as f64)).floor() as isize;
 
         loop {
             if population.worst().is_some() {
@@ -229,29 +240,31 @@ where
             n_of_individuals_to_drop -= 1;
             population.pop();
         }
+
+        (population, parameters)
     }
 
-    fn breed(
-        population: &mut Population<Self::O>,
-        mutations_percent: f64,
-        crossover_percent: f64,
-        mutation_parameters: &<Self::O as Generate>::GeneratorParameters,
-    ) {
+    fn variation(
+        mut population: Population<Self::O>,
+        parameters: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
         let pop_cap = population.capacity();
         let pop_len = population.len();
 
         let mut remaining_pool_spots = pop_cap - pop_len;
 
         if remaining_pool_spots == 0 {
-            return;
+            return (population, parameters);
         }
 
-        let mut n_mutations = (remaining_pool_spots as f64 * mutations_percent).floor() as usize;
-        let mut n_crossovers = (remaining_pool_spots as f64 * crossover_percent).floor() as usize;
+        let mut n_mutations =
+            (remaining_pool_spots as f64 * parameters.mutation_percent).floor() as usize;
+        let mut n_crossovers =
+            (remaining_pool_spots as f64 * parameters.crossover_percent).floor() as usize;
 
         assert_le!(n_mutations + n_crossovers, remaining_pool_spots);
 
-        let mut children = vec![];
+        let mut offspring = vec![];
 
         // Crossover + Mutation
         // TODO: Add a way to priortize mutations or crossovers.
@@ -274,7 +287,7 @@ where
                     remaining_pool_spots -= 1;
                     n_crossovers -= 1;
 
-                    children.push(child)
+                    offspring.push(child)
                 }
 
                 // Step 2B: Mutate
@@ -283,13 +296,13 @@ where
                     let parent_to_mutate = parents.choose(&mut generator());
 
                     let child = parent_to_mutate
-                        .map(|parent| parent.mutate(mutation_parameters))
+                        .map(|parent| parent.mutate(&parameters.program_parameters))
                         .unwrap();
 
                     remaining_pool_spots -= 1;
                     n_mutations -= 1;
 
-                    children.push(child)
+                    offspring.push(child)
                 }
             } else {
                 // Generate new children?
@@ -303,10 +316,12 @@ where
             .iter()
             .choose_multiple(&mut generator(), remaining_pool_spots)
         {
-            children.push(individual.duplicate_new())
+            offspring.push(individual.duplicate_new())
         }
 
-        population.extend(children)
+        population.extend(offspring);
+
+        (population, parameters)
     }
 
     /// Build generator.

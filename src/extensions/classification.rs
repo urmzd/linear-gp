@@ -30,7 +30,7 @@ where
 {
     type FitnessParameters = ClassificationParameters<T>;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters) {
+    fn eval_fitness(&mut self, parameters: Self::FitnessParameters) {
         let inputs = &parameters.inputs;
 
         self.registers.reset();

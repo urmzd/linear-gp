@@ -14,13 +14,7 @@ use super::characteristics::{Generate, Mutate};
 use super::inputs::ValidInput;
 use super::registers::Registers;
 
-/// The EXTERNAL_FACTOR is a constant float value that is used to amplify the effect of external inputs on the program's execution.
-/// Specifically, in the Instruction struct's apply method, if the Mode is Mode::External,
-/// then the target value (i.e., the value in the register that the instruction writes to) is multiplied by the EXTERNAL_FACTOR.
-/// This can be useful for giving more weight to external inputs, allowing the program to better respond to changes in the environment.
-const EXTERNAL_FACTOR: f64 = 10.;
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Copy)]
 pub enum Mode {
     External,
     Internal,
@@ -43,11 +37,17 @@ pub struct InstructionGeneratorParameters {
     n_input_features: usize,
     n_input_classes: usize,
     n_extras: usize,
+    external_factor: f64,
 }
 
 impl InstructionGeneratorParameters {
-    pub fn from<T: ValidInput>(n_extras: usize) -> Self {
-        InstructionGeneratorParameters::new(T::N_INPUT_REGISTERS, T::N_ACTION_REGISTERS, n_extras)
+    pub fn from<T: ValidInput>(n_extras: usize, external_factor: f64) -> Self {
+        InstructionGeneratorParameters::new(
+            T::N_INPUT_REGISTERS,
+            T::N_ACTION_REGISTERS,
+            n_extras,
+            external_factor,
+        )
     }
 
     pub fn n_registers(&self) -> usize {
@@ -63,14 +63,17 @@ impl InstructionGeneratorParameters {
     }
 }
 
-#[derive(Serialize, Eq, Clone)]
+#[derive(Serialize, Clone, Copy)]
 pub struct Instruction {
     source_index: usize,
     target_index: usize,
     mode: Mode,
     #[serde(skip_serializing)]
     executable: Op,
+    external_factor: f64,
 }
+
+impl Eq for Instruction {}
 
 impl Generate for Instruction {
     type GeneratorParameters = InstructionGeneratorParameters;
@@ -101,6 +104,7 @@ impl Generate for Instruction {
             target_index,
             executable,
             mode,
+            external_factor: parameters.external_factor,
         }
     }
 }
@@ -166,7 +170,7 @@ impl Instruction {
         let target_value = *target_data.get(self.target_index);
 
         let amplied_target_value = if self.mode == Mode::External {
-            EXTERNAL_FACTOR * target_value
+            self.external_factor * target_value
         } else {
             target_value
         };

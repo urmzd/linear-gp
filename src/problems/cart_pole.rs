@@ -1,9 +1,8 @@
-use derive_new::new;
+use crate::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
-use lgp::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use serde::Serialize;
 
-#[derive(Clone, Debug, Serialize, new)]
+#[derive(Clone, Debug, Serialize)]
 pub struct CartPoleInput {
     environment: CartPoleEnv,
 }
@@ -37,29 +36,25 @@ impl InteractiveLearningInput for CartPoleInput {
 mod tests {
     use std::error;
 
-    use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
-
-    use itertools::Itertools;
-    use lgp::{
+    use crate::{
         core::{
             algorithm::{GeneticAlgorithm, HyperParameters},
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
         extensions::{
-            gym_rs::ExtendedGymRsEnvironment,
             interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
             q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
         },
         utils::plots::plot_benchmarks,
     };
+    use itertools::Itertools;
 
-    use crate::config::CartPoleInput;
+    use super::*;
 
     #[test]
     fn solve_cart_pole_default() -> Result<(), Box<dyn error::Error>> {
-        let environment = CartPoleEnv::new();
-        let input = CartPoleInput::new(environment);
+        let input = CartPoleInput::new();
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
@@ -73,7 +68,7 @@ mod tests {
             fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
             program_parameters: ProgramGeneratorParameters::new(
                 8,
-                InstructionGeneratorParameters::from::<CartPoleInput>(1),
+                InstructionGeneratorParameters::from::<CartPoleInput>(1, 10.),
             ),
         };
 
@@ -87,8 +82,7 @@ mod tests {
 
     #[test]
     fn solve_cart_pole_with_q_learning() -> Result<(), Box<dyn error::Error>> {
-        let environment = CartPoleEnv::new();
-        let input = CartPoleInput::new(environment);
+        let input = CartPoleInput::new();
         let n_generations = 100;
         let n_trials = 5;
         let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
@@ -103,7 +97,7 @@ mod tests {
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
                     8,
-                    InstructionGeneratorParameters::from::<CartPoleInput>(1),
+                    InstructionGeneratorParameters::from::<CartPoleInput>(1, 10.),
                 ),
                 QConsts::default(),
             ),

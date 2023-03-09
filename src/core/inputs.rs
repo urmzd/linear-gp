@@ -1,8 +1,10 @@
+use std::fmt::Debug;
+
 use super::registers::Registers;
 
 pub type Inputs<InputType> = Vec<InputType>;
 
-pub trait ValidInput: Clone + Send
+pub trait ValidInput: Clone + Send + Debug
 where
     for<'a> Registers: From<&'a Self>,
 {

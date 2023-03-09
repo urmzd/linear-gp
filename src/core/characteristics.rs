@@ -60,7 +60,7 @@ where
 {
     type FitnessParameters;
 
-    fn eval_fitness(&mut self, parameters: &mut Self::FitnessParameters);
+    fn eval_fitness(&mut self, parameters: Self::FitnessParameters);
     fn get_fitness(&self) -> FitnessScore;
 }
 

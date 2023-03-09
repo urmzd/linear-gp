@@ -6,4 +6,5 @@
 //! Provides a bootstrapped implementation to help you start exploring problems immediately.
 pub mod core;
 pub mod extensions;
+pub mod problems;
 pub mod utils;
