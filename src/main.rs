@@ -10,7 +10,7 @@ use lgp::{
         interactive::{InteractiveLearningInput, InteractiveLearningParameters},
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
     },
-    problems::mountain_car::MountainCarInput,
+    problems::{cart_pole::CartPoleInput, mountain_car::MountainCarInput},
 };
 
 #[derive(Parser)]
@@ -78,6 +78,42 @@ fn main() {
                         ProgramGeneratorParameters::new(
                             cli.program_parameter.max_instructions,
                             InstructionGeneratorParameters::from::<MountainCarInput>(
+                                cli.program_parameter
+                                    .instruction_generator_parameters
+                                    .n_extras,
+                                cli.program_parameter
+                                    .instruction_generator_parameters
+                                    .external_factor,
+                            ),
+                        ),
+                        consts,
+                    ),
+                };
+
+                let best_score = QLgp::build(hyper_params)
+                    .last()
+                    .as_ref()
+                    .and_then(|p| p.best())
+                    .map(|p| p.get_fitness().unwrap_or(f64::NAN))
+                    .unwrap_or(f64::NAN);
+
+                println!("{}", best_score)
+            } else {
+                let input = CartPoleInput::new();
+                let n_generations = cli.basic_args.n_generations;
+                let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
+
+                let hyper_params = HyperParameters {
+                    population_size: cli.basic_args.population_size,
+                    gap: cli.basic_args.gap,
+                    crossover_percent: cli.basic_args.crossover_percent,
+                    mutation_percent: cli.basic_args.mutation_percent,
+                    n_generations,
+                    fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
+                    program_parameters: QProgramGeneratorParameters::new(
+                        ProgramGeneratorParameters::new(
+                            cli.program_parameter.max_instructions,
+                            InstructionGeneratorParameters::from::<CartPoleInput>(
                                 cli.program_parameter
                                     .instruction_generator_parameters
                                     .n_extras,
