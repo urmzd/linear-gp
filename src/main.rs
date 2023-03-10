@@ -85,8 +85,8 @@ fn main() {
             .last()
             .as_ref()
             .and_then(|p| p.best())
-            .map(|p| p.get_fitness().unwrap_or(f64::NAN))
-            .unwrap_or(f64::NAN);
+            .map(|p| p.get_fitness().unwrap_or(-201.))
+            .unwrap_or(-201.);
 
         println!("{}", best_score)
     } else {
@@ -122,8 +122,8 @@ fn main() {
             .last()
             .as_ref()
             .and_then(|p| p.best())
-            .map(|p| p.get_fitness().unwrap_or(f64::NAN))
-            .unwrap_or(f64::NAN);
+            .map(|p| p.get_fitness().unwrap_or(-1.))
+            .unwrap_or(-1.);
 
         println!("{}", best_score)
     }

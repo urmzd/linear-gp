@@ -4,6 +4,7 @@ import optuna
 from subprocess import Popen, PIPE
 from typing import Tuple, Any
 from functools import partial
+from optuna.visualization import plot_optimization_history
 
 def objective(trial: optuna.Trial) -> float:
     # Define the hyperparameters to optimize
@@ -25,7 +26,7 @@ def objective(trial: optuna.Trial) -> float:
     game = "cart-pole"
 
     # Define the command to run with the CLI
-    command = ["./lgp", game,
+    command = ["./target/release/lgp", game,
                 "--alpha", alpha, "--alpha-decay", alpha_decay, "--gamma", gamma,
                 "--epsilon", epsilon, "--epsilon-decay", epsilon_decay,
                 "--n-trials", n_trials,
@@ -56,8 +57,10 @@ def objective(trial: optuna.Trial) -> float:
     return best_score
 
 # Define the study and run the optimization
-study = optuna.create_study(direction="minimize")
+study = optuna.create_study(direction="maximize", storage="sqlite:///db.sqlite3")
 study.optimize(objective, n_trials=100)
+
+plot_optimization_history(study)
 
 # Print the best hyperparameters and score
 best_hyperparams = study.best_params
