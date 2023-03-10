@@ -1,3 +1,4 @@
+use more_asserts::assert_gt;
 use rand::{distributions::Uniform, prelude::Distribution};
 
 use crate::utils::random::generator;
@@ -12,19 +13,24 @@ impl Breed for Instructions {
 
         let current_generator = &mut generator();
 
+        assert_gt!(instructions_a.len(), 0);
+        assert_gt!(instructions_b.len(), 0);
+
         let a_start = Uniform::new(0, instructions_a.len()).sample(current_generator);
         let b_start = Uniform::new(0, instructions_b.len()).sample(current_generator);
 
         let a_end = if a_start == instructions_a.len() - 1 {
             None
         } else {
-            Some(Uniform::new(a_start, instructions_a.len()).sample(current_generator))
+            assert_gt!(instructions_a.len(), a_start);
+            Some(Uniform::new(a_start + 1, instructions_a.len()).sample(current_generator))
         };
 
         let b_end = if b_start == instructions_b.len() - 1 {
             None
         } else {
-            Some(Uniform::new(b_start, instructions_b.len()).sample(current_generator))
+            assert_gt!(instructions_b.len(), b_start);
+            Some(Uniform::new(b_start + 1, instructions_b.len()).sample(current_generator))
         };
 
         let a_chunk = match a_end {
@@ -57,6 +63,9 @@ impl Breed for Instructions {
         }
         .collect_vec();
 
+        assert_gt!(instructions_a.len(), 0, "instructions A after crossover");
+        assert_gt!(instructions_b.len(), 0, "instructions B after crossover");
+
         [instructions_a, instructions_b]
     }
 }
@@ -65,7 +74,7 @@ pub type Instructions = Vec<Instruction>;
 
 #[cfg(test)]
 mod tests {
-    use more_asserts::assert_le;
+    use more_asserts::{assert_gt, assert_le};
 
     use crate::{
         core::{
@@ -95,6 +104,9 @@ mod tests {
             let parent_b_instruction_len = parents[1].instructions.len();
 
             let new_parents = Breed::two_point_crossover(&parents[0], &parents[1]);
+
+            assert_gt!(new_parents[0].instructions.len(), 0);
+            assert_gt!(new_parents[1].instructions.len(), 0);
 
             assert_le!(
                 new_parents[0].instructions.len(),
