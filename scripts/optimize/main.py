@@ -1,21 +1,34 @@
 #!/usr/bin/env python
 
 import optuna
+import argparse
 from subprocess import Popen, PIPE
 from typing import Tuple, Any
 from functools import partial
 from optuna.visualization import plot_optimization_history
 
-def objective(trial: optuna.Trial) -> float:
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="LGP Optimizer")
+    parser.add_argument(
+        "game",
+        type=str,
+        choices=["cart-pole", "mountain-car"],
+        help="The name of the game to optimize for",
+    )
+    return parser.parse_args()
+
+
+def objective(game: str, trial: optuna.Trial) -> float:
     # Define the hyperparameters to optimize
     population_size = 100
     gap = 0.5
     mutation_percent = 0.5
-    crossover_percent =  0.5
+    crossover_percent = 0.5
     n_generations = 100
     max_instructions = trial.suggest_int("max_instructions", 1, 32)
     n_extras = 1
-    external_factor = trial.suggest_float("external_factor", 0.0, 100.)
+    external_factor = trial.suggest_float("external_factor", 0.0, 100.0)
     alpha = trial.suggest_float("alpha", 0.0, 1.0)
     epsilon = trial.suggest_float("epsilon", 0.0, 1.0)
     gamma = trial.suggest_float("gamma", 0.0, 1.0)
@@ -23,18 +36,39 @@ def objective(trial: optuna.Trial) -> float:
     epsilon_decay = trial.suggest_float("epsilon_decay", 0.0, 1.0)
     n_trials = 5
 
-    game = "cart-pole"
-
     # Define the command to run with the CLI
-    command = ["./target/release/lgp", game,
-                "--alpha", alpha, "--alpha-decay", alpha_decay, "--gamma", gamma,
-                "--epsilon", epsilon, "--epsilon-decay", epsilon_decay,
-                "--n-trials", n_trials,
-                "--population-size", population_size, "--gap", gap,
-                "--mutation-percent", mutation_percent, "--crossover-percent", crossover_percent,
-                "--n-generations", n_generations, "--max-instructions", max_instructions,
-                "--n-extras", n_extras,
-               "--external-factor", external_factor]
+    command = [
+        "./target/release/lgp",
+        game,
+        "--alpha",
+        alpha,
+        "--alpha-decay",
+        alpha_decay,
+        "--gamma",
+        gamma,
+        "--epsilon",
+        epsilon,
+        "--epsilon-decay",
+        epsilon_decay,
+        "--n-trials",
+        n_trials,
+        "--population-size",
+        population_size,
+        "--gap",
+        gap,
+        "--mutation-percent",
+        mutation_percent,
+        "--crossover-percent",
+        crossover_percent,
+        "--n-generations",
+        n_generations,
+        "--max-instructions",
+        max_instructions,
+        "--n-extras",
+        n_extras,
+        "--external-factor",
+        external_factor,
+    ]
 
     command = list(map(lambda x: str(x), command))
     print(" ".join(command))
@@ -48,7 +82,7 @@ def objective(trial: optuna.Trial) -> float:
 
     # Get the best score from the output
     print(f"Output: {output}")
-    best_score = float(output.decode('utf-8').strip())
+    best_score = float(output.decode("utf-8").strip())
 
     if game == "cart-pole":
         if best_score < 100:
@@ -59,14 +93,19 @@ def objective(trial: optuna.Trial) -> float:
 
     return best_score
 
-# Define the study and run the optimization
-study = optuna.create_study(direction="maximize", storage="sqlite:///db.sqlite3")
-study.optimize(objective, n_trials=100)
 
-plot_optimization_history(study)
+if __name__ == "__main__":
+    args = parse_args()
 
-# Print the best hyperparameters and score
-best_hyperparams = study.best_params
-best_score = study.best_value
-print(f"Best hyperparameters: {best_hyperparams}")
-print(f"Best score: {best_score}")
+    # Define the study and run the optimization
+    study = optuna.create_study(direction="maximize", storage="sqlite:///db.sqlite3")
+    objective_partial = partial(objective, args.game)
+    study.optimize(objective_partial, n_trials=100)
+
+    plot_optimization_history(study)
+
+    # Print the best hyperparameters and score
+    best_hyperparams = study.best_params
+    best_score = study.best_value
+    print(f"Best hyperparameters: {best_hyperparams}")
+    print(f"Best score: {best_score}")
