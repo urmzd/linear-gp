@@ -14,17 +14,6 @@ jobs:
   test:
     name: Run Tests and Examples
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        example:
-          [
-            iris,
-            mountain_car,
-            cart_pole,
-            unit,
-          ]
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -47,19 +36,11 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Build and Run Example Tests
-        if: matrix.example != 'unit'
+      - name: Build and Run Tests
         env:
           RUST_BACKTRACE: 1
           RUST_LOG: debug
-        run: scripts/run_test.sh ${{ matrix.example }}
-
-      - name: Run Unit Tests
-        if: matrix.example == 'unit'
-        env:
-          RUST_BACKTRACE: 1
-          RUST_LOG: debug
-        run: cargo test --no-fail-fast
+        run: xvfv-run cargo test --no-fail-fast
 
       - name: Upload Assets
         uses: EndBug/add-and-commit@v9
