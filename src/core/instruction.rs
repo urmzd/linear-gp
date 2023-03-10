@@ -1,3 +1,4 @@
+use clap::Args;
 use derive_new::new;
 use rand::distributions::uniform::{UniformInt, UniformSampler};
 use rand::prelude::SliceRandom;
@@ -32,12 +33,16 @@ impl Mode {
     }
 }
 
-#[derive(Clone, Debug, Serialize, new, Copy)]
+#[derive(Clone, Debug, Serialize, new, Copy, Args)]
 pub struct InstructionGeneratorParameters {
+    #[arg(skip)]
     n_input_features: usize,
+    #[arg(skip)]
     n_input_classes: usize,
-    n_extras: usize,
-    external_factor: f64,
+    #[arg(long, default_value = "1")]
+    pub n_extras: usize,
+    #[arg(long, default_value = "10.")]
+    pub external_factor: f64,
 }
 
 impl InstructionGeneratorParameters {
@@ -78,7 +83,7 @@ impl Eq for Instruction {}
 impl Generate for Instruction {
     type GeneratorParameters = InstructionGeneratorParameters;
 
-    fn generate(parameters: &Self::GeneratorParameters) -> Self {
+    fn generate(parameters: Self::GeneratorParameters) -> Self {
         let current_generator = &mut generator();
 
         let source_index =
@@ -129,8 +134,8 @@ impl Debug for Instruction {
 }
 
 impl Mutate for Instruction {
-    fn mutate(&self, params: &Self::GeneratorParameters) -> Self {
-        let mut mutated = Self::generate(&params);
+    fn mutate(&self, params: Self::GeneratorParameters) -> Self {
+        let mut mutated = Self::generate(params);
 
         let swap_target = generator().gen_bool(0.5);
         let swap_source = generator().gen_bool(0.5);

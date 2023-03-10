@@ -1,6 +1,7 @@
 use std::{iter::repeat_with, marker::PhantomData};
 
 use crate::utils::random::generator;
+use clap::Args;
 use derive_new::new;
 use rand::{
     distributions::Uniform,
@@ -17,9 +18,11 @@ use super::{
     registers::Registers,
 };
 
-#[derive(Clone, Debug, new, Copy)]
+#[derive(Clone, Debug, new, Copy, Args)]
 pub struct ProgramGeneratorParameters {
+    #[arg(long, default_value = "12")]
     pub max_instructions: usize,
+    #[command(flatten)]
     pub instruction_generator_parameters: InstructionGeneratorParameters,
 }
 
@@ -82,11 +85,11 @@ impl<T> Program<T> {
 impl<T> Generate for Program<T> {
     type GeneratorParameters = ProgramGeneratorParameters;
 
-    fn generate(parameters: &Self::GeneratorParameters) -> Self {
+    fn generate(parameters: Self::GeneratorParameters) -> Self {
         let ProgramGeneratorParameters {
             max_instructions,
             instruction_generator_parameters,
-        } = &parameters;
+        } = parameters;
 
         let registers = Registers::new(instruction_generator_parameters.n_registers());
         let n_instructions = Uniform::new_inclusive(1, max_instructions).sample(&mut generator());
@@ -104,7 +107,7 @@ impl<T> Generate for Program<T> {
 }
 
 impl<T> Mutate for Program<T> {
-    fn mutate(&self, params: &Self::GeneratorParameters) -> Self {
+    fn mutate(&self, params: Self::GeneratorParameters) -> Self {
         let mut mutated = self.clone();
 
         // Pick instruction to mutate.
@@ -114,7 +117,7 @@ impl<T> Mutate for Program<T> {
             .choose(&mut generator())
             .unwrap();
 
-        let mutated_instruction = instruction.mutate(&params.instruction_generator_parameters);
+        let mutated_instruction = instruction.mutate(params.instruction_generator_parameters);
         *instruction = mutated_instruction;
 
         mutated.fitness = FitnessScore::NotEvaluated;
@@ -153,10 +156,8 @@ mod tests {
     #[test]
     fn given_instructions_when_breed_then_two_children_are_produced_using_genes_of_parents() {
         let params = InstructionGeneratorParameters::new(5, 2, 1, 10.);
-        let instructions_a: Instructions =
-            (0..10).map(|_| Instruction::generate(&params)).collect();
-        let instructions_b: Instructions =
-            (0..10).map(|_| Instruction::generate(&params)).collect();
+        let instructions_a: Instructions = (0..10).map(|_| Instruction::generate(params)).collect();
+        let instructions_b: Instructions = (0..10).map(|_| Instruction::generate(params)).collect();
 
         let [child_a, child_b] = instructions_a.two_point_crossover(&instructions_b);
 
@@ -174,8 +175,8 @@ mod tests {
         let instruction_params = InstructionGeneratorParameters::new(4, 2, 1, 10.);
         let program_params = ProgramGeneratorParameters::new(100, instruction_params);
 
-        let program_a = Program::<ClassificationParameters<TestInput>>::generate(&program_params);
-        let program_b = Program::<ClassificationParameters<TestInput>>::generate(&program_params);
+        let program_a = Program::<ClassificationParameters<TestInput>>::generate(program_params);
+        let program_b = Program::<ClassificationParameters<TestInput>>::generate(program_params);
 
         let [child_a, child_b] = program_a.two_point_crossover(&program_b);
 

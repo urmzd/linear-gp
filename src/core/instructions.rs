@@ -85,8 +85,8 @@ mod tests {
             InstructionGeneratorParameters::new(4, 2, 1, 10.),
         );
 
-        let program_a = Program::<TestInput>::generate(&parameters);
-        let program_b = Program::<TestInput>::generate(&parameters);
+        let program_a = Program::<TestInput>::generate(parameters);
+        let program_b = Program::<TestInput>::generate(parameters);
 
         let mut parents = [program_a, program_b];
 
