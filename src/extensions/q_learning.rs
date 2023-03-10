@@ -3,6 +3,7 @@ use std::{
     marker::PhantomData,
 };
 
+use clap::Args;
 use derive_new::new;
 use more_asserts::{assert_ge, assert_le};
 use rand::{
@@ -297,8 +298,8 @@ impl<T> Mutate for QProgram<T>
 where
     T: InteractiveLearningInput,
 {
-    fn mutate(&self, parameters: &Self::GeneratorParameters) -> Self {
-        let mutated = self.program.mutate(&parameters.program_parameters);
+    fn mutate(&self, parameters: Self::GeneratorParameters) -> Self {
+        let mutated = self.program.mutate(parameters.program_parameters);
         QProgram {
             program: mutated,
             q_table: self.q_table.duplicate_new(),
@@ -312,9 +313,8 @@ where
 {
     type GeneratorParameters = QProgramGeneratorParameters;
 
-    fn generate(parameters: &Self::GeneratorParameters) -> Self {
-        let program =
-            Program::<InteractiveLearningParameters<T>>::generate(&parameters.program_parameters);
+    fn generate(parameters: Self::GeneratorParameters) -> Self {
+        let program = Program::generate(parameters.program_parameters);
 
         let instruction_params = &parameters
             .program_parameters
@@ -330,23 +330,30 @@ where
     }
 }
 
-#[derive(Debug, new, Clone)]
+#[derive(Debug, new, Clone, Args)]
 pub struct QProgramGeneratorParameters {
+    #[command(flatten)]
     program_parameters: ProgramGeneratorParameters,
+    #[command(flatten)]
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy, new, Valuable)]
+#[derive(Debug, Clone, Copy, new, Valuable, Args)]
 pub struct QConsts {
     /// Learning Factor
+    #[arg(long, default_value = "0.1")]
     alpha: f64,
     /// Discount Factor
+    #[arg(long, default_value = "0.9")]
     gamma: f64,
     /// Exploration Factor
+    #[arg(long, default_value = "0.05")]
     epsilon: f64,
     /// Learning Rate Decay
+    #[arg(long, default_value = "0.001")]
     alpha_decay: f64,
     /// Exploration Decay
+    #[arg(long, default_value = "0.001")]
     epsilon_decay: f64,
 }
 

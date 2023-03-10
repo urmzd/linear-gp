@@ -162,7 +162,7 @@ where
     fn init_pop(
         hyperparams: HyperParameters<Self::O>,
     ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        let population = repeat_with(|| Self::O::generate(&hyperparams.program_parameters))
+        let population = repeat_with(|| Self::O::generate(hyperparams.program_parameters.clone()))
             .take(hyperparams.population_size)
             .collect();
 
@@ -296,7 +296,7 @@ where
                     let parent_to_mutate = parents.choose(&mut generator());
 
                     let child = parent_to_mutate
-                        .map(|parent| parent.mutate(&parameters.program_parameters))
+                        .map(|parent| parent.mutate(parameters.program_parameters.clone()))
                         .unwrap();
 
                     remaining_pool_spots -= 1;

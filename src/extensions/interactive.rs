@@ -1,5 +1,6 @@
 use std::{
     fmt::{self, Debug},
+    iter::repeat_with,
     marker::PhantomData,
 };
 
@@ -96,18 +97,15 @@ where
         number_of_generations: usize,
         n_trials: usize,
     ) -> Vec<Vec<<Self::Environment as Env>::Observation>> {
-        itertools::repeat_n((), number_of_generations)
-            .map(|_| {
-                itertools::repeat_n((), n_trials)
-                    .map(|_| {
-                        <<Self::Environment as Env>::Observation>::sample_between(
-                            &mut generator(),
-                            None,
-                        )
-                    })
-                    .collect_vec()
+        repeat_with(|| {
+            repeat_with(|| {
+                <<Self::Environment as Env>::Observation>::sample_between(&mut generator(), None)
             })
+            .take(n_trials)
             .collect_vec()
+        })
+        .take(number_of_generations)
+        .collect_vec()
     }
 
     fn get_env(&mut self) -> &mut Self::Environment;

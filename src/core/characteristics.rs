@@ -69,7 +69,7 @@ pub trait Breed: Clone {
 }
 
 pub trait Mutate: Generate + Clone {
-    fn mutate(&self, parameters: &Self::GeneratorParameters) -> Self;
+    fn mutate(&self, parameters: Self::GeneratorParameters) -> Self;
 }
 
 pub trait Generate
@@ -78,7 +78,7 @@ where
 {
     type GeneratorParameters;
 
-    fn generate(parameters: &Self::GeneratorParameters) -> Self;
+    fn generate(parameters: Self::GeneratorParameters) -> Self;
 }
 
 pub trait DuplicateNew {
