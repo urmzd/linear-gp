@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import optuna
+import time
 import argparse
 from subprocess import Popen, PIPE
-from typing import Tuple, Any
 from functools import partial
-from optuna.visualization import plot_optimization_history
+from optuna.visualization import plot_optimization_history, plot_intermediate_values, plot_parallel_coordinate
+from optuna.pruners import MedianPruner
 
 
 def parse_args() -> argparse.Namespace:
@@ -98,11 +99,13 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Define the study and run the optimization
-    study = optuna.create_study(direction="maximize", storage="sqlite:///db.sqlite3")
+    study = optuna.create_study(study_name=f"{args.game}-{int(time.time())}",direction="maximize", storage="sqlite:///db.sqlite3", pruner=MedianPruner(n_startup_trials=5, n_warmup_steps=10, interval_steps=5))
     objective_partial = partial(objective, args.game)
     study.optimize(objective_partial, n_trials=100)
 
     plot_optimization_history(study)
+    plot_intermediate_values(study)
+    plot_parallel_coordinate(study)
 
     # Print the best hyperparameters and score
     best_hyperparams = study.best_params
