@@ -92,7 +92,7 @@ where
     type Item = Population<G::O>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.generation >= self.params.n_generations {
+        if self.generation > self.params.n_generations {
             return None;
         }
 

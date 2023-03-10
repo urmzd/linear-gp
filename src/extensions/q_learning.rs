@@ -383,6 +383,14 @@ where
     T: InteractiveLearningInput,
 {
     type O = QProgram<T>;
-}
 
-// TODO: ENSURE NEXT_GENERATIONS IS USED
+    fn on_post_rank(
+            population: crate::core::population::Population<Self::O>,
+            mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
+        ) -> (crate::core::population::Population<Self::O>, crate::core::algorithm::HyperParameters<Self::O>) {
+
+        parameters.fitness_parameters.next_generation();
+
+        return (population, parameters)
+    }
+}
