@@ -39,20 +39,23 @@ def objective(trial: optuna.Trial) -> float:
     command = list(map(lambda x: str(x), command))
     print(" ".join(command))
 
-    try:
-        # Run the command and capture the output
-        process = Popen(command, stdout=PIPE, stderr=PIPE)
-        output, error = process.communicate()
+    # Run the command and capture the output
+    process = Popen(command, stdout=PIPE, stderr=PIPE)
+    output, error = process.communicate()
 
-        if error:
-            raise Exception(f"Error running command: {error.decode('utf-8')}")
+    if error:
+        raise Exception(f"Error running command: {error.decode('utf-8')}")
 
-        # Get the best score from the output
-        print(f"Output: {output}")
-        best_score = float(output.decode('utf-8').strip())
-    except Exception as e:
-        print(f"Error: {e}")
-        best_score = float('nan')
+    # Get the best score from the output
+    print(f"Output: {output}")
+    best_score = float(output.decode('utf-8').strip())
+
+    if game == "cart-pole":
+        if best_score < 100:
+            raise optuna.TrialPruned()
+    else:
+        if best_score < -180:
+            raise optuna.TrialPruned()
 
     return best_score
 
