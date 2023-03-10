@@ -48,7 +48,7 @@ def objective(trial: optuna.Trial) -> float:
             raise Exception(f"Error running command: {error.decode('utf-8')}")
 
         # Get the best score from the output
-        print(f"OUTPUT: {output}")
+        print(f"Output: {output}")
         best_score = float(output.decode('utf-8').strip())
     except Exception as e:
         print(f"Error: {e}")

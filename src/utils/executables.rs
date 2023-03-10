@@ -1,21 +1,38 @@
-pub type Op = fn(a: f64, b: f64) -> f64;
+use derive_more::Display;
+use rand::{prelude::Distribution, distributions::Standard};
+use serde::Serialize;
 
-pub type Executables = &'static [Op];
-
-pub const DEFAULT_EXECUTABLES: Executables = &[add, subtract, multiply, divide];
-
-pub fn add(a: f64, b: f64) -> f64 {
-    a + b
+#[derive(Clone, Copy, Debug, Display, Serialize, PartialEq, Eq)]
+pub enum Op  {
+    #[display(fmt="+")]
+    Add,
+    #[display(fmt="*")]
+    Mult,
+    #[display(fmt="/")]
+    Divide,
+    #[display(fmt="-")]
+    Sub
 }
 
-pub fn subtract(a: f64, b: f64) -> f64 {
-    a - b
+impl Op {
+    pub fn apply(&self, a: f64, b: f64) -> f64 {
+        match *self {
+            Op::Add => a + b,
+            Op::Mult => a * b,
+            Op::Divide => a / 2.,
+            Op::Sub => a - b
+        }
+
+    }
 }
 
-pub fn multiply(a: f64, b: f64) -> f64 {
-    a * b
-}
-
-pub fn divide(a: f64, _b: f64) -> f64 {
-    a / 2.
+impl Distribution<Op> for Standard {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Op {
+        match rng.gen_range(0..=3) {
+            0 => Op::Add,
+            1 => Op::Mult,
+            2 => Op::Divide,
+            _ => Op::Sub
+        }
+    }
 }

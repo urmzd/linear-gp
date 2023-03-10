@@ -1,14 +1,11 @@
 use clap::Args;
 use derive_new::new;
 use rand::distributions::uniform::{UniformInt, UniformSampler};
-use rand::prelude::SliceRandom;
 use rand::Rng;
 use serde::Serialize;
-use std::fmt;
 use std::fmt::Debug;
-use std::fmt::Formatter;
 
-use crate::utils::executables::{Op, DEFAULT_EXECUTABLES};
+use crate::utils::executables::Op;
 use crate::utils::random::generator;
 
 use super::characteristics::{Generate, Mutate};
@@ -68,15 +65,15 @@ impl InstructionGeneratorParameters {
     }
 }
 
-#[derive(Serialize, Clone, Copy)]
+#[derive(Serialize, Clone, Copy, PartialEq, Debug)]
 pub struct Instruction {
     source_index: usize,
     target_index: usize,
     mode: Mode,
-    #[serde(skip_serializing)]
     executable: Op,
     external_factor: f64,
 }
+
 
 impl Eq for Instruction {}
 
@@ -99,10 +96,7 @@ impl Generate for Instruction {
         let target_index =
             UniformInt::<usize>::new(0, upper_bound_target_index).sample(current_generator);
 
-        let executable = DEFAULT_EXECUTABLES
-            .choose(current_generator)
-            .unwrap()
-            .to_owned();
+        let executable = generator().gen();
 
         Instruction {
             source_index,
@@ -111,25 +105,6 @@ impl Generate for Instruction {
             mode,
             external_factor: parameters.external_factor,
         }
-    }
-}
-
-impl PartialEq for Instruction {
-    fn eq(&self, other: &Self) -> bool {
-        self.source_index == other.source_index
-            && self.target_index == other.target_index
-            && self.mode == other.mode
-            && self.executable as usize == other.executable as usize
-    }
-}
-
-impl Debug for Instruction {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Instruction")
-            .field("mode", &self.mode)
-            .field("source_index", &self.source_index)
-            .field("target_index", &self.target_index)
-            .finish()
     }
 }
 
@@ -182,7 +157,7 @@ impl Instruction {
 
         let source_value = *registers.get(self.source_index);
 
-        let new_source_value = (self.executable)(source_value, amplied_target_value);
+        let new_source_value = self.executable.apply(source_value, amplied_target_value);
         registers.update(self.source_index, new_source_value);
     }
 }
