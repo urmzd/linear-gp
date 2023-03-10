@@ -200,4 +200,14 @@ where
     T: InteractiveLearningInput + fmt::Debug,
 {
     type O = Program<InteractiveLearningParameters<T>>;
+
+    fn on_post_rank(
+            population: crate::core::population::Population<Self::O>,
+            mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
+        ) -> (crate::core::population::Population<Self::O>, crate::core::algorithm::HyperParameters<Self::O>) {
+
+        parameters.fitness_parameters.next_generation();
+
+        return (population, parameters)
+    }
 }

@@ -5,8 +5,7 @@ import time
 import argparse
 from subprocess import Popen, PIPE
 from functools import partial
-from optuna.visualization import plot_optimization_history, plot_intermediate_values, plot_parallel_coordinate
-from optuna.pruners import MedianPruner
+from optuna.visualization import plot_optimization_history, plot_parallel_coordinate
 
 
 def parse_args() -> argparse.Namespace:
@@ -16,6 +15,13 @@ def parse_args() -> argparse.Namespace:
         type=str,
         choices=["cart-pole", "mountain-car"],
         help="The name of the game to optimize for",
+    )
+    parser.add_argument(
+        "--n_trials",
+        default=150,
+        required=False,
+        type=int,
+        help="The number of trials",
     )
     return parser.parse_args()
 
@@ -99,12 +105,11 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Define the study and run the optimization
-    study = optuna.create_study(study_name=f"{args.game}-{int(time.time())}",direction="maximize", storage="sqlite:///db.sqlite3", pruner=MedianPruner(n_startup_trials=5, n_warmup_steps=10, interval_steps=5))
+    study = optuna.create_study(study_name=f"{args.game}-{int(time.time())}",direction="maximize", storage="sqlite:///db.sqlite3")
     objective_partial = partial(objective, args.game)
-    study.optimize(objective_partial, n_trials=100)
+    study.optimize(objective_partial, n_trials=150)
 
     plot_optimization_history(study)
-    plot_intermediate_values(study)
     plot_parallel_coordinate(study)
 
     # Print the best hyperparameters and score
