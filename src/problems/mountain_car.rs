@@ -76,7 +76,7 @@ mod tests {
 
         let populations = ILgp::build(hyper_params).collect_vec();
 
-        const TEST_NAME: &'static str = "mountain-car-smoke-default.png";
+        const TEST_NAME: &'static str = "mountain-car-smoke-default";
         plot_benchmarks(
             &populations,
             TEST_NAME,
@@ -114,7 +114,7 @@ mod tests {
 
         let populations = QLgp::build(hyper_params).collect_vec();
 
-        const TEST_NAME: &'static str = "mountain-car-smoke-q.png";
+        const TEST_NAME: &'static str = "mountain-car-smoke-q";
         plot_benchmarks(
             &populations,
             TEST_NAME,
