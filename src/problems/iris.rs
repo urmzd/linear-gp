@@ -146,7 +146,7 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/mutate_crossover.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-mutate-crossover.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
@@ -174,7 +174,7 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/mutate.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-mutate.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
         Ok(())
     }
@@ -203,7 +203,7 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/crossover.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-crossover.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         Ok(())
@@ -238,7 +238,7 @@ mod tests {
         let best = populations.last().unwrap().best().unwrap().clone();
 
         // TODO: Pull the graph section out into a seperate function.
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris/smoke/default.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
 
         if worst.fitness != median.fitness || median.fitness != best.fitness {

@@ -74,7 +74,7 @@ mod tests {
 
         let populations = ILgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/default.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart-pole-smoke-default.png";
         let range = (0.)..(CartPoleInput::MAX_EPISODE_LENGTH as f64);
         plot_benchmarks(populations, PLOT_FILE_NAME, range)?;
         Ok(())
@@ -105,7 +105,7 @@ mod tests {
 
         let populations = QLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart_pole/smoke/q.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart-pole-smoke-q.png";
         let range = (0.)..(CartPoleInput::MAX_EPISODE_LENGTH as f64);
         plot_benchmarks(populations, PLOT_FILE_NAME, range)?;
         Ok(())

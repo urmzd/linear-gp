@@ -1,0 +1,7 @@
+recievers:
+  otlp:
+    protocols:
+      http: 1
+
+exporters:
+  file: 1
