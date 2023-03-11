@@ -2,6 +2,7 @@
 
 use derive_new::new;
 use rand::{distributions::Standard, prelude::Distribution};
+use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 
 use crate::{
@@ -9,10 +10,10 @@ use crate::{
     extensions::classification::{ClassificationInput, ClassificationParameters},
 };
 
-#[derive(PartialEq, PartialOrd, Clone, Debug, new)]
+#[derive(PartialEq, PartialOrd, Clone, Debug, new, Deserialize, Serialize)]
 pub struct TestInput(pub [f64; 5]);
 
-#[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount, Deserialize, Serialize)]
 pub enum TestRepresent {
     One = 0,
     Two = 1,

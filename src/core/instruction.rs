@@ -2,7 +2,7 @@ use clap::Args;
 use derive_new::new;
 use rand::distributions::uniform::{UniformInt, UniformSampler};
 use rand::Rng;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
 use crate::utils::executables::Op;
@@ -12,7 +12,7 @@ use super::characteristics::{Generate, Mutate};
 use super::inputs::ValidInput;
 use super::registers::Registers;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Copy)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Copy, Deserialize)]
 pub enum Mode {
     External,
     Internal,
@@ -65,7 +65,7 @@ impl InstructionGeneratorParameters {
     }
 }
 
-#[derive(Serialize, Clone, Copy, PartialEq, Debug)]
+#[derive(Serialize, Clone, Copy, PartialEq, Debug, Deserialize)]
 pub struct Instruction {
     source_index: usize,
     target_index: usize,
@@ -73,7 +73,6 @@ pub struct Instruction {
     executable: Op,
     external_factor: f64,
 }
-
 
 impl Eq for Instruction {}
 

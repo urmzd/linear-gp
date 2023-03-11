@@ -1,8 +1,7 @@
 use crate::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
-use serde::Serialize;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug)]
 pub struct CartPoleInput {
     environment: CartPoleEnv,
 }
@@ -46,7 +45,7 @@ mod tests {
             interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
             q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
         },
-        utils::plots::plot_benchmarks,
+        utils::benchmark_tools::{log_benchmarks, plot_benchmarks},
     };
     use itertools::Itertools;
 
@@ -74,9 +73,10 @@ mod tests {
 
         let populations = ILgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart-pole-smoke-default.png";
+        const TEST_NAME: &'static str = "cart-pole-smoke-default.png";
         let range = (0.)..(CartPoleInput::MAX_EPISODE_LENGTH as f64);
-        plot_benchmarks(populations, PLOT_FILE_NAME, range)?;
+        plot_benchmarks(&populations, TEST_NAME, range)?;
+        log_benchmarks(&populations, TEST_NAME)?;
         Ok(())
     }
 
@@ -105,9 +105,10 @@ mod tests {
 
         let populations = QLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/cart-pole-smoke-q.png";
+        const TEST_NAME: &'static str = "cart-pole-smoke-q.png";
         let range = (0.)..(CartPoleInput::MAX_EPISODE_LENGTH as f64);
-        plot_benchmarks(populations, PLOT_FILE_NAME, range)?;
+        plot_benchmarks(&populations, TEST_NAME, range)?;
+        log_benchmarks(&populations, TEST_NAME)?;
         Ok(())
     }
 }

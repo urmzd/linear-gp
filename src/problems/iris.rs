@@ -112,7 +112,7 @@ mod tests {
             program::{Program, ProgramGeneratorParameters},
         },
         extensions::classification::ClassificationParameters,
-        utils::plots::plot_benchmarks,
+        utils::benchmark_tools::{log_benchmarks, plot_benchmarks},
     };
     use itertools::Itertools;
     use more_asserts::{assert_le, assert_lt};
@@ -146,8 +146,11 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-mutate-crossover.png";
-        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        const TEST_NAME: &'static str = "iris-smoke-mutate-crossover";
+
+        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        log_benchmarks(&populations, TEST_NAME)?;
+
         Ok(())
     }
     #[tokio::test]
@@ -174,8 +177,10 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-mutate.png";
-        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        const TEST_NAME: &'static str = "iris-smoke-mutate";
+        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        log_benchmarks(&populations, TEST_NAME)?;
+
         Ok(())
     }
 
@@ -203,8 +208,9 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-crossover.png";
-        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        const TEST_NAME: &'static str = "iris-smoke-crossover.png";
+        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        log_benchmarks(&populations, TEST_NAME)?;
 
         Ok(())
     }
@@ -237,9 +243,10 @@ mod tests {
         let median = populations.last().unwrap().median().unwrap().clone();
         let best = populations.last().unwrap().best().unwrap().clone();
 
-        // TODO: Pull the graph section out into a seperate function.
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/iris-smoke-default.png";
-        plot_benchmarks(populations, PLOT_FILE_NAME, 0.0..1.0)?;
+        const TEST_NAME: &'static str = "iris-smoke-default.png";
+
+        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        log_benchmarks(&populations, TEST_NAME)?;
 
         if worst.fitness != median.fitness || median.fitness != best.fitness {
             // TODO: Create concrete error type; SNAFU or Failure?

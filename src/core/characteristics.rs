@@ -1,9 +1,17 @@
-use std::cmp::Ordering;
+use crate::utils::benchmark_tools::create_path;
+use core::fmt;
+use std::error::Error;
+use std::path::Path;
+use std::{cmp::Ordering, path::PathBuf};
 
 use derive_more::Display;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
+use std::fs::{File, OpenOptions};
+use std::io::prelude::*;
 use valuable::Valuable;
 
-#[derive(Clone, Debug, Copy, PartialEq, Valuable, Display)]
+#[derive(Clone, Debug, Copy, PartialEq, Valuable, Display, Serialize, Deserialize)]
 pub enum FitnessScore {
     #[display(fmt = "valid: {}", _0)]
     Valid(f64),
@@ -62,6 +70,51 @@ where
 
     fn eval_fitness(&mut self, parameters: Self::FitnessParameters);
     fn get_fitness(&self) -> FitnessScore;
+}
+
+pub trait Reproducible: Serialize + DeserializeOwned + Sized {
+    fn save(&self, path: &str) -> Result<(), Box<dyn Error>> {
+        create_path(path)?;
+
+        // Serialize the object to a JSON string
+        let serialized = serde_json::to_string(&self)?;
+
+        // Open the file for writing
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(Path::new(path))?;
+
+        // Write the serialized data to the file
+        file.write_all(serialized.as_bytes())?;
+
+        Ok(())
+    }
+
+    fn load(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
+        // Open the file for reading
+        let file = File::open(path.into())?;
+
+        // Deserialize the data from the file
+        let deserialized: Self = serde_json::from_reader(file)?;
+
+        Ok(deserialized)
+    }
+}
+
+pub trait Organism:
+    Fitness
+    + Generate
+    + DuplicateNew
+    + PartialOrd
+    + Sized
+    + Clone
+    + Mutate
+    + Breed
+    + Reproducible
+    + fmt::Debug
+    + Send
+{
 }
 
 pub trait Breed: Clone {

@@ -1,17 +1,17 @@
 use derive_more::Display;
-use rand::{prelude::Distribution, distributions::Standard};
-use serde::Serialize;
+use rand::{distributions::Standard, prelude::Distribution};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Display, Serialize, PartialEq, Eq)]
-pub enum Op  {
-    #[display(fmt="+")]
+#[derive(Clone, Copy, Debug, Display, Serialize, PartialEq, Eq, Deserialize)]
+pub enum Op {
+    #[display(fmt = "+")]
     Add,
-    #[display(fmt="*")]
+    #[display(fmt = "*")]
     Mult,
-    #[display(fmt="/")]
+    #[display(fmt = "/")]
     Divide,
-    #[display(fmt="-")]
-    Sub
+    #[display(fmt = "-")]
+    Sub,
 }
 
 impl Op {
@@ -20,9 +20,8 @@ impl Op {
             Op::Add => a + b,
             Op::Mult => a * b,
             Op::Divide => a / 2.,
-            Op::Sub => a - b
+            Op::Sub => a - b,
         }
-
     }
 }
 
@@ -32,7 +31,7 @@ impl Distribution<Op> for Standard {
             0 => Op::Add,
             1 => Op::Mult,
             2 => Op::Divide,
-            _ => Op::Sub
+            _ => Op::Sub,
         }
     }
 }

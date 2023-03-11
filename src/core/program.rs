@@ -8,6 +8,7 @@ use rand::{
     prelude::{Distribution, IteratorRandom},
 };
 
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::{
@@ -50,7 +51,7 @@ impl<T> DuplicateNew for Program<T> {
     }
 }
 
-#[derive(Debug, new)]
+#[derive(Debug, new, Serialize, Deserialize)]
 pub struct Program<T> {
     pub id: Uuid,
     pub instructions: Instructions,
