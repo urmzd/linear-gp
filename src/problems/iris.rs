@@ -208,7 +208,7 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const TEST_NAME: &'static str = "iris-smoke-crossover.png";
+        const TEST_NAME: &'static str = "iris-smoke-crossover";
         plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
         log_benchmarks(&populations, TEST_NAME)?;
 
@@ -243,7 +243,7 @@ mod tests {
         let median = populations.last().unwrap().median().unwrap().clone();
         let best = populations.last().unwrap().best().unwrap().clone();
 
-        const TEST_NAME: &'static str = "iris-smoke-default.png";
+        const TEST_NAME: &'static str = "iris-smoke-default";
 
         plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
         log_benchmarks(&populations, TEST_NAME)?;

@@ -83,7 +83,8 @@ where
 {
     let plot_path = create_path(
         Path::new(BENCHMARK_PREFIX)
-            .join(format!("{}.png", test_name))
+            .join(test_name)
+            .join("plot.png")
             .to_str()
             .unwrap(),
     )?;
