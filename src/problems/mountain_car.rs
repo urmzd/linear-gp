@@ -74,7 +74,7 @@ mod tests {
 
         let populations = ILgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/default.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain-car-smoke-default.png";
         plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
         Ok(())
     }
@@ -106,7 +106,7 @@ mod tests {
 
         let pops = QLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain_car/smoke/q.png";
+        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain-car-smoke-q.png";
         plot_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;
         Ok(())
     }

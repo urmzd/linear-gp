@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use std::path::PathBuf;
 
 use csv::ReaderBuilder;
-use more_asserts::assert_le;
+use more_asserts::{assert_gt, assert_le};
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
 use tracing::trace;
@@ -215,27 +215,13 @@ where
         let mut n_of_individuals_to_drop =
             (pop_len as isize) - ((1.0 - parameters.gap) * (pop_len as f64)).floor() as isize;
 
-        loop {
-            if population.worst().is_some() {
-                if population
-                    .worst()
-                    .map(|v| v.get_fitness().is_invalid())
-                    .expect("At least one individual to exist.")
-                {
-                    population.pop();
-
-                    n_of_individuals_to_drop -= 1;
-                } else {
-                    // We've encountered a valid individual. Stop deleting.
-                    break;
-                }
-            } else {
-                // If the population is empty, there's nothing to drop.
-                break;
-            }
+        // Drop invalid individuals.
+        while let Some(true) = population.worst().map(|p| p.get_fitness().is_invalid()) {
+            population.pop();
+            n_of_individuals_to_drop -= 1;
         }
 
-        // Drop remaining gap.
+        // Drop remaining gap, if any...
         while n_of_individuals_to_drop > 0 {
             n_of_individuals_to_drop -= 1;
             population.pop();
@@ -248,6 +234,7 @@ where
         mut population: Population<Self::O>,
         parameters: HyperParameters<Self::O>,
     ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+        assert_gt!(population.len(), 0);
         let pop_cap = population.capacity();
         let pop_len = population.len();
 
@@ -267,7 +254,6 @@ where
         let mut offspring = vec![];
 
         // Crossover + Mutation
-        // TODO: Add a way to priortize mutations or crossovers.
         while (n_crossovers + n_mutations) > 0 {
             // Step 1: Choose Parents
             let selected_a = population.iter().choose(&mut generator());
@@ -305,8 +291,6 @@ where
                     offspring.push(child)
                 }
             } else {
-                // Generate new children?
-                // Or do we give up and panic?
                 panic!("Woah, this should never happen. The whole population died out.")
             };
         }
