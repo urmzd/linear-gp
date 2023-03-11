@@ -1,12 +1,12 @@
-use std::fmt::Debug;
+use core::fmt::Debug;
 
 use super::registers::Registers;
 
 pub type Inputs<InputType> = Vec<InputType>;
 
-pub trait ValidInput: Clone + Send + Debug
+pub trait ValidInput: Clone + Send + Debug + Sized
 where
-    for<'a> Registers: From<&'a Self>,
+    Registers: for<'a> From<&'a Self>,
 {
     const N_INPUT_REGISTERS: usize;
     const N_ACTION_REGISTERS: usize;

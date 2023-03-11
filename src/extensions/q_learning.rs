@@ -10,14 +10,17 @@ use rand::{
     distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
     prelude::SliceRandom,
 };
+use serde::{Deserialize, Serialize};
 use tracing::field::valuable;
 use tracing::{debug, trace};
 use valuable::Valuable;
 
 use crate::{
     core::{
-        algorithm::{GeneticAlgorithm, Organism},
-        characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
+        algorithm::GeneticAlgorithm,
+        characteristics::{
+            Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate, Organism, Reproducible,
+        },
         program::{Program, ProgramGeneratorParameters},
         registers::Registers,
     },
@@ -26,7 +29,7 @@ use crate::{
 
 use super::interactive::{InteractiveLearningInput, InteractiveLearningParameters};
 
-#[derive(Clone, Valuable)]
+#[derive(Clone, Valuable, Serialize, Deserialize)]
 pub struct QTable {
     table: Vec<Vec<f64>>,
     n_actions: usize,
@@ -127,7 +130,8 @@ impl QTable {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(bound(serialize = "T: Sized", deserialize = "T: Sized"))]
 pub struct QProgram<T>
 where
     T: InteractiveLearningInput,
@@ -136,12 +140,9 @@ where
     pub program: Program<InteractiveLearningParameters<T>>,
 }
 
-impl<T> Organism for QProgram<T>
-where
-    T: InteractiveLearningInput,
-    T: fmt::Debug,
-{
-}
+impl<T> Reproducible for QProgram<T> where T: InteractiveLearningInput {}
+
+impl<T> Organism for QProgram<T> where T: InteractiveLearningInput {}
 
 impl<T> DuplicateNew for QProgram<T>
 where
@@ -338,7 +339,7 @@ pub struct QProgramGeneratorParameters {
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy, new, Valuable, Args)]
+#[derive(Debug, Clone, Copy, new, Valuable, Args, Serialize, Deserialize)]
 pub struct QConsts {
     /// Learning Factor
     #[arg(long, default_value = "0.1")]
@@ -385,12 +386,14 @@ where
     type O = QProgram<T>;
 
     fn on_post_rank(
-            population: crate::core::population::Population<Self::O>,
-            mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
-        ) -> (crate::core::population::Population<Self::O>, crate::core::algorithm::HyperParameters<Self::O>) {
-
+        population: crate::core::population::Population<Self::O>,
+        mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
+    ) -> (
+        crate::core::population::Population<Self::O>,
+        crate::core::algorithm::HyperParameters<Self::O>,
+    ) {
         parameters.fitness_parameters.next_generation();
 
-        return (population, parameters)
+        return (population, parameters);
     }
 }

@@ -1,8 +1,7 @@
 use crate::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use gym_rs::{core::Env, envs::classical_control::mountain_car::MountainCarEnv};
-use serde::Serialize;
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Clone)]
 pub struct MountainCarInput {
     environment: MountainCarEnv,
 }
@@ -45,7 +44,10 @@ mod tests {
             interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
             q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
         },
-        utils::{plots::plot_benchmarks, types::VoidResultAnyError},
+        utils::{
+            benchmark_tools::{log_benchmarks, plot_benchmarks},
+            types::VoidResultAnyError,
+        },
     };
     use itertools::Itertools;
 
@@ -74,8 +76,14 @@ mod tests {
 
         let populations = ILgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain-car-smoke-default.png";
-        plot_benchmarks(populations, PLOT_FILE_NAME, -200.0..0.0)?;
+        const TEST_NAME: &'static str = "mountain-car-smoke-default.png";
+        plot_benchmarks(
+            &populations,
+            TEST_NAME,
+            -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
+        )?;
+        log_benchmarks(&populations, TEST_NAME)?;
+
         Ok(())
     }
 
@@ -104,10 +112,15 @@ mod tests {
             ),
         };
 
-        let pops = QLgp::build(hyper_params).collect_vec();
+        let populations = QLgp::build(hyper_params).collect_vec();
 
-        const PLOT_FILE_NAME: &'static str = "assets/plots/tests/mountain-car-smoke-q.png";
-        plot_benchmarks(pops, PLOT_FILE_NAME, -200.0..0.0)?;
+        const TEST_NAME: &'static str = "mountain-car-smoke-q.png";
+        plot_benchmarks(
+            &populations,
+            TEST_NAME,
+            -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
+        )?;
+        log_benchmarks(&populations, TEST_NAME)?;
         Ok(())
     }
 }

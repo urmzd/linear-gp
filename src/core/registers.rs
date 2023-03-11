@@ -5,10 +5,11 @@ use std::{
 };
 
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
 use super::characteristics::DuplicateNew;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Registers {
     data: Vec<f64>,
 }

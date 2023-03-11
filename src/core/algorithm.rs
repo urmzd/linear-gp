@@ -1,4 +1,3 @@
-use core::fmt;
 use std::iter::repeat_with;
 use std::marker::PhantomData;
 use std::path::PathBuf;
@@ -12,7 +11,7 @@ use tracing::{debug, field::valuable};
 use tracing_subscriber::EnvFilter;
 
 use crate::{
-    core::characteristics::{Breed, Fitness, Generate},
+    core::characteristics::{Breed, Fitness, Generate, Organism},
     utils::random::generator,
 };
 
@@ -138,11 +137,6 @@ where
 
         return Some(population.clone());
     }
-}
-
-pub trait Organism:
-    Fitness + Generate + DuplicateNew + PartialOrd + Sized + Clone + Mutate + Breed + fmt::Debug + Send
-{
 }
 
 pub trait GeneticAlgorithm: Send

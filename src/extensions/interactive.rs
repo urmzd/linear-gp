@@ -1,8 +1,5 @@
-use std::{
-    fmt::{self, Debug},
-    iter::repeat_with,
-    marker::PhantomData,
-};
+use core::fmt::Debug;
+use std::{iter::repeat_with, marker::PhantomData};
 
 use derive_new::new;
 use gym_rs::core::ActionReward;
@@ -16,8 +13,8 @@ use tracing::trace;
 
 use crate::{
     core::{
-        algorithm::{GeneticAlgorithm, Organism},
-        characteristics::{Fitness, FitnessScore},
+        algorithm::GeneticAlgorithm,
+        characteristics::{Fitness, FitnessScore, Organism, Reproducible},
         inputs::ValidInput,
         program::Program,
     },
@@ -77,7 +74,7 @@ impl StateRewardPair {
     }
 }
 
-pub trait InteractiveLearningInput: ValidInput + Sized
+pub trait InteractiveLearningInput: ValidInput
 where
     Self::Environment: Env,
 {
@@ -131,10 +128,9 @@ where
     }
 }
 
-impl<T> Organism for Program<InteractiveLearningParameters<T>> where
-    T: InteractiveLearningInput + fmt::Debug
-{
-}
+impl<T> Reproducible for Program<InteractiveLearningParameters<T>> where T: InteractiveLearningInput {}
+
+impl<T> Organism for Program<InteractiveLearningParameters<T>> where T: InteractiveLearningInput {}
 
 impl<T> Fitness for Program<InteractiveLearningParameters<T>>
 where
@@ -197,17 +193,19 @@ pub struct ILgp<T>(PhantomData<T>);
 
 impl<T> GeneticAlgorithm for ILgp<T>
 where
-    T: InteractiveLearningInput + fmt::Debug,
+    T: InteractiveLearningInput,
 {
     type O = Program<InteractiveLearningParameters<T>>;
 
     fn on_post_rank(
-            population: crate::core::population::Population<Self::O>,
-            mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
-        ) -> (crate::core::population::Population<Self::O>, crate::core::algorithm::HyperParameters<Self::O>) {
-
+        population: crate::core::population::Population<Self::O>,
+        mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
+    ) -> (
+        crate::core::population::Population<Self::O>,
+        crate::core::algorithm::HyperParameters<Self::O>,
+    ) {
         parameters.fitness_parameters.next_generation();
 
-        return (population, parameters)
+        return (population, parameters);
     }
 }

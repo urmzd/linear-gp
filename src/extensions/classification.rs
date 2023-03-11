@@ -1,16 +1,13 @@
-use core::fmt;
-
 use derive_new::new;
-use serde::Serialize;
 
 use crate::core::{
-    algorithm::Organism,
-    characteristics::{Fitness, FitnessScore},
+    characteristics::Organism,
+    characteristics::{Fitness, FitnessScore, Reproducible},
     inputs::{Inputs, ValidInput},
     program::Program,
 };
 
-#[derive(Clone, Debug, Serialize, new)]
+#[derive(Clone, Debug, new)]
 pub struct ClassificationParameters<InputType>
 where
     InputType: ClassificationInput,
@@ -22,7 +19,9 @@ pub trait ClassificationInput: ValidInput {
     fn get_class(&self) -> usize;
 }
 
-impl<T> Organism for Program<ClassificationParameters<T>> where T: ClassificationInput + fmt::Debug {}
+impl<T> Organism for Program<ClassificationParameters<T>> where T: ClassificationInput {}
+
+impl<T> Reproducible for Program<ClassificationParameters<T>> where T: ClassificationInput {}
 
 impl<T> Fitness for Program<ClassificationParameters<T>>
 where
