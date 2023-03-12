@@ -1,3 +1,0 @@
-- [ ] Find the distribution of registers to actions (which registers map to which actions).
-- [ ] Figure out how the q-tables converge.
-- [ ] Does the champion program perform well afterwards?
