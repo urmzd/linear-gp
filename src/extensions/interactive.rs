@@ -88,16 +88,18 @@ where
         self.get_env().set_state(state)
     }
 
+    fn get_new_initial_state() -> <Self::Environment as Env>::Observation {
+        <<Self::Environment as Env>::Observation>::sample_between(&mut generator(), None)
+    }
+
     fn get_initial_states(
         number_of_generations: usize,
         n_trials: usize,
     ) -> Vec<Vec<<Self::Environment as Env>::Observation>> {
         repeat_with(|| {
-            repeat_with(|| {
-                <<Self::Environment as Env>::Observation>::sample_between(&mut generator(), None)
-            })
-            .take(n_trials)
-            .collect_vec()
+            repeat_with(Self::get_new_initial_state)
+                .take(n_trials)
+                .collect_vec()
         })
         .take(number_of_generations)
         .collect_vec()

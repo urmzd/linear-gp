@@ -4,13 +4,13 @@ A framework for solving tasks using linear genetic programming.
 
 ![build passing](https://github.com/urmzd/linear-genetic-programming/actions/workflows/build.yml/badge.svg)
 
-## Examples
-
-All examples can be built and ran through Cargo:
+## Usage
 
 ```bash
-cargo build --example <example_name>
-cargo run --example <example_name>
+# Run trials
+cargo build --release
+./scripts/optimizer/main.py cart-pole
+./scripts/optimizer/main.py mountain-car
 ```
 
 ## Contributions
