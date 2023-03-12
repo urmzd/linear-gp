@@ -6,8 +6,7 @@ use csv::ReaderBuilder;
 use more_asserts::{assert_gt, assert_le};
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
-use tracing::{debug, field::valuable};
-use tracing::{info, trace};
+use tracing::info;
 use uuid::Uuid;
 
 use crate::{
@@ -95,8 +94,6 @@ where
             return None;
         }
 
-        debug!(generation = valuable(&self.generation));
-
         // Freeze population.
         let mut population = self.next_population.clone().unwrap();
         let mut params = self.params.clone();
@@ -110,23 +107,11 @@ where
             .iter()
             .all(|p| !p.get_fitness().is_not_evaluated()));
 
-        trace!(
-            best_score = valuable(
-                &population
-                    .best()
-                    .map(|p| p.get_fitness().unwrap_or(f64::NAN))
-            ),
-            median_score = valuable(
-                &population
-                    .median()
-                    .map(|p| p.get_fitness().unwrap_or(f64::NAN))
-            ),
-            worst_score = valuable(
-                &population
-                    .worst()
-                    .map(|p| p.get_fitness().unwrap_or(f64::NAN))
-            ),
-            generation = valuable(&self.generation)
+        info!(
+            best = serde_json::to_string(&population.best()).unwrap(),
+            median = serde_json::to_string(&population.median()).unwrap(),
+            worst = serde_json::to_string(&population.worst()).unwrap(),
+            generation = serde_json::to_string(&self.generation).unwrap()
         );
 
         let (new_population, params) = G::survive(population.clone(), params);
@@ -296,7 +281,7 @@ where
 
     /// Build generator.
     fn build<'b>(hyper_params: HyperParameters<Self::O>) -> GeneticAlgorithmIter<Self> {
-        info!(run_id = valuable(&(Uuid::new_v4()).to_string()));
+        info!(run_id = &(Uuid::new_v4()).to_string());
         GeneticAlgorithmIter::new(hyper_params)
     }
 }

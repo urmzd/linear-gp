@@ -50,7 +50,7 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     if file {
         fs::File::create(path)?;
     } else {
-        fs::create_dir(path)?;
+        fs::create_dir_all(path)?;
     }
 
     Ok(path.to_owned())

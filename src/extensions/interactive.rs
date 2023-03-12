@@ -8,8 +8,6 @@ use gym_rs::utils::custom::traits::Sample;
 use itertools::Itertools;
 use rand::prelude::SliceRandom;
 use serde::Serialize;
-use tracing::field::valuable;
-use tracing::trace;
 
 use crate::{
     core::{
@@ -178,7 +176,6 @@ where
         }
 
         scores.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        trace!(scores = valuable(&scores));
         let median = scores.get(scores.len() / 2).take().unwrap();
 
         self.fitness = FitnessScore::Valid(*median);

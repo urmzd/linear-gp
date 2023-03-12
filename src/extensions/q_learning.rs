@@ -11,9 +11,7 @@ use rand::{
     prelude::SliceRandom,
 };
 use serde::{Deserialize, Serialize};
-use tracing::field::valuable;
-use tracing::{debug, trace};
-use valuable::Valuable;
+use tracing::info;
 
 use crate::{
     core::{
@@ -29,7 +27,7 @@ use crate::{
 
 use super::interactive::{InteractiveLearningInput, InteractiveLearningParameters};
 
-#[derive(Clone, Valuable, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct QTable {
     table: Vec<Vec<f64>>,
     n_actions: usize,
@@ -43,7 +41,7 @@ impl Debug for QTable {
     }
 }
 
-#[derive(Debug, Clone, Copy, Valuable)]
+#[derive(Debug, Clone, Copy)]
 pub struct ActionRegisterPair {
     action: usize,
     register: usize,
@@ -255,20 +253,17 @@ where
             // Reset for next evaluation.
             self.program.registers.reset();
 
-            let initial_state_vec: &Vec<f64> = &initial_state.into();
-
-            debug!(
-                id = valuable(&self.program.id.to_string()),
-                q_table = valuable(&self.q_table),
-                initial_state = valuable(&initial_state_vec),
-                score = valuable(&score)
+            info!(
+                id = serde_json::to_string(&self.program.id.to_string()).unwrap(),
+                q_table = serde_json::to_string(&self.q_table).unwrap(),
+                initial_state = serde_json::to_string(&initial_state.into()).unwrap(),
+                score = serde_json::to_string(&score).unwrap()
             );
 
             scores.push(score);
         }
 
         scores.sort_by(|a, b| a.partial_cmp(&b).unwrap());
-        trace!(scores = valuable(&scores));
         let median = scores.get(scores.len() / 2).take().unwrap();
 
         let fitness_score = FitnessScore::Valid(*median);
@@ -339,7 +334,7 @@ pub struct QProgramGeneratorParameters {
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy, new, Valuable, Args, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, new, Args, Serialize, Deserialize)]
 pub struct QConsts {
     /// Learning Factor
     #[arg(long, default_value = "0.1")]
