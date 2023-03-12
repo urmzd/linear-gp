@@ -6,9 +6,9 @@ use csv::ReaderBuilder;
 use more_asserts::{assert_gt, assert_le};
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
-use tracing::trace;
 use tracing::{debug, field::valuable};
-use tracing_subscriber::EnvFilter;
+use tracing::{info, trace};
+use uuid::Uuid;
 
 use crate::{
     core::characteristics::{Breed, Fitness, Generate, Organism},
@@ -144,14 +144,6 @@ where
     Self::O: Organism,
 {
     type O;
-
-    fn init_sys() {
-        tracing_subscriber::fmt()
-            .json()
-            .with_env_filter(EnvFilter::from_default_env())
-            .try_init()
-            .unwrap_or(());
-    }
 
     fn init_pop(
         hyperparams: HyperParameters<Self::O>,
@@ -304,7 +296,7 @@ where
 
     /// Build generator.
     fn build<'b>(hyper_params: HyperParameters<Self::O>) -> GeneticAlgorithmIter<Self> {
-        Self::init_sys();
-        return GeneticAlgorithmIter::new(hyper_params);
+        info!(run_id = valuable(&(Uuid::new_v4()).to_string()));
+        GeneticAlgorithmIter::new(hyper_params)
     }
 }

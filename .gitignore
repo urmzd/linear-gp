@@ -4,5 +4,7 @@
 .idea
 
 assets/logs
+assets/benchmarks
 
 *.log
+

@@ -14,21 +14,44 @@ use crate::core::{characteristics::Organism, population::Population};
 
 use super::types::VoidResultAnyError;
 
-const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
+pub const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
 
-pub fn create_path(path: &str) -> Result<PathBuf, Box<dyn Error>> {
+macro_rules! with_named_logger {
+    ($name:expr, $($body:tt)*) => {{
+        const NAME: &'static str = $name;
+
+        let shared_dir = std::path::Path::new($crate::utils::benchmark_tools::BENCHMARK_PREFIX).join(format!("{}/",NAME));
+
+        $crate::utils::benchmark_tools::create_path(shared_dir.to_str().unwrap(), false).unwrap();
+
+        let file_appender = tracing_appender::rolling::hourly(shared_dir, "default.log");
+        let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+
+        let subscriber = tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .json()
+        .with_writer(non_blocking)
+        .finish();
+
+        tracing::subscriber::with_default(subscriber, || {
+            $($body)*
+        })
+    }};
+}
+pub(crate) use with_named_logger;
+
+pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     let path = Path::new(path);
-
-    if path.is_dir() {
-        fs::create_dir_all(path)?;
-        return Ok(path.to_owned());
-    }
 
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
 
-    fs::File::create(path)?;
+    if file {
+        fs::File::create(path)?;
+    } else {
+        fs::create_dir(path)?;
+    }
 
     Ok(path.to_owned())
 }
@@ -43,6 +66,7 @@ where
             .join("best.json")
             .to_str()
             .unwrap(),
+        true,
     )?;
 
     let median_path = create_path(
@@ -51,6 +75,7 @@ where
             .join("median.json")
             .to_str()
             .unwrap(),
+        true,
     )?;
 
     let worst_path = create_path(
@@ -59,6 +84,7 @@ where
             .join("worst.json")
             .to_str()
             .unwrap(),
+        true,
     )?;
 
     let (worst, median, best) = population
@@ -87,6 +113,7 @@ where
             .join("plot.png")
             .to_str()
             .unwrap(),
+        true,
     )?;
 
     let root = BitMapBackend::new(plot_path.as_path(), (1280, 720)).into_drawing_area();
