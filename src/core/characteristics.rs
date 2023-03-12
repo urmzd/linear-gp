@@ -74,7 +74,7 @@ where
 
 pub trait Reproducible: Serialize + DeserializeOwned + Sized {
     fn save(&self, path: &str) -> Result<(), Box<dyn Error>> {
-        create_path(path)?;
+        create_path(path, true)?;
 
         // Serialize the object to a JSON string
         let serialized = serde_json::to_string(&self)?;
