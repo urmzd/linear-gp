@@ -89,7 +89,13 @@ def objective(game: str, trial: optuna.Trial) -> float:
 
     # Get the best score from the output
     print(f"Output: {output}")
-    best_score = float(output.decode("utf-8").strip())
+    parsed_output = output.decode("utf-8").strip().split("\n")
+    scores = [float(score) for score in parsed_output]
+
+    for score_idx, score in enumerate(scores[:-1]):
+        trial.report(score, score_idx)
+
+    best_score = scores[-1]
 
     if game == "cart-pole":
         if best_score < 100:
@@ -105,7 +111,11 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Define the study and run the optimization
-    study = optuna.create_study(study_name=f"{args.game}-{int(time.time())}",direction="maximize", storage="sqlite:///db.sqlite3")
+    study = optuna.create_study(
+        study_name=f"{args.game}-{int(time.time())}",
+        direction="maximize",
+        storage="sqlite:///db.sqlite3",
+    )
     objective_partial = partial(objective, args.game)
     study.optimize(objective_partial, n_trials=150)
 

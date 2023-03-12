@@ -81,14 +81,12 @@ fn main() {
             ),
         };
 
-        let best_score = QLgp::build(hyper_params)
-            .last()
-            .as_ref()
-            .and_then(|p| p.best())
-            .map(|p| p.get_fitness().unwrap_or(-201.))
-            .unwrap_or(-201.);
-
-        println!("{}", best_score)
+        for population in QLgp::build(hyper_params) {
+            if let Some(program) = population.best() {
+                let fitness = program.get_fitness().unwrap_or(-201.);
+                println!("{}", fitness);
+            }
+        }
     } else {
         let input = CartPoleInput::new();
         let n_generations = cli.basic_args.n_generations;
@@ -118,13 +116,11 @@ fn main() {
             ),
         };
 
-        let best_score = QLgp::build(hyper_params)
-            .last()
-            .as_ref()
-            .and_then(|p| p.best())
-            .map(|p| p.get_fitness().unwrap_or(-1.))
-            .unwrap_or(-1.);
-
-        println!("{}", best_score)
+        for population in QLgp::build(hyper_params) {
+            if let Some(program) = population.best() {
+                let fitness = program.get_fitness().unwrap_or(-1.);
+                println!("{}", fitness);
+            }
+        }
     }
 }
