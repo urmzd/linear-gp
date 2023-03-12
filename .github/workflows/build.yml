@@ -28,6 +28,7 @@ jobs:
           path: |
             ~/.cargo/
             target/
+          key: ${{ runner.os }}-dependencies
 
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -43,5 +44,5 @@ jobs:
       - name: Upload Assets
         uses: EndBug/add-and-commit@v9
         with:
-          add : "assets/plots"
+          add: "assets/plots"
           pull: "--rebase --autostash"
