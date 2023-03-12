@@ -1,5 +1,5 @@
 use crate::utils::benchmark_tools::create_path;
-use core::fmt;
+use core::fmt::Debug;
 use std::error::Error;
 use std::path::Path;
 use std::{cmp::Ordering, path::PathBuf};
@@ -9,9 +9,8 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
-use valuable::Valuable;
 
-#[derive(Clone, Debug, Copy, PartialEq, Valuable, Display, Serialize, Deserialize)]
+#[derive(Clone, Debug, Copy, PartialEq, Display, Serialize, Deserialize)]
 pub enum FitnessScore {
     #[display(fmt = "valid: {}", _0)]
     Valid(f64),
@@ -73,7 +72,7 @@ where
 }
 
 pub trait Reproducible: Serialize + DeserializeOwned + Sized {
-    fn save(&self, path: &str) -> Result<(), Box<dyn Error>> {
+    fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
         create_path(path, true)?;
 
         // Serialize the object to a JSON string
@@ -88,7 +87,7 @@ pub trait Reproducible: Serialize + DeserializeOwned + Sized {
         // Write the serialized data to the file
         file.write_all(serialized.as_bytes())?;
 
-        Ok(())
+        Ok(serialized)
     }
 
     fn load(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
@@ -112,7 +111,7 @@ pub trait Organism:
     + Mutate
     + Breed
     + Reproducible
-    + fmt::Debug
+    + Debug
     + Send
 {
 }
