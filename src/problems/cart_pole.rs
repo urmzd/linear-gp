@@ -1,5 +1,6 @@
 use crate::{
-    core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput,
+    core::inputs::ValidInput,
+    extensions::{interactive::InteractiveLearningInput, q_learning::QConsts},
 };
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
 

@@ -334,7 +334,7 @@ pub struct QProgramGeneratorParameters {
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy, new, Args, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Args, Serialize, Deserialize, new)]
 pub struct QConsts {
     /// Learning Factor
     #[arg(long, default_value = "0.1")]
@@ -346,7 +346,7 @@ pub struct QConsts {
     #[arg(long, default_value = "0.05")]
     epsilon: f64,
     /// Learning Rate Decay
-    #[arg(long, default_value = "0.001")]
+    #[arg(long, default_value = "0.01")]
     alpha_decay: f64,
     /// Exploration Decay
     #[arg(long, default_value = "0.001")]

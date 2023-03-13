@@ -88,14 +88,13 @@ def objective(game: str, trial: optuna.Trial) -> float:
         raise Exception(f"Error running command: {error.decode('utf-8')}")
 
     # Get the best score from the output
-    print(f"Output: {output}")
     parsed_output = output.decode("utf-8").strip().split("\n")
     scores = [float(score) for score in parsed_output]
-
-    for score_idx, score in enumerate(scores[:-1]):
-        trial.report(score, score_idx)
+    print(f"Output: {parsed_output}")
 
     best_score = scores[-1]
+    for score_idx, score in enumerate(scores[:-1]):
+        trial.report(score, score_idx)
 
     if game == "cart-pole":
         if best_score < 100:
