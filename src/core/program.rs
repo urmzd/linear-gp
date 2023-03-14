@@ -73,7 +73,7 @@ impl<T> PartialOrd for Program<T> {
 }
 
 impl<T> Program<T> {
-    pub fn exec<I>(&mut self, input: &I)
+    pub fn run<I>(&mut self, input: &I)
     where
         I: ValidInput,
     {

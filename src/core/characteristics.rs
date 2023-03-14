@@ -116,6 +116,23 @@ pub trait Organism:
 {
 }
 
+impl<T> Organism for T where
+    T: Fitness
+        + Generate
+        + DuplicateNew
+        + PartialOrd
+        + Sized
+        + Clone
+        + Mutate
+        + Breed
+        + Reproducible
+        + Debug
+        + Send
+{
+}
+
+impl<T> Reproducible for T where T: Serialize + DeserializeOwned {}
+
 pub trait Breed: Clone {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2];
 }

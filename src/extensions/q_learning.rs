@@ -15,12 +15,11 @@ use tracing::info;
 
 use crate::{
     core::{
-        algorithm::GeneticAlgorithm,
-        characteristics::{
-            Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate, Organism, Reproducible,
-        },
+        algorithm::{GeneticAlgorithm, HyperParameters},
+        characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
+        population::Population,
         program::{Program, ProgramGeneratorParameters},
-        registers::Registers,
+        registers::{ArgmaxInput, ArgmaxResult, Registers, AR},
     },
     utils::{float_ops, random::generator},
 };
@@ -80,23 +79,16 @@ impl QTable {
         max.expect("Available action to yield an index.")
     }
 
-    pub fn eval<T>(&self, registers: &Registers) -> Option<ActionRegisterPair> {
-        let winning_registers = registers.all_argmax(None);
-
-        let winning_register = match winning_registers {
-            // NOTE: Should we panic instead?
-            None => return None,
-            // Select any register.
-            Some(registers) => registers
-                .choose(&mut generator())
-                .cloned()
-                .expect("Register to have been chosen."),
+    pub fn get_action_register(&self, registers: &Registers) -> Option<ActionRegisterPair> {
+        // None is only returned on NaNs and +/- infinity.
+        let winning_register = match registers.argmax(ArgmaxInput::All).any() {
+            AR::Value(register) => register,
+            _ => return None,
         };
 
         assert_le!(self.q_consts.epsilon, 1.0);
         assert_ge!(self.q_consts.epsilon, 0.);
 
-        // TODO: Move generator to structs.
         let prob = UniformFloat::<f64>::new_inclusive(0., 1.).sample(&mut generator());
 
         let winning_action = if prob < self.q_consts.epsilon {
@@ -107,7 +99,7 @@ impl QTable {
 
         Some(ActionRegisterPair {
             action: winning_action,
-            register: winning_register as usize,
+            register: winning_register,
         })
     }
 
@@ -137,10 +129,6 @@ where
     pub q_table: QTable,
     pub program: Program<InteractiveLearningParameters<T>>,
 }
-
-impl<T> Reproducible for QProgram<T> where T: InteractiveLearningInput {}
-
-impl<T> Organism for QProgram<T> where T: InteractiveLearningInput {}
 
 impl<T> DuplicateNew for QProgram<T>
 where
@@ -181,10 +169,10 @@ where
     T: InteractiveLearningInput,
 {
     // Run the program on the current state.
-    program.exec(environment);
+    program.run(environment);
 
     // Get the winning action-register pair.
-    let action_state = q_table.eval::<InteractiveLearningParameters<T>>(&program.registers);
+    let action_state = q_table.get_action_register(&program.registers);
 
     action_state
 }
@@ -201,9 +189,10 @@ where
         for initial_state in parameters.get_states() {
             parameters.environment.reset();
             parameters.environment.set_state(initial_state.clone());
+
             let mut score = 0.;
 
-            // We run the program and determine what action to take at the current step.
+            // We run the program and determine what action to take at the step = 0.
             let mut current_action_state = match get_action_state(
                 &mut parameters.environment,
                 &mut self.q_table,
@@ -219,7 +208,9 @@ where
             // We execute the selected action and continue to repeat the cycle until termination.
             for _step in 0..T::MAX_EPISODE_LENGTH {
                 // Act.
-                let state_reward_pair = parameters.environment.sim(current_action_state.action);
+                let state_reward_pair = parameters
+                    .environment
+                    .execute_action(current_action_state.action);
 
                 let reward = state_reward_pair.get_value();
                 score += reward;
@@ -236,12 +227,14 @@ where
                     None => {
                         // We've encountered numerical instability. The program is not considered valid, and thus
                         // has the lowest score.
-                        self.program.fitness = FitnessScore::OutOfBounds;
-                        return;
+                        return {
+                            self.program.fitness = FitnessScore::OutOfBounds;
+                        };
                     }
                     Some(action_state) => action_state,
                 };
 
+                // We only update when there is a transition.
                 if current_action_state.register != next_action_state.register {
                     self.q_table
                         .update(current_action_state, reward, next_action_state)
@@ -252,6 +245,7 @@ where
 
             // Reset for next evaluation.
             self.program.registers.reset();
+            scores.push(score);
 
             info!(
                 id = serde_json::to_string(&self.program.id.to_string()).unwrap(),
@@ -259,8 +253,6 @@ where
                 initial_state = serde_json::to_string(&initial_state.into()).unwrap(),
                 score = serde_json::to_string(&score).unwrap()
             );
-
-            scores.push(score);
         }
 
         scores.sort_by(|a, b| a.partial_cmp(&b).unwrap());
@@ -381,12 +373,9 @@ where
     type O = QProgram<T>;
 
     fn on_post_rank(
-        population: crate::core::population::Population<Self::O>,
-        mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
-    ) -> (
-        crate::core::population::Population<Self::O>,
-        crate::core::algorithm::HyperParameters<Self::O>,
-    ) {
+        population: Population<Self::O>,
+        mut parameters: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
         parameters.fitness_parameters.next_generation();
 
         return (population, parameters);

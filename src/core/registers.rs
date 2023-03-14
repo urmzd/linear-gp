@@ -1,11 +1,11 @@
 use core::slice::Iter;
-use std::{
-    ops::{Index, Range},
-    slice::SliceIndex,
-};
+use std::{ops::Index, slice::SliceIndex};
 
 use itertools::Itertools;
+use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
+
+use crate::utils::random::generator;
 
 use super::characteristics::DuplicateNew;
 
@@ -26,6 +26,39 @@ impl DuplicateNew for Registers {
     }
 }
 
+pub enum ArgmaxResult {
+    MaxValues(Vec<usize>),
+    Overflow,
+}
+
+pub enum AR {
+    Value(usize),
+    Overflow,
+}
+
+impl ArgmaxResult {
+    pub fn one(&self) -> AR {
+        match self {
+            ArgmaxResult::MaxValues(indices) if indices.len() == 1 => AR::Value(indices[0]),
+            _ => AR::Overflow,
+        }
+    }
+
+    pub fn any(&self) -> AR {
+        match self {
+            ArgmaxResult::MaxValues(indices) if indices.len() >= 1 => {
+                AR::Value(indices.choose(&mut generator()).copied().unwrap())
+            }
+            _ => AR::Overflow,
+        }
+    }
+}
+
+pub enum ArgmaxInput {
+    All,
+    To(usize),
+}
+
 impl Registers {
     pub fn new(n_registers: usize) -> Self {
         let data = vec![0.; n_registers];
@@ -33,8 +66,12 @@ impl Registers {
         Registers { data }
     }
 
-    pub fn all_argmax(&self, range: Option<Range<usize>>) -> Option<Vec<usize>> {
-        let range_to_use = range.unwrap_or(0..self.data.len());
+    pub fn argmax(&self, range: ArgmaxInput) -> ArgmaxResult {
+        let range_to_use = match range {
+            ArgmaxInput::All => 0..(self.data.len()),
+            ArgmaxInput::To(to) => 0..(to),
+        };
+
         let sliced_data = &self.data[range_to_use];
         let max_value = sliced_data
             .iter()
@@ -43,7 +80,7 @@ impl Registers {
             .expect("Sliced values to not be of cardinality 0.");
 
         if max_value.is_infinite() || max_value.is_nan() {
-            return None;
+            return ArgmaxResult::Overflow;
         }
 
         let max_indices = sliced_data
@@ -54,7 +91,7 @@ impl Registers {
             .map(|(i, _)| i)
             .collect_vec();
 
-        Some(max_indices)
+        ArgmaxResult::MaxValues(max_indices)
     }
 
     pub fn reset(&mut self) {
@@ -97,7 +134,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::core::registers::Registers;
+    use create::core::registers::Registers;
 
     #[test]
     fn given_registers_when_indexed_with_range_then_slice_is_returned() {

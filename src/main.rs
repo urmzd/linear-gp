@@ -7,7 +7,7 @@ use lgp::{
         program::ProgramGeneratorParameters,
     },
     extensions::{
-        interactive::{InteractiveLearningInput, InteractiveLearningParameters},
+        interactive::InteractiveLearningParameters,
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
     },
     problems::{cart_pole::CartPoleInput, mountain_car::MountainCarInput},
@@ -53,18 +53,17 @@ fn main() {
     let cli = Cli::parse();
 
     if cli.problem_type == ProblemType::MountainCar {
-        let input = MountainCarInput::new();
         let n_generations = cli.basic_args.n_generations;
-        let initial_states =
-            MountainCarInput::get_initial_states(n_generations, cli.basic_args.n_trials);
-
         let hyper_params = HyperParameters {
             population_size: cli.basic_args.population_size,
             gap: cli.basic_args.gap,
             crossover_percent: cli.basic_args.crossover_percent,
             mutation_percent: cli.basic_args.mutation_percent,
             n_generations,
-            fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
+            fitness_parameters: InteractiveLearningParameters::<MountainCarInput>::new(
+                cli.basic_args.n_trials,
+                n_generations,
+            ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
                     cli.program_parameter.max_instructions,
@@ -88,18 +87,17 @@ fn main() {
             }
         }
     } else {
-        let input = CartPoleInput::new();
         let n_generations = cli.basic_args.n_generations;
-        let initial_states =
-            CartPoleInput::get_initial_states(n_generations, cli.basic_args.n_trials);
-
         let hyper_params = HyperParameters {
             population_size: cli.basic_args.population_size,
             gap: cli.basic_args.gap,
             crossover_percent: cli.basic_args.crossover_percent,
             mutation_percent: cli.basic_args.mutation_percent,
             n_generations,
-            fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
+            fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
+                cli.basic_args.n_trials,
+                n_generations,
+            ),
             program_parameters: QProgramGeneratorParameters::new(
                 ProgramGeneratorParameters::new(
                     cli.program_parameter.max_instructions,

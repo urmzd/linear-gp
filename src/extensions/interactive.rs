@@ -1,25 +1,27 @@
 use core::fmt::Debug;
 use std::{iter::repeat_with, marker::PhantomData};
 
-use derive_new::new;
 use gym_rs::core::ActionReward;
 use gym_rs::core::Env;
 use gym_rs::utils::custom::traits::Sample;
 use itertools::Itertools;
-use rand::prelude::SliceRandom;
 use serde::Serialize;
 
+use crate::core::algorithm::HyperParameters;
+use crate::core::population::Population;
+use crate::core::registers::ArgmaxInput;
+use crate::core::registers::AR;
 use crate::{
     core::{
         algorithm::GeneticAlgorithm,
-        characteristics::{Fitness, FitnessScore, Organism, Reproducible},
+        characteristics::{Fitness, FitnessScore},
         inputs::ValidInput,
         program::Program,
     },
     utils::random::generator,
 };
 
-#[derive(Debug, Clone, new)]
+#[derive(Debug, Clone)]
 pub struct InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
@@ -27,7 +29,6 @@ where
     // Collection of X intial states per generation.
     initial_states: Vec<Vec<<T::Environment as Env>::Observation>>,
     pub environment: T,
-    #[new(value = "0")]
     generations: usize,
 }
 
@@ -35,7 +36,15 @@ impl<T> InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
 {
-    pub fn get_states(&self) -> Vec<<T::Environment as Env>::Observation> {
+    pub fn new(n_trials: usize, n_generations: usize) -> Self {
+        Self {
+            initial_states: T::get_initial_states(n_generations, n_trials),
+            environment: T::new(),
+            generations: 0,
+        }
+    }
+
+    pub fn get_states(&mut self) -> Vec<<T::Environment as Env>::Observation> {
         self.initial_states.get(self.generations).cloned().unwrap()
     }
 
@@ -80,6 +89,9 @@ where
 
     const MAX_EPISODE_LENGTH: usize;
 
+    fn new() -> Self;
+    fn get_env(&mut self) -> &mut Self::Environment;
+
     fn reset(&mut self) {
         self.get_env().reset(None, false, None);
     }
@@ -105,11 +117,7 @@ where
         .collect_vec()
     }
 
-    fn get_env(&mut self) -> &mut Self::Environment;
-
-    fn new() -> Self;
-
-    fn sim(&mut self, action: usize) -> StateRewardPair {
+    fn execute_action(&mut self, action: usize) -> StateRewardPair {
         let ActionReward { reward, done, .. } = self.get_env().step(action.into());
 
         let reward = reward.into_inner();
@@ -128,10 +136,6 @@ where
     }
 }
 
-impl<T> Reproducible for Program<InteractiveLearningParameters<T>> where T: InteractiveLearningInput {}
-
-impl<T> Organism for Program<InteractiveLearningParameters<T>> where T: InteractiveLearningInput {}
-
 impl<T> Fitness for Program<InteractiveLearningParameters<T>>
 where
     T: InteractiveLearningInput,
@@ -149,22 +153,17 @@ where
 
             for _ in 0..T::MAX_EPISODE_LENGTH {
                 // Run program.
-                self.exec(&parameters.environment);
+                self.run(&parameters.environment);
+
                 // Eval
-                let winning_registers =
-                    match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
-                        None => {
-                            return {
-                                self.fitness = FitnessScore::OutOfBounds;
-                            }
-                        }
-                        Some(registers) => registers,
-                    };
-                let picked_action = winning_registers
-                    .choose(&mut generator())
-                    .map(|v| *v)
-                    .expect("Register to have been chosen.");
-                let state_reward = parameters.environment.sim(picked_action as usize);
+                let state_reward = match self
+                    .registers
+                    .argmax(ArgmaxInput::To(T::N_ACTION_REGISTERS))
+                    .any()
+                {
+                    AR::Value(action) => parameters.environment.execute_action(action),
+                    AR::Overflow => return self.fitness = FitnessScore::OutOfBounds,
+                };
 
                 score += state_reward.get_value();
 
@@ -197,12 +196,9 @@ where
     type O = Program<InteractiveLearningParameters<T>>;
 
     fn on_post_rank(
-        population: crate::core::population::Population<Self::O>,
-        mut parameters: crate::core::algorithm::HyperParameters<Self::O>,
-    ) -> (
-        crate::core::population::Population<Self::O>,
-        crate::core::algorithm::HyperParameters<Self::O>,
-    ) {
+        population: Population<Self::O>,
+        mut parameters: HyperParameters<Self::O>,
+    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
         parameters.fitness_parameters.next_generation();
 
         return (population, parameters);

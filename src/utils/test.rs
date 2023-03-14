@@ -34,11 +34,6 @@ impl ClassificationInput for TestInput {
     }
 }
 
-pub struct TestLgp;
-impl GeneticAlgorithm for TestLgp {
-    type O = Program<ClassificationParameters<TestInput>>;
-}
-
 impl Default for TestInput {
     fn default() -> Self {
         TestInput::new([0.; 5])
@@ -50,4 +45,10 @@ impl Distribution<TestInput> for Standard {
         let data: [f64; 5] = [0.; 5].map(|_| rng.gen_range((0.)..=(1.)));
         TestInput(data)
     }
+}
+
+pub struct TestLgp;
+
+impl GeneticAlgorithm for TestLgp {
+    type O = Program<ClassificationParameters<TestInput>>;
 }
