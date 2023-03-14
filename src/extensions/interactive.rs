@@ -92,11 +92,8 @@ where
     fn new() -> Self;
     fn get_env(&mut self) -> &mut Self::Environment;
 
-    fn reset(&mut self) {
-        self.get_env().reset(None, false, None);
-    }
-
     fn set_state(&mut self, state: <Self::Environment as Env>::Observation) {
+        self.get_env().reset(None, false, None);
         self.get_env().set_state(state)
     }
 
@@ -146,7 +143,6 @@ where
         let mut scores = vec![];
 
         for initial_state in parameters.get_states() {
-            parameters.environment.reset();
             parameters.environment.set_state(initial_state.clone());
 
             let mut score = 0.;

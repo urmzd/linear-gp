@@ -53,7 +53,7 @@ mod tests {
 
     #[test]
     fn solve_cart_pole_default() -> Result<(), Box<dyn error::Error>> {
-        with_named_logger!("cart-pole-smoke-default", {
+        with_named_logger!("cart-pole-default", {
             let n_generations = 100;
             let n_trials = 5;
 
@@ -68,8 +68,8 @@ mod tests {
                     n_generations,
                 ),
                 program_parameters: ProgramGeneratorParameters::new(
-                    6,
-                    InstructionGeneratorParameters::from::<CartPoleInput>(1, 60.),
+                    8,
+                    InstructionGeneratorParameters::from::<CartPoleInput>(1, 10.),
                 ),
             };
 
@@ -84,7 +84,7 @@ mod tests {
 
     #[test]
     fn solve_cart_pole_with_q_learning() -> Result<(), Box<dyn error::Error>> {
-        with_named_logger!("cart-pole-smoke-q", {
+        with_named_logger!("cart-pole-q", {
             let n_generations = 100;
             let n_trials = 5;
 

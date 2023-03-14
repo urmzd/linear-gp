@@ -1,7 +1,7 @@
-use std::slice::{Iter, IterMut};
-use std::vec::IntoIter;
+use std::iter::FromIterator;
 
 pub type InnerPopulation<T> = Vec<T>;
+
 #[derive(Clone, Debug)]
 pub struct Population<T>
 where
@@ -16,9 +16,7 @@ where
     V: PartialOrd + Clone,
 {
     fn extend<T: IntoIterator<Item = V>>(&mut self, iter: T) {
-        for element in iter {
-            self.push(element)
-        }
+        self.list.extend(iter);
     }
 }
 
@@ -39,8 +37,7 @@ where
         self.list.get_mut(index)
     }
 
-    /// Sort by descending order.
-    pub fn sort(&mut self) -> () {
+    pub fn sort(&mut self) {
         self.list.sort_by(|a, b| b.partial_cmp(a).unwrap());
     }
 
@@ -57,8 +54,8 @@ where
         self.list.last()
     }
 
-    pub fn push(&mut self, value: T) -> () {
-        self.list.push(value)
+    pub fn push(&mut self, value: T) {
+        self.list.push(value);
     }
 
     pub fn pop(&mut self) -> Option<T> {
@@ -73,15 +70,15 @@ where
         self.capacity
     }
 
-    pub fn iter(&self) -> Iter<T> {
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.list.iter()
     }
 
-    pub fn into_iter(self) -> IntoIter<T> {
+    pub fn into_iter(self) -> impl Iterator<Item = T> {
         self.list.into_iter()
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<T> {
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut T> {
         self.list.iter_mut()
     }
 }
@@ -91,8 +88,7 @@ where
     T: PartialOrd + Clone,
 {
     type Item = T;
-
-    type IntoIter = IntoIter<T>;
+    type IntoIter = std::vec::IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.list.into_iter()
@@ -105,9 +101,7 @@ where
 {
     fn from_iter<T: IntoIterator<Item = E>>(iter: T) -> Self {
         let mut population = Population::with_capacity(100);
-        for elem in iter {
-            population.push(elem)
-        }
+        population.extend(iter);
         population
     }
 }

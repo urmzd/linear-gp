@@ -13,8 +13,6 @@ rand = "0.8.5"
 rand_xoshiro = "0.6.0"
 strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
-more-asserts = { version = "0.2" }
-toml = "0.5"
 lazy_static = "1.4.0"
 derive-new = "0.5"
 derivative = "2.2.0"
@@ -27,6 +25,8 @@ tracing-subscriber = { version = "0.3", default-features=false, features = ["env
 gym-rs = { git = "https://github.com/urmzd/gym-rs" }
 uuid = { version = "1.2.2", features = ["v4", "serde"] }
 clap = { version = "4.1.8", features = ["derive"] }
+
+[dev-dependencies]
 tempfile = "3.3"
 reqwest = "0.11"
-pretty_assertions = { version = "1.2" }
+
