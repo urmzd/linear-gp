@@ -134,7 +134,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use create::core::registers::Registers;
+    use crate::core::registers::Registers;
 
     #[test]
     fn given_registers_when_indexed_with_range_then_slice_is_returned() {
