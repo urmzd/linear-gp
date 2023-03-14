@@ -11,9 +11,9 @@ Running trials:
 ```bash
 cargo build --release
 # Optional: python -m venv venv
-pip install -r requirements
-./optimizer/main.py cart-pole
-./optimizer/main.py mountain-car
+pip install -r scripts/requirements
+./scripts/optimizer.py cart-pole
+./scripts/optimizer.py mountain-car
 ```
 
 ## Contributions
