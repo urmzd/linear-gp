@@ -43,7 +43,7 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
     n_generations = 100
     n_extras = 1
     n_trials = 5
-    max_instructions = trial.suggest_int("max_instructions", 1, 32)
+    max_instructions = trial.suggest_int("max_instructions", 1, 64)
     external_factor = trial.suggest_float("external_factor", 0.0, 100.0)
 
     # Define the command to run with the CLI
@@ -112,7 +112,7 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
         trial.report(score, score_idx)
 
     if game == "cart-pole":
-        if best_score < 250:
+        if best_score < 100:
             raise optuna.TrialPruned()
     else:
         if best_score < -100:

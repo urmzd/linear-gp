@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn given_mountain_car_example_when_lgp_executed_then_task_is_solved(
     ) -> Result<(), Box<dyn std::error::Error>> {
-        with_named_logger!("mountain-car-smoke-default", {
+        with_named_logger!("mountain-car-default", {
             let n_generations = 100;
             let n_trials = 5;
 
@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn given_mountain_car_task_when_q_learning_lgp_is_used_then_task_is_solved(
     ) -> VoidResultAnyError {
-        with_named_logger!("mountain-car-smoke-q", {
+        with_named_logger!("mountain-car-q", {
             let n_generations = 100;
             let n_trials = 5;
 

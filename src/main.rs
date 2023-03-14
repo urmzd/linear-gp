@@ -92,6 +92,8 @@ macro_rules! generate_program_params {
 
 macro_rules! run_lgp {
     ($cli: expr, $input_type:ty, $default_fitness:expr, $prog_params:expr, $gp: ident) => {
+        $cli.basic_args.consts.reset_active_properties();
+
         for population in $gp::build(HyperParameters {
             population_size: $cli.basic_args.population_size,
             gap: $cli.basic_args.gap,
@@ -113,7 +115,7 @@ macro_rules! run_lgp {
 }
 
 fn main() {
-    let cli = Cli::parse();
+    let mut cli = Cli::parse();
 
     if cli.problem_type == ProblemType::MountainCar {
         if cli.learning_type == LearningType::Q {

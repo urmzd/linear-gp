@@ -5,10 +5,7 @@ use std::{
 
 use clap::Args;
 use derive_new::new;
-use more_asserts::{assert_ge, assert_le};
-use rand::{
-    distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
-};
+use rand::distributions::uniform::{UniformFloat, UniformInt, UniformSampler};
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
@@ -47,7 +44,11 @@ pub struct ActionRegisterPair {
 
 impl DuplicateNew for QTable {
     fn duplicate_new(&self) -> Self {
-        QTable::new(self.n_actions, self.n_registers, self.q_consts)
+        QTable::new(
+            self.n_actions,
+            self.n_registers,
+            self.q_consts.duplicate_new(),
+        )
     }
 }
 
@@ -79,18 +80,14 @@ impl QTable {
     }
 
     pub fn get_action_register(&self, registers: &Registers) -> Option<ActionRegisterPair> {
-        // None is only returned on NaNs and +/- infinity.
         let winning_register = match registers.argmax(ArgmaxInput::All).any() {
             AR::Value(register) => register,
             _ => return None,
         };
 
-        assert_le!(self.q_consts.epsilon, 1.0);
-        assert_ge!(self.q_consts.epsilon, 0.);
-
         let prob = UniformFloat::<f64>::new_inclusive(0., 1.).sample(&mut generator());
 
-        let winning_action = if prob < self.q_consts.epsilon {
+        let winning_action = if prob <= self.q_consts.epsilon_active {
             self.action_random()
         } else {
             self.action_argmax(winning_register)
@@ -112,10 +109,13 @@ impl QTable {
             self.table[current_action_state.register][current_action_state.action];
         let next_q_value = self.action_argmax(next_action_state.register) as f64;
 
-        let new_q_value = self.q_consts.alpha
+        let new_q_value = self.q_consts.alpha_active
             * (current_reward + (self.q_consts.gamma * next_q_value) - current_q_value);
 
         self.table[current_action_state.register][current_action_state.action] += new_q_value;
+
+        // Reduce update impact next time around.
+        self.q_consts.decay();
     }
 }
 
@@ -186,7 +186,6 @@ where
         let mut scores = vec![];
 
         for initial_state in parameters.get_states() {
-            parameters.environment.reset();
             parameters.environment.set_state(initial_state.clone());
 
             let mut score = 0.;
@@ -260,7 +259,6 @@ where
         let fitness_score = FitnessScore::Valid(*median);
 
         self.program.fitness = fitness_score;
-        self.q_table.q_consts.decay();
     }
 
     fn get_fitness(&self) -> FitnessScore {
@@ -325,7 +323,7 @@ pub struct QProgramGeneratorParameters {
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy, Args, Serialize, Deserialize, new)]
+#[derive(Debug, Clone, Copy, Args, Serialize, Deserialize)]
 pub struct QConsts {
     /// Learning Factor
     #[arg(long, default_value = "0.1")]
@@ -342,12 +340,49 @@ pub struct QConsts {
     /// Exploration Decay
     #[arg(long, default_value = "0.001")]
     epsilon_decay: f64,
+
+    /// To allow new programs to start from the new state, we have active
+    /// properties to mutuate.
+    #[arg(skip)]
+    alpha_active: f64,
+    #[arg(skip)]
+    epsilon_active: f64,
+}
+
+impl DuplicateNew for QConsts {
+    fn duplicate_new(&self) -> Self {
+        QConsts::new(
+            self.alpha,
+            self.gamma,
+            self.epsilon,
+            self.alpha_decay,
+            self.epsilon_decay,
+        )
+    }
 }
 
 impl QConsts {
+    pub fn new(alpha: f64, gamma: f64, epsilon: f64, alpha_decay: f64, epsilon_decay: f64) -> Self {
+        Self {
+            alpha_active: alpha,
+            epsilon_active: epsilon,
+            alpha,
+            gamma,
+            epsilon,
+            alpha_decay,
+            epsilon_decay,
+        }
+    }
+
+    /// Helper method for CLI
+    pub fn reset_active_properties(&mut self) {
+        self.alpha_active = self.alpha;
+        self.epsilon_active = self.epsilon
+    }
+
     pub fn decay(&mut self) {
-        self.alpha *= 1. - self.alpha_decay;
-        self.epsilon *= 1. - self.epsilon_decay
+        self.alpha_active *= 1. - self.alpha_decay;
+        self.epsilon_active *= 1. - self.epsilon_decay
     }
 }
 
@@ -359,6 +394,8 @@ impl Default for QConsts {
             epsilon: 0.05,
             alpha_decay: 0.0,
             epsilon_decay: 0.0,
+            alpha_active: 0.25,
+            epsilon_active: 0.05,
         }
     }
 }

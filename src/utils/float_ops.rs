@@ -32,6 +32,6 @@ mod tests {
         let values = [0., 1., 2.];
         let argmax = argmax(values.iter().copied());
 
-        pretty_assertions::assert_eq!(argmax, Some(2));
+        assert_eq!(argmax, Some(2));
     }
 }

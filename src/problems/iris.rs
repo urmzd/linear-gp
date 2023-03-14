@@ -13,23 +13,6 @@ use crate::{
     extensions::classification::{ClassificationInput, ClassificationParameters},
 };
 
-use std::error;
-
-use tempfile::NamedTempFile;
-
-use std::io::Write;
-
-pub struct ContentFilePair(pub String, pub NamedTempFile);
-
-pub async fn get_iris_content() -> Result<ContentFilePair, Box<dyn error::Error>> {
-    let tmp_file = NamedTempFile::new()?;
-    let response = reqwest::get(IRIS_DATASET_LINK).await?;
-    let content = response.text().await?;
-    writeln!(&tmp_file, "{}", &content)?;
-
-    Ok(ContentFilePair(content, tmp_file))
-}
-
 pub const IRIS_DATASET_LINK: &'static str =
     "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/bezdekIris.data";
 
@@ -83,7 +66,7 @@ impl ClassificationInput for IrisInput {
 
 impl Display for IrisInput {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let serialized = toml::to_string(&self).unwrap();
+        let serialized = serde_json::to_string(&self).unwrap();
         f.write_str(&serialized)
     }
 }
@@ -115,12 +98,24 @@ mod tests {
         utils::benchmark_tools::{log_benchmarks, plot_benchmarks},
     };
     use itertools::Itertools;
-    use more_asserts::{assert_le, assert_lt};
-    use pretty_assertions::{assert_eq, assert_ne};
     use std::error;
 
-    use super::{get_iris_content, ContentFilePair, IrisInput, IrisLgp};
+    use super::{IrisInput, IrisLgp, IRIS_DATASET_LINK};
 
+    use tempfile::NamedTempFile;
+
+    use std::io::Write;
+
+    struct ContentFilePair(pub String, pub NamedTempFile);
+
+    async fn get_iris_content() -> Result<ContentFilePair, Box<dyn error::Error>> {
+        let tmp_file = NamedTempFile::new()?;
+        let response = reqwest::get(IRIS_DATASET_LINK).await?;
+        let content = response.text().await?;
+        writeln!(&tmp_file, "{}", &content)?;
+
+        Ok(ContentFilePair(content, tmp_file))
+    }
     // TODO: Update tests to include assertions about benchmark trends.
     #[tokio::test]
     async fn sanity_test_mutation_crossover() -> Result<(), Box<dyn error::Error>> {
@@ -141,12 +136,12 @@ mod tests {
                 ),
             };
 
-        assert_eq!(hyper_params.crossover_percent, 0.5);
-        assert_eq!(hyper_params.mutation_percent, 0.5);
+        debug_assert_eq!(hyper_params.crossover_percent, 0.5);
+        debug_assert_eq!(hyper_params.mutation_percent, 0.5);
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const TEST_NAME: &'static str = "iris-smoke-mutate-crossover";
+        const TEST_NAME: &'static str = "iris-mutate-crossover";
 
         plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
         log_benchmarks(&populations, TEST_NAME)?;
@@ -177,7 +172,7 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const TEST_NAME: &'static str = "iris-smoke-mutate";
+        const TEST_NAME: &'static str = "iris-mutate";
         plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
         log_benchmarks(&populations, TEST_NAME)?;
 
@@ -208,7 +203,7 @@ mod tests {
 
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
-        const TEST_NAME: &'static str = "iris-smoke-crossover";
+        const TEST_NAME: &'static str = "iris-crossover";
         plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
         log_benchmarks(&populations, TEST_NAME)?;
 
@@ -243,7 +238,7 @@ mod tests {
         let median = populations.last().unwrap().median().unwrap().clone();
         let best = populations.last().unwrap().best().unwrap().clone();
 
-        const TEST_NAME: &'static str = "iris-smoke-default";
+        const TEST_NAME: &'static str = "iris-default";
 
         plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
         log_benchmarks(&populations, TEST_NAME)?;
@@ -284,11 +279,11 @@ mod tests {
 
         let dropped_pop_len = population.len();
 
-        assert_lt!(dropped_pop_len, hyper_params.population_size);
+        assert!(dropped_pop_len < hyper_params.population_size);
 
         (population, hyper_params) = IrisLgp::variation(population, hyper_params);
 
-        assert_eq!(population.len(), hyper_params.population_size);
+        assert!(population.len() == hyper_params.population_size);
 
         Ok(())
     }
@@ -320,7 +315,7 @@ mod tests {
         (population, hyper_params) = IrisLgp::rank(population, hyper_params);
         (population, hyper_params) = IrisLgp::survive(population, hyper_params);
 
-        self::assert_eq!(
+        assert_eq!(
             population.len(),
             ((hyper_params.population_size as f64 * (1.0 - hyper_params.gap)).floor() as usize)
         );
@@ -351,10 +346,10 @@ mod tests {
 
         let (population, hyper_params) = IrisLgp::init_pop(hyper_params);
 
-        self::assert_eq!(population.len(), hyper_params.population_size);
+        assert_eq!(population.len(), hyper_params.population_size);
 
         for individual in population {
-            assert_le!(individual.instructions.len(), 100)
+            assert!(individual.instructions.len() <= 100)
         }
 
         Ok(())

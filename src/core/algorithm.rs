@@ -3,7 +3,6 @@ use std::marker::PhantomData;
 use std::path::PathBuf;
 
 use csv::ReaderBuilder;
-use more_asserts::{assert_gt, assert_le};
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::de::DeserializeOwned;
 use tracing::info;
@@ -160,7 +159,7 @@ where
     ) -> (Population<Self::O>, HyperParameters<Self::O>) {
         population.sort();
         // Organize individuals by their fitness score.
-        assert_le!(population.worst(), population.best());
+        debug_assert!(population.worst() <= population.best());
         (population, params)
     }
 
@@ -206,7 +205,7 @@ where
         mut population: Population<Self::O>,
         parameters: HyperParameters<Self::O>,
     ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        assert_gt!(population.len(), 0);
+        debug_assert!(population.len() > 0);
         let pop_cap = population.capacity();
         let pop_len = population.len();
 
@@ -221,7 +220,7 @@ where
         let mut n_crossovers =
             (remaining_pool_spots as f64 * parameters.crossover_percent).floor() as usize;
 
-        assert_le!(n_mutations + n_crossovers, remaining_pool_spots);
+        debug_assert!(n_mutations + n_crossovers <= remaining_pool_spots);
 
         let mut offspring = vec![];
 
