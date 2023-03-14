@@ -16,6 +16,14 @@ def parse_args() -> argparse.Namespace:
         choices=["cart-pole", "mountain-car"],
         help="The name of the game to optimize for",
     )
+
+    parser.add_argument(
+        "learning_type",
+       type=str,
+       choices=["q", "norm"],
+       help="The type of learning to be done."
+    )
+
     parser.add_argument(
         "--n_trials",
         default=150,
@@ -26,7 +34,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def objective(game: str, trial: optuna.Trial) -> float:
+def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
     # Define the hyperparameters to optimize
     population_size = 100
     gap = 0.5
@@ -37,26 +45,12 @@ def objective(game: str, trial: optuna.Trial) -> float:
     n_trials = 5
     max_instructions = trial.suggest_int("max_instructions", 1, 32)
     external_factor = trial.suggest_float("external_factor", 0.0, 100.0)
-    alpha = trial.suggest_float("alpha", 0.0, 1.0)
-    epsilon = trial.suggest_float("epsilon", 0.0, 1.0)
-    gamma = trial.suggest_float("gamma", 0.0, 1.0)
-    alpha_decay = trial.suggest_float("alpha_decay", 0.0, 1.0)
-    epsilon_decay = trial.suggest_float("epsilon_decay", 0.0, 1.0)
 
     # Define the command to run with the CLI
     command = [
         "./target/release/lgp",
         game,
-        "--alpha",
-        alpha,
-        "--alpha-decay",
-        alpha_decay,
-        "--gamma",
-        gamma,
-        "--epsilon",
-        epsilon,
-        "--epsilon-decay",
-        epsilon_decay,
+        learning_type,
         "--n-trials",
         n_trials,
         "--population-size",
@@ -76,6 +70,27 @@ def objective(game: str, trial: optuna.Trial) -> float:
         "--external-factor",
         external_factor,
     ]
+
+    if learning_type == "q":
+        alpha = trial.suggest_float("alpha", 0.0, 1.0)
+        epsilon = trial.suggest_float("epsilon", 0.0, 1.0)
+        gamma = trial.suggest_float("gamma", 0.0, 1.0)
+        alpha_decay = trial.suggest_float("alpha_decay", 0.0, 1.0)
+        epsilon_decay = trial.suggest_float("epsilon_decay", 0.0, 1.0)
+        q_command = [
+            "--alpha",
+            alpha,
+            "--alpha-decay",
+            alpha_decay,
+            "--gamma",
+            gamma,
+            "--epsilon",
+            epsilon,
+            "--epsilon-decay",
+            epsilon_decay,
+        ]
+        command.extend(q_command)
+
 
     command = list(map(lambda x: str(x), command))
     print(" ".join(command))
@@ -115,7 +130,7 @@ if __name__ == "__main__":
         direction="maximize",
         storage="sqlite:///db.sqlite3",
     )
-    objective_partial = partial(objective, args.game)
+    objective_partial = partial(objective, args.game, args.learning_type)
     study.optimize(objective_partial, n_trials=150)
 
     plot_optimization_history(study)

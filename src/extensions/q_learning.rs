@@ -8,7 +8,6 @@ use derive_new::new;
 use more_asserts::{assert_ge, assert_le};
 use rand::{
     distributions::uniform::{UniformFloat, UniformInt, UniformSampler},
-    prelude::SliceRandom,
 };
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -19,7 +18,7 @@ use crate::{
         characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
         population::Population,
         program::{Program, ProgramGeneratorParameters},
-        registers::{ArgmaxInput, ArgmaxResult, Registers, AR},
+        registers::{ArgmaxInput, Registers, AR},
     },
     utils::{float_ops, random::generator},
 };
@@ -358,8 +357,8 @@ impl Default for QConsts {
             alpha: 0.25,
             gamma: 0.90,
             epsilon: 0.05,
-            alpha_decay: 0.01,
-            epsilon_decay: 0.0001,
+            alpha_decay: 0.0,
+            epsilon_decay: 0.0,
         }
     }
 }

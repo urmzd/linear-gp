@@ -17,7 +17,7 @@ fn main() -> VoidResultAnyError {
 
     let mut lgp_mountain_car_program: Program<InteractiveLearningParameters<MountainCarInput>> =
         Reproducible::load("./assets/benchmarks/")?;
-    let mut q_mountain_car_program: QProgram<MountainCarInput> =
+    let _q_mountain_car_program: QProgram<MountainCarInput> =
         Reproducible::load("./assets/benchmarks/")?;
 
     let mut mountain_car_env = MountainCarInput::new();
