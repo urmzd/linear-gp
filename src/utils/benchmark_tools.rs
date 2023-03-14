@@ -16,6 +16,7 @@ use super::types::VoidResultAnyError;
 
 pub const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
 
+#[allow(unused_macros)]
 macro_rules! with_named_logger {
     ($name:expr, $($body:tt)*) => {{
         const NAME: &'static str = $name;
@@ -38,6 +39,8 @@ macro_rules! with_named_logger {
         })
     }};
 }
+
+#[allow(unused_imports)]
 pub(crate) use with_named_logger;
 
 pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {

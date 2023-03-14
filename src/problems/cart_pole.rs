@@ -68,8 +68,8 @@ mod tests {
                     n_generations,
                 ),
                 program_parameters: ProgramGeneratorParameters::new(
-                    8,
-                    InstructionGeneratorParameters::from::<CartPoleInput>(1, 10.),
+                    6,
+                    InstructionGeneratorParameters::from::<CartPoleInput>(1, 60.),
                 ),
             };
 
