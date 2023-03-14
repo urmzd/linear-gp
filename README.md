@@ -6,11 +6,14 @@ A framework for solving tasks using linear genetic programming.
 
 ## Usage
 
+Running trials:
+
 ```bash
-# Run trials
 cargo build --release
-./scripts/optimizer/main.py cart-pole
-./scripts/optimizer/main.py mountain-car
+# Optional: python -m venv venv
+pip install -r requirements
+./optimizer/main.py cart-pole
+./optimizer/main.py mountain-car
 ```
 
 ## Contributions

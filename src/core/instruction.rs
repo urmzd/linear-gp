@@ -30,7 +30,7 @@ impl Mode {
     }
 }
 
-#[derive(Clone, Debug, Serialize, new, Copy, Args)]
+#[derive(Clone, Debug, Serialize, new, Copy, Args, PartialEq)]
 pub struct InstructionGeneratorParameters {
     #[arg(skip)]
     n_input_features: usize,
@@ -73,8 +73,6 @@ pub struct Instruction {
     executable: Op,
     external_factor: f64,
 }
-
-impl Eq for Instruction {}
 
 impl Generate for Instruction {
     type GeneratorParameters = InstructionGeneratorParameters;
@@ -155,8 +153,8 @@ impl Instruction {
         };
 
         let source_value = *registers.get(self.source_index);
-
         let new_source_value = self.executable.apply(source_value, amplied_target_value);
+
         registers.update(self.source_index, new_source_value);
     }
 }

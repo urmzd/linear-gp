@@ -74,6 +74,7 @@ where
 {
     pub fn new(params: HyperParameters<G::O>) -> Self {
         let (current_population, params) = G::init_pop(params.clone());
+
         Self {
             generation: 0,
             next_population: Some(current_population),

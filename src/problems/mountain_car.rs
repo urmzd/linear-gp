@@ -45,7 +45,7 @@ mod tests {
             q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
         },
         utils::{
-            benchmark_tools::{log_benchmarks, plot_benchmarks},
+            benchmark_tools::{log_benchmarks, plot_benchmarks, with_named_logger},
             types::VoidResultAnyError,
         },
     };
@@ -56,71 +56,71 @@ mod tests {
     #[test]
     fn given_mountain_car_example_when_lgp_executed_then_task_is_solved(
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let input = MountainCarInput::new();
-        let n_generations = 100;
-        let n_trials = 5;
-        let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
+        with_named_logger!("mountain-car-smoke-default", {
+            let n_generations = 100;
+            let n_trials = 5;
 
-        let hyper_params = HyperParameters {
-            population_size: 100,
-            gap: 0.5,
-            crossover_percent: 0.5,
-            mutation_percent: 0.5,
-            n_generations,
-            fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
-            program_parameters: ProgramGeneratorParameters::new(
-                12,
-                InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
-            ),
-        };
-
-        let populations = ILgp::build(hyper_params).collect_vec();
-
-        const TEST_NAME: &'static str = "mountain-car-smoke-default";
-        plot_benchmarks(
-            &populations,
-            TEST_NAME,
-            -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
-        )?;
-        log_benchmarks(&populations, TEST_NAME)?;
-
-        Ok(())
+            let hyper_params = HyperParameters {
+                population_size: 100,
+                gap: 0.5,
+                crossover_percent: 0.5,
+                mutation_percent: 0.5,
+                n_generations,
+                fitness_parameters: InteractiveLearningParameters::<MountainCarInput>::new(
+                    n_trials,
+                    n_generations,
+                ),
+                program_parameters: ProgramGeneratorParameters::new(
+                    12,
+                    InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
+                ),
+            };
+            let populations = ILgp::build(hyper_params).collect_vec();
+            plot_benchmarks(
+                &populations,
+                NAME,
+                -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
+            )?;
+            log_benchmarks(&populations, NAME)?;
+            Ok(())
+        })
     }
 
     #[test]
     fn given_mountain_car_task_when_q_learning_lgp_is_used_then_task_is_solved(
     ) -> VoidResultAnyError {
-        let environment = MountainCarInput::new();
-        let n_generations = 100;
-        let n_trials = 5;
-        let initial_states = MountainCarInput::get_initial_states(n_generations, n_trials);
-        let parameters = InteractiveLearningParameters::new(initial_states, environment);
+        with_named_logger!("mountain-car-smoke-q", {
+            let n_generations = 100;
+            let n_trials = 5;
 
-        let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
-            population_size: 100,
-            gap: 0.5,
-            mutation_percent: 0.5,
-            crossover_percent: 0.5,
-            n_generations,
-            fitness_parameters: parameters,
-            program_parameters: QProgramGeneratorParameters::new(
-                ProgramGeneratorParameters::new(
-                    12,
-                    InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
+            let hyper_params: HyperParameters<QProgram<MountainCarInput>> = HyperParameters {
+                population_size: 100,
+                gap: 0.5,
+                mutation_percent: 0.5,
+                crossover_percent: 0.5,
+                n_generations,
+                fitness_parameters: InteractiveLearningParameters::<MountainCarInput>::new(
+                    n_trials,
+                    n_generations,
                 ),
-                QConsts::default(),
-            ),
-        };
+                program_parameters: QProgramGeneratorParameters::new(
+                    ProgramGeneratorParameters::new(
+                        12,
+                        InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
+                    ),
+                    QConsts::default(),
+                ),
+            };
 
-        let populations = QLgp::build(hyper_params).collect_vec();
+            let populations = QLgp::build(hyper_params).collect_vec();
 
-        const TEST_NAME: &'static str = "mountain-car-smoke-q";
-        plot_benchmarks(
-            &populations,
-            TEST_NAME,
-            -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
-        )?;
-        log_benchmarks(&populations, TEST_NAME)?;
-        Ok(())
+            plot_benchmarks(
+                &populations,
+                NAME,
+                -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
+            )?;
+            log_benchmarks(&populations, NAME)?;
+            Ok(())
+        })
     }
 }

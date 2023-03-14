@@ -1,10 +1,10 @@
 use derive_new::new;
 
 use crate::core::{
-    characteristics::Organism,
-    characteristics::{Fitness, FitnessScore, Reproducible},
+    characteristics::{Fitness, FitnessScore},
     inputs::{Inputs, ValidInput},
     program::Program,
+    registers::{ArgmaxInput, AR},
 };
 
 #[derive(Clone, Debug, new)]
@@ -19,10 +19,6 @@ pub trait ClassificationInput: ValidInput {
     fn get_class(&self) -> usize;
 }
 
-impl<T> Organism for Program<ClassificationParameters<T>> where T: ClassificationInput {}
-
-impl<T> Reproducible for Program<ClassificationParameters<T>> where T: ClassificationInput {}
-
 impl<T> Fitness for Program<ClassificationParameters<T>>
 where
     T: ClassificationInput,
@@ -34,37 +30,30 @@ where
 
         self.registers.reset();
 
-        let mut n_correct = 0.0;
+        let mut n_correct: usize = 0;
 
         for input in inputs {
-            self.exec(input);
+            self.run(input);
 
-            let mut winning_registers =
-                match self.registers.all_argmax(Some(0..T::N_ACTION_REGISTERS)) {
-                    None => {
-                        return {
-                            self.fitness = FitnessScore::OutOfBounds;
-                        }
+            match self
+                .registers
+                .argmax(ArgmaxInput::To(T::N_ACTION_REGISTERS))
+                .one()
+            {
+                AR::Overflow => {
+                    return {
+                        self.fitness = FitnessScore::OutOfBounds;
                     }
-                    Some(registers) => registers,
-                };
-
-            let predicted_class = if winning_registers.len() == 1 {
-                winning_registers.pop().expect("Register to have exist") as i32
-            } else {
-                -1
+                }
+                AR::Value(predicted_class) => {
+                    n_correct += (predicted_class == input.get_class()) as usize;
+                }
             };
-
-            let correct_class = input.get_class() as i32;
-
-            if predicted_class == correct_class {
-                n_correct += 1.;
-            }
 
             self.registers.reset();
         }
 
-        let fitness = n_correct / inputs.len() as f64;
+        let fitness = n_correct as f64 / inputs.len() as f64;
 
         self.fitness = FitnessScore::Valid(fitness);
     }

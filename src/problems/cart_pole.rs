@@ -1,7 +1,4 @@
-use crate::{
-    core::inputs::ValidInput,
-    extensions::{interactive::InteractiveLearningInput, q_learning::QConsts},
-};
+use crate::{core::inputs::ValidInput, extensions::interactive::InteractiveLearningInput};
 use gym_rs::{core::Env, envs::classical_control::cartpole::CartPoleEnv};
 
 #[derive(Clone, Debug)]
@@ -57,10 +54,8 @@ mod tests {
     #[test]
     fn solve_cart_pole_default() -> Result<(), Box<dyn error::Error>> {
         with_named_logger!("cart-pole-smoke-default", {
-            let input = CartPoleInput::new();
             let n_generations = 100;
             let n_trials = 5;
-            let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
             let hyper_params = HyperParameters {
                 population_size: 100,
@@ -68,7 +63,10 @@ mod tests {
                 crossover_percent: 0.5,
                 mutation_percent: 0.5,
                 n_generations,
-                fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
+                fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
+                    n_trials,
+                    n_generations,
+                ),
                 program_parameters: ProgramGeneratorParameters::new(
                     8,
                     InstructionGeneratorParameters::from::<CartPoleInput>(1, 10.),
@@ -87,10 +85,8 @@ mod tests {
     #[test]
     fn solve_cart_pole_with_q_learning() -> Result<(), Box<dyn error::Error>> {
         with_named_logger!("cart-pole-smoke-q", {
-            let input = CartPoleInput::new();
             let n_generations = 100;
             let n_trials = 5;
-            let initial_states = CartPoleInput::get_initial_states(n_generations, n_trials);
 
             let hyper_params = HyperParameters {
                 population_size: 100,
@@ -98,7 +94,10 @@ mod tests {
                 crossover_percent: 0.5,
                 mutation_percent: 0.5,
                 n_generations,
-                fitness_parameters: InteractiveLearningParameters::new(initial_states, input),
+                fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
+                    n_trials,
+                    n_generations,
+                ),
                 program_parameters: QProgramGeneratorParameters::new(
                     ProgramGeneratorParameters::new(
                         8,
