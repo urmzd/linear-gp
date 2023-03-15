@@ -3,11 +3,12 @@ use lgp::{
     core::{
         algorithm::{GeneticAlgorithm, HyperParameters},
         characteristics::Fitness,
+        inputs::ValidInput,
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
     extensions::{
-        interactive::{ILgp, InteractiveLearningParameters},
+        interactive::{ILgp, InteractiveLearningParameters, InteractiveLearningParametersArgs},
         q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
     },
     problems::{cart_pole::CartPoleInput, mountain_car::MountainCarInput},
@@ -16,7 +17,10 @@ use lgp::{
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about=None)]
 #[command(propagate_version = true)]
-struct Cli {
+struct Cli<T>
+where
+    T: ValidInput,
+{
     #[arg(value_enum)]
     problem_type: ProblemType,
     #[arg(value_enum)]
@@ -24,7 +28,7 @@ struct Cli {
     #[command(flatten)]
     basic_args: BasicArgs,
     #[command(flatten)]
-    program_parameter: ProgramGeneratorParameters,
+    program_parameter: ProgramGeneratorParameters<T>,
 }
 
 #[derive(Args, Clone, Debug)]
@@ -60,7 +64,7 @@ pub enum LearningType {
 macro_rules! generate_program_params {
     ($cli:expr, $input_type:ty, $use_q_params:expr) => {{
         let max_instructions = $cli.program_parameter.max_instructions;
-        let instruction_generator_parameters = InstructionGeneratorParameters::from::<$input_type>(
+        let instruction_generator_parameters = InstructionGeneratorParameters::new(
             $cli.program_parameter
                 .instruction_generator_parameters
                 .n_extras,
@@ -75,7 +79,7 @@ macro_rules! generate_program_params {
     }};
     ($cli: expr, $input_type:ty) => {{
         let max_instructions = $cli.program_parameter.max_instructions;
-        let instruction_generator_parameters = InstructionGeneratorParameters::from::<$input_type>(
+        let instruction_generator_parameters = InstructionGeneratorParameters::new(
             $cli.program_parameter
                 .instruction_generator_parameters
                 .n_extras,
@@ -91,7 +95,7 @@ macro_rules! generate_program_params {
 }
 
 macro_rules! run_lgp {
-    ($cli: expr, $input_type:ty, $default_fitness:expr, $prog_params:expr, $gp: ident) => {
+    ($cli: expr, $input_type:ty, $prog_params:expr, $gp: ident) => {
         $cli.basic_args.consts.reset_active_properties();
 
         for population in $gp::build(HyperParameters {
@@ -101,13 +105,15 @@ macro_rules! run_lgp {
             mutation_percent: $cli.basic_args.mutation_percent,
             n_generations: $cli.basic_args.n_generations,
             fitness_parameters: InteractiveLearningParameters::<$input_type>::new(
-                $cli.basic_args.n_trials,
-                $cli.basic_args.n_generations,
+                InteractiveLearningParametersArgs::new(
+                    $cli.basic_args.n_generations,
+                    $cli.basic_args.n_trials,
+                ),
             ),
             program_parameters: $prog_params,
         }) {
             if let Some(program) = population.best() {
-                let fitness = program.get_fitness().unwrap_or($default_fitness);
+                let fitness = program.get_fitness().unwrap_or(f64::NAN);
                 println!("{}", fitness);
             }
         }
@@ -115,23 +121,23 @@ macro_rules! run_lgp {
 }
 
 fn main() {
-    let mut cli = Cli::parse();
+    let mut cli: Cli<MountainCarInput> = Cli::parse();
 
     if cli.problem_type == ProblemType::MountainCar {
         if cli.learning_type == LearningType::Q {
             let program_params = generate_program_params!(cli, MountainCarInput, true);
-            run_lgp!(cli, MountainCarInput, -201., program_params, QLgp);
+            run_lgp!(cli, MountainCarInput, program_params, QLgp);
         } else {
             let program_params = generate_program_params!(cli, MountainCarInput);
-            run_lgp!(cli, MountainCarInput, -201., program_params, ILgp);
+            run_lgp!(cli, MountainCarInput, program_params, ILgp);
         }
     } else {
         if cli.learning_type == LearningType::Q {
             let program_params = generate_program_params!(cli, CartPoleInput, true);
-            run_lgp!(cli, CartPoleInput, -1., program_params, QLgp);
+            run_lgp!(cli, CartPoleInput, program_params, QLgp);
         } else {
             let program_params = generate_program_params!(cli, CartPoleInput);
-            run_lgp!(cli, CartPoleInput, -1., program_params, ILgp);
+            run_lgp!(cli, CartPoleInput, program_params, ILgp);
         }
     }
 }

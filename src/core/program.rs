@@ -19,15 +19,25 @@ use super::{
     registers::Registers,
 };
 
-#[derive(Clone, Debug, new, Copy, Args)]
-pub struct ProgramGeneratorParameters {
+#[derive(Clone, Debug, new, Args, Deserialize)]
+pub struct ProgramGeneratorParameters<T>
+where
+    T: ValidInput,
+{
     #[arg(long, default_value = "12")]
     pub max_instructions: usize,
     #[command(flatten)]
-    pub instruction_generator_parameters: InstructionGeneratorParameters,
+    pub instruction_generator_parameters: InstructionGeneratorParameters<T>,
+    #[arg(skip)]
+    marker: PhantomData<T>,
 }
 
-impl<T> Clone for Program<T> {
+impl<T> Copy for ProgramGeneratorParameters<T> where T: ValidInput {}
+
+impl<T> Clone for Program<T>
+where
+    T: ProgramParameters,
+{
     fn clone(&self) -> Self {
         Self {
             instructions: self.instructions.clone(),
@@ -39,7 +49,10 @@ impl<T> Clone for Program<T> {
     }
 }
 
-impl<T> DuplicateNew for Program<T> {
+impl<T> DuplicateNew for Program<T>
+where
+    T: ProgramParameters,
+{
     fn duplicate_new(&self) -> Self {
         Self {
             instructions: self.instructions.clone(),
@@ -52,44 +65,64 @@ impl<T> DuplicateNew for Program<T> {
 }
 
 #[derive(Debug, new, Serialize, Deserialize)]
-pub struct Program<T> {
+pub struct Program<T>
+where
+    T: ProgramParameters,
+{
     pub id: Uuid,
-    pub instructions: Instructions,
+    pub instructions: Instructions<T::InputType>,
     pub registers: Registers,
     pub fitness: FitnessScore,
     marker: PhantomData<T>,
 }
 
-impl<T> PartialEq for Program<T> {
+impl<T> PartialEq for Program<T>
+where
+    T: ProgramParameters,
+{
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id
     }
 }
 
-impl<T> PartialOrd for Program<T> {
+impl<T> PartialOrd for Program<T>
+where
+    T: ProgramParameters,
+{
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         return self.fitness.partial_cmp(&other.fitness);
     }
 }
 
-impl<T> Program<T> {
-    pub fn run<I>(&mut self, input: &I)
-    where
-        I: ValidInput,
-    {
+pub trait ProgramParameters
+where
+    Self::InputType: ValidInput,
+{
+    type InputType;
+}
+
+impl<T> Program<T>
+where
+    T: ProgramParameters,
+{
+    pub fn run(&mut self, input: &T::InputType) {
         for instruction in &self.instructions {
             instruction.apply(&mut &mut self.registers, input)
         }
     }
 }
 
-impl<T> Generate for Program<T> {
-    type GeneratorParameters = ProgramGeneratorParameters;
+impl<T> Generate for Program<T>
+where
+    T: ProgramParameters,
+{
+    type GeneratorParameters = ProgramGeneratorParameters<T::InputType>;
 
     fn generate(parameters: Self::GeneratorParameters) -> Self {
         let ProgramGeneratorParameters {
             max_instructions,
             instruction_generator_parameters,
+            ..
         } = parameters;
 
         let registers = Registers::new(instruction_generator_parameters.n_registers());
@@ -107,7 +140,10 @@ impl<T> Generate for Program<T> {
     }
 }
 
-impl<T> Mutate for Program<T> {
+impl<T> Mutate for Program<T>
+where
+    T: ProgramParameters,
+{
     fn mutate(&self, params: Self::GeneratorParameters) -> Self {
         let mut mutated = self.clone();
 
@@ -129,7 +165,10 @@ impl<T> Mutate for Program<T> {
     }
 }
 
-impl<T> Breed for Program<T> {
+impl<T> Breed for Program<T>
+where
+    T: ProgramParameters,
+{
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
         let child_instructions = self.instructions.two_point_crossover(&mate.instructions);
 
@@ -156,9 +195,11 @@ mod tests {
 
     #[test]
     fn given_instructions_when_breed_then_two_children_are_produced_using_genes_of_parents() {
-        let params = InstructionGeneratorParameters::new(5, 2, 1, 10.);
-        let instructions_a: Instructions = (0..10).map(|_| Instruction::generate(params)).collect();
-        let instructions_b: Instructions = (0..10).map(|_| Instruction::generate(params)).collect();
+        let params = InstructionGeneratorParameters::new(1, 10.);
+        let instructions_a: Instructions<TestInput> =
+            (0..10).map(|_| Instruction::generate(params)).collect();
+        let instructions_b: Instructions<TestInput> =
+            (0..10).map(|_| Instruction::generate(params)).collect();
 
         let [child_a, child_b] = instructions_a.two_point_crossover(&instructions_b);
 
@@ -173,7 +214,7 @@ mod tests {
 
     #[test]
     fn given_programs_when_two_point_crossover_then_two_children_are_produced() {
-        let instruction_params = InstructionGeneratorParameters::new(4, 2, 1, 10.);
+        let instruction_params = InstructionGeneratorParameters::new(1, 10.);
         let program_params = ProgramGeneratorParameters::new(100, instruction_params);
 
         let program_a = Program::<ClassificationParameters<TestInput>>::generate(program_params);

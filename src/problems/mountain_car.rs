@@ -7,8 +7,8 @@ pub struct MountainCarInput {
 }
 
 impl ValidInput for MountainCarInput {
-    const N_INPUT_REGISTERS: usize = 2;
-    const N_ACTION_REGISTERS: usize = 3;
+    const N_INPUTS: usize = 2;
+    const N_ACTIONS: usize = 3;
 
     fn flat(&self) -> Vec<f64> {
         self.environment.state.into()
@@ -41,7 +41,10 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::{
-            interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
+            interactive::{
+                ILgp, InteractiveLearningInput, InteractiveLearningParameters,
+                InteractiveLearningParametersArgs,
+            },
             q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
         },
         utils::{
@@ -67,12 +70,11 @@ mod tests {
                 mutation_percent: 0.5,
                 n_generations,
                 fitness_parameters: InteractiveLearningParameters::<MountainCarInput>::new(
-                    n_trials,
-                    n_generations,
+                    InteractiveLearningParametersArgs::new(n_generations, n_trials),
                 ),
                 program_parameters: ProgramGeneratorParameters::new(
                     12,
-                    InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
+                    InstructionGeneratorParameters::new(1, 10.),
                 ),
             };
             let populations = ILgp::build(hyper_params).collect_vec();
@@ -100,13 +102,12 @@ mod tests {
                 crossover_percent: 0.5,
                 n_generations,
                 fitness_parameters: InteractiveLearningParameters::<MountainCarInput>::new(
-                    n_trials,
-                    n_generations,
+                    InteractiveLearningParametersArgs::new(n_generations, n_trials),
                 ),
                 program_parameters: QProgramGeneratorParameters::new(
                     ProgramGeneratorParameters::new(
                         12,
-                        InstructionGeneratorParameters::from::<MountainCarInput>(1, 10.),
+                        InstructionGeneratorParameters::new(1, 10.),
                     ),
                     QConsts::default(),
                 ),

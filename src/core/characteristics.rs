@@ -71,7 +71,25 @@ where
     fn get_fitness(&self) -> FitnessScore;
 }
 
-pub trait Reproducible: Serialize + DeserializeOwned + Sized {
+pub trait Load
+where
+    Self: Sized + DeserializeOwned,
+{
+    fn load(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
+        // Open the file for reading
+        let file = File::open(path.into())?;
+
+        // Deserialize the data from the file
+        let deserialized: Self = serde_json::from_reader(file)?;
+
+        Ok(deserialized)
+    }
+}
+
+pub trait Save
+where
+    Self: Serialize,
+{
     fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
         create_path(path, true)?;
 
@@ -89,17 +107,9 @@ pub trait Reproducible: Serialize + DeserializeOwned + Sized {
 
         Ok(serialized)
     }
-
-    fn load(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
-        // Open the file for reading
-        let file = File::open(path.into())?;
-
-        // Deserialize the data from the file
-        let deserialized: Self = serde_json::from_reader(file)?;
-
-        Ok(deserialized)
-    }
 }
+
+pub trait Reproduce: Load + Save {}
 
 pub trait Organism:
     Fitness
@@ -110,7 +120,7 @@ pub trait Organism:
     + Clone
     + Mutate
     + Breed
-    + Reproducible
+    + Reproduce
     + Debug
     + Send
 {
@@ -125,13 +135,15 @@ impl<T> Organism for T where
         + Clone
         + Mutate
         + Breed
-        + Reproducible
+        + Reproduce
         + Debug
         + Send
 {
 }
 
-impl<T> Reproducible for T where T: Serialize + DeserializeOwned {}
+impl<T> Load for T where T: Sized + DeserializeOwned {}
+impl<T> Save for T where T: Serialize {}
+impl<T> Reproduce for T where T: Load + Save {}
 
 pub trait Breed: Clone {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2];

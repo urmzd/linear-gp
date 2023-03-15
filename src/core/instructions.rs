@@ -3,9 +3,12 @@ use rand::{distributions::Uniform, prelude::Distribution};
 use crate::utils::random::generator;
 use itertools::Itertools;
 
-use super::{characteristics::Breed, instruction::Instruction};
+use super::{characteristics::Breed, inputs::ValidInput, instruction::Instruction};
 
-impl Breed for Instructions {
+impl<T> Breed for Instructions<T>
+where
+    T: ValidInput,
+{
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
         let mut instructions_a = self.clone();
         let mut instructions_b = mate.clone();
@@ -69,7 +72,7 @@ impl Breed for Instructions {
     }
 }
 
-pub type Instructions = Vec<Instruction>;
+pub type Instructions<T> = Vec<Instruction<T>>;
 
 #[cfg(test)]
 mod tests {
@@ -79,6 +82,7 @@ mod tests {
             instruction::InstructionGeneratorParameters,
             program::{Program, ProgramGeneratorParameters},
         },
+        extensions::classification::ClassificationParameters,
         utils::test::TestInput,
     };
 
@@ -86,13 +90,13 @@ mod tests {
     fn given_two_programs_when_two_point_crossover_multiple_times_then_instruction_set_never_grows()
     {
         let max_instructions_length = 100;
-        let parameters = ProgramGeneratorParameters::new(
+        let parameters = ProgramGeneratorParameters::<TestInput>::new(
             max_instructions_length,
-            InstructionGeneratorParameters::new(4, 2, 1, 10.),
+            InstructionGeneratorParameters::new(1, 10.),
         );
 
-        let program_a = Program::<TestInput>::generate(parameters);
-        let program_b = Program::<TestInput>::generate(parameters);
+        let program_a = Program::<ClassificationParameters<TestInput>>::generate(parameters);
+        let program_b = Program::<ClassificationParameters<TestInput>>::generate(parameters);
 
         let mut parents = [program_a, program_b];
 

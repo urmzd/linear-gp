@@ -72,8 +72,8 @@ impl Display for IrisInput {
 }
 
 impl ValidInput for IrisInput {
-    const N_INPUT_REGISTERS: usize = 4;
-    const N_ACTION_REGISTERS: usize = 3;
+    const N_INPUTS: usize = 4;
+    const N_ACTIONS: usize = 3;
 
     fn flat(&self) -> Vec<f64> {
         [
@@ -92,7 +92,7 @@ mod tests {
         core::{
             algorithm::{GeneticAlgorithm, HyperParameters, Loader},
             instruction::InstructionGeneratorParameters,
-            program::{Program, ProgramGeneratorParameters},
+            program::ProgramGeneratorParameters,
         },
         extensions::classification::ClassificationParameters,
         utils::benchmark_tools::{log_benchmarks, plot_benchmarks},
@@ -122,19 +122,18 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
-            HyperParameters {
-                population_size: 100,
-                n_generations: 100,
-                gap: 0.5,
-                mutation_percent: 0.5,
-                crossover_percent: 0.5,
-                fitness_parameters: ClassificationParameters::new(inputs),
-                program_parameters: ProgramGeneratorParameters::new(
-                    100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
-                ),
-            };
+        let hyper_params = HyperParameters {
+            population_size: 100,
+            n_generations: 100,
+            gap: 0.5,
+            mutation_percent: 0.5,
+            crossover_percent: 0.5,
+            fitness_parameters: ClassificationParameters::new(inputs),
+            program_parameters: ProgramGeneratorParameters::new(
+                100,
+                InstructionGeneratorParameters::new(1, 10.),
+            ),
+        };
 
         debug_assert_eq!(hyper_params.crossover_percent, 0.5);
         debug_assert_eq!(hyper_params.mutation_percent, 0.5);
@@ -153,19 +152,18 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
-            HyperParameters {
-                population_size: 100,
-                n_generations: 100,
-                gap: 0.5,
-                mutation_percent: 1.,
-                crossover_percent: 0.,
-                fitness_parameters: ClassificationParameters::new(inputs),
-                program_parameters: ProgramGeneratorParameters::new(
-                    100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
-                ),
-            };
+        let hyper_params = HyperParameters {
+            population_size: 100,
+            n_generations: 100,
+            gap: 0.5,
+            mutation_percent: 1.,
+            crossover_percent: 0.,
+            fitness_parameters: ClassificationParameters::new(inputs),
+            program_parameters: ProgramGeneratorParameters::new(
+                100,
+                InstructionGeneratorParameters::new(1, 10.),
+            ),
+        };
 
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 1.);
@@ -184,19 +182,18 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
-            HyperParameters {
-                population_size: 100,
-                n_generations: 100,
-                gap: 0.5,
-                mutation_percent: 0.,
-                crossover_percent: 1.,
-                fitness_parameters: ClassificationParameters::new(inputs),
-                program_parameters: ProgramGeneratorParameters::new(
-                    100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
-                ),
-            };
+        let hyper_params = HyperParameters {
+            population_size: 100,
+            n_generations: 100,
+            gap: 0.5,
+            mutation_percent: 0.,
+            crossover_percent: 1.,
+            fitness_parameters: ClassificationParameters::new(inputs),
+            program_parameters: ProgramGeneratorParameters::new(
+                100,
+                InstructionGeneratorParameters::new(1, 10.),
+            ),
+        };
 
         assert_eq!(hyper_params.crossover_percent, 1.);
         assert_eq!(hyper_params.mutation_percent, 0.);
@@ -215,19 +212,18 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
-            HyperParameters {
-                population_size: 100,
-                n_generations: 250,
-                gap: 0.5,
-                mutation_percent: 0.,
-                crossover_percent: 0.,
-                fitness_parameters: ClassificationParameters::new(inputs),
-                program_parameters: ProgramGeneratorParameters::new(
-                    100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
-                ),
-            };
+        let hyper_params = HyperParameters {
+            population_size: 100,
+            n_generations: 250,
+            gap: 0.5,
+            mutation_percent: 0.,
+            crossover_percent: 0.,
+            fitness_parameters: ClassificationParameters::new(inputs),
+            program_parameters: ProgramGeneratorParameters::new(
+                100,
+                InstructionGeneratorParameters::new(1, 10.),
+            ),
+        };
 
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 0.);
@@ -257,19 +253,18 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
 
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
-        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
-            HyperParameters {
-                population_size: 100,
-                n_generations: 100,
-                gap: 0.5,
-                mutation_percent: 0.,
-                crossover_percent: 0.,
-                fitness_parameters: ClassificationParameters::new(inputs),
-                program_parameters: ProgramGeneratorParameters::new(
-                    100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
-                ),
-            };
+        let hyper_params = HyperParameters {
+            population_size: 100,
+            n_generations: 100,
+            gap: 0.5,
+            mutation_percent: 0.,
+            crossover_percent: 0.,
+            fitness_parameters: ClassificationParameters::new(inputs),
+            program_parameters: ProgramGeneratorParameters::new(
+                100,
+                InstructionGeneratorParameters::new(1, 10.),
+            ),
+        };
 
         let (mut population, mut hyper_params) = IrisLgp::init_pop(hyper_params);
 
@@ -295,19 +290,18 @@ mod tests {
 
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
-            HyperParameters {
-                population_size: 100,
-                n_generations: 100,
-                gap: 0.5,
-                mutation_percent: 0.,
-                crossover_percent: 0.,
-                fitness_parameters: ClassificationParameters::new(inputs),
-                program_parameters: ProgramGeneratorParameters::new(
-                    100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
-                ),
-            };
+        let hyper_params = HyperParameters {
+            population_size: 100,
+            n_generations: 100,
+            gap: 0.5,
+            mutation_percent: 0.,
+            crossover_percent: 0.,
+            fitness_parameters: ClassificationParameters::new(inputs),
+            program_parameters: ProgramGeneratorParameters::new(
+                100,
+                InstructionGeneratorParameters::new(1, 10.),
+            ),
+        };
 
         let (mut population, mut hyper_params) = IrisLgp::init_pop(hyper_params);
 
@@ -330,19 +324,18 @@ mod tests {
 
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let hyper_params: HyperParameters<Program<ClassificationParameters<IrisInput>>> =
-            HyperParameters {
-                population_size: 100,
-                n_generations: 100,
-                gap: 0.5,
-                mutation_percent: 0.,
-                crossover_percent: 0.,
-                fitness_parameters: ClassificationParameters::new(inputs),
-                program_parameters: ProgramGeneratorParameters::new(
-                    100,
-                    InstructionGeneratorParameters::from::<IrisInput>(1, 10.),
-                ),
-            };
+        let hyper_params = HyperParameters {
+            population_size: 100,
+            n_generations: 100,
+            gap: 0.5,
+            mutation_percent: 0.,
+            crossover_percent: 0.,
+            fitness_parameters: ClassificationParameters::new(inputs),
+            program_parameters: ProgramGeneratorParameters::new(
+                100,
+                InstructionGeneratorParameters::new(1, 10.),
+            ),
+        };
 
         let (population, hyper_params) = IrisLgp::init_pop(hyper_params);
 

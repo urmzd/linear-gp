@@ -6,23 +6,23 @@ import time
 import argparse
 from subprocess import Popen, PIPE
 from functools import partial
-
+from concurrent.futures import ProcessPoolExecutor
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="LGP Optimizer")
-    parser.add_argument(
-        "game",
-        type=str,
-        choices=["cart-pole", "mountain-car"],
-        help="The name of the game to optimize for",
-    )
+    # parser.add_argument(
+        # "game",
+        # type=str,
+        # choices=["cart-pole", "mountain-car"],
+        # help="The name of the game to optimize for",
+    # )
 
-    parser.add_argument(
-        "learning_type",
-       type=str,
-       choices=["q", "norm"],
-       help="The type of learning to be done."
-    )
+    # parser.add_argument(
+        # "learning_type",
+       # type=str,
+       # choices=["q", "norm"],
+       # help="The type of learning to be done."
+    # )
 
     parser.add_argument(
         "--n_trials",
@@ -111,6 +111,9 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
     for score_idx, score in enumerate(scores[:-1]):
         trial.report(score, score_idx)
 
+    if best_score == float("nan"):
+        raise optuna.TrialPruned
+
     if game == "cart-pole":
         if best_score < 100:
             raise optuna.TrialPruned()
@@ -120,18 +123,14 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
 
     return best_score
 
-
-if __name__ == "__main__":
-    args = parse_args()
-
+def run_optimization(game, learning_type, n_trials):
     # Define the study and run the optimization
     study = optuna.create_study(
-        study_name=f"{args.game}-{int(time.time())}",
+        study_name=f"{game}-{learning_type}-{int(time.time())}",
         direction="maximize",
-        storage="sqlite:///db.sqlite3",
     )
-    objective_partial = partial(objective, args.game, args.learning_type)
-    study.optimize(objective_partial, n_trials=150)
+    objective_partial = partial(objective, game, learning_type)
+    study.optimize(objective_partial, n_trials=n_trials)
 
     plot_optimization_history(study)
     plot_parallel_coordinate(study)
@@ -139,5 +138,22 @@ if __name__ == "__main__":
     # Print the best hyperparameters and score
     best_hyperparams = study.best_params
     best_score = study.best_value
-    print(f"Best hyperparameters: {best_hyperparams}")
+    print(f"Best hyperparameters for {game} with {learning_type}: {best_hyperparams}")
     print(f"Best score: {best_score}")
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    games = ["cart-pole", "mountain-car"]
+    learning_types = ["q", "norm"]
+
+    # Run all possible variations in parallel
+    with ProcessPoolExecutor() as executor:
+        futures = []
+        for game in games:
+            for learning_type in learning_types:
+                futures.append(executor.submit(run_optimization, game, learning_type, args.n_trials))
+
+        # Wait for all tasks to complete
+        for future in futures:
+            future.result()
