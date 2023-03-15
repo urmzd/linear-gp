@@ -13,6 +13,7 @@ use crate::{
     core::{
         algorithm::{GeneticAlgorithm, HyperParameters},
         characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
+        inputs::ValidInput,
         population::Population,
         program::{Program, ProgramGeneratorParameters},
         registers::{ArgmaxInput, Registers, AR},
@@ -296,7 +297,7 @@ impl<T> Generate for QProgram<T>
 where
     T: InteractiveLearningInput,
 {
-    type GeneratorParameters = QProgramGeneratorParameters;
+    type GeneratorParameters = QProgramGeneratorParameters<T>;
 
     fn generate(parameters: Self::GeneratorParameters) -> Self {
         let program = Program::generate(parameters.program_parameters);
@@ -315,12 +316,17 @@ where
     }
 }
 
-#[derive(Debug, new, Clone, Args)]
-pub struct QProgramGeneratorParameters {
+#[derive(Debug, new, Clone, Args, Deserialize)]
+pub struct QProgramGeneratorParameters<T>
+where
+    T: ValidInput,
+{
     #[command(flatten)]
-    program_parameters: ProgramGeneratorParameters,
+    program_parameters: ProgramGeneratorParameters<T>,
     #[command(flatten)]
     consts: QConsts,
+    #[arg(skip)]
+    marker: PhantomData<T>,
 }
 
 #[derive(Debug, Clone, Copy, Args, Serialize, Deserialize)]

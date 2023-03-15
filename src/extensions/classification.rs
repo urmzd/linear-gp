@@ -3,7 +3,7 @@ use derive_new::new;
 use crate::core::{
     characteristics::{Fitness, FitnessScore},
     inputs::{Inputs, ValidInput},
-    program::Program,
+    program::{Program, ProgramParameters},
     registers::{ArgmaxInput, AR},
 };
 
@@ -17,6 +17,13 @@ where
 
 pub trait ClassificationInput: ValidInput {
     fn get_class(&self) -> usize;
+}
+
+impl<T> ProgramParameters for ClassificationParameters<T>
+where
+    T: ClassificationInput,
+{
+    type InputType = T;
 }
 
 impl<T> Fitness for Program<ClassificationParameters<T>>
@@ -35,11 +42,7 @@ where
         for input in inputs {
             self.run(input);
 
-            match self
-                .registers
-                .argmax(ArgmaxInput::To(T::N_ACTION_REGISTERS))
-                .one()
-            {
+            match self.registers.argmax(ArgmaxInput::To(T::N_ACTIONS)).one() {
                 AR::Overflow => {
                     return {
                         self.fitness = FitnessScore::OutOfBounds;

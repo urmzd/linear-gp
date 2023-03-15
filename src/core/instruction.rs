@@ -4,6 +4,7 @@ use rand::distributions::uniform::{UniformInt, UniformSampler};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use std::marker::PhantomData;
 
 use crate::utils::executables::Op;
 use crate::utils::random::generator;
@@ -30,52 +31,55 @@ impl Mode {
     }
 }
 
-#[derive(Clone, Debug, Serialize, new, Copy, Args, PartialEq)]
-pub struct InstructionGeneratorParameters {
-    #[arg(skip)]
-    n_input_features: usize,
-    #[arg(skip)]
-    n_input_classes: usize,
+#[derive(Clone, Debug, Serialize, new, Args, PartialEq, Deserialize)]
+pub struct InstructionGeneratorParameters<T>
+where
+    T: ValidInput,
+{
     #[arg(long, default_value = "1")]
     pub n_extras: usize,
     #[arg(long, default_value = "10.")]
     pub external_factor: f64,
+    #[arg(skip)]
+    marker: PhantomData<T>,
 }
 
-impl InstructionGeneratorParameters {
-    pub fn from<T: ValidInput>(n_extras: usize, external_factor: f64) -> Self {
-        InstructionGeneratorParameters::new(
-            T::N_INPUT_REGISTERS,
-            T::N_ACTION_REGISTERS,
-            n_extras,
-            external_factor,
-        )
-    }
+impl<T> Copy for InstructionGeneratorParameters<T> where T: ValidInput {}
+impl<T> Copy for Instruction<T> where T: ValidInput {}
 
+impl<T> InstructionGeneratorParameters<T>
+where
+    T: ValidInput,
+{
     pub fn n_registers(&self) -> usize {
-        self.n_extras + self.n_input_classes
+        // | A1 | A2 | A3 | Extra |
+        T::N_ACTIONS + self.n_extras
     }
 
     pub fn n_inputs(&self) -> usize {
-        self.n_input_features
+        T::N_INPUTS
     }
 
     pub fn n_actions(&self) -> usize {
-        self.n_input_classes
+        T::N_ACTIONS
     }
 }
 
-#[derive(Serialize, Clone, Copy, PartialEq, Debug, Deserialize)]
-pub struct Instruction {
+#[derive(Serialize, Clone, PartialEq, Debug, Deserialize, new)]
+pub struct Instruction<T> {
     source_index: usize,
     target_index: usize,
     mode: Mode,
     executable: Op,
     external_factor: f64,
+    marker: PhantomData<T>,
 }
 
-impl Generate for Instruction {
-    type GeneratorParameters = InstructionGeneratorParameters;
+impl<T> Generate for Instruction<T>
+where
+    T: ValidInput,
+{
+    type GeneratorParameters = InstructionGeneratorParameters<T>;
 
     fn generate(parameters: Self::GeneratorParameters) -> Self {
         let current_generator = &mut generator();
@@ -86,7 +90,7 @@ impl Generate for Instruction {
         let mode = Mode::sample(current_generator);
 
         let upper_bound_target_index = if mode == Mode::External {
-            parameters.n_input_features
+            T::N_INPUTS
         } else {
             parameters.n_registers()
         };
@@ -95,17 +99,20 @@ impl Generate for Instruction {
 
         let executable = generator().gen();
 
-        Instruction {
+        Instruction::new(
             source_index,
             target_index,
-            executable,
             mode,
-            external_factor: parameters.external_factor,
-        }
+            executable,
+            parameters.external_factor,
+        )
     }
 }
 
-impl Mutate for Instruction {
+impl<T> Mutate for Instruction<T>
+where
+    T: ValidInput,
+{
     fn mutate(&self, params: Self::GeneratorParameters) -> Self {
         let mut mutated = Self::generate(params);
 
@@ -133,8 +140,8 @@ impl Mutate for Instruction {
     }
 }
 
-impl Instruction {
-    pub fn apply<'b, T>(&self, registers: &'b mut Registers, input: &'b T)
+impl<T> Instruction<T> {
+    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &'b T)
     where
         T: ValidInput,
     {

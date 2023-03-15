@@ -1,5 +1,5 @@
 use lgp::{
-    core::{characteristics::Reproducible, program::Program},
+    core::{characteristics::Load, program::Program},
     extensions::{
         interactive::{InteractiveLearningInput, InteractiveLearningParameters},
         q_learning::QProgram,
@@ -16,9 +16,8 @@ fn main() -> VoidResultAnyError {
     //
 
     let mut lgp_mountain_car_program: Program<InteractiveLearningParameters<MountainCarInput>> =
-        Reproducible::load("./assets/benchmarks/")?;
-    let _q_mountain_car_program: QProgram<MountainCarInput> =
-        Reproducible::load("./assets/benchmarks/")?;
+        Load::load("./assets/benchmarks/")?;
+    let _q_mountain_car_program: QProgram<MountainCarInput> = Load::load("./assets/benchmarks/")?;
 
     let mut mountain_car_env = MountainCarInput::new();
 

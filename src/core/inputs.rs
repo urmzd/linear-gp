@@ -8,8 +8,8 @@ pub trait ValidInput: Clone + Send + Debug + Sized
 where
     Registers: for<'a> From<&'a Self>,
 {
-    const N_INPUT_REGISTERS: usize;
-    const N_ACTION_REGISTERS: usize;
+    const N_INPUTS: usize;
+    const N_ACTIONS: usize;
 
     fn flat(&self) -> Vec<f64>;
 }

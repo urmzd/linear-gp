@@ -7,8 +7,8 @@ pub struct CartPoleInput {
 }
 
 impl ValidInput for CartPoleInput {
-    const N_INPUT_REGISTERS: usize = 4;
-    const N_ACTION_REGISTERS: usize = 2;
+    const N_INPUTS: usize = 4;
+    const N_ACTIONS: usize = 2;
 
     fn flat(&self) -> Vec<f64> {
         self.environment.state.into()
@@ -42,7 +42,10 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::{
-            interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters},
+            interactive::{
+                ILgp, InteractiveLearningInput, InteractiveLearningParameters,
+                InteractiveLearningParametersArgs,
+            },
             q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
         },
         utils::benchmark_tools::{log_benchmarks, plot_benchmarks, with_named_logger},
@@ -64,12 +67,11 @@ mod tests {
                 mutation_percent: 0.5,
                 n_generations,
                 fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
-                    n_trials,
-                    n_generations,
+                    InteractiveLearningParametersArgs::new(n_generations, n_trials),
                 ),
                 program_parameters: ProgramGeneratorParameters::new(
                     8,
-                    InstructionGeneratorParameters::from::<CartPoleInput>(1, 10.),
+                    InstructionGeneratorParameters::new(1, 10.),
                 ),
             };
 
@@ -95,14 +97,10 @@ mod tests {
                 mutation_percent: 0.5,
                 n_generations,
                 fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
-                    n_trials,
-                    n_generations,
+                    InteractiveLearningParametersArgs::new(n_generations, n_trials),
                 ),
                 program_parameters: QProgramGeneratorParameters::new(
-                    ProgramGeneratorParameters::new(
-                        8,
-                        InstructionGeneratorParameters::from::<CartPoleInput>(1, 10.),
-                    ),
+                    ProgramGeneratorParameters::new(8, InstructionGeneratorParameters::new(1, 10.)),
                     QConsts::default(),
                 ),
             };

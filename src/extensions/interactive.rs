@@ -1,14 +1,17 @@
 use core::fmt::Debug;
 use std::{iter::repeat_with, marker::PhantomData};
 
+use derive_new::new;
 use gym_rs::core::ActionReward;
 use gym_rs::core::Env;
 use gym_rs::utils::custom::traits::Sample;
 use itertools::Itertools;
+use serde::Deserialize;
 use serde::Serialize;
 
 use crate::core::algorithm::HyperParameters;
 use crate::core::population::Population;
+use crate::core::program::ProgramParameters;
 use crate::core::registers::ArgmaxInput;
 use crate::core::registers::AR;
 use crate::{
@@ -21,7 +24,27 @@ use crate::{
     utils::random::generator,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, new)]
+pub struct InteractiveLearningParametersArgs<T>
+where
+    T: InteractiveLearningInput,
+{
+    n_trials: usize,
+    n_generations: usize,
+    marker: PhantomData<T>,
+}
+
+impl<T> From<InteractiveLearningParametersArgs<T>> for InteractiveLearningParameters<T>
+where
+    T: InteractiveLearningInput,
+{
+    fn from(value: InteractiveLearningParametersArgs<T>) -> Self {
+        InteractiveLearningParameters::new(value)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(from = "InteractiveLearningParametersArgs<T>")]
 pub struct InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
@@ -36,9 +59,9 @@ impl<T> InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
 {
-    pub fn new(n_trials: usize, n_generations: usize) -> Self {
+    pub fn new(args: InteractiveLearningParametersArgs<T>) -> Self {
         Self {
-            initial_states: T::get_initial_states(n_generations, n_trials),
+            initial_states: T::get_initial_states(args.n_generations, args.n_trials),
             environment: T::new(),
             generations: 0,
         }
@@ -133,6 +156,13 @@ where
     }
 }
 
+impl<T> ProgramParameters for InteractiveLearningParameters<T>
+where
+    T: InteractiveLearningInput,
+{
+    type InputType = T;
+}
+
 impl<T> Fitness for Program<InteractiveLearningParameters<T>>
 where
     T: InteractiveLearningInput,
@@ -152,10 +182,7 @@ where
                 self.run(&parameters.environment);
 
                 // Eval
-                let state_reward = match self
-                    .registers
-                    .argmax(ArgmaxInput::To(T::N_ACTION_REGISTERS))
-                    .any()
+                let state_reward = match self.registers.argmax(ArgmaxInput::To(T::N_ACTIONS)).any()
                 {
                     AR::Value(action) => parameters.environment.execute_action(action),
                     AR::Overflow => return self.fitness = FitnessScore::OutOfBounds,
