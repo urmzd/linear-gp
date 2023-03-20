@@ -1,8 +1,10 @@
 use std::iter::FromIterator;
 
+use serde::Serialize;
+
 pub type InnerPopulation<T> = Vec<T>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Population<T>
 where
     T: PartialOrd + Clone,

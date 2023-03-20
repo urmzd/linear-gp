@@ -42,13 +42,10 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::{
-            interactive::{
-                ILgp, InteractiveLearningInput, InteractiveLearningParameters,
-                InteractiveLearningParametersArgs,
-            },
+            interactive::{ILgp, InteractiveLearningParameters, InteractiveLearningParametersArgs},
             q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
         },
-        utils::benchmark_tools::{log_benchmarks, plot_benchmarks, with_named_logger},
+        utils::benchmark_tools::{log_benchmarks, output_benchmarks, with_named_logger},
     };
     use itertools::Itertools;
 
@@ -77,8 +74,7 @@ mod tests {
 
             let populations = ILgp::build(hyper_params).collect_vec();
 
-            let range = (0.)..(CartPoleInput::MAX_EPISODE_LENGTH as f64);
-            plot_benchmarks(&populations, NAME, range)?;
+            output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;
             Ok(())
         })
@@ -107,8 +103,7 @@ mod tests {
 
             let populations = QLgp::build(hyper_params).collect_vec();
 
-            let range = (0.)..(CartPoleInput::MAX_EPISODE_LENGTH as f64);
-            plot_benchmarks(&populations, NAME, range)?;
+            output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;
             Ok(())
         })

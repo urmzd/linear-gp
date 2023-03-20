@@ -41,14 +41,11 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::{
-            interactive::{
-                ILgp, InteractiveLearningInput, InteractiveLearningParameters,
-                InteractiveLearningParametersArgs,
-            },
+            interactive::{ILgp, InteractiveLearningParameters, InteractiveLearningParametersArgs},
             q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
         },
         utils::{
-            benchmark_tools::{log_benchmarks, plot_benchmarks, with_named_logger},
+            benchmark_tools::{log_benchmarks, output_benchmarks, with_named_logger},
             types::VoidResultAnyError,
         },
     };
@@ -78,11 +75,7 @@ mod tests {
                 ),
             };
             let populations = ILgp::build(hyper_params).collect_vec();
-            plot_benchmarks(
-                &populations,
-                NAME,
-                -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
-            )?;
+            output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;
             Ok(())
         })
@@ -115,11 +108,7 @@ mod tests {
 
             let populations = QLgp::build(hyper_params).collect_vec();
 
-            plot_benchmarks(
-                &populations,
-                NAME,
-                -(MountainCarInput::MAX_EPISODE_LENGTH as f64)..0.0,
-            )?;
+            output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;
             Ok(())
         })
