@@ -95,7 +95,7 @@ mod tests {
             program::ProgramGeneratorParameters,
         },
         extensions::classification::ClassificationParameters,
-        utils::benchmark_tools::{log_benchmarks, plot_benchmarks},
+        utils::benchmark_tools::{log_benchmarks, output_benchmarks},
     };
     use itertools::Itertools;
     use std::error;
@@ -142,7 +142,7 @@ mod tests {
 
         const TEST_NAME: &'static str = "iris-mutate-crossover";
 
-        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        output_benchmarks(&populations, TEST_NAME)?;
         log_benchmarks(&populations, TEST_NAME)?;
 
         Ok(())
@@ -171,7 +171,7 @@ mod tests {
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
         const TEST_NAME: &'static str = "iris-mutate";
-        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        output_benchmarks(&populations, TEST_NAME)?;
         log_benchmarks(&populations, TEST_NAME)?;
 
         Ok(())
@@ -201,7 +201,7 @@ mod tests {
         let populations = IrisLgp::build(hyper_params).collect_vec();
 
         const TEST_NAME: &'static str = "iris-crossover";
-        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        output_benchmarks(&populations, TEST_NAME)?;
         log_benchmarks(&populations, TEST_NAME)?;
 
         Ok(())
@@ -236,7 +236,7 @@ mod tests {
 
         const TEST_NAME: &'static str = "iris-default";
 
-        plot_benchmarks(&populations, TEST_NAME, 0.0..100.0)?;
+        output_benchmarks(&populations, TEST_NAME)?;
         log_benchmarks(&populations, TEST_NAME)?;
 
         if worst.fitness != median.fitness || median.fitness != best.fitness {

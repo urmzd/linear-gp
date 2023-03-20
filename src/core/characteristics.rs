@@ -93,8 +93,8 @@ where
     fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
         create_path(path, true)?;
 
-        // Serialize the object to a JSON string
-        let serialized = serde_json::to_string(&self)?;
+        // Serialize the object to a json string
+        let serialized = serde_json::to_string_pretty(&self)?;
 
         // Open the file for writing
         let mut file = OpenOptions::new()
