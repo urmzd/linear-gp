@@ -114,6 +114,7 @@ impl QTable {
             * (current_reward + (self.q_consts.gamma * next_q_value) - current_q_value);
 
         self.table[current_action_state.register][current_action_state.action] += new_q_value;
+        self.q_consts.decay();
     }
 }
 
@@ -256,7 +257,6 @@ where
 
         let fitness_score = FitnessScore::Valid(*median);
 
-        self.q_table.q_consts.decay();
         self.program.fitness = fitness_score;
     }
 
