@@ -9,7 +9,7 @@ use lgp::{
     },
     extensions::{
         interactive::{ILgp, InteractiveLearningParameters, InteractiveLearningParametersArgs},
-        q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
+        q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
     },
     problems::{cart_pole::CartPoleInput, mountain_car::MountainCarInput},
 };
@@ -95,10 +95,10 @@ macro_rules! generate_program_params {
 }
 
 macro_rules! run_lgp {
-    ($cli: expr, $input_type:ty, $prog_params:expr, $gp: ident) => {
+    ($cli: expr, $input_type:ty, $prog_params:expr, $gp: ty) => {
         $cli.basic_args.consts.reset_active_properties();
 
-        for population in $gp::build(HyperParameters {
+        for population in ILgp::<$gp>::build(HyperParameters {
             population_size: $cli.basic_args.population_size,
             gap: $cli.basic_args.gap,
             crossover_percent: $cli.basic_args.crossover_percent,
@@ -126,18 +126,23 @@ fn main() {
     if cli.problem_type == ProblemType::MountainCar {
         if cli.learning_type == LearningType::Q {
             let program_params = generate_program_params!(cli, MountainCarInput, true);
-            run_lgp!(cli, MountainCarInput, program_params, QLgp);
+            run_lgp!(
+                cli,
+                MountainCarInput,
+                program_params,
+                QProgram<MountainCarInput>
+            );
         } else {
             let program_params = generate_program_params!(cli, MountainCarInput);
-            run_lgp!(cli, MountainCarInput, program_params, ILgp);
+            run_lgp!(cli, MountainCarInput, program_params, MountainCarInput);
         }
     } else {
         if cli.learning_type == LearningType::Q {
             let program_params = generate_program_params!(cli, CartPoleInput, true);
-            run_lgp!(cli, CartPoleInput, program_params, QLgp);
+            run_lgp!(cli, CartPoleInput, program_params, QProgram<CartPoleInput>);
         } else {
             let program_params = generate_program_params!(cli, CartPoleInput);
-            run_lgp!(cli, CartPoleInput, program_params, ILgp);
+            run_lgp!(cli, CartPoleInput, program_params, CartPoleInput);
         }
     }
 }
