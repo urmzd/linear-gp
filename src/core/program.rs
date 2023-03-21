@@ -19,7 +19,8 @@ use super::{
     registers::Registers,
 };
 
-#[derive(Clone, Debug, new, Args, Deserialize)]
+#[derive(Clone, Debug, new, Args, Deserialize, Serialize)]
+#[serde(bound = "T: ValidInput")]
 pub struct ProgramGeneratorParameters<T>
 where
     T: ValidInput,
@@ -29,6 +30,7 @@ where
     #[command(flatten)]
     pub instruction_generator_parameters: InstructionGeneratorParameters<T>,
     #[arg(skip)]
+    #[serde(skip)]
     marker: PhantomData<T>,
 }
 
@@ -73,6 +75,7 @@ where
     pub instructions: Instructions<T::InputType>,
     pub registers: Registers,
     pub fitness: FitnessScore,
+    #[serde(skip)]
     marker: PhantomData<T>,
 }
 

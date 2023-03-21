@@ -6,6 +6,7 @@ use gym_rs::core::ActionReward;
 use gym_rs::core::Env;
 use gym_rs::utils::custom::traits::Sample;
 use itertools::Itertools;
+use serde::ser::SerializeStruct;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -52,7 +53,24 @@ where
     // Collection of X intial states per generation.
     initial_states: Vec<Vec<<T::Environment as Env>::Observation>>,
     pub environment: T,
-    generations: usize,
+    current_generation: usize,
+    n_generations: usize,
+    n_trials: usize,
+}
+
+impl<T> Serialize for InteractiveLearningParameters<T>
+where
+    T: InteractiveLearningInput,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_struct("InteractiveLearningParameters", 2)?;
+        state.serialize_field("n_generations", &self.n_generations)?;
+        state.serialize_field("n_trials", &self.n_trials)?;
+        state.end()
+    }
 }
 
 impl<T> InteractiveLearningParameters<T>
@@ -60,19 +78,29 @@ where
     T: InteractiveLearningInput,
 {
     pub fn new(args: InteractiveLearningParametersArgs<T>) -> Self {
+        let InteractiveLearningParametersArgs {
+            n_generations,
+            n_trials,
+            ..
+        } = args;
         Self {
-            initial_states: T::get_initial_states(args.n_generations, args.n_trials),
+            initial_states: T::get_initial_states(n_generations, n_trials),
             environment: T::new(),
-            generations: 0,
+            current_generation: 0,
+            n_generations,
+            n_trials,
         }
     }
 
     pub fn get_states(&mut self) -> Vec<<T::Environment as Env>::Observation> {
-        self.initial_states.get(self.generations).cloned().unwrap()
+        self.initial_states
+            .get(self.current_generation)
+            .cloned()
+            .unwrap()
     }
 
     pub fn next_generation(&mut self) {
-        self.generations += 1;
+        self.current_generation += 1;
     }
 }
 

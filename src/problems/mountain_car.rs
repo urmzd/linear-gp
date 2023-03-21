@@ -75,9 +75,9 @@ mod tests {
                 ),
             };
 
-            let populations = ILgp::<MountainCarInput>::build(hyper_params).collect_vec();
+            let populations = ILgp::<MountainCarInput>::build(hyper_params.clone()).collect_vec();
             output_benchmarks(&populations, NAME)?;
-            log_benchmarks(&populations, NAME)?;
+            log_benchmarks(&populations, &hyper_params, NAME)?;
             Ok(())
         })
     }
@@ -107,10 +107,11 @@ mod tests {
                 ),
             };
 
-            let populations = ILgp::<QProgram<MountainCarInput>>::build(hyper_params).collect_vec();
+            let populations =
+                ILgp::<QProgram<MountainCarInput>>::build(hyper_params.clone()).collect_vec();
 
             output_benchmarks(&populations, NAME)?;
-            log_benchmarks(&populations, NAME)?;
+            log_benchmarks(&populations, &hyper_params, NAME)?;
             Ok(())
         })
     }

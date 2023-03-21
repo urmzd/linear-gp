@@ -138,12 +138,12 @@ mod tests {
         debug_assert_eq!(hyper_params.crossover_percent, 0.5);
         debug_assert_eq!(hyper_params.mutation_percent, 0.5);
 
-        let populations = IrisLgp::build(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params.clone()).collect_vec();
 
         const TEST_NAME: &'static str = "iris-mutate-crossover";
 
         output_benchmarks(&populations, TEST_NAME)?;
-        log_benchmarks(&populations, TEST_NAME)?;
+        log_benchmarks(&populations, &hyper_params, TEST_NAME)?;
 
         Ok(())
     }
@@ -168,11 +168,11 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 1.);
 
-        let populations = IrisLgp::build(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params.clone()).collect_vec();
 
         const TEST_NAME: &'static str = "iris-mutate";
         output_benchmarks(&populations, TEST_NAME)?;
-        log_benchmarks(&populations, TEST_NAME)?;
+        log_benchmarks(&populations, &hyper_params, TEST_NAME)?;
 
         Ok(())
     }
@@ -198,11 +198,11 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 1.);
         assert_eq!(hyper_params.mutation_percent, 0.);
 
-        let populations = IrisLgp::build(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params.clone()).collect_vec();
 
         const TEST_NAME: &'static str = "iris-crossover";
         output_benchmarks(&populations, TEST_NAME)?;
-        log_benchmarks(&populations, TEST_NAME)?;
+        log_benchmarks(&populations, &hyper_params, TEST_NAME)?;
 
         Ok(())
     }
@@ -228,7 +228,7 @@ mod tests {
         assert_eq!(hyper_params.crossover_percent, 0.);
         assert_eq!(hyper_params.mutation_percent, 0.);
 
-        let populations = IrisLgp::build(hyper_params).collect_vec();
+        let populations = IrisLgp::build(hyper_params.clone()).collect_vec();
 
         let worst = populations.last().unwrap().worst().unwrap().clone();
         let median = populations.last().unwrap().median().unwrap().clone();
@@ -237,7 +237,7 @@ mod tests {
         const TEST_NAME: &'static str = "iris-default";
 
         output_benchmarks(&populations, TEST_NAME)?;
-        log_benchmarks(&populations, TEST_NAME)?;
+        log_benchmarks(&populations, &hyper_params, TEST_NAME)?;
 
         if worst.fitness != median.fitness || median.fitness != best.fitness {
             // TODO: Create concrete error type; SNAFU or Failure?
