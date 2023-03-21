@@ -314,7 +314,8 @@ where
     }
 }
 
-#[derive(Debug, new, Clone, Args, Deserialize)]
+#[derive(Debug, new, Clone, Args, Deserialize, Serialize)]
+#[serde(bound = "T: Sized")]
 pub struct QProgramGeneratorParameters<T>
 where
     T: ValidInput,
@@ -324,6 +325,7 @@ where
     #[command(flatten)]
     consts: QConsts,
     #[arg(skip)]
+    #[serde(skip)]
     marker: PhantomData<T>,
 }
 

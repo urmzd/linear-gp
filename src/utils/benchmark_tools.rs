@@ -6,7 +6,7 @@ use std::{
 
 use crate::core::{
     characteristics::{Organism, Save},
-    population::Population,
+    population::Population, algorithm::HyperParameters,
 };
 
 use super::types::VoidResultAnyError;
@@ -56,7 +56,7 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     Ok(path.to_owned())
 }
 
-pub fn log_benchmarks<T>(population: &Vec<Population<T>>, test_name: &str) -> VoidResultAnyError
+pub fn log_benchmarks<T>(population: &Vec<Population<T>>, params: &HyperParameters<T>, test_name: &str) -> VoidResultAnyError
 where
     T: Organism,
 {
@@ -87,6 +87,15 @@ where
         true,
     )?;
 
+    let params_path = create_path(
+        Path::new(BENCHMARK_PREFIX)
+            .join(test_name)
+            .join("params.json")
+            .to_str()
+            .unwrap(),
+        true,
+    )?;
+
     let (worst, median, best) = population
         .last()
         .map(|p| (p.worst(), p.median(), p.best()))
@@ -95,6 +104,7 @@ where
     worst.unwrap().save(worst_path.to_str().unwrap())?;
     median.unwrap().save(median_path.to_str().unwrap())?;
     best.unwrap().save(best_path.to_str().unwrap())?;
+    params.save(params_path.to_str().unwrap())?;
 
     Ok(())
 }

@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use csv::ReaderBuilder;
 use rand::prelude::{IteratorRandom, SliceRandom};
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::info;
 use uuid::Uuid;
 
@@ -19,7 +19,7 @@ use super::{
     population::Population,
 };
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct HyperParameters<T>
 where
     T: Fitness + Generate + Clone,

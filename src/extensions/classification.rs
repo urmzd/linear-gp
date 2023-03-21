@@ -1,4 +1,5 @@
 use derive_new::new;
+use serde::Serialize;
 
 use crate::core::{
     characteristics::{Fitness, FitnessScore},
@@ -7,11 +8,12 @@ use crate::core::{
     registers::{ArgmaxInput, AR},
 };
 
-#[derive(Clone, Debug, new)]
+#[derive(Clone, Debug, new, Serialize)]
 pub struct ClassificationParameters<InputType>
 where
     InputType: ClassificationInput,
 {
+    #[serde(skip)]
     inputs: Inputs<InputType>,
 }
 

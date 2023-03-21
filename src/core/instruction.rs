@@ -41,6 +41,7 @@ where
     #[arg(long, default_value = "10.")]
     pub external_factor: f64,
     #[arg(skip)]
+    #[serde(skip)]
     marker: PhantomData<T>,
 }
 
@@ -72,6 +73,7 @@ pub struct Instruction<T> {
     mode: Mode,
     executable: Op,
     external_factor: f64,
+    #[serde(skip)]
     marker: PhantomData<T>,
 }
 
