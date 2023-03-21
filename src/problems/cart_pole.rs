@@ -43,7 +43,7 @@ mod tests {
         },
         extensions::{
             interactive::{ILgp, InteractiveLearningParameters, InteractiveLearningParametersArgs},
-            q_learning::{QConsts, QLgp, QProgramGeneratorParameters},
+            q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
         },
         utils::benchmark_tools::{log_benchmarks, output_benchmarks, with_named_logger},
     };
@@ -72,7 +72,7 @@ mod tests {
                 ),
             };
 
-            let populations = ILgp::build(hyper_params).collect_vec();
+            let populations = ILgp::<CartPoleInput>::build(hyper_params).collect_vec();
 
             output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;
@@ -101,7 +101,7 @@ mod tests {
                 ),
             };
 
-            let populations = QLgp::build(hyper_params).collect_vec();
+            let populations = ILgp::<QProgram<CartPoleInput>>::build(hyper_params).collect_vec();
 
             output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;

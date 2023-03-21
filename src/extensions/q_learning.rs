@@ -21,7 +21,7 @@ use crate::{
     utils::{float_ops, random::generator},
 };
 
-use super::interactive::{InteractiveLearningInput, InteractiveLearningParameters};
+use super::interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct QTable {
@@ -404,9 +404,7 @@ impl Default for QConsts {
     }
 }
 
-pub struct QLgp<T>(PhantomData<T>);
-
-impl<T> GeneticAlgorithm for QLgp<T>
+impl<T> GeneticAlgorithm for ILgp<QProgram<T>>
 where
     T: InteractiveLearningInput,
 {

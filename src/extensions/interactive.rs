@@ -29,8 +29,8 @@ pub struct InteractiveLearningParametersArgs<T>
 where
     T: InteractiveLearningInput,
 {
-    n_trials: usize,
     n_generations: usize,
+    n_trials: usize,
     marker: PhantomData<T>,
 }
 

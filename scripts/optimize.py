@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import optuna
+import subprocess
 from optuna.visualization import plot_optimization_history, plot_parallel_coordinate
 import time
 import argparse
@@ -35,6 +36,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
+
     # Define the hyperparameters to optimize
     population_size = 100
     gap = 0.5
@@ -146,6 +148,8 @@ if __name__ == "__main__":
 
     games = ["cart-pole", "mountain-car"]
     learning_types = ["q", "norm"]
+
+    subprocess.run(['cargo', 'build', '--release'])
 
     # Run all possible variations in parallel
     with ProcessPoolExecutor() as executor:

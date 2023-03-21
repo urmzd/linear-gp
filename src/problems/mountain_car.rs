@@ -42,7 +42,7 @@ mod tests {
         },
         extensions::{
             interactive::{ILgp, InteractiveLearningParameters, InteractiveLearningParametersArgs},
-            q_learning::{QConsts, QLgp, QProgram, QProgramGeneratorParameters},
+            q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
         },
         utils::{
             benchmark_tools::{log_benchmarks, output_benchmarks, with_named_logger},
@@ -74,7 +74,8 @@ mod tests {
                     InstructionGeneratorParameters::new(1, 10.),
                 ),
             };
-            let populations = ILgp::build(hyper_params).collect_vec();
+
+            let populations = ILgp::<MountainCarInput>::build(hyper_params).collect_vec();
             output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;
             Ok(())
@@ -106,7 +107,7 @@ mod tests {
                 ),
             };
 
-            let populations = QLgp::build(hyper_params).collect_vec();
+            let populations = ILgp::<QProgram<MountainCarInput>>::build(hyper_params).collect_vec();
 
             output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, NAME)?;
