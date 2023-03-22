@@ -18,6 +18,17 @@ thread_local! {
     }
 }
 
+pub fn update_seed(seed: Option<u64>) {
+    let prng = match seed {
+        Some(internal_seed) => Xoshiro256PlusPlus::seed_from_u64(internal_seed),
+        None => Xoshiro256PlusPlus::from_entropy(),
+    };
+    GENERATOR.with(|t| {
+        let generator = unsafe { &mut *t.get() };
+        *generator = prng;
+    });
+}
+
 pub fn generator() -> Random {
     let rng = GENERATOR.with(|t| t.clone());
     Random { rng }
