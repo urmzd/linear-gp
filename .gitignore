@@ -5,7 +5,4 @@
 
 assets/logs
 assets/benchmarks
-
-*.log
-
-*.sqlite3
+assets/parameters
