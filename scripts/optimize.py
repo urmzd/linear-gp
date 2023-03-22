@@ -1,42 +1,94 @@
 #!/usr/bin/env python
 
-import optuna
-import subprocess
-from optuna.visualization import plot_optimization_history, plot_parallel_coordinate
-import time
 import argparse
-from subprocess import Popen, PIPE
+from concurrent.futures import Future, ThreadPoolExecutor
 from functools import partial
-from concurrent.futures import ProcessPoolExecutor
+import time
+from typing import Any, Callable, Dict, List
+from subprocess import Popen, PIPE
+import optuna
+from optuna.visualization import plot_intermediate_values, plot_optimization_history
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="LGP Optimizer")
-    # parser.add_argument(
-        # "game",
-        # type=str,
-        # choices=["cart-pole", "mountain-car"],
-        # help="The name of the game to optimize for",
-    # )
+from pathlib import Path
+import json
+from typing import Any, Dict
 
-    # parser.add_argument(
-        # "learning_type",
-       # type=str,
-       # choices=["q", "norm"],
-       # help="The type of learning to be done."
-    # )
+STORAGE = "postgresql://user:password@localhost:5432/database"
+ENV = ["cart-pole", "mountain-car"]
+ALGORITHMS = ["q", "norm"]
 
-    parser.add_argument(
-        "--n_trials",
-        default=150,
-        required=False,
-        type=int,
-        help="The number of trials",
+
+def save_best_hyperparameters(
+    hyper_parameters: Dict[str, Any], best_score: float, study_name: str
+) -> None:
+    program_parameters = {
+        "max_instructions": hyper_parameters["max_instructions"],
+        "instruction_generator_parameters": {
+            "n_extras": 1,
+            "external_factor": hyper_parameters["external_factor"],
+        },
+    }
+
+    if "alpha" in hyper_parameters:
+        program_parameters = {
+            "program_parameters": program_parameters,
+            "consts": {
+                "alpha": hyper_parameters["alpha"],
+                "epsilon": hyper_parameters["epsilon"],
+                "gamma": hyper_parameters["gamma"],
+                "alpha_decay": hyper_parameters["alpha_decay"],
+                "epsilon_decay": hyper_parameters["epsilon_decay"],
+            },
+        }
+
+    full_hp = {
+        "population_size": 100,
+        "gap": 0.5,
+        "mutation_percent": 0.5,
+        "crossover_percent": 0.5,
+        "fitness_parameters": {
+            "n_generations": 100,
+            "n_trials": 5,
+        },
+        "program_parameters": program_parameters,
+    }
+
+    path_to_save = f"assets/parameters/{best_score}_{study_name}.json"
+
+    Path(path_to_save).parent.mkdir(exist_ok=True)
+
+    with open(path_to_save, "w") as f:
+        json.dump(full_hp, f, indent=4)
+
+
+def load_study(study_name: str) -> optuna.Study:
+    study = optuna.load_study(
+        study_name=study_name,
+        storage=STORAGE,
     )
-    return parser.parse_args()
+
+    return study
 
 
-def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
+def create_study(env: str, algorithm: str) -> str:
+    study_name = f"{env}_{algorithm}_{int(time.time())}"
+    optuna.create_study(
+        study_name=study_name,
+        direction="maximize",
+        storage=STORAGE,
+    )
 
+    return study_name
+
+
+def run_optimization(
+    study_name: str, objective: Callable[[optuna.Trial], float], n_trials: int
+):
+    study = load_study(study_name)
+    study.optimize(objective, n_trials=n_trials)
+
+
+def build_objective(study_name: str, trial: optuna.Trial) -> float:
     # Define the hyperparameters to optimize
     population_size = 100
     gap = 0.5
@@ -47,6 +99,8 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
     n_trials = 5
     max_instructions = trial.suggest_int("max_instructions", 1, 64)
     external_factor = trial.suggest_float("external_factor", 0.0, 100.0)
+
+    game, learning_type, _timestamp = study_name.split("_")
 
     # Define the command to run with the CLI
     command = [
@@ -93,10 +147,8 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
         ]
         command.extend(q_command)
 
-
     command = list(map(lambda x: str(x), command))
     print(" ".join(command))
-
     # Run the command and capture the output
     process = Popen(command, stdout=PIPE, stderr=PIPE)
     output, error = process.communicate()
@@ -117,7 +169,7 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
         raise optuna.TrialPruned
 
     if game == "cart-pole":
-        if best_score < 100:
+        if best_score < 400:
             raise optuna.TrialPruned()
     else:
         if best_score < -100:
@@ -125,39 +177,65 @@ def objective(game: str, learning_type: str, trial: optuna.Trial) -> float:
 
     return best_score
 
-def run_optimization(game, learning_type, n_trials):
-    # Define the study and run the optimization
-    study = optuna.create_study(
-        study_name=f"{game}-{learning_type}-{int(time.time())}",
-        direction="maximize",
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Optimizer")
+    parser.add_argument(
+        "--env",
+        choices=ENV,
+        type=str,
+        required=True,
+        help="The name of the environment to run simulation in.",
     )
-    objective_partial = partial(objective, game, learning_type)
-    study.optimize(objective_partial, n_trials=n_trials)
+    parser.add_argument(
+        "--algorithm",
+        choices=ALGORITHMS,
+        type=str,
+        required=True,
+        help="The type of algorithm to run.",
+    )
+    parser.add_argument(
+        "--n-trials",
+        default=150,
+        type=int,
+        help="The number of trials to run per study",
+    )
+    parser.add_argument(
+        "--n-threads",
+        default=4,
+        type=int,
+        help="The number of threads to use per study",
+    )
+    return parser.parse_args()
 
+
+def main(args: argparse.Namespace) -> None:
+    study_name = create_study(args.env, args.algorithm)
+    objective = partial(build_objective, study_name)
+
+    n_trials = args.n_trials
+    results: List[Future[Any]] = []
+
+    with ThreadPoolExecutor(max_workers=args.n_threads) as executor:
+        for _ in range(args.n_threads):
+            future = executor.submit(
+                run_optimization,
+                study_name=study_name,
+                objective=objective,
+                n_trials=n_trials,
+            )
+            results.append(future)
+
+    for future in results:
+        future.result()
+
+    study = load_study(study_name)
+    save_best_hyperparameters(study.best_params, study.best_value, study_name)
     plot_optimization_history(study)
-    plot_parallel_coordinate(study)
+    plot_intermediate_values(study)
 
-    # Print the best hyperparameters and score
-    best_hyperparams = study.best_params
-    best_score = study.best_value
-    print(f"Best hyperparameters for {game} with {learning_type}: {best_hyperparams}")
-    print(f"Best score: {best_score}")
 
 if __name__ == "__main__":
     args = parse_args()
 
-    games = ["cart-pole", "mountain-car"]
-    learning_types = ["q", "norm"]
-
-    subprocess.run(['cargo', 'build', '--release'])
-
-    # Run all possible variations in parallel
-    with ProcessPoolExecutor() as executor:
-        futures = []
-        for game in games:
-            for learning_type in learning_types:
-                futures.append(executor.submit(run_optimization, game, learning_type, args.n_trials))
-
-        # Wait for all tasks to complete
-        for future in futures:
-            future.result()
+    main(args)

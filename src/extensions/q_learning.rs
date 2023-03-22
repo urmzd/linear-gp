@@ -350,7 +350,9 @@ pub struct QConsts {
     /// To allow new programs to start from the new state, we have active
     /// properties to mutuate.
     #[arg(skip)]
+    #[serde(skip)]
     alpha_active: f64,
+    #[serde(skip)]
     #[arg(skip)]
     epsilon_active: f64,
 }

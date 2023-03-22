@@ -20,10 +20,14 @@ sudo apt-get install python
 Running Trials:
 
 ```bash
-cargo build --release
+docker-compose up
+
 # Optional: python -m venv venv
 pip install -r scripts/requirements.txt
-./scripts/optimizer.py 
+
+cargo build --release
+
+./scripts/optimize.py -h
 ```
 
 ## Contributions
