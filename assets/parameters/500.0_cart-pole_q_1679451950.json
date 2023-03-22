@@ -1,8 +1,0 @@
-{
- "alpha_decay": 0.8694452029561959,
-    "epsilon": 0.11566466171251197,
-    "epsilon_decay": 0.31354318413102344,
-    "external_factor": 43.798482326001206,
-    "gamma": 0.7099726051428477,
-    "max_instructions": 20
-}
