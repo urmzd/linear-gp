@@ -38,6 +38,7 @@ mod tests {
     use crate::{
         core::{
             algorithm::{GeneticAlgorithm, HyperParameters},
+            characteristics::Load,
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
@@ -86,22 +87,28 @@ mod tests {
             let n_generations = 100;
             let n_trials = 5;
 
-            let hyper_params = HyperParameters {
-                population_size: 100,
-                gap: 0.5,
-                crossover_percent: 0.5,
-                mutation_percent: 0.5,
-                n_generations,
-                fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
-                    InteractiveLearningParametersArgs::new(n_generations, n_trials),
-                ),
-                program_parameters: QProgramGeneratorParameters::new(
-                    ProgramGeneratorParameters::new(8, InstructionGeneratorParameters::new(1, 10.)),
-                    QConsts::default(),
-                ),
-            };
+            let hyper_params =
+                HyperParameters::load("assets/parameters/500.0_cart-pole_q_1679454161.json")
+                    .unwrap_or(HyperParameters {
+                        population_size: 100,
+                        gap: 0.5,
+                        crossover_percent: 0.5,
+                        mutation_percent: 0.5,
+                        n_generations,
+                        fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
+                            InteractiveLearningParametersArgs::new(n_generations, n_trials),
+                        ),
+                        program_parameters: QProgramGeneratorParameters::new(
+                            ProgramGeneratorParameters::new(
+                                8,
+                                InstructionGeneratorParameters::new(1, 10.),
+                            ),
+                            QConsts::default(),
+                        ),
+                    });
 
-            let populations = ILgp::<QProgram<CartPoleInput>>::build(hyper_params.clone()).collect_vec();
+            let populations =
+                ILgp::<QProgram<CartPoleInput>>::build(hyper_params.clone()).collect_vec();
 
             output_benchmarks(&populations, NAME)?;
             log_benchmarks(&populations, &hyper_params, NAME)?;

@@ -42,6 +42,7 @@ def save_best_hyperparameters(
         }
 
     full_hp = {
+        "n_generations": 100,
         "population_size": 100,
         "gap": 0.5,
         "mutation_percent": 0.5,

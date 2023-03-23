@@ -32,6 +32,7 @@ where
 {
     n_generations: usize,
     n_trials: usize,
+    #[serde(skip)]
     marker: PhantomData<T>,
 }
 
@@ -45,7 +46,7 @@ where
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(from = "InteractiveLearningParametersArgs<T>")]
+#[serde(from = "InteractiveLearningParametersArgs<T>", bound = "T: Sized")]
 pub struct InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,

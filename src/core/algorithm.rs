@@ -72,6 +72,7 @@ where
     G: GeneticAlgorithm + ?Sized,
 {
     pub fn new(params: HyperParameters<G::O>) -> Self {
+        let params = G::on_pre_init(params);
         let (current_population, params) = G::init_pop(params.clone());
 
         Self {
@@ -175,6 +176,10 @@ where
         _parameters: HyperParameters<Self::O>,
     ) -> (Population<Self::O>, HyperParameters<Self::O>) {
         (population, _parameters)
+    }
+
+    fn on_pre_init(parameters: HyperParameters<Self::O>) -> HyperParameters<Self::O> {
+        parameters
     }
 
     fn survive(

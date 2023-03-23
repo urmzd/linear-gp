@@ -1,5 +1,5 @@
 use derive_new::new;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
 use crate::core::{
     characteristics::{Fitness, FitnessScore},
@@ -8,13 +8,14 @@ use crate::core::{
     registers::{ArgmaxInput, AR},
 };
 
-#[derive(Clone, Debug, new, Serialize)]
-pub struct ClassificationParameters<InputType>
+#[derive(Clone, Debug, new, Serialize, Deserialize)]
+#[serde(bound="T: Sized")]
+pub struct ClassificationParameters<T>
 where
-    InputType: ClassificationInput,
+    T: ClassificationInput,
 {
     #[serde(skip)]
-    inputs: Inputs<InputType>,
+    inputs: Inputs<T>,
 }
 
 pub trait ClassificationInput: ValidInput {
