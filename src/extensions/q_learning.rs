@@ -414,6 +414,14 @@ where
 {
     type O = QProgram<T>;
 
+    fn on_pre_init(mut parameters: HyperParameters<Self::O>) -> HyperParameters<Self::O> {
+        parameters
+            .program_parameters
+            .consts
+            .reset_active_properties();
+        parameters
+    }
+
     fn on_post_rank(
         population: Population<Self::O>,
         mut parameters: HyperParameters<Self::O>,

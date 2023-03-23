@@ -7,7 +7,7 @@ use std::{cmp::Ordering, path::PathBuf};
 use derive_more::Display;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
-use std::fs::{File, OpenOptions};
+use std::fs::{read_to_string, File, OpenOptions};
 use std::io::prelude::*;
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, Serialize, Deserialize)]
@@ -63,7 +63,7 @@ impl FitnessScore {
 
 pub trait Fitness
 where
-    Self::FitnessParameters: Send + Clone + Serialize,
+    Self::FitnessParameters: Send + Clone + Serialize + DeserializeOwned,
 {
     type FitnessParameters;
 
@@ -76,11 +76,11 @@ where
     Self: Sized + DeserializeOwned,
 {
     fn load(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
-        // Open the file for reading
-        let file = File::open(path.into())?;
+        // Read the file contents into a string for debugging purposes
+        let contents = read_to_string(&path.into())?;
 
         // Deserialize the data from the file
-        let deserialized: Self = serde_json::from_reader(file)?;
+        let deserialized: Self = serde_json::from_str(&contents).unwrap();
 
         Ok(deserialized)
     }
@@ -155,7 +155,7 @@ pub trait Mutate: Generate + Clone {
 
 pub trait Generate
 where
-    Self::GeneratorParameters: Send + Clone + Serialize,
+    Self::GeneratorParameters: Send + Clone + Serialize + DeserializeOwned,
 {
     type GeneratorParameters;
 
