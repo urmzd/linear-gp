@@ -1,7 +1,6 @@
 use core::fmt::Debug;
 use std::{iter::repeat_with, marker::PhantomData};
 
-use derive_new::new;
 use gym_rs::core::ActionReward;
 use gym_rs::core::Env;
 use gym_rs::utils::custom::traits::Sample;
@@ -11,6 +10,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::core::algorithm::HyperParameters;
+use crate::core::characteristics::Reset;
 use crate::core::population::Population;
 use crate::core::program::ProgramParameters;
 use crate::core::registers::ArgmaxInput;
@@ -25,28 +25,23 @@ use crate::{
     utils::random::generator,
 };
 
-#[derive(Debug, Clone, Deserialize, new)]
-pub struct InteractiveLearningParametersArgs<T>
-where
-    T: InteractiveLearningInput,
-{
+#[derive(Debug, Clone, Deserialize)]
+pub struct InteractiveLearningParametersArgs {
     n_generations: usize,
     n_trials: usize,
-    #[serde(skip)]
-    marker: PhantomData<T>,
 }
 
-impl<T> From<InteractiveLearningParametersArgs<T>> for InteractiveLearningParameters<T>
+impl<T> From<InteractiveLearningParametersArgs> for InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
 {
-    fn from(value: InteractiveLearningParametersArgs<T>) -> Self {
+    fn from(value: InteractiveLearningParametersArgs) -> Self {
         InteractiveLearningParameters::new(value)
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
-#[serde(from = "InteractiveLearningParametersArgs<T>", bound = "T: Sized")]
+#[serde(from = "InteractiveLearningParametersArgs", bound = "T: Sized")]
 pub struct InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
@@ -78,7 +73,7 @@ impl<T> InteractiveLearningParameters<T>
 where
     T: InteractiveLearningInput,
 {
-    pub fn new(args: InteractiveLearningParametersArgs<T>) -> Self {
+    pub fn new(args: InteractiveLearningParametersArgs) -> Self {
         let InteractiveLearningParametersArgs {
             n_generations,
             n_trials,
@@ -192,13 +187,23 @@ where
     type InputType = T;
 }
 
-impl<T> Fitness for Program<InteractiveLearningParameters<T>>
+pub struct InteractiveLearner<T>(T);
+
+impl<T> Fitness for InteractiveLearner<T> where T: InteractiveLearningInput {
+    fn eval_fitness(
+            &mut self,
+            program: &mut Program,
+            parameters: Self::Parameters,
+        ) -> (FitnessScore, Self::Parameters) {
+        
+    }
+}
+
+impl<T> Fitness<InteractiveLearningParameters<T>> for Program
 where
     T: InteractiveLearningInput,
 {
-    type FitnessParameters = InteractiveLearningParameters<T>;
-
-    fn eval_fitness(&mut self, mut parameters: Self::FitnessParameters) {
+    fn eval_fitness(&mut self, mut parameters: InteractiveLearningParameters<T>) {
         let mut scores = vec![];
 
         for initial_state in parameters.get_states() {
@@ -233,10 +238,6 @@ where
 
         self.fitness = FitnessScore::Valid(*median);
     }
-
-    fn get_fitness(&self) -> FitnessScore {
-        self.fitness
-    }
 }
 
 pub struct ILgp<T>(PhantomData<T>);
@@ -245,7 +246,7 @@ impl<T> GeneticAlgorithm for ILgp<T>
 where
     T: InteractiveLearningInput,
 {
-    type O = Program<InteractiveLearningParameters<T>>;
+    type O = Program;
 
     fn on_post_rank(
         population: Population<Self::O>,

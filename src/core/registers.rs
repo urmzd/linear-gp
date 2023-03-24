@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::random::generator;
 
-use super::characteristics::DuplicateNew;
+use super::characteristics::Reset;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Registers {
@@ -17,12 +17,6 @@ pub struct Registers {
 impl From<Vec<f64>> for Registers {
     fn from(data: Vec<f64>) -> Self {
         Registers { data }
-    }
-}
-
-impl DuplicateNew for Registers {
-    fn duplicate_new(&self) -> Self {
-        Self::new(self.len())
     }
 }
 
@@ -59,6 +53,15 @@ pub enum ArgmaxInput {
     To(usize),
 }
 
+impl Reset for Registers {
+    fn reset(&mut self) {
+        let Registers { data } = self;
+        for value in data.as_mut_slice() {
+            *value = 0.
+        }
+    }
+}
+
 impl Registers {
     pub fn new(n_registers: usize) -> Self {
         let data = vec![0.; n_registers];
@@ -92,13 +95,6 @@ impl Registers {
             .collect_vec();
 
         ArgmaxResult::MaxValues(max_indices)
-    }
-
-    pub fn reset(&mut self) {
-        let Registers { data } = self;
-        for value in data.as_mut_slice() {
-            *value = 0.
-        }
     }
 
     pub fn len(&self) -> usize {

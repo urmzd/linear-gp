@@ -1,12 +1,13 @@
 use std::{
     error::Error,
-    fs::{self},
+    fs,
     path::{Path, PathBuf},
 };
 
 use crate::core::{
+    algorithm::HyperParameters,
     characteristics::{Organism, Save},
-    population::Population, algorithm::HyperParameters,
+    population::Population,
 };
 
 use super::types::VoidResultAnyError;
@@ -56,7 +57,11 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     Ok(path.to_owned())
 }
 
-pub fn log_benchmarks<T>(population: &Vec<Population<T>>, params: &HyperParameters<T>, test_name: &str) -> VoidResultAnyError
+pub fn log_benchmarks<T>(
+    population: &Vec<Population<T>>,
+    params: &HyperParameters<T>,
+    test_name: &str,
+) -> VoidResultAnyError
 where
     T: Organism,
 {

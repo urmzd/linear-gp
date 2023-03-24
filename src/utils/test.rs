@@ -1,6 +1,5 @@
 // For testing purposes only (binary classification).
 
-use derive_new::new;
 use rand::{distributions::Standard, prelude::Distribution};
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
@@ -10,7 +9,7 @@ use crate::{
     extensions::classification::{ClassificationInput, ClassificationParameters},
 };
 
-#[derive(PartialEq, PartialOrd, Clone, Debug, new, Deserialize, Serialize)]
+#[derive(PartialEq, PartialOrd, Clone, Debug, Deserialize, Serialize)]
 pub struct TestInput(pub [f64; 5]);
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount, Deserialize, Serialize)]
@@ -23,8 +22,11 @@ impl ValidInput for TestInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
-    fn flat(&self) -> Vec<f64> {
-        vec![self.0[0], self.0[1], self.0[2], self.0[3]]
+    fn get(&self, idx: usize) -> f64 {
+        match idx {
+            0..=3 => self.0[idx],
+            _ => panic!("Idx out of range."),
+        }
     }
 }
 
@@ -36,7 +38,7 @@ impl ClassificationInput for TestInput {
 
 impl Default for TestInput {
     fn default() -> Self {
-        TestInput::new([0.; 5])
+        TestInput([0.; 5])
     }
 }
 

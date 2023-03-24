@@ -11,14 +11,5 @@ where
     const N_INPUTS: usize;
     const N_ACTIONS: usize;
 
-    fn flat(&self) -> Vec<f64>;
-}
-
-impl<T> From<&T> for Registers
-where
-    T: ValidInput,
-{
-    fn from(input: &T) -> Self {
-        input.flat().into()
-    }
+    fn get(&self, idx: usize) -> f64;
 }
