@@ -7,8 +7,10 @@ use std::{cmp::Ordering, path::PathBuf};
 use derive_more::Display;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
-use std::fs::{read_to_string, File, OpenOptions};
+use std::fs::{read_to_string, OpenOptions};
 use std::io::prelude::*;
+
+use super::program::Program;
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, Serialize, Deserialize)]
 pub enum FitnessScore {
@@ -18,6 +20,12 @@ pub enum FitnessScore {
     OutOfBounds,
     #[display(format = "not-evaluated")]
     NotEvaluated,
+}
+
+impl Reset for FitnessScore {
+    fn reset(&mut self) {
+        *self = FitnessScore::NotEvaluated
+    }
 }
 
 impl PartialOrd for FitnessScore {
@@ -61,28 +69,28 @@ impl FitnessScore {
     }
 }
 
-pub trait Fitness
-where
-    Self::FitnessParameters: Send + Clone + Serialize + DeserializeOwned,
-{
-    type FitnessParameters;
-
-    fn eval_fitness(&mut self, parameters: Self::FitnessParameters);
-    fn get_fitness(&self) -> FitnessScore;
+pub trait Fitness {
+    type Parameters;
+    // Takes a set of parameters, runs the program and returns the score along with updated parameters.
+    fn eval_fitness(
+        &mut self,
+        program: &mut Program,
+        parameters: Self::Parameters,
+    ) -> (FitnessScore, Self::Parameters);
 }
 
 pub trait Load
 where
     Self: Sized + DeserializeOwned,
 {
-    fn load(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
+    fn load(path: impl Into<PathBuf>) -> Self {
         // Read the file contents into a string for debugging purposes
-        let contents = read_to_string(&path.into())?;
+        let contents = read_to_string(&path.into()).unwrap();
 
         // Deserialize the data from the file
         let deserialized: Self = serde_json::from_str(&contents).unwrap();
 
-        Ok(deserialized)
+        deserialized
     }
 }
 
@@ -111,36 +119,6 @@ where
 
 pub trait Reproduce: Load + Save {}
 
-pub trait Organism:
-    Fitness
-    + Generate
-    + DuplicateNew
-    + PartialOrd
-    + Sized
-    + Clone
-    + Mutate
-    + Breed
-    + Reproduce
-    + Debug
-    + Send
-{
-}
-
-impl<T> Organism for T where
-    T: Fitness
-        + Generate
-        + DuplicateNew
-        + PartialOrd
-        + Sized
-        + Clone
-        + Mutate
-        + Breed
-        + Reproduce
-        + Debug
-        + Send
-{
-}
-
 impl<T> Load for T where T: Sized + DeserializeOwned {}
 impl<T> Save for T where T: Serialize {}
 impl<T> Reproduce for T where T: Load + Save {}
@@ -149,19 +127,28 @@ pub trait Breed: Clone {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2];
 }
 
-pub trait Mutate: Generate + Clone {
-    fn mutate(&self, parameters: Self::GeneratorParameters) -> Self;
+pub trait Mutate {
+    type Input;
+
+    fn mutate(&self, object_to_mutate: &Self::Input) -> Self;
 }
 
-pub trait Generate
-where
-    Self::GeneratorParameters: Send + Clone + Serialize + DeserializeOwned,
-{
-    type GeneratorParameters;
+pub trait Generate {
+    type Output;
 
-    fn generate(parameters: Self::GeneratorParameters) -> Self;
+    fn generate(&self) -> Self::Output;
 }
 
-pub trait DuplicateNew {
-    fn duplicate_new(&self) -> Self;
+pub trait ResetNew: Reset + Clone {
+    fn reset_new(&self) -> Self {
+        let mut new = self.clone();
+        new.reset();
+        return new;
+    }
 }
+
+pub trait Reset {
+    fn reset(&mut self);
+}
+
+impl<T> ResetNew for T where T: Reset + Clone {}

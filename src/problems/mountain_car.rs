@@ -9,10 +9,6 @@ pub struct MountainCarInput {
 impl ValidInput for MountainCarInput {
     const N_INPUTS: usize = 2;
     const N_ACTIONS: usize = 3;
-
-    fn flat(&self) -> Vec<f64> {
-        self.environment.state.into()
-    }
 }
 
 impl InteractiveLearningInput for MountainCarInput {

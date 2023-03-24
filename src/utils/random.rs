@@ -12,7 +12,7 @@ type InternalGenerator = Rc<UnsafeCell<Xoshiro256PlusPlus>>;
 
 thread_local! {
     static GENERATOR: InternalGenerator = {
-        let prng = Xoshiro256PlusPlus::from_entropy();
+        let prng = Xoshiro256PlusPlus::seed_from_u64(0);
 
         Rc::new(UnsafeCell::new(prng))
     }

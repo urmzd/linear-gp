@@ -3,38 +3,41 @@ use std::marker::PhantomData;
 use std::path::PathBuf;
 
 use csv::ReaderBuilder;
+use derive_builder::Builder;
 use rand::prelude::{IteratorRandom, SliceRandom};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::info;
 use uuid::Uuid;
 
 use crate::{
-    core::characteristics::{Breed, Fitness, Generate, Organism},
+    core::characteristics::{Breed, Fitness, Generate},
     utils::random::generator,
 };
 
 use super::{
-    characteristics::{DuplicateNew, Mutate},
+    characteristics::{Mutate, ResetNew},
     inputs::{Inputs, ValidInput},
     population::Population,
 };
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct HyperParameters<T>
-where
-    T: Fitness + Generate + Clone,
-{
+#[derive(Debug, Clone, Deserialize, Serialize, Builder)]
+pub struct HyperParameters<F: Fitness, G: Generate> {
+    #[builder(default = "100")]
     pub population_size: usize,
+    #[builder(default = "0.5")]
     pub gap: f64,
+    #[builder(default = "0.5")]
     pub mutation_percent: f64,
+    #[builder(default = "0.5")]
     pub crossover_percent: f64,
+    #[builder(default = "100")]
     pub n_generations: usize,
-    pub fitness_parameters: T::FitnessParameters,
-    pub program_parameters: T::GeneratorParameters,
+    pub fitness_parameters: F,
+    pub program_parameters: G,
 }
 
 /// Defines a program capable of loading inputs from various sources.
-pub trait Loader
+pub trait SupportLoad
 where
     Self::InputType: ValidInput + DeserializeOwned,
 {
@@ -57,34 +60,25 @@ where
     }
 }
 
-pub struct GeneticAlgorithmIter<G>
-where
-    G: GeneticAlgorithm + ?Sized,
-{
+pub struct GeneticAlgorithmIter<S, T, P> {
     generation: usize,
-    next_population: Option<Population<G::O>>,
-    marker: PhantomData<G>,
-    params: HyperParameters<G::O>,
+    next_population: Option<Population<P>>,
+    params: HyperParameters<S, T>,
 }
 
-impl<G> GeneticAlgorithmIter<G>
-where
-    G: GeneticAlgorithm + ?Sized,
-{
-    pub fn new(params: HyperParameters<G::O>) -> Self {
-        let params = G::on_pre_init(params);
-        let (current_population, params) = G::init_pop(params.clone());
+impl<S, T, P> GeneticAlgorithmIter<S, T, P> {
+    pub fn new(params: HyperParameters<S, T>) -> Self {
+        let (current_population, params) = GeneticAlgorithm::init_pop::<S>(params.clone());
 
         Self {
             generation: 0,
             next_population: Some(current_population),
-            marker: PhantomData,
             params,
         }
     }
 }
 
-impl<G> Iterator for GeneticAlgorithmIter<G>
+impl<S, T, P> Iterator for GeneticAlgorithmIter<S, T, P>
 where
     G: GeneticAlgorithm,
 {
@@ -125,71 +119,43 @@ where
     }
 }
 
-pub trait GeneticAlgorithm: Send
-where
-    Self::O: Organism,
-{
-    type O;
-
-    fn init_pop(
-        hyperparams: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        let population = repeat_with(|| Self::O::generate(hyperparams.program_parameters.clone()))
-            .take(hyperparams.population_size)
+pub trait GeneticAlgorithm {
+    fn init_pop<G: Generate>(
+        program_parameters: G,
+        population_size: usize,
+    ) -> Population<G::Output> {
+        let population = repeat_with(program_parameters.generate)
+            .take(population_size)
             .collect();
 
-        (population, hyperparams)
+        population
     }
 
-    fn eval_fitness(
-        mut population: Population<Self::O>,
-        params: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+    fn eval_fitness<F: Fitness, T>(population: &mut Population<T>, evaluator: F) {
         for individual in population.iter_mut() {
-            individual.eval_fitness(params.fitness_parameters.clone());
-            assert!(!individual.get_fitness().is_not_evaluated());
-        }
+            evaluator.eval_fitness(program, parameters);
 
-        (population, params)
+            individual.eval_fitness(fitness_parameters);
+            debug_assert!(!individual.get_fitness().is_not_evaluated());
+        }
     }
 
     /// Evaluates the individuals found in the current population.
-    fn rank(
-        mut population: Population<Self::O>,
-        params: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+    fn rank<T>(population: &mut Population<T>) {
         population.sort();
         // Organize individuals by their fitness score.
         debug_assert!(population.worst() <= population.best());
-        (population, params)
     }
 
-    fn on_pre_eval_fitness(
-        population: Population<Self::O>,
-        params: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        (population, params)
-    }
+    fn on_pre_eval_fitness<F, O>(population: &mut Population<O>, fitness_parameters: F) {}
 
-    fn on_post_rank(
-        population: Population<Self::O>,
-        _parameters: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        (population, _parameters)
-    }
+    fn on_post_rank<O>(population: &mut Population<O>) {}
 
-    fn on_pre_init(parameters: HyperParameters<Self::O>) -> HyperParameters<Self::O> {
-        parameters
-    }
-
-    fn survive(
-        mut population: Population<Self::O>,
-        parameters: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+    fn survive<O>(population: &mut Population<O>, gap: f64) {
         let pop_len = population.len();
 
         let mut n_of_individuals_to_drop =
-            (pop_len as isize) - ((1.0 - parameters.gap) * (pop_len as f64)).floor() as isize;
+            (pop_len as isize) - ((1.0 - gap) * (pop_len as f64)).floor() as isize;
 
         // Drop invalid individuals.
         while let Some(true) = population.worst().map(|p| p.get_fitness().is_invalid()) {
@@ -202,14 +168,14 @@ where
             n_of_individuals_to_drop -= 1;
             population.pop();
         }
-
-        (population, parameters)
     }
 
-    fn variation(
-        mut population: Population<Self::O>,
-        parameters: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
+    fn variation<O: Breed, P: Generate>(
+        population: &mut Population<O>,
+        crossover_percent: f64,
+        mutation_percent: f64,
+        program_parameters: P,
+    ) {
         debug_assert!(population.len() > 0);
         let pop_cap = population.capacity();
         let pop_len = population.len();
@@ -217,13 +183,11 @@ where
         let mut remaining_pool_spots = pop_cap - pop_len;
 
         if remaining_pool_spots == 0 {
-            return (population, parameters);
+            return;
         }
 
-        let mut n_mutations =
-            (remaining_pool_spots as f64 * parameters.mutation_percent).floor() as usize;
-        let mut n_crossovers =
-            (remaining_pool_spots as f64 * parameters.crossover_percent).floor() as usize;
+        let mut n_mutations = (remaining_pool_spots as f64 * mutation_percent).floor() as usize;
+        let mut n_crossovers = (remaining_pool_spots as f64 * crossover_percent).floor() as usize;
 
         debug_assert!(n_mutations + n_crossovers <= remaining_pool_spots);
 
@@ -258,7 +222,7 @@ where
                     let parent_to_mutate = parents.choose(&mut generator());
 
                     let child = parent_to_mutate
-                        .map(|parent| parent.mutate(parameters.program_parameters.clone()))
+                        .map(|parent| program_parameters.mutate(parent))
                         .unwrap();
 
                     remaining_pool_spots -= 1;
@@ -276,16 +240,14 @@ where
             .iter()
             .choose_multiple(&mut generator(), remaining_pool_spots)
         {
-            offspring.push(individual.duplicate_new())
+            offspring.push(individual.reset_new())
         }
 
         population.extend(offspring);
-
-        (population, parameters)
     }
 
     /// Build generator.
-    fn build<'b>(hyper_params: HyperParameters<Self::O>) -> GeneticAlgorithmIter<Self> {
+    fn build<S, T, P>(hyper_params: HyperParameters<S, T>) -> GeneticAlgorithmIter<S, T, P> {
         info!(run_id = &(Uuid::new_v4()).to_string());
         GeneticAlgorithmIter::new(hyper_params)
     }

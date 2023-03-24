@@ -10,8 +10,9 @@ impl ValidInput for CartPoleInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
-    fn flat(&self) -> Vec<f64> {
-        self.environment.state.into()
+    fn get(&self, idx: usize) -> f64 {
+        let state_vector: Vec<f64> = self.environment.state.into();
+        state_vector[idx]
     }
 }
 
@@ -33,7 +34,7 @@ impl InteractiveLearningInput for CartPoleInput {
 
 #[cfg(test)]
 mod tests {
-    use std::error;
+    use std::{error, marker::PhantomData};
 
     use crate::{
         core::{
@@ -44,7 +45,7 @@ mod tests {
         },
         extensions::{
             interactive::{ILgp, InteractiveLearningParameters, InteractiveLearningParametersArgs},
-            q_learning::{QConsts, QProgram, QProgramGeneratorParameters},
+            q_learning::QProgram,
         },
         utils::benchmark_tools::{log_benchmarks, output_benchmarks, with_named_logger},
     };
@@ -65,12 +66,20 @@ mod tests {
                 mutation_percent: 0.5,
                 n_generations,
                 fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
-                    InteractiveLearningParametersArgs::new(n_generations, n_trials),
+                    InteractiveLearningParametersArgs {
+                        n_generations,
+                        n_trials,
+                    },
                 ),
-                program_parameters: ProgramGeneratorParameters::new(
-                    8,
-                    InstructionGeneratorParameters::new(1, 10.),
-                ),
+                program_parameters: ProgramGeneratorParameters {
+                    max_instructions: 8,
+                    instruction_generator_parameters: InstructionGeneratorParameters {
+                        n_extras: 1,
+                        external_factor: 10.,
+                        n_actions: CartPoleInput::N_ACTIONS,
+                        n_inputs: CartPoleInput::N_INPUTS,
+                    },
+                },
             };
 
             let populations = ILgp::<CartPoleInput>::build(hyper_params.clone()).collect_vec();
@@ -84,28 +93,8 @@ mod tests {
     #[test]
     fn solve_cart_pole_with_q_learning() -> Result<(), Box<dyn error::Error>> {
         with_named_logger!("cart-pole-q", {
-            let n_generations = 100;
-            let n_trials = 5;
-
             let hyper_params =
-                HyperParameters::load("assets/parameters/500.0_cart-pole_q_1679454161.json")
-                    .unwrap_or(HyperParameters {
-                        population_size: 100,
-                        gap: 0.5,
-                        crossover_percent: 0.5,
-                        mutation_percent: 0.5,
-                        n_generations,
-                        fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
-                            InteractiveLearningParametersArgs::new(n_generations, n_trials),
-                        ),
-                        program_parameters: QProgramGeneratorParameters::new(
-                            ProgramGeneratorParameters::new(
-                                8,
-                                InstructionGeneratorParameters::new(1, 10.),
-                            ),
-                            QConsts::default(),
-                        ),
-                    });
+                HyperParameters::load("assets/parameters/500.0_cart-pole_q_1679454161.json");
 
             let populations =
                 ILgp::<QProgram<CartPoleInput>>::build(hyper_params.clone()).collect_vec();

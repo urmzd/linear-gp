@@ -4,7 +4,7 @@ use std::{
 };
 
 use clap::Args;
-use derive_new::new;
+use derivative::Derivative;
 use rand::distributions::uniform::{UniformFloat, UniformInt, UniformSampler};
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -12,7 +12,7 @@ use tracing::info;
 use crate::{
     core::{
         algorithm::{GeneticAlgorithm, HyperParameters},
-        characteristics::{Breed, DuplicateNew, Fitness, FitnessScore, Generate, Mutate},
+        characteristics::{Breed, Fitness, FitnessScore, Generate, Mutate, Reset, ResetNew},
         inputs::ValidInput,
         population::Population,
         program::{Program, ProgramGeneratorParameters},
@@ -43,13 +43,9 @@ pub struct ActionRegisterPair {
     register: usize,
 }
 
-impl DuplicateNew for QTable {
-    fn duplicate_new(&self) -> Self {
-        QTable::new(
-            self.n_actions,
-            self.n_registers,
-            self.q_consts.duplicate_new(),
-        )
+impl Reset for QTable {
+    fn reset(&mut self) {
+        self.q_consts.reset();
     }
 }
 
@@ -118,50 +114,24 @@ impl QTable {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(bound(serialize = "T: Sized", deserialize = "T: Sized"))]
-pub struct QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
+#[derive(Debug, Clone, Serialize, Deserialize, Derivative)]
+pub struct QProgram {
+    #[derivative(PartialEq = "ignore", PartialOrd = "ignore")]
     pub q_table: QTable,
-    pub program: Program<InteractiveLearningParameters<T>>,
+    pub program: Program,
 }
 
-impl<T> DuplicateNew for QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
-    fn duplicate_new(&self) -> Self {
-        return Self {
-            q_table: self.q_table.duplicate_new(),
-            program: self.program.duplicate_new(),
-        };
-    }
-}
-
-impl<T> PartialEq for QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.program == other.program
-    }
-}
-
-impl<T> PartialOrd for QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.program.fitness.partial_cmp(&other.program.fitness)
+impl Reset for QProgram {
+    fn reset(&mut self) {
+        self.q_table.reset();
+        self.program.reset();
     }
 }
 
 fn get_action_state<T>(
     environment: &mut T,
     q_table: &mut QTable,
-    program: &mut Program<InteractiveLearningParameters<T>>,
+    program: &mut Program,
 ) -> Option<ActionRegisterPair>
 where
     T: InteractiveLearningInput,
@@ -175,13 +145,8 @@ where
     action_state
 }
 
-impl<T> Fitness for QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
-    type FitnessParameters = InteractiveLearningParameters<T>;
-
-    fn eval_fitness(&mut self, mut parameters: Self::FitnessParameters) {
+impl<T> Fitness<InteractiveLearningParameters<T>> for QProgram {
+    fn eval_fitness(&mut self, mut parameters: InteractiveLearningParameters<T>) {
         let mut scores = vec![];
 
         for initial_state in parameters.get_states() {
@@ -241,7 +206,7 @@ where
             }
 
             // Reset for next evaluation.
-            self.program.registers.reset();
+            self.program.registers.reset_new();
             scores.push(score);
 
             info!(
@@ -259,34 +224,24 @@ where
 
         self.program.fitness = fitness_score;
     }
-
-    fn get_fitness(&self) -> FitnessScore {
-        self.program.fitness
-    }
 }
 
-impl<T> Breed for QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
+impl Breed for QProgram {
     fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
         let children = self.program.two_point_crossover(&mate.program);
         children.map(|program| QProgram {
             program,
-            q_table: self.q_table.duplicate_new(),
+            q_table: self.q_table.reset_new(),
         })
     }
 }
 
-impl<T> Mutate for QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
+impl Mutate for QProgram {
     fn mutate(&self, parameters: Self::GeneratorParameters) -> Self {
         let mutated = self.program.mutate(parameters.program_parameters);
         QProgram {
             program: mutated,
-            q_table: self.q_table.duplicate_new(),
+            q_table: self.q_table.reset_new(),
         }
     }
 }
@@ -314,19 +269,12 @@ where
     }
 }
 
-#[derive(Debug, new, Clone, Args, Deserialize, Serialize)]
-#[serde(bound = "T: Sized")]
-pub struct QProgramGeneratorParameters<T>
-where
-    T: ValidInput,
-{
+#[derive(Debug, Clone, Args, Deserialize, Serialize)]
+pub struct QProgramGeneratorParameters {
     #[command(flatten)]
-    program_parameters: ProgramGeneratorParameters<T>,
+    program_parameters: ProgramGeneratorParameters,
     #[command(flatten)]
     consts: QConsts,
-    #[arg(skip)]
-    #[serde(skip)]
-    marker: PhantomData<T>,
 }
 
 #[derive(Debug, Clone, Copy, Args, Serialize, Deserialize)]
@@ -357,15 +305,10 @@ pub struct QConsts {
     epsilon_active: f64,
 }
 
-impl DuplicateNew for QConsts {
-    fn duplicate_new(&self) -> Self {
-        QConsts::new(
-            self.alpha,
-            self.gamma,
-            self.epsilon,
-            self.alpha_decay,
-            self.epsilon_decay,
-        )
+impl Reset for QConsts {
+    fn reset(&mut self) {
+        self.alpha_active = self.alpha;
+        self.epsilon_active = self.epsilon;
     }
 }
 
@@ -380,12 +323,6 @@ impl QConsts {
             alpha_decay,
             epsilon_decay,
         }
-    }
-
-    /// Helper method for CLI
-    pub fn reset_active_properties(&mut self) {
-        self.alpha_active = self.alpha;
-        self.epsilon_active = self.epsilon
     }
 
     pub fn decay(&mut self) {
@@ -415,10 +352,7 @@ where
     type O = QProgram<T>;
 
     fn on_pre_init(mut parameters: HyperParameters<Self::O>) -> HyperParameters<Self::O> {
-        parameters
-            .program_parameters
-            .consts
-            .reset_active_properties();
+        parameters.program_parameters.consts.reset();
         parameters
     }
 

@@ -6,7 +6,7 @@ use strum::EnumCount;
 
 use crate::{
     core::{
-        algorithm::{GeneticAlgorithm, Loader},
+        algorithm::{GeneticAlgorithm, SupportLoad},
         inputs::ValidInput,
         program::Program,
     },
@@ -45,7 +45,7 @@ impl GeneticAlgorithm for IrisLgp {
     type O = Program<ClassificationParameters<IrisInput>>;
 }
 
-impl<'a> Loader for IrisLgp {
+impl<'a> SupportLoad for IrisLgp {
     type InputType = IrisInput;
 }
 
@@ -75,14 +75,14 @@ impl ValidInput for IrisInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 3;
 
-    fn flat(&self) -> Vec<f64> {
-        [
-            self.sepal_length,
-            self.sepal_width,
-            self.petal_length,
-            self.petal_width,
-        ]
-        .to_vec()
+    fn get(&self, idx: usize) -> f64 {
+        match idx {
+            0 => self.sepal_length,
+            1 => self.sepal_width,
+            2 => self.petal_length,
+            3 => self.petal_width,
+            _ => panic!("idx out of range"),
+        }
     }
 }
 
@@ -90,7 +90,7 @@ impl ValidInput for IrisInput {
 mod tests {
     use crate::{
         core::{
-            algorithm::{GeneticAlgorithm, HyperParameters, Loader},
+            algorithm::{GeneticAlgorithm, HyperParameters, SupportLoad},
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
@@ -98,7 +98,7 @@ mod tests {
         utils::benchmark_tools::{log_benchmarks, output_benchmarks},
     };
     use itertools::Itertools;
-    use std::error;
+    use std::{error, marker::PhantomData};
 
     use super::{IrisInput, IrisLgp, IRIS_DATASET_LINK};
 
@@ -122,18 +122,17 @@ mod tests {
         let ContentFilePair(_, tmp_file) = get_iris_content().await?;
         let inputs = IrisLgp::load_from_csv(tmp_file.path());
 
-        let hyper_params = HyperParameters {
-            population_size: 100,
-            n_generations: 100,
-            gap: 0.5,
-            mutation_percent: 0.5,
-            crossover_percent: 0.5,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
-                100,
-                InstructionGeneratorParameters::new(1, 10.),
-            ),
-        };
+        let hyper_params = HyperParameters::default()
+            .fitness_parameters(ClassificationParameters { inputs })
+            .program_parameters(ProgramGeneratorParameters {
+                max_instructions: 100,
+                instruction_generator_parameters: InstructionGeneratorParameters {
+                    n_extras: 1,
+                    external_factor: 10.,
+                    marker: PhantomData,
+                },
+                marker: PhantomData,
+            });
 
         debug_assert_eq!(hyper_params.crossover_percent, 0.5);
         debug_assert_eq!(hyper_params.mutation_percent, 0.5);

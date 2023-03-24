@@ -1,15 +1,15 @@
 use clap::Args;
-use derive_new::new;
+use derivative::Derivative;
+use derive_builder::Builder;
 use rand::distributions::uniform::{UniformInt, UniformSampler};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use std::marker::PhantomData;
 
 use crate::utils::executables::Op;
 use crate::utils::random::generator;
 
-use super::characteristics::{Generate, Mutate};
+use super::characteristics::Generate;
 use super::inputs::ValidInput;
 use super::registers::Registers;
 
@@ -31,129 +31,101 @@ impl Mode {
     }
 }
 
-#[derive(Clone, Debug, Serialize, new, Args, PartialEq, Deserialize)]
-pub struct InstructionGeneratorParameters<T>
-where
-    T: ValidInput,
-{
+#[derive(Clone, Derivative, Debug, Serialize, Args, PartialEq, Deserialize, Builder)]
+#[derivative(Copy)]
+pub struct InstructionGeneratorParameters {
     #[arg(long, default_value = "1")]
+    #[builder(default = "1")]
     pub n_extras: usize,
     #[arg(long, default_value = "10.")]
+    #[builder(default = "10.")]
     pub external_factor: f64,
-    #[arg(skip)]
-    #[serde(skip)]
-    marker: PhantomData<T>,
+    pub n_actions: usize,
+    pub n_inputs: usize,
 }
 
-impl<T> Copy for InstructionGeneratorParameters<T> where T: ValidInput {}
-impl<T> Copy for Instruction<T> where T: ValidInput {}
-
-impl<T> InstructionGeneratorParameters<T>
-where
-    T: ValidInput,
-{
+impl InstructionGeneratorParameters {
     pub fn n_registers(&self) -> usize {
-        // | A1 | A2 | A3 | Extra |
-        T::N_ACTIONS + self.n_extras
-    }
-
-    pub fn n_inputs(&self) -> usize {
-        T::N_INPUTS
-    }
-
-    pub fn n_actions(&self) -> usize {
-        T::N_ACTIONS
+        // | -1 | 0 | 1 | Extra |
+        self.n_actions + self.n_extras
     }
 }
 
-#[derive(Serialize, Clone, PartialEq, Debug, Deserialize, new)]
-pub struct Instruction<T> {
-    source_index: usize,
-    target_index: usize,
+#[derive(Serialize, PartialEq, Debug, Deserialize, Derivative)]
+#[derivative(Copy, Clone)]
+pub struct Instruction {
+    src_idx: usize,
+    tgt_idx: usize,
     mode: Mode,
-    executable: Op,
+    op: Op,
     external_factor: f64,
-    #[serde(skip)]
-    marker: PhantomData<T>,
 }
 
-impl<T> Generate for Instruction<T>
-where
-    T: ValidInput,
-{
-    type GeneratorParameters = InstructionGeneratorParameters<T>;
-
-    fn generate(parameters: Self::GeneratorParameters) -> Self {
+impl InstructionGeneratorParameters {
+    pub fn generate(&self) -> Instruction {
         let current_generator = &mut generator();
 
-        let source_index =
-            UniformInt::<usize>::new(0, parameters.n_registers()).sample(current_generator);
+        let src_idx = UniformInt::<usize>::new(0, self.n_registers()).sample(current_generator);
 
-        let mode = Mode::sample(current_generator);
+        let mode = generator().gen();
 
         let upper_bound_target_index = if mode == Mode::External {
-            T::N_INPUTS
+            self.n_inputs
         } else {
-            parameters.n_registers()
+            self.n_registers()
         };
+
         let target_index =
             UniformInt::<usize>::new(0, upper_bound_target_index).sample(current_generator);
 
         let executable = generator().gen();
 
-        Instruction::new(
-            source_index,
-            target_index,
+        Instruction {
+            src_idx,
+            tgt_idx: target_index,
             mode,
-            executable,
-            parameters.external_factor,
-        )
+            op: executable,
+            external_factor: self.external_factor,
+        }
     }
-}
 
-impl<T> Mutate for Instruction<T>
-where
-    T: ValidInput,
-{
-    fn mutate(&self, params: Self::GeneratorParameters) -> Self {
-        let mut mutated = Self::generate(params);
+    fn mutate(&self, instruction: &Instruction) -> Self {
+        let mut mutated = self.generate();
+        let cloned_object = instruction.clone();
 
-        let swap_target = generator().gen_bool(0.5);
-        let swap_source = generator().gen_bool(0.5);
-        let swap_exec = generator().gen_bool(0.5);
+        let swap_target = generator().gen();
+        let swap_source = generator().gen();
+        let swap_exec = generator().gen();
 
         // Flip a Coin: Target
         if swap_target {
-            mutated.mode = self.mode.clone();
-            mutated.target_index = self.target_index;
+            cloned_object.mode = mutated.clone();
+            mutated.tgt_idx = mutated.tgt_idx;
         }
 
         // Flip a Coin: Source
         if swap_source {
-            mutated.source_index = self.source_index;
+            cloned_object.src_idx = mutated.src_idx;
         }
 
         // Flip a Coin: Executable
         if swap_exec {
-            mutated.executable = self.executable.clone();
+            mutated.op = mutated.op;
         }
 
         mutated
     }
 }
 
-impl<T> Instruction<T> {
-    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &'b T)
-    where
-        T: ValidInput,
-    {
+impl Instruction {
+    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &impl ValidInput) {
         let target_data = if self.mode == Mode::External {
             Registers::from(input)
         } else {
             registers.clone()
         };
 
-        let target_value = *target_data.get(self.target_index);
+        let target_value = *target_data.get(self.tgt_idx);
 
         let amplied_target_value = if self.mode == Mode::External {
             self.external_factor * target_value
@@ -161,9 +133,9 @@ impl<T> Instruction<T> {
             target_value
         };
 
-        let source_value = *registers.get(self.source_index);
-        let new_source_value = self.executable.apply(source_value, amplied_target_value);
+        let source_value = *registers.get(self.src_idx);
+        let new_source_value = self.op.apply(source_value, amplied_target_value);
 
-        registers.update(self.source_index, new_source_value);
+        registers.update(self.src_idx, new_source_value);
     }
 }

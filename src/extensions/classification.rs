@@ -1,54 +1,44 @@
-use derive_new::new;
-use serde::{Serialize, Deserialize};
-
 use crate::core::{
-    characteristics::{Fitness, FitnessScore},
+    characteristics::{Fitness, FitnessScore, Reset},
     inputs::{Inputs, ValidInput},
-    program::{Program, ProgramParameters},
+    program::Program,
     registers::{ArgmaxInput, AR},
 };
-
-#[derive(Clone, Debug, new, Serialize, Deserialize)]
-#[serde(bound="T: Sized")]
-pub struct ClassificationParameters<T>
-where
-    T: ClassificationInput,
-{
-    #[serde(skip)]
-    inputs: Inputs<T>,
-}
 
 pub trait ClassificationInput: ValidInput {
     fn get_class(&self) -> usize;
 }
 
-impl<T> ProgramParameters for ClassificationParameters<T>
+pub struct Classifier<T>(Inputs<T>);
+
+impl<T> Fitness for Classifier<T>
 where
     T: ClassificationInput,
 {
-    type InputType = T;
-}
+    type Parameters = ();
 
-impl<T> Fitness for Program<ClassificationParameters<T>>
-where
-    T: ClassificationInput,
-{
-    type FitnessParameters = ClassificationParameters<T>;
+    fn eval_fitness(
+        &mut self,
+        program: Program,
+        parameters: Self::Parameters,
+    ) -> (FitnessScore, Self::Parameters) {
+        let inputs = &self.0;
 
-    fn eval_fitness(&mut self, parameters: Self::FitnessParameters) {
-        let inputs = &parameters.inputs;
-
-        self.registers.reset();
+        program.registers.reset();
 
         let mut n_correct: usize = 0;
 
         for input in inputs {
-            self.run(input);
+            program.run(input);
 
-            match self.registers.argmax(ArgmaxInput::To(T::N_ACTIONS)).one() {
+            match program
+                .registers
+                .argmax(ArgmaxInput::To(T::N_ACTIONS))
+                .one()
+            {
                 AR::Overflow => {
                     return {
-                        self.fitness = FitnessScore::OutOfBounds;
+                        FitnessScore::OutOfBounds;
                     }
                 }
                 AR::Value(predicted_class) => {
@@ -56,15 +46,11 @@ where
                 }
             };
 
-            self.registers.reset();
+            program.registers.reset();
         }
 
         let fitness = n_correct as f64 / inputs.len() as f64;
 
-        self.fitness = FitnessScore::Valid(fitness);
-    }
-
-    fn get_fitness(&self) -> FitnessScore {
-        self.fitness
+        (FitnessScore::Valid(fitness), ())
     }
 }

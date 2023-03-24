@@ -20,14 +20,15 @@ sudo apt-get install python
 Running Trials:
 
 ```bash
-docker-compose up
+docker-compose up -d
 
-# Optional: python -m venv venv
+python -m venv venv # optional
 pip install -r scripts/requirements.txt
 
 cargo build --release
 
-./scripts/optimize.py -h
+./scripts/optimize.py -h # help
+./scripts/optimize.py --env cart-pole --algorithm q --n-trials 40 --n-threads 4 # run
 ```
 
 ## Contributions
