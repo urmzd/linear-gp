@@ -12,7 +12,7 @@ use crate::utils::random::generator;
 
 use super::engines::generate_engine::{Generate, GenerateEngine};
 use super::engines::mutate_engine::{Mutate, MutateEngine};
-use super::input_engine::EnvironmentalFactor;
+use super::input_engine::State;
 use super::registers::Registers;
 use derive_more::Display;
 
@@ -151,7 +151,7 @@ impl Mutate<InstructionGeneratorParameters, Instruction> for MutateEngine {
 }
 
 impl Instruction {
-    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &impl EnvironmentalFactor) {
+    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &impl State) {
         let target_value = match self.mode {
             Mode::External => self.external_factor * input.get_value(self.tgt_idx),
             _ => *registers.get(self.tgt_idx),

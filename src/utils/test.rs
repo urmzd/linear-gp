@@ -4,7 +4,7 @@ use rand::{distributions::Standard, prelude::Distribution};
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 
-use crate::core::input_engine::EnvironmentalFactor;
+use crate::core::input_engine::State;
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount, Deserialize, Serialize, Debug)]
 pub enum TestOutput {
@@ -21,7 +21,7 @@ pub struct TestInput {
     e: TestOutput,
 }
 
-impl EnvironmentalFactor for TestInput {
+impl State for TestInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
@@ -34,15 +34,19 @@ impl EnvironmentalFactor for TestInput {
             _ => unreachable!(),
         }
     }
+
+    fn execute_action(&mut self, action: usize) -> f64 {
+        (action == self.e as usize) as usize as f64
+    }
 }
 
 impl Default for TestInput {
     fn default() -> Self {
         TestInput {
-            a: 0,
-            b: 0,
-            c: 0,
-            d: 0,
+            a: 0.,
+            b: 0.,
+            c: 0.,
+            d: 0.,
             e: TestOutput::One,
         }
     }

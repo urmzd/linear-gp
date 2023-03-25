@@ -1,4 +1,4 @@
-use crate::core::{characteristics::Reset, input_engine::EnvironmentalFactor, program::Program};
+use crate::core::{characteristics::Reset, input_engine::State, program::Program};
 use core::fmt::Debug;
 use std::cmp::Ordering;
 
@@ -62,9 +62,12 @@ impl FitnessScore {
     }
 }
 
-pub trait Fitness<E, P> {
-    // Takes a set of parameters, runs the program and updates the item to contain the new fitness.
-    fn eval_fitness(item: &mut Program, environment: &mut E, additonal_parameters: &mut P);
+pub trait Fitness<S, P> {
+    fn eval_fitness(
+        item: &mut Program,
+        state: &mut S,
+        additonal_parameters: &mut P,
+    ) -> FitnessScore;
 }
 
 pub struct FitnessEngine;

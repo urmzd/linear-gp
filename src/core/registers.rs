@@ -25,25 +25,27 @@ pub enum ArgmaxResult {
     Overflow,
 }
 
-pub enum AR {
+pub enum ActionRegister {
     Value(usize),
     Overflow,
 }
 
 impl ArgmaxResult {
-    pub fn one(&self) -> AR {
+    pub fn one(&self) -> ActionRegister {
         match self {
-            ArgmaxResult::MaxValues(indices) if indices.len() == 1 => AR::Value(indices[0]),
-            _ => AR::Overflow,
+            ArgmaxResult::MaxValues(indices) if indices.len() == 1 => {
+                ActionRegister::Value(indices[0])
+            }
+            _ => ActionRegister::Overflow,
         }
     }
 
-    pub fn any(&self) -> AR {
+    pub fn any(&self) -> ActionRegister {
         match self {
             ArgmaxResult::MaxValues(indices) if indices.len() >= 1 => {
-                AR::Value(indices.choose(&mut generator()).copied().unwrap())
+                ActionRegister::Value(indices.choose(&mut generator()).copied().unwrap())
             }
-            _ => AR::Overflow,
+            _ => ActionRegister::Overflow,
         }
     }
 }
