@@ -13,7 +13,13 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::{
-    characteristics::{Breed, FitnessScore, Generate, Mutate, Reset, ResetNew},
+    characteristics::Reset,
+    engines::{
+        breed_engine::{Breed, BreedEngine},
+        fitness_engine::FitnessScore,
+        generate_engine::{Generate, GenerateEngine},
+        mutate_engine::{Mutate, MutateEngine},
+    },
     inputs::ValidInput,
     instruction::{Instruction, InstructionGeneratorParameters},
     instructions::Instructions,
@@ -65,15 +71,13 @@ impl Program {
     }
 }
 
-impl Generate for ProgramGeneratorParameters {
-    type Output = Program;
-
-    fn generate(&self) -> Self {
+impl Generate<ProgramGeneratorParameters, Program> for GenerateEngine {
+    fn generate(using: ProgramGeneratorParameters) -> Program {
         let ProgramGeneratorParameters {
             max_instructions,
             instruction_generator_parameters,
             ..
-        } = self;
+        } = using;
 
         let registers = Registers::new(instruction_generator_parameters.n_registers());
         let n_instructions = Uniform::new_inclusive(1, max_instructions).sample(&mut generator());
@@ -90,35 +94,34 @@ impl Generate for ProgramGeneratorParameters {
     }
 }
 
-impl Mutate for ProgramGeneratorParameters {
-    type Input = Program;
-    fn mutate(&self, params: Self::Input) -> Self {
-        let mut mutated = self.clone();
-
+impl Mutate<ProgramGeneratorParameters, Program> for MutateEngine {
+    fn mutate(item: &mut Program, using: ProgramGeneratorParameters) {
         // Pick instruction to mutate.
-        let instruction = mutated
+        let instruction = item
             .instructions
             .iter_mut()
             .choose(&mut generator())
             .unwrap();
 
-        let mutated_instruction = instruction.mutate(params.instruction_generator_parameters);
-        *instruction = mutated_instruction;
+        let mutated_instruction =
+            MutateEngine::mutate(instruction, using.instruction_generator_parameters);
 
-        mutated.fitness = FitnessScore::NotEvaluated;
-        mutated.id = Uuid::new_v4();
-        mutated.registers = mutated.registers.reset_new();
+        // Reset to force re-eval.
+        item.fitness = FitnessScore::NotEvaluated;
+        item.id = Uuid::new_v4();
 
-        mutated
+        item.registers.reset();
     }
 }
 
-impl Breed for Program {
-    fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
-        let child_instructions = self.instructions.two_point_crossover(&mate.instructions);
+impl Breed<Program> for BreedEngine {
+    fn two_point_crossover(mate_1: &Program, mate_2: &Program) -> [Program; 2] {
+        let child_instructions = mate_1
+            .instructions
+            .two_point_crossover(&mate_2.instructions);
 
         child_instructions.map(|instructions| {
-            let mut parent = self.reset_new();
+            let mut parent = mate_1.reset_new();
             parent.instructions = instructions;
             parent
         })
@@ -128,10 +131,7 @@ impl Breed for Program {
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        core::instruction::InstructionGeneratorParameters,
-        extensions::classification::ClassificationParameters, utils::test::TestInput,
-    };
+    use crate::{core::instruction::InstructionGeneratorParameters, utils::test::TestInput};
 
     use super::*;
 
@@ -172,8 +172,8 @@ mod tests {
             instruction_generator_parameters,
         };
 
-        let program_a = Program::<ClassificationParameters<TestInput>>::generate(program_params);
-        let program_b = Program::<ClassificationParameters<TestInput>>::generate(program_params);
+        let program_a = program_params.generate();
+        let program_b = program_params.generate();
 
         let [child_a, child_b] = program_a.two_point_crossover(&program_b);
 

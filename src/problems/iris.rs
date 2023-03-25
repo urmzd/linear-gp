@@ -75,7 +75,7 @@ impl ValidInput for IrisInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 3;
 
-    fn get(&self, idx: usize) -> f64 {
+    fn get_input_at(&self, idx: usize) -> f64 {
         match idx {
             0 => self.sepal_length,
             1 => self.sepal_width,
@@ -157,8 +157,8 @@ mod tests {
             gap: 0.5,
             mutation_percent: 1.,
             crossover_percent: 0.,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
+            evaluator: ClassificationParameters::new(inputs),
+            generator: ProgramGeneratorParameters::new(
                 100,
                 InstructionGeneratorParameters::new(1, 10.),
             ),
@@ -187,8 +187,8 @@ mod tests {
             gap: 0.5,
             mutation_percent: 0.,
             crossover_percent: 1.,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
+            evaluator: ClassificationParameters::new(inputs),
+            generator: ProgramGeneratorParameters::new(
                 100,
                 InstructionGeneratorParameters::new(1, 10.),
             ),
@@ -217,8 +217,8 @@ mod tests {
             gap: 0.5,
             mutation_percent: 0.,
             crossover_percent: 0.,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
+            evaluator: ClassificationParameters::new(inputs),
+            generator: ProgramGeneratorParameters::new(
                 100,
                 InstructionGeneratorParameters::new(1, 10.),
             ),
@@ -258,8 +258,8 @@ mod tests {
             gap: 0.5,
             mutation_percent: 0.,
             crossover_percent: 0.,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
+            evaluator: ClassificationParameters::new(inputs),
+            generator: ProgramGeneratorParameters::new(
                 100,
                 InstructionGeneratorParameters::new(1, 10.),
             ),
@@ -295,8 +295,8 @@ mod tests {
             gap: 0.5,
             mutation_percent: 0.,
             crossover_percent: 0.,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
+            evaluator: ClassificationParameters::new(inputs),
+            generator: ProgramGeneratorParameters::new(
                 100,
                 InstructionGeneratorParameters::new(1, 10.),
             ),
@@ -329,8 +329,8 @@ mod tests {
             gap: 0.5,
             mutation_percent: 0.,
             crossover_percent: 0.,
-            fitness_parameters: ClassificationParameters::new(inputs),
-            program_parameters: ProgramGeneratorParameters::new(
+            evaluator: ClassificationParameters::new(inputs),
+            generator: ProgramGeneratorParameters::new(
                 100,
                 InstructionGeneratorParameters::new(1, 10.),
             ),

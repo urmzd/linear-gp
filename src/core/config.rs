@@ -1,10 +1,5 @@
 use config::{Config, Environment, File, FileFormat};
 
-use super::{
-    algorithm::HyperParameters,
-    characteristics::{Fitness, Generate},
-};
-
 // pub fn load_config<T>(config_path: &str) -> HyperParameters<T>
 // where
 //     T: Fitness + Generate + Clone,

@@ -1,7 +1,4 @@
-use std::{
-    fmt::{self, Debug},
-    marker::PhantomData,
-};
+use std::fmt::{self, Debug};
 
 use clap::Args;
 use derivative::Derivative;
@@ -14,7 +11,6 @@ use crate::{
         algorithm::{GeneticAlgorithm, HyperParameters},
         characteristics::{Breed, Fitness, FitnessScore, Generate, Mutate, Reset, ResetNew},
         inputs::ValidInput,
-        population::Population,
         program::{Program, ProgramGeneratorParameters},
         registers::{ArgmaxInput, Registers, AR},
     },
@@ -352,7 +348,7 @@ where
     type O = QProgram<T>;
 
     fn on_pre_init(mut parameters: HyperParameters<Self::O>) -> HyperParameters<Self::O> {
-        parameters.program_parameters.consts.reset();
+        parameters.generator.consts.reset();
         parameters
     }
 
@@ -360,7 +356,7 @@ where
         population: Population<Self::O>,
         mut parameters: HyperParameters<Self::O>,
     ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        parameters.fitness_parameters.next_generation();
+        parameters.evaluator.next_generation();
 
         return (population, parameters);
     }

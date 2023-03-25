@@ -11,5 +11,5 @@ where
     const N_INPUTS: usize;
     const N_ACTIONS: usize;
 
-    fn get(&self, idx: usize) -> f64;
+    fn get_input_at(&self, idx: usize) -> f64;
 }

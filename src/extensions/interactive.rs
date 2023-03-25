@@ -11,7 +11,6 @@ use serde::Serialize;
 
 use crate::core::algorithm::HyperParameters;
 use crate::core::characteristics::Reset;
-use crate::core::population::Population;
 use crate::core::program::ProgramParameters;
 use crate::core::registers::ArgmaxInput;
 use crate::core::registers::AR;
@@ -189,13 +188,15 @@ where
 
 pub struct InteractiveLearner<T>(T);
 
-impl<T> Fitness for InteractiveLearner<T> where T: InteractiveLearningInput {
+impl<T> Fitness for InteractiveLearner<T>
+where
+    T: InteractiveLearningInput,
+{
     fn eval_fitness(
-            &mut self,
-            program: &mut Program,
-            parameters: Self::Parameters,
-        ) -> (FitnessScore, Self::Parameters) {
-        
+        &mut self,
+        program: &mut Program,
+        parameters: Self::Parameters,
+    ) -> (FitnessScore, Self::Parameters) {
     }
 }
 
@@ -252,7 +253,7 @@ where
         population: Population<Self::O>,
         mut parameters: HyperParameters<Self::O>,
     ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        parameters.fitness_parameters.next_generation();
+        parameters.evaluator.next_generation();
 
         return (population, parameters);
     }
