@@ -98,12 +98,16 @@ where
     ) -> crate::core::engines::fitness_engine::FitnessScore {
         let mut score = 0.;
 
-        while let Some(state) = states.next_state() {
+        while let Some(state) = states.next() {
             // Run program.
-            program.run(&state);
+            program.run(&mut state);
 
             // Eval
-            let reward = match program.registers.argmax(ArgmaxInput::To(T::N_ACTIONS)).any() {
+            let reward = match program
+                .registers
+                .argmax(ArgmaxInput::To(T::N_ACTIONS))
+                .any()
+            {
                 ActionRegister::Value(action) => state.execute_action(action),
                 ActionRegister::Overflow => return FitnessScore::OutOfBounds,
             };

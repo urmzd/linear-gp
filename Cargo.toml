@@ -26,8 +26,4 @@ uuid = { version = "1.2.2", features = ["v4", "serde"] }
 clap = { version = "4.1.8", features = ["derive"] }
 config = "0.13.1"
 derive_builder = "0.12.0"
-
-[dev-dependencies]
-tempfile = "3.3"
 reqwest = "0.11"
-

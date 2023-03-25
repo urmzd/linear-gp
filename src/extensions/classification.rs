@@ -13,8 +13,8 @@ where
         let mut n_correct = 0.;
         let mut n_total = 0.;
 
-        while let Some(state) = states.next_state() {
-            program.run(&state);
+        while let Some(state) = states.next() {
+            program.run(&mut state);
 
             match program
                 .registers
