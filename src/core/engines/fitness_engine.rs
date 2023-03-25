@@ -63,11 +63,7 @@ impl FitnessScore {
 }
 
 pub trait Fitness<S, P> {
-    fn eval_fitness(
-        item: &mut Program,
-        state: &mut S,
-        additonal_parameters: &mut P,
-    ) -> FitnessScore;
+    fn eval_fitness(program: &mut Program, states: &mut S, params: &mut P) -> FitnessScore;
 }
 
 pub struct FitnessEngine;

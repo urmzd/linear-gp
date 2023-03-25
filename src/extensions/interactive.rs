@@ -92,18 +92,18 @@ where
     T: RlState,
 {
     fn eval_fitness(
-        item: &mut crate::core::program::Program,
-        environment: &mut T,
-        additonal_parameters: &mut Rl,
+        program: &mut crate::core::program::Program,
+        states: &mut T,
+        parameters: &mut Rl,
     ) -> crate::core::engines::fitness_engine::FitnessScore {
         let mut score = 0.;
 
-        while let Some(state) = environment.next_state() {
+        while let Some(state) = states.next_state() {
             // Run program.
-            item.run(&state);
+            program.run(&state);
 
             // Eval
-            let reward = match item.registers.argmax(ArgmaxInput::To(T::N_ACTIONS)).any() {
+            let reward = match program.registers.argmax(ArgmaxInput::To(T::N_ACTIONS)).any() {
                 ActionRegister::Value(action) => state.execute_action(action),
                 ActionRegister::Overflow => return FitnessScore::OutOfBounds,
             };
