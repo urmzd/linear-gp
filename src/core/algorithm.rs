@@ -1,6 +1,5 @@
-use std::iter::repeat_with;
-use std::marker::PhantomData;
 use std::path::PathBuf;
+use std::{iter::repeat_with, marker::PhantomData};
 
 use csv::ReaderBuilder;
 use derive_builder::Builder;
@@ -9,19 +8,14 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::info;
 use uuid::Uuid;
 
-use crate::{
-    core::characteristics::{Breed, Fitness, Generate},
-    utils::random::generator,
-};
+use crate::utils::random::generator;
 
-use super::{
-    characteristics::{Mutate, ResetNew},
-    inputs::{Inputs, ValidInput},
-    population::Population,
-};
+use super::engines::fitness_engine::{Fitness, FitnessEngine};
+use super::engines::generate_engine::{Generate, GenerateEngine};
+use super::inputs::{Inputs, ValidInput};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Builder)]
-pub struct HyperParameters<F: Fitness, G: Generate> {
+pub struct HyperParameters {
     #[builder(default = "100")]
     pub population_size: usize,
     #[builder(default = "0.5")]
@@ -32,8 +26,6 @@ pub struct HyperParameters<F: Fitness, G: Generate> {
     pub crossover_percent: f64,
     #[builder(default = "100")]
     pub n_generations: usize,
-    pub fitness_parameters: F,
-    pub program_parameters: G,
 }
 
 /// Defines a program capable of loading inputs from various sources.
@@ -60,15 +52,15 @@ where
     }
 }
 
-pub struct GeneticAlgorithmIter<S, T, P> {
+pub struct GeneticAlgorithmIter<T> {
     generation: usize,
-    next_population: Option<Population<P>>,
-    params: HyperParameters<S, T>,
+    next_population: Option<Vec<T>>,
+    params: HyperParameters,
 }
 
-impl<S, T, P> GeneticAlgorithmIter<S, T, P> {
-    pub fn new(params: HyperParameters<S, T>) -> Self {
-        let (current_population, params) = GeneticAlgorithm::init_pop::<S>(params.clone());
+impl<T> GeneticAlgorithmIter<T> {
+    pub fn new(params: HyperParameters) -> Self {
+        let (current_population, params) = GeneticAlgorithm::init_pop::<T>(params.clone());
 
         Self {
             generation: 0,
@@ -78,11 +70,8 @@ impl<S, T, P> GeneticAlgorithmIter<S, T, P> {
     }
 }
 
-impl<S, T, P> Iterator for GeneticAlgorithmIter<S, T, P>
-where
-    G: GeneticAlgorithm,
-{
-    type Item = Population<G::O>;
+impl<T> Iterator for GeneticAlgorithmIter<T> {
+    type Item = Vec<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.generation > self.params.n_generations {
@@ -93,7 +82,6 @@ where
         let mut population = self.next_population.clone().unwrap();
         let mut params = self.params.clone();
 
-        (population, params) = G::on_pre_eval_fitness(population, params);
         (population, params) = G::eval_fitness(population, params);
         (population, params) = G::rank(population, params);
         (population, params) = G::on_post_rank(population, params);
@@ -119,39 +107,29 @@ where
     }
 }
 
-pub trait GeneticAlgorithm {
-    fn init_pop<G: Generate>(
-        program_parameters: G,
-        population_size: usize,
-    ) -> Population<G::Output> {
-        let population = repeat_with(program_parameters.generate)
+trait GeneticAlgorithm<I, P, F> {
+    fn init_pop(program_parameters: P, population_size: usize) -> Vec<I> {
+        let population = repeat_with(GenerateEngine::generate(program_parameters))
             .take(population_size)
             .collect();
 
         population
     }
 
-    fn eval_fitness<F: Fitness, T>(population: &mut Population<T>, evaluator: F) {
+    fn eval_fitness(population: &mut Vec<I>, evaluator: FitnessEngine) {
         for individual in population.iter_mut() {
-            evaluator.eval_fitness(program, parameters);
-
-            individual.eval_fitness(fitness_parameters);
+            evaluator.eval_fitness(individual, parameters);
             debug_assert!(!individual.get_fitness().is_not_evaluated());
         }
     }
 
-    /// Evaluates the individuals found in the current population.
-    fn rank<T>(population: &mut Population<T>) {
+    fn rank(population: &mut Vec<I>) {
         population.sort();
         // Organize individuals by their fitness score.
         debug_assert!(population.worst() <= population.best());
     }
 
-    fn on_pre_eval_fitness<F, O>(population: &mut Population<O>, fitness_parameters: F) {}
-
-    fn on_post_rank<O>(population: &mut Population<O>) {}
-
-    fn survive<O>(population: &mut Population<O>, gap: f64) {
+    fn survive(population: &mut Vec<I>, gap: f64) {
         let pop_len = population.len();
 
         let mut n_of_individuals_to_drop =
@@ -170,13 +148,14 @@ pub trait GeneticAlgorithm {
         }
     }
 
-    fn variation<O: Breed, P: Generate>(
-        population: &mut Population<O>,
+    fn variation(
+        population: &mut Vec<I>,
         crossover_percent: f64,
         mutation_percent: f64,
         program_parameters: P,
     ) {
         debug_assert!(population.len() > 0);
+
         let pop_cap = population.capacity();
         let pop_len = population.len();
 
@@ -247,7 +226,7 @@ pub trait GeneticAlgorithm {
     }
 
     /// Build generator.
-    fn build<S, T, P>(hyper_params: HyperParameters<S, T>) -> GeneticAlgorithmIter<S, T, P> {
+    fn build(hyper_params: HyperParameters) -> GeneticAlgorithmIter<I> {
         info!(run_id = &(Uuid::new_v4()).to_string());
         GeneticAlgorithmIter::new(hyper_params)
     }

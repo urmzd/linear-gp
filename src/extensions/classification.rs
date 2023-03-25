@@ -1,5 +1,6 @@
 use crate::core::{
-    characteristics::{Fitness, FitnessScore, Reset},
+    characteristics::Reset,
+    engines::fitness_engine::{Fitness, FitnessEngine, FitnessScore},
     inputs::{Inputs, ValidInput},
     program::Program,
     registers::{ArgmaxInput, AR},
@@ -9,26 +10,13 @@ pub trait ClassificationInput: ValidInput {
     fn get_class(&self) -> usize;
 }
 
-pub struct Classifier<T>(Inputs<T>);
-
-impl<T> Fitness for Classifier<T>
-where
-    T: ClassificationInput,
-{
-    type Parameters = ();
-
-    fn eval_fitness(
-        &mut self,
-        program: Program,
-        parameters: Self::Parameters,
-    ) -> (FitnessScore, Self::Parameters) {
-        let inputs = &self.0;
-
+impl<T: ClassificationInput> Fitness<Program, Inputs<T>> for FitnessEngine {
+    fn eval_fitness(program: &mut Program, parameters: &mut Inputs<T>) {
         program.registers.reset();
 
         let mut n_correct: usize = 0;
 
-        for input in inputs {
+        for input in parameters {
             program.run(input);
 
             match program
@@ -38,7 +26,7 @@ where
             {
                 AR::Overflow => {
                     return {
-                        FitnessScore::OutOfBounds;
+                        program.fitness = FitnessScore::OutOfBounds;
                     }
                 }
                 AR::Value(predicted_class) => {
@@ -49,8 +37,7 @@ where
             program.registers.reset();
         }
 
-        let fitness = n_correct as f64 / inputs.len() as f64;
-
-        (FitnessScore::Valid(fitness), ())
+        let fitness = n_correct as f64 / parameters.len() as f64;
+        program.fitness = FitnessScore::Valid(fitness);
     }
 }

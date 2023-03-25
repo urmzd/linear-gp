@@ -3,12 +3,15 @@ use rand::{distributions::Uniform, prelude::Distribution};
 use crate::utils::random::generator;
 use itertools::Itertools;
 
-use super::{characteristics::Breed, instruction::Instruction};
+use super::{
+    engines::breed_engine::{Breed, BreedEngine},
+    instruction::Instruction,
+};
 
-impl Breed for Instructions {
-    fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
-        let mut instructions_a = self.clone();
-        let mut instructions_b = mate.clone();
+impl Breed<Instructions> for BreedEngine {
+    fn two_point_crossover(mate_1: &Instruction, mate_2: &Instruction) -> [Instruction; 2] {
+        let mut instructions_a = mate_1.clone();
+        let mut instructions_b = mate_2.clone();
 
         let current_generator = &mut generator();
 
@@ -73,14 +76,12 @@ pub type Instructions = Vec<Instruction>;
 
 #[cfg(test)]
 mod tests {
-    use std::marker::PhantomData;
 
     use crate::{
         core::{
-            characteristics::{Breed, Generate},
-            inputs::ValidInput,
+            engines::{breed_engine::BreedEngine, generate_engine::GenerateEngine},
             instruction::InstructionGeneratorParameters,
-            program::{Program, ProgramGeneratorParameters},
+            program::ProgramGeneratorParameters,
         },
         utils::test::TestInput,
     };
@@ -99,8 +100,8 @@ mod tests {
             },
         };
 
-        let program_a = Program::<ClassificationParameters<TestInput>>::generate(parameters);
-        let program_b = Program::<ClassificationParameters<TestInput>>::generate(parameters);
+        let program_a = GenerateEngine::generate(parameters);
+        let program_b = GenerateEngine::generate(parameters);
 
         let mut parents = [program_a, program_b];
 
@@ -108,7 +109,7 @@ mod tests {
             let parent_a_instruction_len = parents[0].instructions.len();
             let parent_b_instruction_len = parents[1].instructions.len();
 
-            let new_parents = Breed::two_point_crossover(&parents[0], &parents[1]);
+            let new_parents = BreedEngine::two_point_crossover(&parents[0], &parents[1]);
 
             debug_assert!(new_parents[0].instructions.len() > 0);
             debug_assert!(new_parents[1].instructions.len() > 0);

@@ -10,7 +10,7 @@ impl ValidInput for CartPoleInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
-    fn get(&self, idx: usize) -> f64 {
+    fn get_input_at(&self, idx: usize) -> f64 {
         let state_vector: Vec<f64> = self.environment.state.into();
         state_vector[idx]
     }
@@ -65,13 +65,13 @@ mod tests {
                 crossover_percent: 0.5,
                 mutation_percent: 0.5,
                 n_generations,
-                fitness_parameters: InteractiveLearningParameters::<CartPoleInput>::new(
+                evaluator: InteractiveLearningParameters::<CartPoleInput>::new(
                     InteractiveLearningParametersArgs {
                         n_generations,
                         n_trials,
                     },
                 ),
-                program_parameters: ProgramGeneratorParameters {
+                generator: ProgramGeneratorParameters {
                     max_instructions: 8,
                     instruction_generator_parameters: InstructionGeneratorParameters {
                         n_extras: 1,

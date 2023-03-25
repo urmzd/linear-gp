@@ -22,7 +22,7 @@ impl ValidInput for TestInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
-    fn get(&self, idx: usize) -> f64 {
+    fn get_input_at(&self, idx: usize) -> f64 {
         match idx {
             0..=3 => self.0[idx],
             _ => panic!("Idx out of range."),

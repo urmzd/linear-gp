@@ -2,6 +2,8 @@ use clap::Args;
 use derivative::Derivative;
 use derive_builder::Builder;
 use rand::distributions::uniform::{UniformInt, UniformSampler};
+use rand::distributions::Standard;
+use rand::prelude::Distribution;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
@@ -9,7 +11,8 @@ use std::fmt::Debug;
 use crate::utils::executables::Op;
 use crate::utils::random::generator;
 
-use super::characteristics::Generate;
+use super::engines::generate_engine::{Generate, GenerateEngine};
+use super::engines::mutate_engine::{Mutate, MutateEngine};
 use super::inputs::ValidInput;
 use super::registers::Registers;
 
@@ -19,7 +22,7 @@ pub enum Mode {
     Internal,
 }
 
-impl Mode {
+impl Distribution<Mode> for Standard {
     fn sample<R: Rng + ?Sized>(rng: &mut R) -> Mode {
         let mode_repr = UniformInt::<usize>::new_inclusive(0, 1).sample(rng);
 
@@ -61,18 +64,18 @@ pub struct Instruction {
     external_factor: f64,
 }
 
-impl InstructionGeneratorParameters {
-    pub fn generate(&self) -> Instruction {
+impl Generate<InstructionGeneratorParameters, Instruction> for GenerateEngine {
+    fn generate(using: InstructionGeneratorParameters) -> Instruction {
         let current_generator = &mut generator();
 
-        let src_idx = UniformInt::<usize>::new(0, self.n_registers()).sample(current_generator);
+        let src_idx = UniformInt::<usize>::new(0, using.n_registers()).sample(current_generator);
 
         let mode = generator().gen();
 
         let upper_bound_target_index = if mode == Mode::External {
-            self.n_inputs
+            using.n_inputs
         } else {
-            self.n_registers()
+            using.n_registers()
         };
 
         let target_index =
@@ -85,12 +88,14 @@ impl InstructionGeneratorParameters {
             tgt_idx: target_index,
             mode,
             op: executable,
-            external_factor: self.external_factor,
+            external_factor: using.external_factor,
         }
     }
+}
 
-    fn mutate(&self, instruction: &Instruction) -> Self {
-        let mut mutated = self.generate();
+impl Mutate<InstructionGeneratorParameters, Instruction> for MutateEngine {
+    fn mutate(instruction: &mut Instruction, using: InstructionGeneratorParameters) -> Self {
+        let mut mutated = GenerateEngine::generate(using);
         let cloned_object = instruction.clone();
 
         let swap_target = generator().gen();

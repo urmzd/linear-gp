@@ -62,10 +62,10 @@ mod tests {
                 crossover_percent: 0.5,
                 mutation_percent: 0.5,
                 n_generations,
-                fitness_parameters: InteractiveLearningParameters::<MountainCarInput>::new(
+                evaluator: InteractiveLearningParameters::<MountainCarInput>::new(
                     InteractiveLearningParametersArgs::new(n_generations, n_trials),
                 ),
-                program_parameters: ProgramGeneratorParameters::new(
+                generator: ProgramGeneratorParameters::new(
                     12,
                     InstructionGeneratorParameters::new(1, 10.),
                 ),
@@ -91,10 +91,10 @@ mod tests {
                 mutation_percent: 0.5,
                 crossover_percent: 0.5,
                 n_generations,
-                fitness_parameters: InteractiveLearningParameters::<MountainCarInput>::new(
+                evaluator: InteractiveLearningParameters::<MountainCarInput>::new(
                     InteractiveLearningParametersArgs::new(n_generations, n_trials),
                 ),
-                program_parameters: QProgramGeneratorParameters::new(
+                generator: QProgramGeneratorParameters::new(
                     ProgramGeneratorParameters::new(
                         12,
                         InstructionGeneratorParameters::new(1, 10.),
