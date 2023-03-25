@@ -1,10 +1,9 @@
-use crate::core::characteristics::Reset;
+use crate::core::{characteristics::Reset, input_engine::EnvironmentalFactor, program::Program};
 use core::fmt::Debug;
 use std::cmp::Ordering;
 
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use std::io::prelude::*;
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, Serialize, Deserialize)]
 pub enum FitnessScore {
@@ -58,14 +57,14 @@ impl FitnessScore {
     pub fn unwrap(&self) -> f64 {
         match self {
             FitnessScore::Valid(fitness_score) => *fitness_score,
-            _ => panic!("Tried to unwrap a value from an invalid FitnessScore."),
+            _ => unreachable!(),
         }
     }
 }
 
-pub trait Fitness<I, P> {
+pub trait Fitness<E, P> {
     // Takes a set of parameters, runs the program and updates the item to contain the new fitness.
-    fn eval_fitness(item: &mut I, parameters: &mut P);
+    fn eval_fitness(item: &mut Program, environment: &mut E, additonal_parameters: &mut P);
 }
 
 pub struct FitnessEngine;

@@ -3,7 +3,7 @@ use lgp::{
     core::{
         algorithm::{GeneticAlgorithm, HyperParameters},
         characteristics::Fitness,
-        inputs::ValidInput,
+        input_engine::InputSource,
         instruction::InstructionGeneratorParameters,
         program::ProgramGeneratorParameters,
     },
@@ -19,7 +19,7 @@ use lgp::{
 #[command(propagate_version = true)]
 struct Cli<T>
 where
-    T: ValidInput,
+    T: InputSource,
 {
     #[arg(value_enum)]
     problem_type: ProblemType,

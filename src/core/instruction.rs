@@ -8,13 +8,13 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-use crate::utils::executables::Op;
 use crate::utils::random::generator;
 
 use super::engines::generate_engine::{Generate, GenerateEngine};
 use super::engines::mutate_engine::{Mutate, MutateEngine};
-use super::inputs::ValidInput;
+use super::input_engine::EnvironmentalFactor;
 use super::registers::Registers;
+use derive_more::Display;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Copy, Deserialize)]
 pub enum Mode {
@@ -22,14 +22,45 @@ pub enum Mode {
     Internal,
 }
 
-impl Distribution<Mode> for Standard {
-    fn sample<R: Rng + ?Sized>(rng: &mut R) -> Mode {
-        let mode_repr = UniformInt::<usize>::new_inclusive(0, 1).sample(rng);
+#[derive(Clone, Copy, Debug, Display, Serialize, PartialEq, Eq, Deserialize)]
+pub enum Op {
+    #[display(fmt = "+")]
+    Add,
+    #[display(fmt = "*")]
+    Mult,
+    #[display(fmt = "/")]
+    Divide,
+    #[display(fmt = "-")]
+    Sub,
+}
 
-        if mode_repr == 0 {
-            Mode::External
-        } else {
-            Mode::Internal
+impl Op {
+    pub fn apply(&self, a: f64, b: f64) -> f64 {
+        match *self {
+            Op::Add => a + b,
+            Op::Mult => a * b,
+            Op::Divide => a / 2.,
+            Op::Sub => a - b,
+        }
+    }
+}
+
+impl Distribution<Op> for Standard {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Op {
+        match rng.gen_range(0..=3) {
+            0 => Op::Add,
+            1 => Op::Mult,
+            2 => Op::Divide,
+            _ => Op::Sub,
+        }
+    }
+}
+
+impl Distribution<Mode> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Mode {
+        match rng.gen_bool(0.5) {
+            false => Mode::External,
+            true => Mode::Internal,
         }
     }
 }
@@ -49,7 +80,7 @@ pub struct InstructionGeneratorParameters {
 
 impl InstructionGeneratorParameters {
     pub fn n_registers(&self) -> usize {
-        // | -1 | 0 | 1 | Extra |
+        // Mountain Car Example: | -1 | 0 | 1 | Extra |
         self.n_actions + self.n_extras
     }
 }
@@ -94,9 +125,8 @@ impl Generate<InstructionGeneratorParameters, Instruction> for GenerateEngine {
 }
 
 impl Mutate<InstructionGeneratorParameters, Instruction> for MutateEngine {
-    fn mutate(instruction: &mut Instruction, using: InstructionGeneratorParameters) -> Self {
+    fn mutate(instruction: &mut Instruction, using: InstructionGeneratorParameters) {
         let mut mutated = GenerateEngine::generate(using);
-        let cloned_object = instruction.clone();
 
         let swap_target = generator().gen();
         let swap_source = generator().gen();
@@ -104,42 +134,31 @@ impl Mutate<InstructionGeneratorParameters, Instruction> for MutateEngine {
 
         // Flip a Coin: Target
         if swap_target {
-            cloned_object.mode = mutated.clone();
-            mutated.tgt_idx = mutated.tgt_idx;
+            instruction.mode = mutated.mode;
+            instruction.tgt_idx = mutated.tgt_idx;
         }
 
         // Flip a Coin: Source
         if swap_source {
-            cloned_object.src_idx = mutated.src_idx;
+            instruction.src_idx = mutated.src_idx;
         }
 
         // Flip a Coin: Executable
         if swap_exec {
-            mutated.op = mutated.op;
+            instruction.op = mutated.op;
         }
-
-        mutated
     }
 }
 
 impl Instruction {
-    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &impl ValidInput) {
-        let target_data = if self.mode == Mode::External {
-            Registers::from(input)
-        } else {
-            registers.clone()
-        };
-
-        let target_value = *target_data.get(self.tgt_idx);
-
-        let amplied_target_value = if self.mode == Mode::External {
-            self.external_factor * target_value
-        } else {
-            target_value
+    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &impl EnvironmentalFactor) {
+        let target_value = match self.mode {
+            Mode::External => self.external_factor * input.get_value(self.tgt_idx),
+            _ => *registers.get(self.tgt_idx),
         };
 
         let source_value = *registers.get(self.src_idx);
-        let new_source_value = self.op.apply(source_value, amplied_target_value);
+        let new_source_value = self.op.apply(source_value, target_value);
 
         registers.update(self.src_idx, new_source_value);
     }

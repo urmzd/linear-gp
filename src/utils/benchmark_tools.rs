@@ -4,11 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::core::{
-    algorithm::HyperParameters,
-    characteristics::{Organism, Save},
-    population::Population,
-};
+use crate::core::algorithm::HyperParameters;
 
 use super::types::VoidResultAnyError;
 
@@ -58,13 +54,10 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
 }
 
 pub fn log_benchmarks<T>(
-    population: &Vec<Population<T>>,
-    params: &HyperParameters<T>,
+    populations: &Vec<Vec<T>>,
+    params: &HyperParameters,
     test_name: &str,
-) -> VoidResultAnyError
-where
-    T: Organism,
-{
+) -> VoidResultAnyError {
     let best_path = create_path(
         Path::new(BENCHMARK_PREFIX)
             .join(test_name)
@@ -101,7 +94,7 @@ where
         true,
     )?;
 
-    let (worst, median, best) = population
+    let (worst, median, best) = populations
         .last()
         .map(|p| (p.worst(), p.median(), p.best()))
         .unwrap();
@@ -114,10 +107,7 @@ where
     Ok(())
 }
 
-pub fn output_benchmarks<T>(populations: &Vec<Population<T>>, test_name: &str) -> VoidResultAnyError
-where
-    T: Organism,
-{
+pub fn output_benchmarks<T>(populations: &Vec<Vec<T>>, test_name: &str) -> VoidResultAnyError {
     let plot_path = create_path(
         Path::new(BENCHMARK_PREFIX)
             .join(test_name)

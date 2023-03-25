@@ -1,27 +1,27 @@
+use gym_rs::core::Env;
+use strum::additional_attributes;
+
 use crate::core::{
     characteristics::Reset,
     engines::fitness_engine::{Fitness, FitnessEngine, FitnessScore},
-    inputs::{Inputs, ValidInput},
+    input_engine::{ClassificationEnvironment, EnvironmentalFactor},
     program::Program,
     registers::{ArgmaxInput, AR},
 };
 
-pub trait ClassificationInput: ValidInput {
-    fn get_class(&self) -> usize;
-}
-
-impl<T: ClassificationInput> Fitness<Program, Inputs<T>> for FitnessEngine {
-    fn eval_fitness(program: &mut Program, parameters: &mut Inputs<T>) {
+impl<S: EnvironmentalFactor, E: ClassificationEnvironment<S>> Fitness<E, ()> for FitnessEngine {
+    fn eval_fitness(program: &mut Program, environment: &mut E, parameters: &mut ()) {
+        /// TODO: Reset all registers and states before running.
         program.registers.reset();
 
         let mut n_correct: usize = 0;
 
         for input in parameters {
-            program.run(input);
+            program.run(&input);
 
             match program
                 .registers
-                .argmax(ArgmaxInput::To(T::N_ACTIONS))
+                .argmax(ArgmaxInput::To(S::N_ACTIONS))
                 .one()
             {
                 AR::Overflow => {
@@ -37,7 +37,7 @@ impl<T: ClassificationInput> Fitness<Program, Inputs<T>> for FitnessEngine {
             program.registers.reset();
         }
 
-        let fitness = n_correct as f64 / parameters.len() as f64;
-        program.fitness = FitnessScore::Valid(fitness);
+        let accuracy = n_correct as f64 / parameters.len() as f64;
+        program.fitness = FitnessScore::Valid(accuracy);
     }
 }

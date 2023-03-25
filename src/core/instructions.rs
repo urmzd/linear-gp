@@ -9,7 +9,7 @@ use super::{
 };
 
 impl Breed<Instructions> for BreedEngine {
-    fn two_point_crossover(mate_1: &Instruction, mate_2: &Instruction) -> [Instruction; 2] {
+    fn two_point_crossover(mate_1: &Instructions, mate_2: &Instructions) -> [Instructions; 2] {
         let mut instructions_a = mate_1.clone();
         let mut instructions_b = mate_2.clone();
 
@@ -79,7 +79,11 @@ mod tests {
 
     use crate::{
         core::{
-            engines::{breed_engine::BreedEngine, generate_engine::GenerateEngine},
+            engines::{
+                breed_engine::{Breed, BreedEngine},
+                generate_engine::{Generate, GenerateEngine},
+            },
+            input_engine::EnvironmentalFactor,
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
