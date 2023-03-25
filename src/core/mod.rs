@@ -1,4 +1,4 @@
-pub mod algorithm;
+// pub mod algorithm;
 pub mod characteristics;
 pub mod config;
 pub mod input_engine;

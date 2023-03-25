@@ -1,43 +1,35 @@
-use gym_rs::core::Env;
-use strum::additional_attributes;
-
 use crate::core::{
-    characteristics::Reset,
     engines::fitness_engine::{Fitness, FitnessEngine, FitnessScore},
-    input_engine::{ClassificationEnvironment, EnvironmentalFactor},
+    input_engine::State,
     program::Program,
-    registers::{ArgmaxInput, AR},
+    registers::{ActionRegister, ArgmaxInput},
 };
 
-impl<S: EnvironmentalFactor, E: ClassificationEnvironment<S>> Fitness<E, ()> for FitnessEngine {
-    fn eval_fitness(program: &mut Program, environment: &mut E, parameters: &mut ()) {
-        /// TODO: Reset all registers and states before running.
-        program.registers.reset();
+impl<T> Fitness<T, ()> for FitnessEngine
+where
+    T: State,
+{
+    fn eval_fitness(program: &mut Program, states: &mut T, parameters: &mut ()) -> FitnessScore {
+        let mut n_correct = 0.;
+        let mut n_total = 0.;
 
-        let mut n_correct: usize = 0;
-
-        for input in parameters {
-            program.run(&input);
+        while let Some(state) = states.next_state() {
+            program.run(&state);
 
             match program
                 .registers
-                .argmax(ArgmaxInput::To(S::N_ACTIONS))
+                .argmax(ArgmaxInput::To(T::N_ACTIONS))
                 .one()
             {
-                AR::Overflow => {
-                    return {
-                        program.fitness = FitnessScore::OutOfBounds;
-                    }
-                }
-                AR::Value(predicted_class) => {
-                    n_correct += (predicted_class == input.get_class()) as usize;
+                ActionRegister::Overflow => return FitnessScore::OutOfBounds,
+                ActionRegister::Value(predicted_class) => {
+                    n_correct += state.execute_action(predicted_class);
                 }
             };
 
-            program.registers.reset();
+            n_total += 1.;
         }
 
-        let accuracy = n_correct as f64 / parameters.len() as f64;
-        program.fitness = FitnessScore::Valid(accuracy);
+        FitnessScore::Valid(n_correct / n_total)
     }
 }

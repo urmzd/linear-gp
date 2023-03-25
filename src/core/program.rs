@@ -20,7 +20,7 @@ use super::{
         generate_engine::{Generate, GenerateEngine},
         mutate_engine::{Mutate, MutateEngine},
     },
-    input_engine::EnvironmentalFactor,
+    input_engine::State,
     instruction::InstructionGeneratorParameters,
     instructions::Instructions,
     registers::Registers,
@@ -57,7 +57,7 @@ pub struct Program {
 }
 
 impl Program {
-    pub fn run(&mut self, input: &impl EnvironmentalFactor) {
+    pub fn run(&mut self, input: &impl State) {
         for instruction in &self.instructions {
             instruction.apply(&mut self.registers, input)
         }

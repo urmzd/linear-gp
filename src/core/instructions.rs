@@ -83,7 +83,7 @@ mod tests {
                 breed_engine::{Breed, BreedEngine},
                 generate_engine::{Generate, GenerateEngine},
             },
-            input_engine::EnvironmentalFactor,
+            input_engine::State,
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
