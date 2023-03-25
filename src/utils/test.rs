@@ -4,53 +4,68 @@ use rand::{distributions::Standard, prelude::Distribution};
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 
-use crate::{
-    core::{algorithm::GeneticAlgorithm, inputs::ValidInput, program::Program},
-    extensions::classification::{ClassificationInput, ClassificationParameters},
-};
+use crate::core::input_engine::EnvironmentalFactor;
 
-#[derive(PartialEq, PartialOrd, Clone, Debug, Deserialize, Serialize)]
-pub struct TestInput(pub [f64; 5]);
-
-#[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount, Deserialize, Serialize)]
-pub enum TestRepresent {
+#[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount, Deserialize, Serialize, Debug)]
+pub enum TestOutput {
     One = 0,
     Two = 1,
 }
 
-impl ValidInput for TestInput {
+#[derive(PartialEq, PartialOrd, Clone, Debug, Deserialize, Serialize)]
+pub struct TestInput {
+    a: f64,
+    b: f64,
+    c: f64,
+    d: f64,
+    e: TestOutput,
+}
+
+impl EnvironmentalFactor for TestInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
-    fn get_input_at(&self, idx: usize) -> f64 {
-        match idx {
-            0..=3 => self.0[idx],
-            _ => panic!("Idx out of range."),
+    fn get_value(&self, at_idx: usize) -> f64 {
+        match at_idx {
+            0 => self.a,
+            1 => self.b,
+            2 => self.c,
+            3 => self.d,
+            _ => unreachable!(),
         }
-    }
-}
-
-impl ClassificationInput for TestInput {
-    fn get_class(&self) -> usize {
-        self.0[Self::N_INPUTS] as usize
     }
 }
 
 impl Default for TestInput {
     fn default() -> Self {
-        TestInput([0.; 5])
+        TestInput {
+            a: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: TestOutput::One,
+        }
     }
 }
 
 impl Distribution<TestInput> for Standard {
     fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> TestInput {
-        let data: [f64; 5] = [0.; 5].map(|_| rng.gen_range((0.)..=(1.)));
-        TestInput(data)
+        let data: [f64; 4] = [0.0; 4].map(|_| rng.gen_range(0.0..=1.0));
+        TestInput {
+            a: data[0],
+            b: data[1],
+            c: data[2],
+            d: data[3],
+            e: rng.gen(),
+        }
     }
 }
 
-pub struct TestLgp;
-
-impl GeneticAlgorithm for TestLgp {
-    type O = Program<ClassificationParameters<TestInput>>;
+impl Distribution<TestOutput> for Standard {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> TestOutput {
+        match rng.gen_bool(0.5) {
+            true => TestOutput::One,
+            false => TestOutput::Two,
+        }
+    }
 }

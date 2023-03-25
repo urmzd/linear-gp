@@ -81,7 +81,7 @@ impl ValidInput for IrisInput {
             1 => self.sepal_width,
             2 => self.petal_length,
             3 => self.petal_width,
-            _ => panic!("idx out of range"),
+            _ => unreachable!(),
         }
     }
 }

@@ -1,5 +1,3 @@
-use config::{Config, Environment, File, FileFormat};
-
 // pub fn load_config<T>(config_path: &str) -> HyperParameters<T>
 // where
 //     T: Fitness + Generate + Clone,

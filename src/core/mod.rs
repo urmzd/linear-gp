@@ -1,7 +1,7 @@
 pub mod algorithm;
 pub mod characteristics;
 pub mod config;
-pub mod inputs;
+pub mod input_engine;
 pub mod instruction;
 pub mod instructions;
 pub mod program;

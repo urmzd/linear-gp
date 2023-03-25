@@ -1,18 +1,9 @@
-use std::path::PathBuf;
-use std::{iter::repeat_with, marker::PhantomData};
-
-use csv::ReaderBuilder;
 use derive_builder::Builder;
-use rand::prelude::{IteratorRandom, SliceRandom};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use tracing::info;
-use uuid::Uuid;
 
-use crate::utils::random::generator;
-
-use super::engines::fitness_engine::{Fitness, FitnessEngine};
-use super::engines::generate_engine::{Generate, GenerateEngine};
-use super::inputs::{Inputs, ValidInput};
+use super::engines::core_engine::CoreEngine;
+use super::engines::fitness_engine::Fitness;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Builder)]
 pub struct HyperParameters {
@@ -28,29 +19,29 @@ pub struct HyperParameters {
     pub n_generations: usize,
 }
 
-/// Defines a program capable of loading inputs from various sources.
-pub trait SupportLoad
-where
-    Self::InputType: ValidInput + DeserializeOwned,
-{
-    type InputType;
+// /// Defines a program capable of loading inputs from various sources.
+// pub trait SupportLoad
+// where
+//     Self::InputType: Input + DeserializeOwned,
+// {
+//     type InputType;
 
-    /// Loads entities from a csv file found on the local file system.
-    fn load_from_csv(file_path: impl Into<PathBuf>) -> Inputs<Self::InputType> {
-        let mut csv_reader = ReaderBuilder::new()
-            .has_headers(false)
-            .from_path(file_path.into())
-            .unwrap();
+//     /// Loads entities from a csv file found on the local file system.
+//     fn load_from_csv(file_path: impl Into<PathBuf>) -> Vec<Self::InputType> {
+//         let mut csv_reader = ReaderBuilder::new()
+//             .has_headers(false)
+//             .from_path(file_path.into())
+//             .unwrap();
 
-        let inputs: Result<Inputs<Self::InputType>, _> = csv_reader
-            .deserialize()
-            .into_iter()
-            .map(|input| input)
-            .collect();
+//         let inputs: Result<Vec<Self::InputType>, _> = csv_reader
+//             .deserialize()
+//             .into_iter()
+//             .map(|input| input)
+//             .collect();
 
-        inputs.unwrap()
-    }
-}
+//         inputs.unwrap()
+//     }
+// }
 
 pub struct GeneticAlgorithmIter<T> {
     generation: usize,
@@ -60,7 +51,7 @@ pub struct GeneticAlgorithmIter<T> {
 
 impl<T> GeneticAlgorithmIter<T> {
     pub fn new(params: HyperParameters) -> Self {
-        let (current_population, params) = GeneticAlgorithm::init_pop::<T>(params.clone());
+        let (current_population, params) = CoreEngine::init_pop(params.clone());
 
         Self {
             generation: 0,
@@ -82,9 +73,8 @@ impl<T> Iterator for GeneticAlgorithmIter<T> {
         let mut population = self.next_population.clone().unwrap();
         let mut params = self.params.clone();
 
-        (population, params) = G::eval_fitness(population, params);
-        (population, params) = G::rank(population, params);
-        (population, params) = G::on_post_rank(population, params);
+        CoreEngine::eval_fitness(population, params);
+        CoreEngine::rank(population, params);
 
         assert!(population
             .iter()
@@ -97,137 +87,14 @@ impl<T> Iterator for GeneticAlgorithmIter<T> {
             generation = serde_json::to_string(&self.generation).unwrap()
         );
 
-        let (new_population, params) = G::survive(population.clone(), params);
-        let (new_population, ..) = G::variation(new_population, params);
+        let new_population = population.clone();
 
-        self.next_population = Some(new_population.clone());
+        CoreEngine::survive();
+        CoreEngine::variation(new_population, params);
+
+        self.next_population = Some(new_population);
         self.generation += 1;
 
         return Some(population.clone());
-    }
-}
-
-trait GeneticAlgorithm<I, P, F> {
-    fn init_pop(program_parameters: P, population_size: usize) -> Vec<I> {
-        let population = repeat_with(GenerateEngine::generate(program_parameters))
-            .take(population_size)
-            .collect();
-
-        population
-    }
-
-    fn eval_fitness(population: &mut Vec<I>, evaluator: FitnessEngine) {
-        for individual in population.iter_mut() {
-            evaluator.eval_fitness(individual, parameters);
-            debug_assert!(!individual.get_fitness().is_not_evaluated());
-        }
-    }
-
-    fn rank(population: &mut Vec<I>) {
-        population.sort();
-        // Organize individuals by their fitness score.
-        debug_assert!(population.worst() <= population.best());
-    }
-
-    fn survive(population: &mut Vec<I>, gap: f64) {
-        let pop_len = population.len();
-
-        let mut n_of_individuals_to_drop =
-            (pop_len as isize) - ((1.0 - gap) * (pop_len as f64)).floor() as isize;
-
-        // Drop invalid individuals.
-        while let Some(true) = population.worst().map(|p| p.get_fitness().is_invalid()) {
-            population.pop();
-            n_of_individuals_to_drop -= 1;
-        }
-
-        // Drop remaining gap, if any...
-        while n_of_individuals_to_drop > 0 {
-            n_of_individuals_to_drop -= 1;
-            population.pop();
-        }
-    }
-
-    fn variation(
-        population: &mut Vec<I>,
-        crossover_percent: f64,
-        mutation_percent: f64,
-        program_parameters: P,
-    ) {
-        debug_assert!(population.len() > 0);
-
-        let pop_cap = population.capacity();
-        let pop_len = population.len();
-
-        let mut remaining_pool_spots = pop_cap - pop_len;
-
-        if remaining_pool_spots == 0 {
-            return;
-        }
-
-        let mut n_mutations = (remaining_pool_spots as f64 * mutation_percent).floor() as usize;
-        let mut n_crossovers = (remaining_pool_spots as f64 * crossover_percent).floor() as usize;
-
-        debug_assert!(n_mutations + n_crossovers <= remaining_pool_spots);
-
-        let mut offspring = vec![];
-
-        // Crossover + Mutation
-        while (n_crossovers + n_mutations) > 0 {
-            // Step 1: Choose Parents
-            let selected_a = population.iter().choose(&mut generator());
-            let selected_b = population.iter().choose(&mut generator());
-
-            // Step 2: Transform Children
-            if let (Some(parent_a), Some(parent_b)) = (selected_a, selected_b) {
-                // NOTE: This can be done in parallel.
-                // Step 2A: Crossover
-                if n_crossovers > 0 {
-                    let child = parent_a
-                        .two_point_crossover(parent_b)
-                        .choose(&mut generator())
-                        .unwrap()
-                        .to_owned();
-
-                    remaining_pool_spots -= 1;
-                    n_crossovers -= 1;
-
-                    offspring.push(child)
-                }
-
-                // Step 2B: Mutate
-                if n_mutations > 0 {
-                    let parents = [parent_a, parent_b];
-                    let parent_to_mutate = parents.choose(&mut generator());
-
-                    let child = parent_to_mutate
-                        .map(|parent| program_parameters.mutate(parent))
-                        .unwrap();
-
-                    remaining_pool_spots -= 1;
-                    n_mutations -= 1;
-
-                    offspring.push(child)
-                }
-            } else {
-                panic!("Woah, this should never happen. The whole population died out.")
-            };
-        }
-
-        // Fill reset with clones
-        for individual in population
-            .iter()
-            .choose_multiple(&mut generator(), remaining_pool_spots)
-        {
-            offspring.push(individual.reset_new())
-        }
-
-        population.extend(offspring);
-    }
-
-    /// Build generator.
-    fn build(hyper_params: HyperParameters) -> GeneticAlgorithmIter<I> {
-        info!(run_id = &(Uuid::new_v4()).to_string());
-        GeneticAlgorithmIter::new(hyper_params)
     }
 }

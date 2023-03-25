@@ -143,80 +143,70 @@ where
 
 impl<T> Fitness<InteractiveLearningParameters<T>> for QProgram {
     fn eval_fitness(&mut self, mut parameters: InteractiveLearningParameters<T>) {
-        let mut scores = vec![];
+        let mut score = 0.;
 
-        for initial_state in parameters.get_states() {
-            parameters.environment.set_state(initial_state.clone());
+        // We run the program and determine what action to take at the step = 0.
+        let mut current_action_state = match get_action_state(
+            &mut parameters.environment,
+            &mut self.q_table,
+            &mut self.program,
+        ) {
+            Some(action_state) => action_state,
+            None => {
+                self.program.fitness = FitnessScore::OutOfBounds;
+                return;
+            }
+        };
 
-            let mut score = 0.;
+        // We execute the selected action and continue to repeat the cycle until termination.
+        for _step in 0..T::MAX_EPISODE_LENGTH {
+            // Act.
+            let state_reward_pair = parameters
+                .environment
+                .execute_action(current_action_state.action);
 
-            // We run the program and determine what action to take at the step = 0.
-            let mut current_action_state = match get_action_state(
+            let reward = state_reward_pair.get_value();
+            score += reward;
+
+            if state_reward_pair.is_terminal() {
+                break;
+            }
+
+            let next_action_state = match get_action_state(
                 &mut parameters.environment,
                 &mut self.q_table,
                 &mut self.program,
             ) {
-                Some(action_state) => action_state,
                 None => {
-                    self.program.fitness = FitnessScore::OutOfBounds;
-                    return;
+                    // We've encountered numerical instability. The program is not considered valid, and thus
+                    // has the lowest score.
+                    return {
+                        self.program.fitness = FitnessScore::OutOfBounds;
+                    };
                 }
+                Some(action_state) => action_state,
             };
 
-            // We execute the selected action and continue to repeat the cycle until termination.
-            for _step in 0..T::MAX_EPISODE_LENGTH {
-                // Act.
-                let state_reward_pair = parameters
-                    .environment
-                    .execute_action(current_action_state.action);
-
-                let reward = state_reward_pair.get_value();
-                score += reward;
-
-                if state_reward_pair.is_terminal() {
-                    break;
-                }
-
-                let next_action_state = match get_action_state(
-                    &mut parameters.environment,
-                    &mut self.q_table,
-                    &mut self.program,
-                ) {
-                    None => {
-                        // We've encountered numerical instability. The program is not considered valid, and thus
-                        // has the lowest score.
-                        return {
-                            self.program.fitness = FitnessScore::OutOfBounds;
-                        };
-                    }
-                    Some(action_state) => action_state,
-                };
-
-                // We only update when there is a transition.
-                if current_action_state.register != next_action_state.register {
-                    self.q_table
-                        .update(current_action_state, reward, next_action_state)
-                }
-
-                current_action_state = next_action_state;
+            // We only update when there is a transition.
+            if current_action_state.register != next_action_state.register {
+                self.q_table
+                    .update(current_action_state, reward, next_action_state)
             }
 
-            // Reset for next evaluation.
-            self.program.registers.reset_new();
-            scores.push(score);
-
-            info!(
-                id = serde_json::to_string(&self.program.id.to_string()).unwrap(),
-                q_table = serde_json::to_string(&self.q_table).unwrap(),
-                initial_state = serde_json::to_string(&initial_state.into()).unwrap(),
-                score = serde_json::to_string(&score).unwrap()
-            );
+            current_action_state = next_action_state;
         }
 
-        scores.sort_by(|a, b| a.partial_cmp(&b).unwrap());
-        let median = scores.get(scores.len() / 2).take().unwrap();
+        // Reset for next evaluation.
+        self.program.registers.reset_new();
 
-        let fitness_score = FitnessScore::Valid(*median);
+        info!(
+            id = serde_json::to_string(&self.program.id.to_string()).unwrap(),
+            q_table = serde_json::to_string(&self.q_table).unwrap(),
+            initial_state = serde_json::to_string(&initial_state.into()).unwrap(),
+            score = serde_json::to_string(&score).unwrap()
+        );
+
+        let fitness_score = FitnessScore::Valid(*score);
 
         self.program.fitness = fitness_score;
     }

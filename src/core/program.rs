@@ -13,15 +13,15 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::{
-    characteristics::Reset,
+    characteristics::{Reset, ResetNew},
     engines::{
         breed_engine::{Breed, BreedEngine},
         fitness_engine::FitnessScore,
         generate_engine::{Generate, GenerateEngine},
         mutate_engine::{Mutate, MutateEngine},
     },
-    inputs::ValidInput,
-    instruction::{Instruction, InstructionGeneratorParameters},
+    input_engine::EnvironmentalFactor,
+    instruction::InstructionGeneratorParameters,
     instructions::Instructions,
     registers::Registers,
 };
@@ -43,7 +43,7 @@ impl Reset for Program {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Derivative)]
+#[derive(Debug, Clone, Serialize, Deserialize, Derivative)]
 #[derivative(PartialEq, PartialOrd)]
 pub struct Program {
     #[derivative(PartialOrd = "ignore")]
@@ -56,15 +56,8 @@ pub struct Program {
     pub fitness: FitnessScore,
 }
 
-pub trait ProgramParameters
-where
-    Self::InputType: ValidInput,
-{
-    type InputType;
-}
-
 impl Program {
-    pub fn run(&mut self, input: &impl ValidInput) {
+    pub fn run(&mut self, input: &impl EnvironmentalFactor) {
         for instruction in &self.instructions {
             instruction.apply(&mut self.registers, input)
         }
@@ -81,9 +74,10 @@ impl Generate<ProgramGeneratorParameters, Program> for GenerateEngine {
 
         let registers = Registers::new(instruction_generator_parameters.n_registers());
         let n_instructions = Uniform::new_inclusive(1, max_instructions).sample(&mut generator());
-        let instructions = repeat_with(|| Instruction::generate(instruction_generator_parameters))
-            .take(n_instructions)
-            .collect();
+        let instructions =
+            repeat_with(|| GenerateEngine::generate(instruction_generator_parameters))
+                .take(n_instructions)
+                .collect();
 
         Program {
             id: Uuid::new_v4(),
@@ -116,9 +110,8 @@ impl Mutate<ProgramGeneratorParameters, Program> for MutateEngine {
 
 impl Breed<Program> for BreedEngine {
     fn two_point_crossover(mate_1: &Program, mate_2: &Program) -> [Program; 2] {
-        let child_instructions = mate_1
-            .instructions
-            .two_point_crossover(&mate_2.instructions);
+        let child_instructions =
+            BreedEngine::two_point_crossover(&mate_1.instructions, &mate_2.instructions);
 
         child_instructions.map(|instructions| {
             let mut parent = mate_1.reset_new();
@@ -143,12 +136,12 @@ mod tests {
             n_actions: TestInput::N_ACTIONS,
             n_inputs: TestInput::N_INPUTS,
         };
-        let instructions_a: Instructions<TestInput> =
-            (0..10).map(|_| Instruction::generate(params)).collect();
-        let instructions_b: Instructions<TestInput> =
-            (0..10).map(|_| Instruction::generate(params)).collect();
+        let instructions_a: Instructions =
+            (0..10).map(|_| GenerateEngine::generate(params)).collect();
+        let instructions_b: Instructions =
+            (0..10).map(|_| GenerateEngine::generate(params)).collect();
 
-        let [child_a, child_b] = instructions_a.two_point_crossover(&instructions_b);
+        let [child_a, child_b] = BreedEngine::two_point_crossover(&instructions_a, &instructions_b);
 
         assert_ne!(child_a, child_b);
 
@@ -172,10 +165,10 @@ mod tests {
             instruction_generator_parameters,
         };
 
-        let program_a = program_params.generate();
-        let program_b = program_params.generate();
+        let program_a = GenerateEngine::generate(program_params);
+        let program_b = GenerateEngine::generate(program_params);
 
-        let [child_a, child_b] = program_a.two_point_crossover(&program_b);
+        let [child_a, child_b] = BreedEngine::two_point_crossover(&program_a, &program_b);
 
         assert_ne!(child_a, child_b);
 
