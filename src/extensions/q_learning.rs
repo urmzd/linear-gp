@@ -2,29 +2,40 @@ use std::fmt::{self, Debug};
 
 use clap::Args;
 use derivative::Derivative;
-use rand::distributions::uniform::{UniformFloat, UniformInt, UniformSampler};
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
 use crate::{
     core::{
-        algorithm::{GeneticAlgorithm, HyperParameters},
-        characteristics::{Breed, Fitness, FitnessScore, Generate, Mutate, Reset, ResetNew},
-        inputs::ValidInput,
+        characteristics::{Reset, ResetNew},
+        engines::{
+            breed_engine::{Breed, BreedEngine},
+            fitness_engine::{Fitness, FitnessEngine, FitnessScore},
+            generate_engine::{Generate, GenerateEngine},
+            mutate_engine::{Mutate, MutateEngine},
+        },
+        input_engine::{RlState, State},
+        instruction::InstructionGeneratorParameters,
         program::{Program, ProgramGeneratorParameters},
-        registers::{ArgmaxInput, Registers, AR},
+        registers::{ActionRegister, ArgmaxInput, Registers},
     },
     utils::{float_ops, random::generator},
 };
 
-use super::interactive::{ILgp, InteractiveLearningInput, InteractiveLearningParameters};
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct QTable {
     table: Vec<Vec<f64>>,
-    n_actions: usize,
-    n_registers: usize,
     q_consts: QConsts,
+}
+
+impl Generate<(InstructionGeneratorParameters, QConsts), QTable> for GenerateEngine {
+    fn generate(using: (InstructionGeneratorParameters, QConsts)) -> QTable {
+        QTable {
+            table: vec![vec![0.; using.0.n_actions]; using.0.n_registers()],
+            q_consts: using.1,
+        }
+    }
 }
 
 impl Debug for QTable {
@@ -46,18 +57,9 @@ impl Reset for QTable {
 }
 
 impl QTable {
-    pub fn new(n_actions: usize, n_registers: usize, q_consts: QConsts) -> Self {
-        let table = vec![vec![0.; n_actions]; n_registers];
-        QTable {
-            table,
-            n_actions,
-            n_registers,
-            q_consts,
-        }
-    }
-
     pub fn action_random(&self) -> usize {
-        UniformInt::<usize>::new(0, self.n_actions).sample(&mut generator())
+        let n_actions = self.table[0].len();
+        generator().gen_range(0..n_actions)
     }
 
     pub fn action_argmax(&self, register_number: usize) -> usize {
@@ -74,11 +76,11 @@ impl QTable {
 
     pub fn get_action_register(&self, registers: &Registers) -> Option<ActionRegisterPair> {
         let winning_register = match registers.argmax(ArgmaxInput::All).any() {
-            AR::Value(register) => register,
+            ActionRegister::Value(register) => register,
             _ => return None,
         };
 
-        let prob = UniformFloat::<f64>::new_inclusive(0., 1.).sample(&mut generator());
+        let prob = generator().gen_range((0.)..(1.));
 
         let winning_action = if prob <= self.q_consts.epsilon_active {
             self.action_random()
@@ -130,7 +132,7 @@ fn get_action_state<T>(
     program: &mut Program,
 ) -> Option<ActionRegisterPair>
 where
-    T: InteractiveLearningInput,
+    T: State,
 {
     // Run the program on the current state.
     program.run(environment);
@@ -141,115 +143,79 @@ where
     action_state
 }
 
-impl<T> Fitness<InteractiveLearningParameters<T>> for QProgram {
-    fn eval_fitness(&mut self, mut parameters: InteractiveLearningParameters<T>) {
+impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
+    fn eval_fitness(
+        program: &mut Program,
+        states: &mut T,
+        params: &mut QTable,
+    ) -> crate::core::engines::fitness_engine::FitnessScore {
         let mut score = 0.;
 
         // We run the program and determine what action to take at the step = 0.
-        let mut current_action_state = match get_action_state(
-            &mut parameters.environment,
-            &mut self.q_table,
-            &mut self.program,
-        ) {
+        let mut current_action_state = match get_action_state(states, &mut params, &mut program) {
             Some(action_state) => action_state,
-            None => {
-                self.program.fitness = FitnessScore::OutOfBounds;
-                return;
-            }
+            None => return FitnessScore::OutOfBounds,
         };
 
         // We execute the selected action and continue to repeat the cycle until termination.
-        for _step in 0..T::MAX_EPISODE_LENGTH {
+        while let Some(state) = states.next_state() {
             // Act.
-            let state_reward_pair = parameters
-                .environment
-                .execute_action(current_action_state.action);
-
-            let reward = state_reward_pair.get_value();
+            let reward = state.execute_action(current_action_state.action);
             score += reward;
 
-            if state_reward_pair.is_terminal() {
+            if state.is_terminal() {
                 break;
             }
 
-            let next_action_state = match get_action_state(
-                &mut parameters.environment,
-                &mut self.q_table,
-                &mut self.program,
-            ) {
-                None => {
-                    // We've encountered numerical instability. The program is not considered valid, and thus
-                    // has the lowest score.
-                    return {
-                        self.program.fitness = FitnessScore::OutOfBounds;
-                    };
-                }
+            let next_action_state = match get_action_state(&mut state, &mut params, &mut program) {
+                None => return FitnessScore::OutOfBounds,
                 Some(action_state) => action_state,
             };
 
             // We only update when there is a transition.
+            // NOTE: Why?
             if current_action_state.register != next_action_state.register {
-                self.q_table
-                    .update(current_action_state, reward, next_action_state)
+                params.update(current_action_state, reward, next_action_state)
             }
 
             current_action_state = next_action_state;
         }
 
-        // Reset for next evaluation.
-        self.program.registers.reset_new();
-
         info!(
-            id = serde_json::to_string(&self.program.id.to_string()).unwrap(),
-            q_table = serde_json::to_string(&self.q_table).unwrap(),
-            initial_state = serde_json::to_string(&initial_state.into()).unwrap(),
+            id = serde_json::to_string(&program.id.to_string()).unwrap(),
+            q_table = serde_json::to_string(&params).unwrap(),
+            initial_state = serde_json::to_string(&params.into()).unwrap(),
             score = serde_json::to_string(&score).unwrap()
         );
 
-        let fitness_score = FitnessScore::Valid(*score);
-
-        self.program.fitness = fitness_score;
+        FitnessScore::Valid(score)
     }
 }
 
-impl Breed for QProgram {
-    fn two_point_crossover(&self, mate: &Self) -> [Self; 2] {
-        let children = self.program.two_point_crossover(&mate.program);
+impl Breed<QProgram> for BreedEngine {
+    fn two_point_crossover(mate_1: &QProgram, mate_2: &QProgram) -> [QProgram; 2] {
+        let children = BreedEngine::two_point_crossover(&mate_1.program, &mate_2.program);
         children.map(|program| QProgram {
             program,
-            q_table: self.q_table.reset_new(),
+            q_table: mate_1.q_table.reset_new(),
         })
     }
 }
 
-impl Mutate for QProgram {
-    fn mutate(&self, parameters: Self::GeneratorParameters) -> Self {
-        let mutated = self.program.mutate(parameters.program_parameters);
-        QProgram {
-            program: mutated,
-            q_table: self.q_table.reset_new(),
-        }
+impl Mutate<QProgramGeneratorParameters, QProgram> for MutateEngine {
+    fn mutate(item: &mut QProgram, using: QProgramGeneratorParameters) {
+        MutateEngine::mutate(&mut item.program, using.program_parameters);
+        item.q_table.reset_new();
     }
 }
 
-impl<T> Generate for QProgram<T>
-where
-    T: InteractiveLearningInput,
-{
-    type GeneratorParameters = QProgramGeneratorParameters<T>;
-
-    fn generate(parameters: Self::GeneratorParameters) -> Self {
-        let program = Program::generate(parameters.program_parameters);
-
-        let instruction_params = &parameters
-            .program_parameters
-            .instruction_generator_parameters;
-
-        let q_table = QTable::new(
-            instruction_params.n_actions(),
-            instruction_params.n_registers(),
-            parameters.consts,
-        );
+impl Generate<QProgramGeneratorParameters, QProgram> for GenerateEngine {
+    fn generate(using: QProgramGeneratorParameters) -> QProgram {
+        let program = GenerateEngine::generate(using.program_parameters);
+        let q_table = GenerateEngine::generate((
+            using.program_parameters.instruction_generator_parameters,
+            using.consts,
+        ));
 
         QProgram { q_table, program }
     }
@@ -328,26 +294,5 @@ impl Default for QConsts {
             alpha_active: 0.25,
             epsilon_active: 0.05,
         }
-    }
-}
-
-impl<T> GeneticAlgorithm for ILgp<QProgram<T>>
-where
-    T: InteractiveLearningInput,
-{
-    type O = QProgram<T>;
-
-    fn on_pre_init(mut parameters: HyperParameters<Self::O>) -> HyperParameters<Self::O> {
-        parameters.generator.consts.reset();
-        parameters
-    }
-
-    fn on_post_rank(
-        population: Population<Self::O>,
-        mut parameters: HyperParameters<Self::O>,
-    ) -> (Population<Self::O>, HyperParameters<Self::O>) {
-        parameters.evaluator.next_generation();
-
-        return (population, parameters);
     }
 }

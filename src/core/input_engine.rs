@@ -38,8 +38,10 @@ where
         }
     }
     /// A trial consists of several starting states.
-    fn next_trial(&mut self) -> &mut [T] {
-        unimplemented!()
+    /// returns true if next trial is available, false otherwise
+    fn next_trial(&mut self) -> bool {
+        self.trial_idx += 1;
+        self.n_trials >= self.trial_idx
     }
     // /// Reseting a trial reverts to the 0th index of the current trial collection.
     fn reset_trial(&mut self) {
@@ -48,16 +50,11 @@ where
 
     // A new trial generates a new set of starting states.
     fn new_trials(&mut self) {
-        // trials: GenerateEngine::generate()
-    }
-
-    /// Gets the current starting state.
-    fn get_state(&mut self) -> Option<&mut T> {
-        self.trial.get_mut(self.trial_idx)
+        // self.trials = GenerateEngine::generate()
     }
 }
 
 pub trait RlState: State {
     /// Returns true if episode count > MAX or terminal_signal sent from environment.
-    fn terminal_reached(&mut self) -> bool;
+    fn is_terminal(&mut self) -> bool;
 }

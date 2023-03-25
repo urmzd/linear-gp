@@ -38,6 +38,10 @@ impl State for TestInput {
     fn execute_action(&mut self, action: usize) -> f64 {
         (action == self.e as usize) as usize as f64
     }
+
+    fn next_state(&mut self) -> Option<Self> {
+        None
+    }
 }
 
 impl Default for TestInput {

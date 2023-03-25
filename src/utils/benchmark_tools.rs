@@ -4,8 +4,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::core::algorithm::HyperParameters;
-
 use super::types::VoidResultAnyError;
 
 pub const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
