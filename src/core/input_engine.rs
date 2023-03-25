@@ -1,13 +1,10 @@
+use super::characteristics::Reset;
+
 /// Defines a single state which can use the current context to get the next data.
-pub trait State
-where
-    Self: Sized,
-{
+pub trait State: Iterator<Item = Self> + Sized + Reset {
     const N_INPUTS: usize;
     const N_ACTIONS: usize;
 
-    fn next_state(&mut self) -> Option<Self>;
-    /// Returns a value from the feature set.
     fn get_value(&self, at_idx: usize) -> f64;
     /// Updates the impact of the factor.
     /// For example, if data[0] has been accessed, we increase the index so data[1] is accessed next (in classification).
@@ -48,9 +45,10 @@ where
         self.trial_idx = 0;
     }
 
+    /// TODO: Generate states and input them into the environment.
     // A new trial generates a new set of starting states.
-    fn new_trials(&mut self) {
-        // self.trials = GenerateEngine::generate()
+    fn set_new_trial(&mut self, trial: Vec<T>) {
+        self.trial = trial
     }
 }
 

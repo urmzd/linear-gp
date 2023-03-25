@@ -14,6 +14,12 @@ pub enum TestOutput {
 
 #[derive(PartialEq, PartialOrd, Clone, Debug, Deserialize, Serialize)]
 pub struct TestInput {
+    inputs: Vec<SingleInput>,
+    idx: usize,
+}
+
+#[derive(PartialEq, PartialOrd, Clone, Debug, Deserialize, Serialize)]
+struct SingleInput {
     a: f64,
     b: f64,
     c: f64,
@@ -21,45 +27,69 @@ pub struct TestInput {
     e: TestOutput,
 }
 
+impl Iterator for TestInput {
+    type Item = TestInput;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let current_state = if self.idx < self.inputs.len() {
+            Some(Self {
+                inputs: self.inputs,
+                idx: self.idx,
+            })
+        } else {
+            return None;
+        };
+
+        self.idx += 1;
+
+        current_state
+    }
+}
+
 impl State for TestInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
     fn get_value(&self, at_idx: usize) -> f64 {
+        let item = self.inputs[self.idx];
+
         match at_idx {
-            0 => self.a,
-            1 => self.b,
-            2 => self.c,
-            3 => self.d,
+            0 => item.a,
+            1 => item.b,
+            2 => item.c,
+            3 => item.d,
             _ => unreachable!(),
         }
     }
 
     fn execute_action(&mut self, action: usize) -> f64 {
-        (action == self.e as usize) as usize as f64
+        (action == self.inputs[self.idx].e as usize) as usize as f64
     }
 
-    fn next_state(&mut self) -> Option<Self> {
-        None
+    fn reset(&mut self) {
+        self.idx = 0;
     }
 }
 
 impl Default for TestInput {
     fn default() -> Self {
         TestInput {
-            a: 0.,
-            b: 0.,
-            c: 0.,
-            d: 0.,
-            e: TestOutput::One,
+            inputs: vec![SingleInput {
+                a: 0.,
+                b: 0.,
+                c: 0.,
+                d: 0.,
+                e: TestOutput::One,
+            }],
+            idx: 0,
         }
     }
 }
 
-impl Distribution<TestInput> for Standard {
-    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> TestInput {
+impl Distribution<SingleInput> for Standard {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> SingleInput {
         let data: [f64; 4] = [0.0; 4].map(|_| rng.gen_range(0.0..=1.0));
-        TestInput {
+        SingleInput {
             a: data[0],
             b: data[1],
             c: data[2],

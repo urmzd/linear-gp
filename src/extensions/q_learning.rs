@@ -158,7 +158,7 @@ impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
         };
 
         // We execute the selected action and continue to repeat the cycle until termination.
-        while let Some(state) = states.next_state() {
+        while let Some(state) = states.next() {
             // Act.
             let reward = state.execute_action(current_action_state.action);
             score += reward;
@@ -168,8 +168,8 @@ impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
             }
 
             let next_action_state = match get_action_state(&mut state, &mut params, &mut program) {
-                None => return FitnessScore::OutOfBounds,
                 Some(action_state) => action_state,
+                None => return FitnessScore::OutOfBounds,
             };
 
             // We only update when there is a transition.
@@ -184,8 +184,7 @@ impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
         info!(
             id = serde_json::to_string(&program.id.to_string()).unwrap(),
             q_table = serde_json::to_string(&params).unwrap(),
-            initial_state = serde_json::to_string(&params.into()).unwrap(),
-            score = serde_json::to_string(&score).unwrap()
+            score = serde_json::to_string(&score).unwrap() // TODO: Add original state heree.
         );
 
         FitnessScore::Valid(score)
