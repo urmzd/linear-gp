@@ -112,7 +112,7 @@ impl Generate<(), IrisState> for GenerateEngine {
 }
 
 #[derive(Clone)]
-struct IrisEngine;
+pub struct IrisEngine;
 
 impl Core for IrisEngine {
     type State = IrisState;

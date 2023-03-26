@@ -73,7 +73,9 @@ pub struct InstructionGeneratorParameters {
     #[arg(long, default_value = "10.")]
     #[builder(default = "10.")]
     pub external_factor: f64,
+    #[arg(skip)]
     pub n_actions: usize,
+    #[arg(skip)]
     pub n_inputs: usize,
 }
 

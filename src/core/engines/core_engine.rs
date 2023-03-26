@@ -1,5 +1,6 @@
 use std::{iter::repeat_with, sync::Arc};
 
+use clap::{Args, Parser};
 use derivative::Derivative;
 use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
@@ -17,26 +18,36 @@ use derive_builder::Builder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::info;
 
-#[derive(Debug, Deserialize, Serialize, Builder, Copy, Derivative)]
+#[derive(Debug, Deserialize, Serialize, Builder, Copy, Derivative, Parser)]
+#[command(author, version, about, long_about=None)]
+#[command(propagate_version = true)]
 #[derivative(Clone)]
 pub struct HyperParameters<C>
 where
     C: Core,
 {
     #[builder(default = "100")]
+    #[arg(long, default_value = "100")]
     pub population_size: usize,
     #[builder(default = "0.5")]
+    #[arg(long, default_value = "0.5")]
     pub gap: f64,
     #[builder(default = "0.5")]
+    #[arg(long, default_value = "0.5")]
     pub mutation_percent: f64,
     #[builder(default = "0.5")]
+    #[arg(long, default_value = "0.5")]
     pub crossover_percent: f64,
     #[builder(default = "100")]
+    #[arg(long, default_value = "100")]
     pub n_generations: usize,
     #[builder(default = "1")]
+    #[arg(long, default_value = "1")]
     pub n_trials: usize,
     #[builder(default = "None")]
+    #[arg(long)]
     pub seed: Option<u64>,
+    #[command(flatten)]
     pub program_parameters: C::ProgramParameters,
 }
 
@@ -139,7 +150,7 @@ pub struct CoreEngine;
 /// The population should be a Vec of Programs or QPrograms.
 pub trait Core {
     type Individual: Ord + Clone + Send + Sync + Serialize;
-    type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned;
+    type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned + Args;
     type State;
     type Marker;
     type Generate: Generate<Self::ProgramParameters, Self::Individual> + Generate<(), Self::State>;
