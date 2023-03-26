@@ -5,7 +5,10 @@ use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
 
 use crate::{
-    core::engines::{breed_engine::Breed, reset_engine::Reset},
+    core::engines::{
+        breed_engine::Breed,
+        reset_engine::{Reset, ResetEngine},
+    },
     utils::random::{generator, update_seed},
 };
 
@@ -35,7 +38,7 @@ where
     pub n_generations: usize,
     #[builder(default = "1")]
     pub n_trials: usize,
-    #[builder(default)]
+    #[builder(default = "None")]
     pub seed: Option<u64>,
     // #[derivative(Clone(bound = "C: Sized"))]
     pub program_parameters: C::ProgramParameters,
@@ -250,8 +253,8 @@ pub trait Core {
                     let population_to_read = rc_population.clone();
                     let parent = population_to_read.iter().choose(&mut generator());
 
-                    if let Some(parent) = parent {
-                        let mut clone = parent.clone();
+                    if let Some(internal_parent) = parent {
+                        let mut clone = internal_parent.clone();
                         Self::Mutate::mutate(&mut clone, program_parameters);
                         Some(clone)
                     } else {
@@ -265,8 +268,10 @@ pub trait Core {
                     let population_to_read = rc_population.clone();
                     let parent = population_to_read.iter().choose(&mut generator());
 
-                    if let Some(parent) = parent {
-                        Some(parent.clone())
+                    if let Some(internal_parent) = parent {
+                        let mut clone = internal_parent.clone();
+                        Self::Reset::reset(&mut clone);
+                        Some(clone)
                     } else {
                         None
                     }
