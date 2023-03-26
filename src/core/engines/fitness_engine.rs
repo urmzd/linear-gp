@@ -47,20 +47,6 @@ impl FitnessScore {
             _ => false,
         }
     }
-
-    pub fn unwrap_or(&self, value: f64) -> f64 {
-        match self {
-            FitnessScore::Valid(fitness_score) => *fitness_score,
-            _ => value,
-        }
-    }
-
-    pub fn unwrap(&self) -> f64 {
-        match self {
-            FitnessScore::Valid(fitness_score) => *fitness_score,
-            _ => unreachable!(),
-        }
-    }
 }
 
 pub trait Fitness<I, S, P> {

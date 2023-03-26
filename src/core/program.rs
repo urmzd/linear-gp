@@ -112,8 +112,8 @@ impl Mutate<ProgramGeneratorParameters, Program> for MutateEngine {
         let _mutated_instruction =
             MutateEngine::mutate(instruction, using.instruction_generator_parameters);
 
-        ResetEngine::reset(item);
         ResetEngine::reset(&mut item.id);
+        ResetEngine::reset(item);
     }
 }
 
