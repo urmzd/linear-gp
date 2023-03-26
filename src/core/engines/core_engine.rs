@@ -1,11 +1,12 @@
 use std::{iter::repeat_with, sync::Arc};
 
+use derivative::Derivative;
 use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
 
 use crate::{
     core::engines::{breed_engine::Breed, reset_engine::Reset},
-    utils::random::generator,
+    utils::random::{generator, update_seed},
 };
 
 use super::{
@@ -13,10 +14,11 @@ use super::{
     status_engine::Status,
 };
 use derive_builder::Builder;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::info;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Builder)]
+#[derive(Debug, Deserialize, Serialize, Builder, Copy, Derivative)]
+#[derivative(Clone)]
 pub struct HyperParameters<C>
 where
     C: Core,
@@ -33,6 +35,9 @@ where
     pub n_generations: usize,
     #[builder(default = "1")]
     pub n_trials: usize,
+    #[builder(default)]
+    pub seed: Option<u64>,
+    // #[derivative(Clone(bound = "C: Sized"))]
     pub program_parameters: C::ProgramParameters,
 }
 
@@ -43,6 +48,7 @@ where
     generation: usize,
     next_population: Option<Vec<C::Individual>>,
     params: HyperParameters<C>,
+    trials: Vec<C::State>,
 }
 
 impl<C> CoreIter<C>
@@ -51,11 +57,15 @@ where
 {
     pub fn new(hp: HyperParameters<C>) -> Self {
         let current_population = C::init_population(hp.program_parameters, hp.population_size);
+        let trials: Vec<C::State> = repeat_with(|| C::Generate::generate(()))
+            .take(hp.n_trials)
+            .collect_vec();
 
         Self {
             generation: 0,
             next_population: Some(current_population),
             params: hp,
+            trials,
         }
     }
 }
@@ -74,7 +84,7 @@ where
         // Freeze population.
         let mut population = self.next_population.clone().unwrap();
 
-        C::eval_fitness(&mut population, self.params.n_trials);
+        C::eval_fitness(&mut population, &mut self.trials);
         C::rank(&mut population);
 
         assert!(population.iter().all(C::Status::evaluated));
@@ -103,11 +113,14 @@ where
     }
 }
 
-pub fn build_core_engine<C>(hp: HyperParameters<C>) -> CoreIter<C>
+impl<T> HyperParameters<T>
 where
-    C: Core,
+    T: Core,
 {
-    CoreIter::new(hp)
+    pub fn build_engine(&self) -> CoreIter<T> {
+        update_seed(self.seed);
+        CoreIter::new(self.clone())
+    }
 }
 
 pub struct CoreEngine;
@@ -128,7 +141,7 @@ pub struct CoreEngine;
 /// The population should be a Vec of Programs or QPrograms.
 pub trait Core {
     type Individual: Ord + Clone + Send + Sync + Serialize;
-    type ProgramParameters: Copy + Send + Sync;
+    type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned;
     type State;
     type Marker;
     type Generate: Generate<Self::ProgramParameters, Self::Individual> + Generate<(), Self::State>;
@@ -149,22 +162,23 @@ pub trait Core {
         population
     }
 
-    fn eval_fitness(population: &mut Vec<Self::Individual>, n_trials: usize) {
-        let mut trials: Vec<Self::State> = repeat_with(|| Self::Generate::generate(()))
-            .take(n_trials)
-            .collect_vec();
-
+    fn eval_fitness(population: &mut Vec<Self::Individual>, trials: &mut Vec<Self::State>) {
         for individual in population.iter_mut() {
-            for trial in trials.iter_mut() {
-                Self::Reset::reset(individual);
-                Self::Reset::reset(trial);
-                Self::Fitness::eval_fitness(individual, trial);
-            }
+            let scores = trials
+                .iter_mut()
+                .map(|trial| {
+                    Self::Reset::reset(individual);
+                    Self::Reset::reset(trial);
+                    Self::Fitness::eval_fitness(individual, trial)
+                })
+                .collect_vec();
+            let median = *scores.get(scores.len() / 2).unwrap();
+            Self::Status::set_fitness(individual, median);
         }
     }
 
     fn rank(population: &mut Vec<Self::Individual>) {
-        population.sort();
+        population.sort_by(|a, b| b.cmp(a));
     }
 
     fn survive(population: &mut Vec<Self::Individual>, gap: f64) {
@@ -252,9 +266,7 @@ pub trait Core {
                     let parent = population_to_read.iter().choose(&mut generator());
 
                     if let Some(parent) = parent {
-                        let mut clone = parent.clone();
-                        Self::Reset::reset(&mut clone);
-                        Some(clone)
+                        Some(parent.clone())
                     } else {
                         None
                     }
