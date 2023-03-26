@@ -130,105 +130,137 @@ impl Core for IrisEngine {
 #[cfg(test)]
 mod test {
 
+    use itertools::Itertools;
+
     use crate::core::engines::core_engine::HyperParametersBuilder;
     use crate::core::instruction::InstructionGeneratorParametersBuilder;
     use crate::core::program::ProgramGeneratorParametersBuilder;
+    use crate::utils::benchmark_tools::{log_benchmarks, save_benchmarks, with_named_logger};
     use crate::utils::types::VoidResultAnyError;
 
     use super::*;
 
     #[test]
-    fn sanity_test() -> VoidResultAnyError {
-        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
-            .build()?;
-        let program_parameters = ProgramGeneratorParametersBuilder::default()
-            .max_instructions(100)
-            .instruction_generator_parameters(instruction_parameters)
-            .build()?;
-        let parameters = HyperParametersBuilder::<IrisEngine>::default()
-            .program_parameters(program_parameters)
-            .mutation_percent(0.)
-            .crossover_percent(0.)
-            .build()?;
+    fn default() -> VoidResultAnyError {
+        with_named_logger!("iris_default", {
+            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+                .n_actions(IrisState::N_ACTIONS)
+                .n_inputs(IrisState::N_INPUTS)
+                .build()?;
+            let program_parameters = ProgramGeneratorParametersBuilder::default()
+                .max_instructions(100)
+                .instruction_generator_parameters(instruction_parameters)
+                .build()?;
+            let parameters = HyperParametersBuilder::<IrisEngine>::default()
+                .program_parameters(program_parameters)
+                .mutation_percent(0.)
+                .crossover_percent(0.)
+                .build()?;
 
-        let last_population = parameters.build_engine().take(100).last().unwrap();
-        last_population
-            .iter()
-            .all(|individual| Some(individual) == last_population.first());
+            let populations = parameters.build_engine().take(100).collect_vec();
 
-        println!("{:?}", last_population[0]);
+            let last_population = populations.last().unwrap();
+            last_population
+                .iter()
+                .all(|individual| Some(individual) == last_population.first());
 
-        Ok(())
+            log_benchmarks(&populations, &parameters, NAME)?;
+            save_benchmarks(&populations, NAME)?;
+
+            Ok(())
+        })
     }
 
     #[test]
-    fn mutation_test() -> VoidResultAnyError {
-        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
-            .build()?;
-        let program_parameters = ProgramGeneratorParametersBuilder::default()
-            .max_instructions(100)
-            .instruction_generator_parameters(instruction_parameters)
-            .build()?;
-        let parameters = HyperParametersBuilder::<IrisEngine>::default()
-            .program_parameters(program_parameters)
-            .mutation_percent(1.0)
-            .crossover_percent(0.)
-            .build()?;
+    fn mutation() -> VoidResultAnyError {
+        with_named_logger!("iris_mutation", {
+            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+                .n_actions(IrisState::N_ACTIONS)
+                .n_inputs(IrisState::N_INPUTS)
+                .build()?;
+            let program_parameters = ProgramGeneratorParametersBuilder::default()
+                .max_instructions(100)
+                .instruction_generator_parameters(instruction_parameters)
+                .build()?;
+            let parameters = HyperParametersBuilder::<IrisEngine>::default()
+                .program_parameters(program_parameters)
+                .mutation_percent(0.5)
+                .crossover_percent(0.)
+                .build()?;
 
-        let last_population = parameters.build_engine().take(100).last().unwrap();
+            let populations = parameters.build_engine().take(100).collect_vec();
 
-        println!("{:?}", last_population[0]);
+            let last_population = populations.last().unwrap();
+            last_population
+                .iter()
+                .all(|individual| Some(individual) == last_population.first());
 
-        Ok(())
+            log_benchmarks(&populations, &parameters, NAME)?;
+            save_benchmarks(&populations, NAME)?;
+
+            Ok(())
+        })
     }
 
     #[test]
-    fn crossover_test() -> VoidResultAnyError {
-        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
-            .build()?;
-        let program_parameters = ProgramGeneratorParametersBuilder::default()
-            .max_instructions(100)
-            .instruction_generator_parameters(instruction_parameters)
-            .build()?;
-        let parameters = HyperParametersBuilder::<IrisEngine>::default()
-            .program_parameters(program_parameters)
-            .mutation_percent(0.)
-            .crossover_percent(1.0)
-            .build()?;
+    fn crossover() -> VoidResultAnyError {
+        with_named_logger!("iris_crossover", {
+            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+                .n_actions(IrisState::N_ACTIONS)
+                .n_inputs(IrisState::N_INPUTS)
+                .build()?;
+            let program_parameters = ProgramGeneratorParametersBuilder::default()
+                .max_instructions(100)
+                .instruction_generator_parameters(instruction_parameters)
+                .build()?;
+            let parameters = HyperParametersBuilder::<IrisEngine>::default()
+                .program_parameters(program_parameters)
+                .mutation_percent(0.)
+                .crossover_percent(0.5)
+                .build()?;
 
-        let last_population = parameters.build_engine().take(100).last().unwrap();
+            let populations = parameters.build_engine().take(100).collect_vec();
 
-        println!("{:?}", last_population[0]);
+            let last_population = populations.last().unwrap();
+            last_population
+                .iter()
+                .all(|individual| Some(individual) == last_population.first());
 
-        Ok(())
+            log_benchmarks(&populations, &parameters, NAME)?;
+            save_benchmarks(&populations, NAME)?;
+
+            Ok(())
+        })
     }
 
     #[test]
-    fn full_test() -> VoidResultAnyError {
-        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
-            .build()?;
-        let program_parameters = ProgramGeneratorParametersBuilder::default()
-            .max_instructions(100)
-            .instruction_generator_parameters(instruction_parameters)
-            .build()?;
-        let parameters = HyperParametersBuilder::<IrisEngine>::default()
-            .program_parameters(program_parameters)
-            .mutation_percent(0.5)
-            .crossover_percent(0.5)
-            .build()?;
+    fn full() -> VoidResultAnyError {
+        with_named_logger!("iris_full", {
+            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+                .n_actions(IrisState::N_ACTIONS)
+                .n_inputs(IrisState::N_INPUTS)
+                .build()?;
+            let program_parameters = ProgramGeneratorParametersBuilder::default()
+                .max_instructions(100)
+                .instruction_generator_parameters(instruction_parameters)
+                .build()?;
+            let parameters = HyperParametersBuilder::<IrisEngine>::default()
+                .program_parameters(program_parameters)
+                .mutation_percent(0.5)
+                .crossover_percent(0.5)
+                .build()?;
 
-        let last_population = parameters.build_engine().take(100).last().unwrap();
+            let populations = parameters.build_engine().take(100).collect_vec();
 
-        println!("{:?}", last_population[0]);
+            let last_population = populations.last().unwrap();
+            last_population
+                .iter()
+                .all(|individual| Some(individual) == last_population.first());
 
-        Ok(())
+            log_benchmarks(&populations, &parameters, NAME)?;
+            save_benchmarks(&populations, NAME)?;
+
+            Ok(())
+        })
     }
 }

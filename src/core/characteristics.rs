@@ -1,39 +1,48 @@
-// use crate::utils::benchmark_tools::create_path;
+use std::{
+    error::Error,
+    fs::{read_to_string, OpenOptions},
+    io::Write,
+    path::{Path, PathBuf},
+};
 
-// pub trait Load
-// where
-//     Self: Sized + DeserializeOwned,
-// {
-//     fn load(path: impl Into<PathBuf>) -> Self {
-//         let contents = read_to_string(&path.into()).unwrap();
-//         let deserialized: Self = serde_json::from_str(&contents).unwrap();
+use serde::{de::DeserializeOwned, Serialize};
 
-//         deserialized
-//     }
-// }
+use crate::utils::benchmark_tools::create_path;
 
-// pub trait Save
-// where
-//     Self: Serialize,
-// {
-//     fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
-//         create_path(path, true)?;
+pub trait Load
+where
+    Self: Sized + DeserializeOwned,
+{
+    fn load(path: impl Into<PathBuf>) -> Self {
+        let contents = read_to_string(&path.into()).unwrap();
+        let deserialized: Self = serde_json::from_str(&contents).unwrap();
 
-//         let serialized = serde_json::to_string_pretty(&self)?;
+        deserialized
+    }
+}
 
-//         let mut file = OpenOptions::new()
-//             .write(true)
-//             .create(true)
-//             .open(Path::new(path))?;
+pub trait Save
+where
+    Self: Serialize,
+{
+    fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
+        create_path(path, true)?;
 
-//         file.write_all(serialized.as_bytes())?;
+        let serialized = serde_json::to_string_pretty(&self)?;
 
-//         Ok(serialized)
-//     }
-// }
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(Path::new(path))?;
 
-// pub trait Reproduce: Load + Save {}
+        file.write_all(serialized.as_bytes())?;
 
-// impl<T> Load for T where T: Sized + DeserializeOwned {}
-// impl<T> Save for T where T: Serialize {}
-// impl<T> Reproduce for T where T: Load + Save {}
+        Ok(serialized)
+    }
+}
+
+pub trait Reproduce: Load + Save {}
+
+impl<T> Load for T where T: Sized + DeserializeOwned {}
+impl<T> Save for T where T: Serialize {}
+impl<T> Reproduce for T where T: Load + Save {}
