@@ -4,9 +4,14 @@ use rand::{distributions::Standard, prelude::Distribution};
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 
-use crate::core::input_engine::State;
+use crate::core::{
+    engines::reset_engine::{Reset, ResetEngine},
+    environment::State,
+};
 
-#[derive(Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount, Deserialize, Serialize, Debug)]
+#[derive(
+    Eq, PartialEq, Ord, PartialOrd, Hash, Clone, EnumCount, Deserialize, Serialize, Debug, Copy,
+)]
 pub enum TestOutput {
     One = 0,
     Two = 1,
@@ -14,7 +19,7 @@ pub enum TestOutput {
 
 #[derive(PartialEq, PartialOrd, Clone, Debug, Deserialize, Serialize)]
 pub struct TestInput {
-    inputs: Vec<SingleInput>,
+    data: Vec<SingleInput>,
     idx: usize,
 }
 
@@ -27,31 +32,12 @@ struct SingleInput {
     e: TestOutput,
 }
 
-impl Iterator for TestInput {
-    type Item = TestInput;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let current_state = if self.idx < self.inputs.len() {
-            Some(Self {
-                inputs: self.inputs,
-                idx: self.idx,
-            })
-        } else {
-            return None;
-        };
-
-        self.idx += 1;
-
-        current_state
-    }
-}
-
 impl State for TestInput {
     const N_INPUTS: usize = 4;
     const N_ACTIONS: usize = 2;
 
     fn get_value(&self, at_idx: usize) -> f64 {
-        let item = self.inputs[self.idx];
+        let item = &self.data[self.idx];
 
         match at_idx {
             0 => item.a,
@@ -63,18 +49,29 @@ impl State for TestInput {
     }
 
     fn execute_action(&mut self, action: usize) -> f64 {
-        (action == self.inputs[self.idx].e as usize) as usize as f64
+        let class = self.data[self.idx].e as usize;
+        self.idx += 1;
+        (action == class) as usize as f64
     }
 
-    fn reset(&mut self) {
-        self.idx = 0;
+    fn get(&mut self) -> Option<&mut Self> {
+        if self.idx >= self.data.len() {
+            return None;
+        }
+        return Some(self);
+    }
+}
+
+impl Reset<TestInput> for ResetEngine {
+    fn reset(item: &mut TestInput) {
+        item.idx = 0;
     }
 }
 
 impl Default for TestInput {
     fn default() -> Self {
         TestInput {
-            inputs: vec![SingleInput {
+            data: vec![SingleInput {
                 a: 0.,
                 b: 0.,
                 c: 0.,

@@ -1,62 +1,39 @@
-use std::error::Error;
-use std::path::Path;
-use std::path::PathBuf;
+// use crate::utils::benchmark_tools::create_path;
 
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-use std::fs::{read_to_string, OpenOptions};
-use std::io::prelude::*;
+// pub trait Load
+// where
+//     Self: Sized + DeserializeOwned,
+// {
+//     fn load(path: impl Into<PathBuf>) -> Self {
+//         let contents = read_to_string(&path.into()).unwrap();
+//         let deserialized: Self = serde_json::from_str(&contents).unwrap();
 
-use crate::utils::benchmark_tools::create_path;
+//         deserialized
+//     }
+// }
 
-pub trait Load
-where
-    Self: Sized + DeserializeOwned,
-{
-    fn load(path: impl Into<PathBuf>) -> Self {
-        let contents = read_to_string(&path.into()).unwrap();
-        let deserialized: Self = serde_json::from_str(&contents).unwrap();
+// pub trait Save
+// where
+//     Self: Serialize,
+// {
+//     fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
+//         create_path(path, true)?;
 
-        deserialized
-    }
-}
+//         let serialized = serde_json::to_string_pretty(&self)?;
 
-pub trait Save
-where
-    Self: Serialize,
-{
-    fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
-        create_path(path, true)?;
+//         let mut file = OpenOptions::new()
+//             .write(true)
+//             .create(true)
+//             .open(Path::new(path))?;
 
-        let serialized = serde_json::to_string_pretty(&self)?;
+//         file.write_all(serialized.as_bytes())?;
 
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(Path::new(path))?;
+//         Ok(serialized)
+//     }
+// }
 
-        file.write_all(serialized.as_bytes())?;
+// pub trait Reproduce: Load + Save {}
 
-        Ok(serialized)
-    }
-}
-
-pub trait Reproduce: Load + Save {}
-
-impl<T> Load for T where T: Sized + DeserializeOwned {}
-impl<T> Save for T where T: Serialize {}
-impl<T> Reproduce for T where T: Load + Save {}
-
-pub trait ResetNew: Reset + Clone {
-    fn reset_new(&self) -> Self {
-        let mut new = self.clone();
-        new.reset();
-        return new;
-    }
-}
-
-pub trait Reset {
-    fn reset(&mut self);
-}
-
-impl<T> ResetNew for T where T: Reset + Clone {}
+// impl<T> Load for T where T: Sized + DeserializeOwned {}
+// impl<T> Save for T where T: Serialize {}
+// impl<T> Reproduce for T where T: Load + Save {}

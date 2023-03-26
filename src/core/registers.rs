@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::random::generator;
 
-use super::characteristics::Reset;
+use super::engines::reset_engine::{Reset, ResetEngine};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Registers {
@@ -55,10 +55,9 @@ pub enum ArgmaxInput {
     To(usize),
 }
 
-impl Reset for Registers {
-    fn reset(&mut self) {
-        let Registers { data } = self;
-        for value in data.as_mut_slice() {
+impl Reset<Registers> for ResetEngine {
+    fn reset(item: &mut Registers) {
+        for value in item.data.as_mut_slice() {
             *value = 0.
         }
     }

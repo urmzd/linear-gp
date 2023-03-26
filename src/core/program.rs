@@ -13,14 +13,14 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::{
-    characteristics::{Reset, ResetNew},
     engines::{
         breed_engine::{Breed, BreedEngine},
         fitness_engine::FitnessScore,
         generate_engine::{Generate, GenerateEngine},
         mutate_engine::{Mutate, MutateEngine},
+        reset_engine::{Reset, ResetEngine},
     },
-    input_engine::State,
+    environment::State,
     instruction::InstructionGeneratorParameters,
     instructions::Instructions,
     registers::Registers,
@@ -35,15 +35,15 @@ pub struct ProgramGeneratorParameters {
     pub instruction_generator_parameters: InstructionGeneratorParameters,
 }
 
-impl Reset for Program {
-    fn reset(&mut self) {
-        self.registers.reset();
-        self.fitness.reset();
-        self.id = Uuid::new_v4();
+impl Reset<Program> for ResetEngine {
+    fn reset(item: &mut Program) {
+        ResetEngine::reset(&mut item.id);
+        ResetEngine::reset(&mut item.registers);
+        ResetEngine::reset(&mut item.fitness);
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Derivative)]
+#[derive(Debug, Clone, Serialize, Deserialize, Derivative, Builder)]
 #[derivative(PartialEq, PartialOrd)]
 pub struct Program {
     #[derivative(PartialOrd = "ignore")]
@@ -97,27 +97,28 @@ impl Mutate<ProgramGeneratorParameters, Program> for MutateEngine {
             .choose(&mut generator())
             .unwrap();
 
-        let mutated_instruction =
+        let _mutated_instruction =
             MutateEngine::mutate(instruction, using.instruction_generator_parameters);
 
-        // Reset to force re-eval.
-        item.fitness = FitnessScore::NotEvaluated;
-        item.id = Uuid::new_v4();
-
-        item.registers.reset();
+        ResetEngine::reset(item);
     }
 }
 
 impl Breed<Program> for BreedEngine {
-    fn two_point_crossover(mate_1: &Program, mate_2: &Program) -> [Program; 2] {
-        let child_instructions =
+    fn two_point_crossover(mate_1: &Program, mate_2: &Program) -> (Program, Program) {
+        let (child_1_instructions, child_2_instructions) =
             BreedEngine::two_point_crossover(&mate_1.instructions, &mate_2.instructions);
 
-        child_instructions.map(|instructions| {
-            let mut parent = mate_1.reset_new();
-            parent.instructions = instructions;
-            parent
-        })
+        let mut child_1 = mate_1.clone();
+        let mut child_2 = mate_2.clone();
+
+        child_1.instructions = child_1_instructions;
+        child_2.instructions = child_2_instructions;
+
+        ResetEngine::reset(&mut child_1);
+        ResetEngine::reset(&mut child_2);
+
+        (child_1, child_2)
     }
 }
 
@@ -141,7 +142,7 @@ mod tests {
         let instructions_b: Instructions =
             (0..10).map(|_| GenerateEngine::generate(params)).collect();
 
-        let [child_a, child_b] = BreedEngine::two_point_crossover(&instructions_a, &instructions_b);
+        let (child_a, child_b) = BreedEngine::two_point_crossover(&instructions_a, &instructions_b);
 
         assert_ne!(child_a, child_b);
 
@@ -168,7 +169,7 @@ mod tests {
         let program_a = GenerateEngine::generate(program_params);
         let program_b = GenerateEngine::generate(program_params);
 
-        let [child_a, child_b] = BreedEngine::two_point_crossover(&program_a, &program_b);
+        let (child_a, child_b) = BreedEngine::two_point_crossover(&program_a, &program_b);
 
         assert_ne!(child_a, child_b);
 

@@ -1,9 +1,11 @@
-use crate::core::{characteristics::Reset, input_engine::State, program::Program};
+use crate::core::program::Program;
 use core::fmt::Debug;
 use std::cmp::Ordering;
 
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
+
+use super::reset_engine::{Reset, ResetEngine};
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, Serialize, Deserialize)]
 pub enum FitnessScore {
@@ -15,9 +17,9 @@ pub enum FitnessScore {
     NotEvaluated,
 }
 
-impl Reset for FitnessScore {
-    fn reset(&mut self) {
-        *self = FitnessScore::NotEvaluated
+impl Reset<FitnessScore> for ResetEngine {
+    fn reset(item: &mut FitnessScore) {
+        *item = FitnessScore::NotEvaluated
     }
 }
 
@@ -62,8 +64,8 @@ impl FitnessScore {
     }
 }
 
-pub trait Fitness<S, P> {
-    fn eval_fitness(program: &mut Program, states: &mut S, params: &mut P) -> FitnessScore;
+pub trait Fitness<I, S, P> {
+    fn eval_fitness(program: &mut I, states: &mut S) -> FitnessScore;
 }
 
 pub struct FitnessEngine;

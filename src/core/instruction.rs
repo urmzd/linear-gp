@@ -12,7 +12,7 @@ use crate::utils::random::generator;
 
 use super::engines::generate_engine::{Generate, GenerateEngine};
 use super::engines::mutate_engine::{Mutate, MutateEngine};
-use super::input_engine::State;
+use super::environment::State;
 use super::registers::Registers;
 use derive_more::Display;
 
@@ -126,7 +126,7 @@ impl Generate<InstructionGeneratorParameters, Instruction> for GenerateEngine {
 
 impl Mutate<InstructionGeneratorParameters, Instruction> for MutateEngine {
     fn mutate(instruction: &mut Instruction, using: InstructionGeneratorParameters) {
-        let mut mutated = GenerateEngine::generate(using);
+        let mutated = GenerateEngine::generate(using);
 
         let swap_target = generator().gen();
         let swap_source = generator().gen();

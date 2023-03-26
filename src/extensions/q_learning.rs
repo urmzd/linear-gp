@@ -8,14 +8,14 @@ use tracing::info;
 
 use crate::{
     core::{
-        characteristics::{Reset, ResetNew},
         engines::{
             breed_engine::{Breed, BreedEngine},
             fitness_engine::{Fitness, FitnessEngine, FitnessScore},
             generate_engine::{Generate, GenerateEngine},
             mutate_engine::{Mutate, MutateEngine},
+            reset_engine::{Reset, ResetEngine},
         },
-        input_engine::{RlState, State},
+        environment::{RlState, State},
         instruction::InstructionGeneratorParameters,
         program::{Program, ProgramGeneratorParameters},
         registers::{ActionRegister, ArgmaxInput, Registers},
@@ -50,9 +50,9 @@ pub struct ActionRegisterPair {
     register: usize,
 }
 
-impl Reset for QTable {
-    fn reset(&mut self) {
-        self.q_consts.reset();
+impl Reset<QTable> for ResetEngine {
+    fn reset(item: &mut QTable) {
+        ResetEngine::reset(&mut item.q_consts);
     }
 }
 
@@ -119,46 +119,43 @@ pub struct QProgram {
     pub program: Program,
 }
 
-impl Reset for QProgram {
-    fn reset(&mut self) {
-        self.q_table.reset();
-        self.program.reset();
+impl Reset<QProgram> for ResetEngine {
+    fn reset(item: &mut QProgram) {
+        ResetEngine::reset(&mut item.q_table);
+        ResetEngine::reset(&mut item.program);
     }
 }
 
-fn get_action_state<T>(
-    environment: &mut T,
-    q_table: &mut QTable,
-    program: &mut Program,
-) -> Option<ActionRegisterPair>
+fn get_action_state<T>(environment: &mut T, q_program: &mut QProgram) -> Option<ActionRegisterPair>
 where
     T: State,
 {
     // Run the program on the current state.
-    program.run(environment);
+    q_program.program.run(environment);
 
     // Get the winning action-register pair.
-    let action_state = q_table.get_action_register(&program.registers);
+    let action_state = q_program
+        .q_table
+        .get_action_register(&q_program.program.registers);
 
     action_state
 }
 
-impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
+impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
     fn eval_fitness(
-        program: &mut Program,
+        program: &mut QProgram,
         states: &mut T,
-        params: &mut QTable,
     ) -> crate::core::engines::fitness_engine::FitnessScore {
         let mut score = 0.;
 
         // We run the program and determine what action to take at the step = 0.
-        let mut current_action_state = match get_action_state(states, &mut params, &mut program) {
+        let mut current_action_state = match get_action_state(states, program) {
             Some(action_state) => action_state,
             None => return FitnessScore::OutOfBounds,
         };
 
         // We execute the selected action and continue to repeat the cycle until termination.
-        while let Some(state) = states.next() {
+        while let Some(state) = states.get() {
             // Act.
             let reward = state.execute_action(current_action_state.action);
             score += reward;
@@ -167,7 +164,7 @@ impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
                 break;
             }
 
-            let next_action_state = match get_action_state(&mut state, &mut params, &mut program) {
+            let next_action_state = match get_action_state(state, &mut program) {
                 Some(action_state) => action_state,
                 None => return FitnessScore::OutOfBounds,
             };
@@ -175,15 +172,17 @@ impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
             // We only update when there is a transition.
             // NOTE: Why?
             if current_action_state.register != next_action_state.register {
-                params.update(current_action_state, reward, next_action_state)
+                program
+                    .q_table
+                    .update(current_action_state, reward, next_action_state)
             }
 
             current_action_state = next_action_state;
         }
 
         info!(
-            id = serde_json::to_string(&program.id.to_string()).unwrap(),
-            q_table = serde_json::to_string(&params).unwrap(),
+            id = serde_json::to_string(&program.program.id.to_string()).unwrap(),
+            q_table = serde_json::to_string(&program.q_table).unwrap(),
             score = serde_json::to_string(&score).unwrap() // TODO: Add original state heree.
         );
 
@@ -192,19 +191,27 @@ impl<T: RlState> Fitness<T, QTable> for FitnessEngine {
 }
 
 impl Breed<QProgram> for BreedEngine {
-    fn two_point_crossover(mate_1: &QProgram, mate_2: &QProgram) -> [QProgram; 2] {
-        let children = BreedEngine::two_point_crossover(&mate_1.program, &mate_2.program);
-        children.map(|program| QProgram {
-            program,
-            q_table: mate_1.q_table.reset_new(),
-        })
+    fn two_point_crossover(mate_1: &QProgram, mate_2: &QProgram) -> (QProgram, QProgram) {
+        let (child_1_program, child_2_program) =
+            BreedEngine::two_point_crossover(&mate_1.program, &mate_2.program);
+
+        let mut child_1 = mate_1.clone();
+        let mut child_2 = mate_2.clone();
+
+        child_1.program = child_1.program;
+        child_2.program = child_2.program;
+
+        ResetEngine::reset(&mut child_1);
+        ResetEngine::reset(&mut child_2);
+
+        (child_1, child_2)
     }
 }
 
 impl Mutate<QProgramGeneratorParameters, QProgram> for MutateEngine {
     fn mutate(item: &mut QProgram, using: QProgramGeneratorParameters) {
         MutateEngine::mutate(&mut item.program, using.program_parameters);
-        item.q_table.reset_new();
+        ResetEngine::reset(&mut item.q_table);
     }
 }
 
@@ -256,10 +263,10 @@ pub struct QConsts {
     epsilon_active: f64,
 }
 
-impl Reset for QConsts {
-    fn reset(&mut self) {
-        self.alpha_active = self.alpha;
-        self.epsilon_active = self.epsilon;
+impl Reset<QConsts> for ResetEngine {
+    fn reset(item: &mut QConsts) {
+        item.alpha_active = item.alpha;
+        item.epsilon_active = item.epsilon;
     }
 }
 

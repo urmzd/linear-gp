@@ -1,69 +1,109 @@
 use std::iter::repeat_with;
 
-use rand::seq::IteratorRandom;
+use itertools::Itertools;
+use rand::{
+    seq::{IteratorRandom, SliceRandom},
+    Rng,
+};
+
+use rayon::join;
 
 use crate::{
-    core::engines::{
-        breed_engine::{Breed, BreedEngine},
-        fitness_engine::{Fitness, FitnessEngine},
+    core::{
+        engines::{
+            breed_engine::{Breed, BreedEngine},
+            mutate_engine::MutateEngine,
+            reset_engine::{Reset, ResetEngine},
+        },
+        program::Program,
     },
     utils::random::generator,
 };
 
-use super::generate_engine::{Generate, GenerateEngine};
+use super::{
+    fitness_engine::{Fitness, FitnessEngine},
+    generate_engine::{Generate, GenerateEngine},
+    mutate_engine::Mutate,
+    valid_engine::Valid,
+};
 
 pub struct CoreEngine;
 
-/// Possible Variations:
+/// init_population should using GenerateEngine::generate(ProgramParameters or QProgramParameters)
+/// to generate a population of Programs or QPrograms respectively.
 ///
-/// 1. Program, ProgramGeneratorParameters, (Environment,)
-/// 2. Program, ProgramGeneratorParameters, (Environment, QTable)
-pub trait Core<I, P, F> {
-    fn init_pop(program_parameters: P, population_size: usize) -> Vec<I> {
-        let population = repeat_with(GenerateEngine::generate(program_parameters))
+/// eval_fitness should use FitnessEngine::eval_fitness(Program or QProgram, Any State, Any Parameters) to evaluate the fitness of each individual.
+/// It should also take the n_trials and generate n_states, taking the median fitness associated with each
+/// n_trial. GenerateEngine::generate(State) should also exist to generate a new state.
+///
+/// rank should sort the population by fitness.
+///
+/// surive should drop the population by the given gap.
+///
+/// variation should use MutateEngine::mutate and BreedEngine::breed to fill the population with new indivudals.
+///
+/// The population should be a Vec of Programs or QPrograms.
+pub trait Core<Individual, ProgramParameters, State, Marker>
+where
+    ProgramParameters: Copy + Send + Sync,
+    Individual: Ord + Clone + Send + Sync,
+{
+    fn init_population<G: Generate<ProgramParameters, Individual>>(
+        program_parameters: ProgramParameters,
+        population_size: usize,
+    ) -> Vec<Individual> {
+        let population = repeat_with(|| G::generate(program_parameters))
             .take(population_size)
             .collect();
 
         population
     }
 
-    fn eval_fitness(population: &mut Vec<I>, parameters: &mut F) {
+    fn eval_fitness<
+        F: Fitness<Individual, State, Marker>,
+        G: Generate<(), State>,
+        R: Reset<Individual> + Reset<State>,
+    >(
+        population: &mut Vec<Individual>,
+        n_trials: usize,
+        marker: Marker,
+    ) {
+        let mut trials = repeat_with(|| G::generate(())).take(n_trials).collect_vec();
+
         for individual in population.iter_mut() {
-            FitnessEngine::eval_fitness(individual, parameters);
-            debug_assert!(!individual.get_fitness().is_not_evaluated());
+            for trial in trials.iter_mut() {
+                R::reset(individual);
+                R::reset(trial);
+                F::eval_fitness(individual, trial);
+            }
         }
     }
 
-    fn rank(population: &mut Vec<I>) {
+    fn rank(population: &mut Vec<Individual>) {
         population.sort();
-        // Organize individuals by their fitness score.
-        debug_assert!(population.worst() <= population.best());
     }
 
-    fn survive(population: &mut Vec<I>, gap: f64) {
-        let pop_len = population.len();
+    fn survive<V: Valid<Individual>>(population: &mut Vec<Individual>, gap: f64) {
+        let n_individuals = population.len();
 
         let mut n_of_individuals_to_drop =
-            (pop_len as isize) - ((1.0 - gap) * (pop_len as f64)).floor() as isize;
+            (n_individuals as isize) - ((1.0 - gap) * (n_individuals as f64)).floor() as isize;
 
-        // Drop invalid individuals.
-        while let Some(true) = population.worst().map(|p| p.get_fitness().is_invalid()) {
-            population.pop();
-            n_of_individuals_to_drop -= 1;
-        }
+        population.retain(V::valid);
+        let n_individuals_dropped = n_individuals - population.len();
+        n_of_individuals_to_drop -= n_individuals_dropped as isize;
 
-        // Drop remaining gap, if any...
         while n_of_individuals_to_drop > 0 {
             n_of_individuals_to_drop -= 1;
             population.pop();
         }
     }
 
-    fn variation(
-        population: &mut Vec<I>,
+    fn variation<B: Breed<Individual>, M: Mutate<ProgramParameters, Individual>>(
+        population: &mut Vec<Individual>,
         crossover_percent: f64,
         mutation_percent: f64,
-        program_parameters: P,
+        program_parameters: ProgramParameters,
     ) {
         debug_assert!(population.len() > 0);
 
@@ -76,62 +116,52 @@ pub trait Core<I, P, F> {
             return;
         }
 
-        let mut n_mutations = (remaining_pool_spots as f64 * mutation_percent).floor() as usize;
-        let mut n_crossovers = (remaining_pool_spots as f64 * crossover_percent).floor() as usize;
+        let n_mutations = (remaining_pool_spots as f64 * mutation_percent).floor() as usize;
+        let n_crossovers = (remaining_pool_spots as f64 * crossover_percent).floor() as usize;
 
         debug_assert!(n_mutations + n_crossovers <= remaining_pool_spots);
 
-        let mut offspring = vec![];
+        // Create separate vectors for offspring from crossover and mutation
+        let (mut crossover_offspring, mut mutation_offspring) = join(
+            || {
+                (0..n_crossovers)
+                    .filter_map(|_| {
+                        let parent_a = population.iter().choose(&mut generator());
+                        let parent_b = population.iter().choose(&mut generator());
 
-        // Crossover + Mutation
-        while (n_crossovers + n_mutations) > 0 {
-            // Step 1: Choose Parents
-            let selected_a = population.iter().choose(&mut generator());
-            let selected_b = population.iter().choose(&mut generator());
+                        if let (Some(parent_a), Some(parent_b)) = (parent_a, parent_b) {
+                            let children = B::two_point_crossover(&parent_a, &parent_b);
 
-            // Step 2: Transform Children
-            if let (Some(parent_a), Some(parent_b)) = (selected_a, selected_b) {
-                // NOTE: This can be done in parallel.
-                // Step 2A: Crossover
-                if n_crossovers > 0 {
-                    let child = BreedEngine::two_point_crossover(&parent_a, &parent_b)
-                        .choose(&mut generator())
-                        .unwrap()
-                        .to_owned();
+                            match generator().gen_range(0..2) {
+                                0 => Some(children.0),
+                                1 => Some(children.1),
+                                _ => unreachable!(),
+                            }
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<Individual>>()
+            },
+            || {
+                (0..n_mutations)
+                    .filter_map(|_| {
+                        let parent = population.iter().choose(&mut generator());
 
-                    remaining_pool_spots -= 1;
-                    n_crossovers -= 1;
+                        if let Some(parent) = parent {
+                            let mut clone = parent.clone();
+                            M::mutate(&mut clone, program_parameters);
+                            Some(clone)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<Individual>>()
+            },
+        );
 
-                    offspring.push(child)
-                }
-
-                // Step 2B: Mutate
-                if n_mutations > 0 {
-                    let parents = [parent_a, parent_b];
-                    let parent_to_mutate = parents.choose(&mut generator());
-
-                    let child = parent_to_mutate
-                        .map(|parent| program_parameters.mutate(parent))
-                        .unwrap();
-
-                    remaining_pool_spots -= 1;
-                    n_mutations -= 1;
-
-                    offspring.push(child)
-                }
-            } else {
-                unreachable!()
-            };
-        }
-
-        // Fill reset with clones
-        for individual in population
-            .iter()
-            .choose_multiple(&mut generator(), remaining_pool_spots)
-        {
-            offspring.push(individual.reset_new())
-        }
-
-        population.extend(offspring);
+        // Step 3: Add Children to Population
+        population.append(&mut crossover_offspring);
+        population.append(&mut mutation_offspring);
     }
 }
