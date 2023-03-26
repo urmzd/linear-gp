@@ -2,6 +2,7 @@ use std::fmt::{self, Debug};
 
 use clap::Args;
 use derivative::Derivative;
+use derive_builder::Builder;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -14,6 +15,7 @@ use crate::{
             generate_engine::{Generate, GenerateEngine},
             mutate_engine::{Mutate, MutateEngine},
             reset_engine::{Reset, ResetEngine},
+            status_engine::{Status, StatusEngine},
         },
         environment::{RlState, State},
         instruction::InstructionGeneratorParameters,
@@ -31,10 +33,13 @@ pub struct QTable {
 
 impl Generate<(InstructionGeneratorParameters, QConsts), QTable> for GenerateEngine {
     fn generate(using: (InstructionGeneratorParameters, QConsts)) -> QTable {
-        QTable {
+        let mut table = QTable {
             table: vec![vec![0.; using.0.n_actions]; using.0.n_registers()],
             q_consts: using.1,
-        }
+        };
+
+        ResetEngine::reset(&mut table);
+        table
     }
 }
 
@@ -123,7 +128,6 @@ pub struct QProgram {
 impl Reset<QProgram> for ResetEngine {
     fn reset(item: &mut QProgram) {
         ResetEngine::reset(&mut item.program);
-        ResetEngine::reset(&mut item.q_table);
     }
 }
 
@@ -216,6 +220,24 @@ impl Breed<QProgram> for BreedEngine {
     }
 }
 
+impl Status<QProgram> for StatusEngine {
+    fn valid(item: &QProgram) -> bool {
+        StatusEngine::valid(&item.program)
+    }
+
+    fn set_fitness(program: &mut QProgram, fitness: FitnessScore) {
+        program.program.fitness = fitness;
+    }
+
+    fn get_fitness(program: &QProgram) -> FitnessScore {
+        program.program.fitness
+    }
+
+    fn evaluated(item: &QProgram) -> bool {
+        StatusEngine::evaluated(&item.program)
+    }
+}
+
 impl Mutate<QProgramGeneratorParameters, QProgram> for MutateEngine {
     fn mutate(item: &mut QProgram, using: QProgramGeneratorParameters) {
         MutateEngine::mutate(&mut item.program, using.program_parameters);
@@ -237,39 +259,48 @@ impl Generate<QProgramGeneratorParameters, QProgram> for GenerateEngine {
     }
 }
 
-#[derive(Debug, Clone, Args, Deserialize, Serialize)]
+#[derive(Debug, Clone, Args, Deserialize, Serialize, Copy, Builder)]
 pub struct QProgramGeneratorParameters {
     #[command(flatten)]
     program_parameters: ProgramGeneratorParameters,
+    #[builder(default)]
     #[command(flatten)]
     consts: QConsts,
 }
 
-#[derive(Debug, Clone, Copy, Args, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Args, Serialize, Deserialize, Builder)]
 pub struct QConsts {
     /// Learning Factor
     #[arg(long, default_value = "0.1")]
+    #[builder(default = "0.1")]
     alpha: f64,
     /// Discount Factor
     #[arg(long, default_value = "0.9")]
+    #[builder(default = "0.9")]
     gamma: f64,
     /// Exploration Factor
     #[arg(long, default_value = "0.05")]
+    #[builder(default = "0.05")]
     epsilon: f64,
     /// Learning Rate Decay
     #[arg(long, default_value = "0.01")]
+    #[builder(default = "0.01")]
     alpha_decay: f64,
     /// Exploration Decay
     #[arg(long, default_value = "0.001")]
+    #[builder(default = "0.001")]
     epsilon_decay: f64,
 
     /// To allow new programs to start from the new state, we have active
     /// properties to mutuate.
     #[arg(skip)]
     #[serde(skip)]
+    #[builder(setter(skip), default)]
     alpha_active: f64,
+
     #[serde(skip)]
     #[arg(skip)]
+    #[builder(setter(skip), default)]
     epsilon_active: f64,
 }
 
