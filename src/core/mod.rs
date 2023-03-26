@@ -1,4 +1,3 @@
-pub mod algorithm;
 pub mod characteristics;
 pub mod config;
 pub mod environment;

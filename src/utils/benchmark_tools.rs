@@ -4,6 +4,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::core::{
+    characteristics::Save,
+    engines::core_engine::{Core, HyperParameters},
+};
+
 use super::types::VoidResultAnyError;
 
 pub const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
@@ -32,6 +37,7 @@ macro_rules! with_named_logger {
     }};
 }
 
+use serde::Serialize;
 #[allow(unused_imports)]
 pub(crate) use with_named_logger;
 
@@ -51,11 +57,14 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     Ok(path.to_owned())
 }
 
-pub fn log_benchmarks<T>(
-    populations: &Vec<Vec<T>>,
-    params: &HyperParameters,
+pub fn log_benchmarks<C>(
+    populations: &Vec<Vec<C::Individual>>,
+    params: &HyperParameters<C>,
     test_name: &str,
-) -> VoidResultAnyError {
+) -> VoidResultAnyError
+where
+    C: Core,
+{
     let best_path = create_path(
         Path::new(BENCHMARK_PREFIX)
             .join(test_name)
@@ -92,9 +101,11 @@ pub fn log_benchmarks<T>(
         true,
     )?;
 
+    let last_population = populations.last().unwrap();
+
     let (worst, median, best) = populations
         .last()
-        .map(|p| (p.worst(), p.median(), p.best()))
+        .map(|p| (p.last(), p.get(last_population.len() / 2), p.first()))
         .unwrap();
 
     worst.unwrap().save(worst_path.to_str().unwrap())?;
@@ -105,7 +116,10 @@ pub fn log_benchmarks<T>(
     Ok(())
 }
 
-pub fn output_benchmarks<T>(populations: &Vec<Vec<T>>, test_name: &str) -> VoidResultAnyError {
+pub fn save_benchmarks<T>(populations: &Vec<Vec<T>>, test_name: &str) -> VoidResultAnyError
+where
+    T: Serialize,
+{
     let plot_path = create_path(
         Path::new(BENCHMARK_PREFIX)
             .join(test_name)
