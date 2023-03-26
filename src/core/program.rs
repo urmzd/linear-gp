@@ -4,7 +4,7 @@ use crate::utils::random::generator;
 use clap::Args;
 use derivative::Derivative;
 use derive_builder::Builder;
-use rand::{Rng, seq::IteratorRandom};
+use rand::{seq::IteratorRandom, Rng};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -36,7 +36,6 @@ pub struct ProgramGeneratorParameters {
 
 impl Reset<Program> for ResetEngine {
     fn reset(item: &mut Program) {
-        ResetEngine::reset(&mut item.id);
         ResetEngine::reset(&mut item.registers);
         ResetEngine::reset(&mut item.fitness);
     }
@@ -48,11 +47,11 @@ impl Status<Program> for StatusEngine {
     }
 
     fn valid(item: &Program) -> bool {
-        !item.fitness.is_invalid()
+        item.fitness.is_valid()
     }
 
     fn evaluated(item: &Program) -> bool {
-        !item.fitness.is_not_evaluated()
+        item.fitness.is_evaluated()
     }
 }
 
@@ -114,6 +113,7 @@ impl Mutate<ProgramGeneratorParameters, Program> for MutateEngine {
             MutateEngine::mutate(instruction, using.instruction_generator_parameters);
 
         ResetEngine::reset(item);
+        ResetEngine::reset(&mut item.id);
     }
 }
 
@@ -127,6 +127,9 @@ impl Breed<Program> for BreedEngine {
 
         child_1.instructions = child_1_instructions;
         child_2.instructions = child_2_instructions;
+
+        ResetEngine::reset(&mut child_1.id);
+        ResetEngine::reset(&mut child_2.id);
 
         ResetEngine::reset(&mut child_1);
         ResetEngine::reset(&mut child_2);

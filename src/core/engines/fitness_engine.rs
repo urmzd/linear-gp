@@ -34,17 +34,17 @@ impl PartialOrd for FitnessScore {
 }
 
 impl FitnessScore {
-    pub fn is_not_evaluated(&self) -> bool {
+    pub fn is_evaluated(&self) -> bool {
         match self {
-            Self::NotEvaluated => true,
-            _ => false,
+            FitnessScore::NotEvaluated => false,
+            _ => true,
         }
     }
 
-    pub fn is_invalid(&self) -> bool {
+    pub fn is_valid(&self) -> bool {
         match self {
-            FitnessScore::Valid(_) | FitnessScore::NotEvaluated => false,
-            _ => true,
+            FitnessScore::Valid(_) => true,
+            _ => false,
         }
     }
 

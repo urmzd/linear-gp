@@ -9,7 +9,6 @@ impl<T> Fitness<Program, T, ()> for FitnessEngine
 where
     T: State,
 {
-
     fn eval_fitness(program: &mut Program, states: &mut T) -> FitnessScore {
         let mut n_correct = 0.;
         let mut n_total = 0.;
