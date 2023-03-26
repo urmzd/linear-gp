@@ -80,7 +80,9 @@ impl State for IrisState {
     fn execute_action(&mut self, action: usize) -> f64 {
         let item = &self.data[self.idx];
         self.idx += 1;
-        (item.class as usize == action) as usize as f64
+        let correct_class = item.class as usize;
+        let is_correct = correct_class == action;
+        is_correct as usize as f64
     }
 
     fn get(&mut self) -> Option<&mut Self> {
