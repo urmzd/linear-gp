@@ -5,10 +5,16 @@ use tokio::runtime::Runtime;
 use crate::{
     core::{
         engines::{
+            breed_engine::BreedEngine,
+            core_engine::Core,
+            fitness_engine::FitnessEngine,
             generate_engine::{Generate, GenerateEngine},
+            mutate_engine::MutateEngine,
             reset_engine::{Reset, ResetEngine},
+            status_engine::StatusEngine,
         },
         environment::State,
+        program::{Program, ProgramGeneratorParameters},
     },
     utils::loader::download_and_load_csv,
 };
@@ -100,5 +106,58 @@ impl Generate<(), IrisState> for GenerateEngine {
             .expect("Failed to download and load the dataset");
 
         IrisState { data, idx: 0 }
+    }
+}
+
+#[derive(Clone)]
+struct IrisEngine;
+
+impl Core for IrisEngine {
+    type State = IrisState;
+    type Individual = Program;
+    type ProgramParameters = ProgramGeneratorParameters;
+    type Marker = ();
+    type Generate = GenerateEngine;
+    type Fitness = FitnessEngine;
+    type Reset = ResetEngine;
+    type Breed = BreedEngine;
+    type Mutate = MutateEngine;
+    type Status = StatusEngine;
+}
+
+#[cfg(test)]
+mod test {
+
+    use crate::core::engines::core_engine::HyperParametersBuilder;
+    use crate::core::instruction::InstructionGeneratorParametersBuilder;
+    use crate::core::program::ProgramGeneratorParametersBuilder;
+    use crate::utils::types::VoidResultAnyError;
+
+    use super::*;
+
+    #[test]
+    fn sanity_test() -> VoidResultAnyError {
+        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+            .n_actions(IrisState::N_ACTIONS)
+            .n_inputs(IrisState::N_INPUTS)
+            .build()?;
+        let program_parameters = ProgramGeneratorParametersBuilder::default()
+            .max_instructions(100)
+            .instruction_generator_parameters(instruction_parameters)
+            .build()?;
+        let parameters = HyperParametersBuilder::<IrisEngine>::default()
+            .program_parameters(program_parameters)
+            .mutation_percent(0.)
+            .crossover_percent(0.)
+            .build()?;
+
+        let last_population = parameters.build_engine().take(100).last().unwrap();
+        last_population
+            .iter()
+            .all(|individual| Some(individual) == last_population.first());
+
+        println!("{:?}", last_population[0]);
+
+        Ok(())
     }
 }

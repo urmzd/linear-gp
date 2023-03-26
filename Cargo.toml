@@ -11,11 +11,11 @@ serde_json = "1.0"
 simd-json = "0.7"
 tokio = { version = "1.18", features = ["full", "macros"] }
 rand = "0.8.5"
-rand_xoshiro = "0.6.0"
+rand_xoshiro = "0.6"
 strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
-lazy_static = "1.4.0"
-derivative = "2.2.0"
+lazy_static = "1.4"
+derivative = "2.2"
 derive_more = { version = "0.99" }
 itertools = "0.10"
 tracing = {version = "0.1", default-features=false }
@@ -24,7 +24,7 @@ tracing-subscriber = { version = "0.3", default-features=false, features = ["env
 gym-rs = { git = "https://github.com/urmzd/gym-rs" }
 uuid = { version = "1.2.2", features = ["v4", "serde"] }
 clap = { version = "4.1.8", features = ["derive"] }
-config = "0.13.1"
-derive_builder = "0.12.0"
+config = "0.13"
+derive_builder = "0.12"
 reqwest = "0.11"
-rayon = "1.5"
+rayon = "1.7"

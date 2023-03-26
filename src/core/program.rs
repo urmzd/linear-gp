@@ -19,6 +19,7 @@ use super::{
         generate_engine::{Generate, GenerateEngine},
         mutate_engine::{Mutate, MutateEngine},
         reset_engine::{Reset, ResetEngine},
+        status_engine::{Status, StatusEngine},
     },
     environment::State,
     instruction::InstructionGeneratorParameters,
@@ -30,6 +31,7 @@ use super::{
 #[derivative(Copy)]
 pub struct ProgramGeneratorParameters {
     #[arg(long, default_value = "12")]
+    #[builder(default = "12")]
     pub max_instructions: usize,
     #[command(flatten)]
     pub instruction_generator_parameters: InstructionGeneratorParameters,
@@ -43,16 +45,30 @@ impl Reset<Program> for ResetEngine {
     }
 }
 
+impl Status<Program> for StatusEngine {
+    fn set_fitness(program: &mut Program, fitness: FitnessScore) {
+        program.fitness = fitness;
+    }
+
+    fn valid(item: &Program) -> bool {
+        !item.fitness.is_invalid()
+    }
+
+    fn evaluated(item: &Program) -> bool {
+        !item.fitness.is_not_evaluated()
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Derivative, Builder)]
-#[derivative(PartialEq, PartialOrd)]
+#[derivative(PartialEq, PartialOrd, Ord, Eq)]
 pub struct Program {
-    #[derivative(PartialOrd = "ignore")]
+    #[derivative(PartialOrd = "ignore", Ord = "ignore")]
     pub id: Uuid,
-    #[derivative(PartialEq = "ignore", PartialOrd = "ignore")]
+    #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub instructions: Instructions,
-    #[derivative(PartialEq = "ignore", PartialOrd = "ignore")]
+    #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub registers: Registers,
-    #[derivative(PartialEq = "ignore")]
+    #[derivative(PartialEq = "ignore", Ord = "ignore")]
     pub fitness: FitnessScore,
 }
 

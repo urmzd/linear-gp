@@ -8,16 +8,18 @@ pub async fn download_and_load_csv<T>(url: &str) -> Result<Vec<T>, Box<dyn Error
 where
     T: DeserializeOwned + Send,
 {
-    let response = get(url).await?.text().await?;
-    let mut reader = ReaderBuilder::new()
-        .has_headers(true)
-        .from_reader(response.as_bytes());
-    let mut data = Vec::new();
+    let response = get(url).await?;
+    let content = response.text().await?;
 
-    for record in reader.deserialize() {
-        let item: T = record?;
-        data.push(item);
-    }
+    let mut csv_reader = ReaderBuilder::new()
+        .has_headers(false)
+        .from_reader(content.as_bytes());
 
-    Ok(data)
+    let inputs: Result<Vec<T>, _> = csv_reader
+        .deserialize()
+        .into_iter()
+        .map(|input| input)
+        .collect();
+
+    Ok(inputs?)
 }
