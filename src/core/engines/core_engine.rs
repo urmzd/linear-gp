@@ -4,7 +4,7 @@ use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
 
 use crate::{
-    core::engines::{breed_engine::Breed, reset_engine::Reset, status_engine::StatusEngine},
+    core::engines::{breed_engine::Breed, reset_engine::Reset},
     utils::random::generator,
 };
 
@@ -17,7 +17,10 @@ use serde::{Deserialize, Serialize};
 use tracing::info;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Builder)]
-pub struct HyperParameters<P> {
+pub struct HyperParameters<C>
+where
+    C: Core,
+{
     #[builder(default = "100")]
     pub population_size: usize,
     #[builder(default = "0.5")]
@@ -30,7 +33,7 @@ pub struct HyperParameters<P> {
     pub n_generations: usize,
     #[builder(default = "1")]
     pub n_trials: usize,
-    pub program_parameters: P,
+    pub program_parameters: C::ProgramParameters,
 }
 
 pub struct CoreIter<C>
@@ -39,22 +42,20 @@ where
 {
     generation: usize,
     next_population: Option<Vec<C::Individual>>,
-    params: HyperParameters<C::ProgramParameters>,
-    engine: C,
+    params: HyperParameters<C>,
 }
 
 impl<C> CoreIter<C>
 where
     C: Core,
 {
-    pub fn new(engine: C, hp: HyperParameters<C::ProgramParameters>) -> Self {
+    pub fn new(hp: HyperParameters<C>) -> Self {
         let current_population = C::init_population(hp.program_parameters, hp.population_size);
 
         Self {
             generation: 0,
             next_population: Some(current_population),
             params: hp,
-            engine,
         }
     }
 }
@@ -100,6 +101,13 @@ where
 
         return Some(population.clone());
     }
+}
+
+pub fn build_core_engine<C>(hp: HyperParameters<C>) -> CoreIter<C>
+where
+    C: Core,
+{
+    CoreIter::new(hp)
 }
 
 pub struct CoreEngine;
