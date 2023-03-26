@@ -22,14 +22,22 @@ impl Reset<FitnessScore> for ResetEngine {
     }
 }
 
+impl Ord for FitnessScore {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Self::Valid(a), Self::Valid(b)) => a.partial_cmp(b).unwrap(),
+            (Self::Valid(_), _) => Ordering::Greater,
+            (_, Self::Valid(_)) => Ordering::Less,
+            _ => Ordering::Equal,
+        }
+    }
+}
+
+impl Eq for FitnessScore {}
+
 impl PartialOrd for FitnessScore {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match (self, other) {
-            (Self::Valid(a), Self::Valid(b)) => a.partial_cmp(b),
-            (Self::Valid(_), _) => Some(Ordering::Greater),
-            (_, Self::Valid(_)) => Some(Ordering::Less),
-            _ => Some(Ordering::Equal),
-        }
+        Some(self.cmp(other))
     }
 }
 

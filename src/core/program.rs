@@ -46,6 +46,10 @@ impl Status<Program> for StatusEngine {
         program.fitness = fitness;
     }
 
+    fn get_fitness(program: &Program) -> FitnessScore {
+        program.fitness
+    }
+
     fn valid(item: &Program) -> bool {
         item.fitness.is_valid()
     }
@@ -56,16 +60,31 @@ impl Status<Program> for StatusEngine {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Derivative, Builder)]
-#[derivative(PartialEq, PartialOrd, Ord, Eq)]
 pub struct Program {
-    #[derivative(PartialOrd = "ignore", Ord = "ignore")]
     pub id: Uuid,
-    #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub instructions: Instructions,
-    #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub registers: Registers,
-    #[derivative(PartialEq = "ignore", Ord = "ignore")]
     pub fitness: FitnessScore,
+}
+
+impl PartialEq for Program {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Ord for Program {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.fitness.cmp(&other.fitness)
+    }
+}
+
+impl Eq for Program {}
+
+impl PartialOrd for Program {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.fitness.partial_cmp(&other.fitness)
+    }
 }
 
 impl Program {
@@ -109,8 +128,7 @@ impl Mutate<ProgramGeneratorParameters, Program> for MutateEngine {
             .choose(&mut generator())
             .unwrap();
 
-        let _mutated_instruction =
-            MutateEngine::mutate(instruction, using.instruction_generator_parameters);
+        MutateEngine::mutate(instruction, using.instruction_generator_parameters);
 
         ResetEngine::reset(&mut item.id);
         ResetEngine::reset(item);

@@ -133,6 +133,7 @@ mod test {
     use itertools::Itertools;
 
     use crate::core::engines::core_engine::HyperParametersBuilder;
+    use crate::core::engines::status_engine::Status;
     use crate::core::instruction::InstructionGeneratorParametersBuilder;
     use crate::core::program::ProgramGeneratorParametersBuilder;
     use crate::utils::benchmark_tools::{log_benchmarks, save_benchmarks, with_named_logger};
@@ -160,9 +161,10 @@ mod test {
             let populations = parameters.build_engine().take(100).collect_vec();
 
             let last_population = populations.last().unwrap();
-            last_population
+            assert!(last_population
                 .iter()
-                .all(|individual| Some(individual) == last_population.first());
+                .all(|individual| Some(StatusEngine::get_fitness(individual))
+                    == last_population.first().map(StatusEngine::get_fitness)));
 
             log_benchmarks(&populations, &parameters, NAME)?;
             save_benchmarks(&populations, NAME)?;
@@ -184,16 +186,11 @@ mod test {
                 .build()?;
             let parameters = HyperParametersBuilder::<IrisEngine>::default()
                 .program_parameters(program_parameters)
-                .mutation_percent(0.5)
+                .mutation_percent(1.0)
                 .crossover_percent(0.)
                 .build()?;
 
             let populations = parameters.build_engine().take(100).collect_vec();
-
-            let last_population = populations.last().unwrap();
-            last_population
-                .iter()
-                .all(|individual| Some(individual) == last_population.first());
 
             log_benchmarks(&populations, &parameters, NAME)?;
             save_benchmarks(&populations, NAME)?;
@@ -216,15 +213,10 @@ mod test {
             let parameters = HyperParametersBuilder::<IrisEngine>::default()
                 .program_parameters(program_parameters)
                 .mutation_percent(0.)
-                .crossover_percent(0.5)
+                .crossover_percent(1.0)
                 .build()?;
 
             let populations = parameters.build_engine().take(100).collect_vec();
-
-            let last_population = populations.last().unwrap();
-            last_population
-                .iter()
-                .all(|individual| Some(individual) == last_population.first());
 
             log_benchmarks(&populations, &parameters, NAME)?;
             save_benchmarks(&populations, NAME)?;
@@ -251,11 +243,6 @@ mod test {
                 .build()?;
 
             let populations = parameters.build_engine().take(100).collect_vec();
-
-            let last_population = populations.last().unwrap();
-            last_population
-                .iter()
-                .all(|individual| Some(individual) == last_population.first());
 
             log_benchmarks(&populations, &parameters, NAME)?;
             save_benchmarks(&populations, NAME)?;
