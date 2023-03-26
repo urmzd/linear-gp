@@ -37,7 +37,6 @@ where
     pub n_trials: usize,
     #[builder(default = "None")]
     pub seed: Option<u64>,
-    // #[derivative(Clone(bound = "C: Sized"))]
     pub program_parameters: C::ProgramParameters,
 }
 

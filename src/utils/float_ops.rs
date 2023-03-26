@@ -19,10 +19,6 @@ pub fn argmax<I: Iterator<Item = f64>>(iter: I) -> Option<usize> {
     }
 }
 
-pub fn max_val<I: Iterator<Item = f64>>(iter: I) -> Option<f64> {
-    iter.reduce(f64::max)
-}
-
 #[cfg(test)]
 mod tests {
     use super::argmax;

@@ -9,7 +9,7 @@ use crate::core::{
     engines::core_engine::{Core, HyperParameters},
 };
 
-use super::types::VoidResultAnyError;
+use super::misc::VoidResultAnyError;
 
 pub const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
 

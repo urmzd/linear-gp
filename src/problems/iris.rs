@@ -136,7 +136,7 @@ mod test {
     use crate::core::instruction::InstructionGeneratorParametersBuilder;
     use crate::core::program::ProgramGeneratorParametersBuilder;
     use crate::utils::benchmark_tools::{log_benchmarks, save_benchmarks, with_named_logger};
-    use crate::utils::types::VoidResultAnyError;
+    use crate::utils::misc::VoidResultAnyError;
 
     use super::*;
 

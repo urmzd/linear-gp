@@ -113,16 +113,17 @@ impl QTable {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Derivative)]
+#[derivative(PartialEq, PartialOrd, Ord, Eq)]
 pub struct QProgram {
-    #[derivative(PartialEq = "ignore", PartialOrd = "ignore")]
+    #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub q_table: QTable,
     pub program: Program,
 }
 
 impl Reset<QProgram> for ResetEngine {
     fn reset(item: &mut QProgram) {
-        ResetEngine::reset(&mut item.q_table);
         ResetEngine::reset(&mut item.program);
+        ResetEngine::reset(&mut item.q_table);
     }
 }
 
