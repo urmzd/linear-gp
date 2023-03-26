@@ -1,7 +1,6 @@
-use rand::{distributions::Uniform, prelude::Distribution};
-
 use crate::utils::random::generator;
 use itertools::Itertools;
+use rand::Rng;
 
 use super::{
     engines::breed_engine::{Breed, BreedEngine},
@@ -16,26 +15,24 @@ impl Breed<Instructions> for BreedEngine {
         let mut instructions_a = mate_1.clone();
         let mut instructions_b = mate_2.clone();
 
-        let current_generator = &mut generator();
-
         debug_assert!(instructions_a.len() > 0);
         debug_assert!(instructions_b.len() > 0);
 
-        let a_start = Uniform::new(0, instructions_a.len()).sample(current_generator);
-        let b_start = Uniform::new(0, instructions_b.len()).sample(current_generator);
+        let a_start = generator().gen_range(0..instructions_a.len());
+        let b_start = generator().gen_range(0..instructions_b.len());
 
         let a_end = if a_start == instructions_a.len() - 1 {
             None
         } else {
             debug_assert!(instructions_a.len() > a_start);
-            Some(Uniform::new(a_start + 1, instructions_a.len()).sample(current_generator))
+            Some(generator().gen_range(a_start + 1..instructions_a.len()))
         };
 
         let b_end = if b_start == instructions_b.len() - 1 {
             None
         } else {
             debug_assert!(instructions_b.len() > b_start);
-            Some(Uniform::new(b_start + 1, instructions_b.len()).sample(current_generator))
+            Some(generator().gen_range(b_start + 1..instructions_b.len()))
         };
 
         let a_chunk = match a_end {

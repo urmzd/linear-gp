@@ -4,10 +4,7 @@ use crate::utils::random::generator;
 use clap::Args;
 use derivative::Derivative;
 use derive_builder::Builder;
-use rand::{
-    distributions::Uniform,
-    prelude::{Distribution, IteratorRandom},
-};
+use rand::{Rng, seq::IteratorRandom};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -89,7 +86,7 @@ impl Generate<ProgramGeneratorParameters, Program> for GenerateEngine {
         } = using;
 
         let registers = Registers::new(instruction_generator_parameters.n_registers());
-        let n_instructions = Uniform::new_inclusive(1, max_instructions).sample(&mut generator());
+        let n_instructions = generator().gen_range(1..=max_instructions);
         let instructions =
             repeat_with(|| GenerateEngine::generate(instruction_generator_parameters))
                 .take(n_instructions)

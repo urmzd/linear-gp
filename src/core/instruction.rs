@@ -1,7 +1,6 @@
 use clap::Args;
 use derivative::Derivative;
 use derive_builder::Builder;
-use rand::distributions::uniform::{UniformInt, UniformSampler};
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
 use rand::Rng;
@@ -97,9 +96,7 @@ pub struct Instruction {
 
 impl Generate<InstructionGeneratorParameters, Instruction> for GenerateEngine {
     fn generate(using: InstructionGeneratorParameters) -> Instruction {
-        let current_generator = &mut generator();
-
-        let src_idx = UniformInt::<usize>::new(0, using.n_registers()).sample(current_generator);
+        let src_idx = generator().gen_range(0..using.n_registers());
 
         let mode = generator().gen();
 
@@ -109,8 +106,7 @@ impl Generate<InstructionGeneratorParameters, Instruction> for GenerateEngine {
             using.n_registers()
         };
 
-        let target_index =
-            UniformInt::<usize>::new(0, upper_bound_target_index).sample(current_generator);
+        let target_index = generator().gen_range(0..upper_bound_target_index);
 
         let executable = generator().gen();
 
