@@ -1,20 +1,21 @@
 use crate::core::{
     engines::fitness_engine::{Fitness, FitnessEngine, FitnessScore},
-    input_engine::State,
+    environment::State,
     program::Program,
     registers::{ActionRegister, ArgmaxInput},
 };
 
-impl<T> Fitness<T, ()> for FitnessEngine
+
+impl<T> Fitness<Program, T, ()> for FitnessEngine
 where
     T: State,
 {
-    fn eval_fitness(program: &mut Program, states: &mut T, parameters: &mut ()) -> FitnessScore {
+    fn eval_fitness(program: &mut Program, states: &mut T) -> FitnessScore {
         let mut n_correct = 0.;
         let mut n_total = 0.;
 
-        while let Some(state) = states.next() {
-            program.run(&mut state);
+        while let Some(state) = states.get() {
+            program.run(state);
 
             match program
                 .registers

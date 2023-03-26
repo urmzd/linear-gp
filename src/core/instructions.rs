@@ -9,7 +9,10 @@ use super::{
 };
 
 impl Breed<Instructions> for BreedEngine {
-    fn two_point_crossover(mate_1: &Instructions, mate_2: &Instructions) -> [Instructions; 2] {
+    fn two_point_crossover(
+        mate_1: &Instructions,
+        mate_2: &Instructions,
+    ) -> (Instructions, Instructions) {
         let mut instructions_a = mate_1.clone();
         let mut instructions_b = mate_2.clone();
 
@@ -68,7 +71,7 @@ impl Breed<Instructions> for BreedEngine {
         debug_assert!(instructions_a.len() > 0, "instructions A after crossover");
         debug_assert!(instructions_b.len() > 0, "instructions B after crossover");
 
-        [instructions_a, instructions_b]
+        (instructions_a, instructions_b)
     }
 }
 
@@ -83,7 +86,7 @@ mod tests {
                 breed_engine::{Breed, BreedEngine},
                 generate_engine::{Generate, GenerateEngine},
             },
-            input_engine::State,
+            environment::State,
             instruction::InstructionGeneratorParameters,
             program::ProgramGeneratorParameters,
         },
@@ -104,30 +107,30 @@ mod tests {
             },
         };
 
-        let program_a = GenerateEngine::generate(parameters);
-        let program_b = GenerateEngine::generate(parameters);
-
-        let mut parents = [program_a, program_b];
+        let mut program_a = GenerateEngine::generate(parameters);
+        let mut program_b = GenerateEngine::generate(parameters);
 
         for _ in 0..100 {
-            let parent_a_instruction_len = parents[0].instructions.len();
-            let parent_b_instruction_len = parents[1].instructions.len();
+            let parent_a_instruction_len = program_a.instructions.len();
+            let parent_b_instruction_len = program_b.instructions.len();
 
-            let new_parents = BreedEngine::two_point_crossover(&parents[0], &parents[1]);
+            let (new_parent_a, new_parent_b) =
+                BreedEngine::two_point_crossover(&program_a, &program_b);
 
-            debug_assert!(new_parents[0].instructions.len() > 0);
-            debug_assert!(new_parents[1].instructions.len() > 0);
+            debug_assert!(new_parent_a.instructions.len() > 0);
+            debug_assert!(new_parent_b.instructions.len() > 0);
 
             debug_assert!(
-                new_parents[0].instructions.len()
+                new_parent_a.instructions.len()
                     <= parent_a_instruction_len + parent_b_instruction_len
             );
             debug_assert!(
-                new_parents[1].instructions.len()
+                new_parent_b.instructions.len()
                     <= parent_a_instruction_len + parent_b_instruction_len
             );
 
-            parents = new_parents;
+            program_a = new_parent_a;
+            program_b = new_parent_b;
         }
     }
 }
