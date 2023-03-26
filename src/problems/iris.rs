@@ -162,4 +162,73 @@ mod test {
 
         Ok(())
     }
+
+    #[test]
+    fn mutation_test() -> VoidResultAnyError {
+        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+            .n_actions(IrisState::N_ACTIONS)
+            .n_inputs(IrisState::N_INPUTS)
+            .build()?;
+        let program_parameters = ProgramGeneratorParametersBuilder::default()
+            .max_instructions(100)
+            .instruction_generator_parameters(instruction_parameters)
+            .build()?;
+        let parameters = HyperParametersBuilder::<IrisEngine>::default()
+            .program_parameters(program_parameters)
+            .mutation_percent(1.0)
+            .crossover_percent(0.)
+            .build()?;
+
+        let last_population = parameters.build_engine().take(100).last().unwrap();
+
+        println!("{:?}", last_population[0]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn crossover_test() -> VoidResultAnyError {
+        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+            .n_actions(IrisState::N_ACTIONS)
+            .n_inputs(IrisState::N_INPUTS)
+            .build()?;
+        let program_parameters = ProgramGeneratorParametersBuilder::default()
+            .max_instructions(100)
+            .instruction_generator_parameters(instruction_parameters)
+            .build()?;
+        let parameters = HyperParametersBuilder::<IrisEngine>::default()
+            .program_parameters(program_parameters)
+            .mutation_percent(0.)
+            .crossover_percent(1.0)
+            .build()?;
+
+        let last_population = parameters.build_engine().take(100).last().unwrap();
+
+        println!("{:?}", last_population[0]);
+
+        Ok(())
+    }
+
+    #[test]
+    fn full_test() -> VoidResultAnyError {
+        let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+            .n_actions(IrisState::N_ACTIONS)
+            .n_inputs(IrisState::N_INPUTS)
+            .build()?;
+        let program_parameters = ProgramGeneratorParametersBuilder::default()
+            .max_instructions(100)
+            .instruction_generator_parameters(instruction_parameters)
+            .build()?;
+        let parameters = HyperParametersBuilder::<IrisEngine>::default()
+            .program_parameters(program_parameters)
+            .mutation_percent(0.5)
+            .crossover_percent(0.5)
+            .build()?;
+
+        let last_population = parameters.build_engine().take(100).last().unwrap();
+
+        println!("{:?}", last_population[0]);
+
+        Ok(())
+    }
 }

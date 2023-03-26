@@ -622,7 +622,7 @@ checksum = "ad0a93d233ebf96623465aad4046a8d3aa4da22d4f4beba5388838c8a434bbb4"
 [[package]]
 name = "gym-rs"
 version = "1.0.0"
-source = "git+https://github.com/urmzd/gym-rs#623b174344b0de66003172972b04f3d70349534a"
+source = "git+https://github.com/urmzd/gym-rs#3a4e537071cc80a1d2642568a14f11565ffd3376"
 dependencies = [
  "derivative",
  "derive-new",
@@ -1453,9 +1453,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.53"
+version = "1.0.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba466839c78239c09faf015484e5cc04860f88242cff4d03eb038f04b4699b73"
+checksum = "e472a104799c74b514a57226160104aa483546de37e839ec50e3c2e41dd87534"
 dependencies = [
  "unicode-ident",
 ]

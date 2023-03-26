@@ -6,6 +6,7 @@ use crate::core::engines::generate_engine::Generate;
 use crate::core::engines::generate_engine::GenerateEngine;
 use crate::core::engines::reset_engine::Reset;
 use crate::core::engines::reset_engine::ResetEngine;
+use crate::core::environment::RlState;
 use crate::core::environment::State;
 
 #[derive(Clone, Debug)]
@@ -41,6 +42,19 @@ where
         }
 
         Some(self)
+    }
+}
+
+impl<T, const N_PUTS: usize, const N_ACTS: usize> RlState for GymRsInput<T, N_PUTS, N_ACTS>
+where
+    T: Env,
+{
+    fn is_terminal(&mut self) -> bool {
+        self.terminated
+    }
+
+    fn get_initial_state(&self) -> Vec<f64> {
+        self.initial_state.into()
     }
 }
 
