@@ -5,10 +5,7 @@ use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
 
 use crate::{
-    core::engines::{
-        breed_engine::Breed,
-        reset_engine::{Reset, ResetEngine},
-    },
+    core::engines::{breed_engine::Breed, reset_engine::Reset},
     utils::random::{generator, update_seed},
 };
 
