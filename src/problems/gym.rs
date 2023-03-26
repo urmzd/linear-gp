@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 
 use gym_rs::core::Env;
-use gym_rs::core::EnvProperties;
-use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
-use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
 
 use crate::core::engines::breed_engine::BreedEngine;
 use crate::core::engines::core_engine::Core;
@@ -149,6 +146,9 @@ mod tests {
     use crate::utils::benchmark_tools::{log_benchmarks, save_benchmarks, with_named_logger};
     use crate::utils::misc::VoidResultAnyError;
 
+    use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
+    use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
+
     #[test]
     fn cart_pole_q() -> VoidResultAnyError {
         with_named_logger!("cart_pole_q", {
@@ -205,7 +205,7 @@ mod tests {
     }
 
     #[test]
-    fn mountain_car_default() -> VoidResultAnyError {
+    fn mountain_cart_default() -> VoidResultAnyError {
         with_named_logger!("mountain_car_default", {
             let instruction_parameters = InstructionGeneratorParametersBuilder::default()
                 .n_actions(GymRsInput::<MountainCarEnv, 2, 3>::N_ACTIONS)
