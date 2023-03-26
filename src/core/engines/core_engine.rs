@@ -45,7 +45,7 @@ where
     C: Core,
 {
     generation: usize,
-    next_population: Option<Vec<C::Individual>>,
+    next_population: Vec<C::Individual>,
     params: HyperParameters<C>,
     trials: Vec<C::State>,
 }
@@ -62,7 +62,7 @@ where
 
         Self {
             generation: 0,
-            next_population: Some(current_population),
+            next_population: current_population,
             params: hp,
             trials,
         }
@@ -80,8 +80,7 @@ where
             return None;
         }
 
-        // Freeze population.
-        let mut population = self.next_population.clone().unwrap();
+        let mut population = self.next_population.clone();
 
         C::eval_fitness(&mut population, &mut self.trials);
         C::rank(&mut population);
@@ -89,9 +88,9 @@ where
         assert!(population.iter().all(C::Status::evaluated));
 
         info!(
-            best = serde_json::to_string(&population.last()).unwrap(),
+            best = serde_json::to_string(&population.first()).unwrap(),
             median = serde_json::to_string(&population.get(population.len() / 2)).unwrap(),
-            worst = serde_json::to_string(&population.first()).unwrap(),
+            worst = serde_json::to_string(&population.last()).unwrap(),
             generation = serde_json::to_string(&self.generation).unwrap()
         );
 
@@ -105,10 +104,10 @@ where
             self.params.program_parameters,
         );
 
-        self.next_population = Some(new_population);
+        self.next_population = new_population;
         self.generation += 1;
 
-        return Some(population.clone());
+        return Some(population);
     }
 }
 
@@ -178,6 +177,13 @@ pub trait Core {
 
     fn rank(population: &mut Vec<Self::Individual>) {
         population.sort_by(|a, b| b.cmp(a));
+        debug_assert!(population.windows(2).all(|w| {
+            let a = &w[0];
+            let b = &w[1];
+
+            debug_assert!(a >= b);
+            a >= b
+        }));
     }
 
     fn survive(population: &mut Vec<Self::Individual>, gap: f64) {
@@ -224,6 +230,7 @@ pub trait Core {
         debug_assert!(n_mutations + n_crossovers <= remaining_pool_spots);
 
         let rc_population = Arc::new(population.clone());
+
         rayon::scope(|s| {
             s.spawn(|_| {
                 crossover_offspring.extend((0..n_crossovers).filter_map(|_| {
