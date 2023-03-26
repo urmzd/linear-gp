@@ -183,7 +183,8 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
         info!(
             id = serde_json::to_string(&program.program.id.to_string()).unwrap(),
             q_table = serde_json::to_string(&program.q_table).unwrap(),
-            score = serde_json::to_string(&score).unwrap() // TODO: Add original state heree.
+            score = serde_json::to_string(&score).unwrap(),
+            initial_state = serde_json::to_string(&states.get_initial_state()).unwrap()
         );
 
         FitnessScore::Valid(score)
@@ -201,8 +202,14 @@ impl Breed<QProgram> for BreedEngine {
         child_1.program = child_1.program;
         child_2.program = child_2.program;
 
-        ResetEngine::reset(&mut child_1);
-        ResetEngine::reset(&mut child_2);
+        ResetEngine::reset(&mut child_1.program.id);
+        ResetEngine::reset(&mut child_2.program.id);
+
+        ResetEngine::reset(&mut child_1.program);
+        ResetEngine::reset(&mut child_2.program);
+
+        ResetEngine::reset(&mut child_1.q_table);
+        ResetEngine::reset(&mut child_2.q_table);
 
         (child_1, child_2)
     }
@@ -211,6 +218,8 @@ impl Breed<QProgram> for BreedEngine {
 impl Mutate<QProgramGeneratorParameters, QProgram> for MutateEngine {
     fn mutate(item: &mut QProgram, using: QProgramGeneratorParameters) {
         MutateEngine::mutate(&mut item.program, using.program_parameters);
+        ResetEngine::reset(&mut item.program);
+        ResetEngine::reset(&mut item.program.id);
         ResetEngine::reset(&mut item.q_table);
     }
 }

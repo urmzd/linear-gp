@@ -16,4 +16,7 @@ pub trait State: Sized {
 pub trait RlState: State {
     /// Returns true if episode count > MAX or terminal_signal sent from environment.
     fn is_terminal(&mut self) -> bool;
+
+    // Returns the initial state.
+    fn get_initial_state(&self) -> Vec<f64>;
 }
