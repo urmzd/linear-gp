@@ -5,7 +5,6 @@ use crate::core::{
     registers::{ActionRegister, ArgmaxInput},
 };
 
-
 impl<T> Fitness<Program, T, ()> for FitnessEngine
 where
     T: State,

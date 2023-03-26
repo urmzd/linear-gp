@@ -9,22 +9,12 @@ use rand::{
 use rayon::join;
 
 use crate::{
-    core::{
-        engines::{
-            breed_engine::{Breed, BreedEngine},
-            mutate_engine::MutateEngine,
-            reset_engine::{Reset, ResetEngine},
-        },
-        program::Program,
-    },
+    core::engines::{breed_engine::Breed, reset_engine::Reset},
     utils::random::generator,
 };
 
 use super::{
-    fitness_engine::{Fitness, FitnessEngine},
-    generate_engine::{Generate, GenerateEngine},
-    mutate_engine::Mutate,
-    valid_engine::Valid,
+    fitness_engine::Fitness, generate_engine::Generate, mutate_engine::Mutate, valid_engine::Valid,
 };
 
 pub struct CoreEngine;
@@ -66,7 +56,7 @@ where
     >(
         population: &mut Vec<Individual>,
         n_trials: usize,
-        marker: Marker,
+        _marker: Marker,
     ) {
         let mut trials = repeat_with(|| G::generate(())).take(n_trials).collect_vec();
 
@@ -110,7 +100,7 @@ where
         let pop_cap = population.capacity();
         let pop_len = population.len();
 
-        let mut remaining_pool_spots = pop_cap - pop_len;
+        let remaining_pool_spots = pop_cap - pop_len;
 
         if remaining_pool_spots == 0 {
             return;

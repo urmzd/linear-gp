@@ -58,7 +58,7 @@ where
 impl<const N_PUTS: usize, const N_ACTS: usize>
     Generate<(), GymRsInput<MountainCarEnv, N_PUTS, N_ACTS>> for GenerateEngine
 {
-    fn generate(from: ()) -> GymRsInput<MountainCarEnv, N_PUTS, N_ACTS> {
+    fn generate(_from: ()) -> GymRsInput<MountainCarEnv, N_PUTS, N_ACTS> {
         let mut environment = MountainCarEnv::new();
         let (initial_state, _) = environment.reset(None, false, None);
 
@@ -75,7 +75,7 @@ impl<const N_PUTS: usize, const N_ACTS: usize>
 impl<const N_PUTS: usize, const N_ACTS: usize> Generate<(), GymRsInput<CartPoleEnv, N_PUTS, N_ACTS>>
     for GenerateEngine
 {
-    fn generate(from: ()) -> GymRsInput<CartPoleEnv, N_PUTS, N_ACTS> {
+    fn generate(_from: ()) -> GymRsInput<CartPoleEnv, N_PUTS, N_ACTS> {
         let mut environment = CartPoleEnv::new();
         let (initial_state, _) = environment.reset(None, false, None);
 

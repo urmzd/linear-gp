@@ -164,7 +164,7 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
                 break;
             }
 
-            let next_action_state = match get_action_state(state, &mut program) {
+            let next_action_state = match get_action_state(state, program) {
                 Some(action_state) => action_state,
                 None => return FitnessScore::OutOfBounds,
             };
@@ -192,7 +192,7 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
 
 impl Breed<QProgram> for BreedEngine {
     fn two_point_crossover(mate_1: &QProgram, mate_2: &QProgram) -> (QProgram, QProgram) {
-        let (child_1_program, child_2_program) =
+        let (_child_1_program, _child_2_program) =
             BreedEngine::two_point_crossover(&mate_1.program, &mate_2.program);
 
         let mut child_1 = mate_1.clone();
