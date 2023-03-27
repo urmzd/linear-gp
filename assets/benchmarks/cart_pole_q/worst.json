@@ -2,50 +2,71 @@
   "q_table": {
     "table": [
       [
-        5.22014104369722e-9,
-        0.9162327883652447
+        0.8408846353656807,
+        0.0
       ],
       [
-        0.7208921721763296,
-        0.1607903845224863
+        0.541174224052674,
+        0.17069144580771636
       ],
       [
-        0.8462609837296305,
-        0.4822060116473635
+        0.16256778735835492,
+        0.05184245424594996
       ]
     ],
     "q_consts": {
-      "alpha": 0.7727737926324254,
-      "gamma": 0.5580312662260263,
-      "epsilon": 0.32263428698949725,
-      "alpha_decay": 0.39548388874306417,
-      "epsilon_decay": 0.005899258410533181
+      "alpha": 0.5383362682783306,
+      "gamma": 0.08724844356562467,
+      "epsilon": 0.9791449903388126,
+      "alpha_decay": 0.4504712386500149,
+      "epsilon_decay": 0.06095503699069371
     },
     "freeze": true
   },
   "program": {
-    "id": "c884ed7b-f1a2-4f71-ac77-ab5e64349fc2",
+    "id": "bbebe538-e99b-4eb2-92a0-c793f9a326d3",
     "instructions": [
       {
-        "src_idx": 1,
-        "tgt_idx": 1,
+        "src_idx": 2,
+        "tgt_idx": 2,
         "mode": "External",
-        "op": "Divide",
-        "external_factor": 0.7685098560879533
+        "op": "Sub",
+        "external_factor": 2.075665289783043
       },
       {
         "src_idx": 0,
-        "tgt_idx": 0,
-        "mode": "External",
+        "tgt_idx": 2,
+        "mode": "Internal",
         "op": "Divide",
-        "external_factor": 0.7685098560879533
+        "external_factor": 2.075665289783043
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 2.075665289783043
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 2.075665289783043
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "Internal",
+        "op": "Divide",
+        "external_factor": 2.075665289783043
       }
     ],
     "registers": {
       "data": [
+        -0.3121405108364804,
         0.0,
-        0.0,
-        0.0
+        0.7828697450898473
       ]
     },
     "fitness": {
