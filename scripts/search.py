@@ -80,7 +80,7 @@ def build_objective(
     else:
         program_parameters = lgp_parameters["program_parameters"]
         max_instructions = program_parameters["max_instructions"]
-        external_factor = program_parameters["external_factor"]
+        external_factor = program_parameters["instruction_generator_parameters"]["external_factor"]
 
     # Define the command to run with the CLI
     base_command = [
@@ -132,12 +132,7 @@ def build_objective(
     if champion == float("nan"):
         raise optuna.TrialPruned
 
-    prune_thresholds = {
-        "cart": 400,
-        "iris": 0.9,
-        "mountain": -150,
-        "default": 0
-    }
+    prune_thresholds = {"cart": 400, "iris": 0.9, "mountain": -150, "default": 0}
     threshold = prune_thresholds.get(env.split("-")[0], prune_thresholds["default"])
 
     update_best_hyperparameters(champion, hyperparameters)
@@ -175,7 +170,7 @@ def parse_args() -> argparse.Namespace:
 def main(args: argparse.Namespace) -> None:
     study_name = create_study(args.env)
 
-    env_tokens = study_name.split("-")
+    env_tokens = args.env.split("-")
     learning_type = env_tokens[-1]
     env_name = "-".join(env_tokens[:-1])
 
@@ -185,8 +180,8 @@ def main(args: argparse.Namespace) -> None:
         # to the values found in the file
         lgp_params = f"assets/parameters/{env_name}-lgp.json"
         assert Path(lgp_params).exists()
-        with open(lgp_params, "r"):
-            parameters = json.loads(lgp_params)
+        with open(lgp_params, "r") as file:
+            parameters = json.load(file)
             objective = partial(build_objective, study_name, lgp_parameters=parameters)
     else:
         objective = partial(build_objective, study_name)
