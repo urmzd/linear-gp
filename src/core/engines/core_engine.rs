@@ -176,7 +176,7 @@ pub trait Core {
 
     fn eval_fitness(population: &mut Vec<Self::Individual>, trials: &mut Vec<Self::State>) {
         for individual in population.iter_mut() {
-            let scores = trials
+            let mut scores = trials
                 .iter_mut()
                 .map(|trial| {
                     Self::Reset::reset(individual);
@@ -184,6 +184,8 @@ pub trait Core {
                     Self::Fitness::eval_fitness(individual, trial)
                 })
                 .collect_vec();
+
+            scores.sort();
             let median = *scores.get(scores.len() / 2).unwrap();
             Self::Status::set_fitness(individual, median);
         }
