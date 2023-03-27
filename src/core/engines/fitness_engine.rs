@@ -1,7 +1,10 @@
 use core::fmt::Debug;
-use std::cmp::Ordering;
+use std::{
+    cmp::Ordering,
+    ops::{Add, Div, Mul, Sub},
+};
 
-use derive_more::Display;
+use derive_more::{Display};
 use serde::{Deserialize, Serialize};
 
 use super::reset_engine::{Reset, ResetEngine};
@@ -14,6 +17,59 @@ pub enum FitnessScore {
     OutOfBounds,
     #[display(format = "nan")]
     NotEvaluated,
+}
+
+impl Add for FitnessScore {
+    type Output = f64;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Valid(a), Self::Valid(b)) => a + b,
+            (Self::Valid(a), _) => a,
+            (_, Self::Valid(b)) => b,
+            _ => 0.0,
+        }
+    }
+}
+
+impl Sub for FitnessScore {
+    type Output = f64;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Valid(a), Self::Valid(b)) => a - b,
+            (Self::Valid(a), _) => a,
+            (_, Self::Valid(b)) => -b,
+            _ => 0.0,
+        }
+    }
+}
+
+impl Mul for FitnessScore {
+    type Output = f64;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Valid(a), Self::Valid(b)) => a * b,
+            (Self::Valid(_a), _) => 0.,
+            (_, Self::Valid(_b)) => 0.,
+            _ => 0.0,
+        }
+    }
+}
+
+impl Div for FitnessScore {
+    type Output = f64;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Valid(a), Self::Valid(b)) => a / b,
+            (Self::Valid(a), _) if a >= 0. => f64::INFINITY,
+            (Self::Valid(a), _) if a < 0. => f64::NEG_INFINITY,
+            (_, Self::Valid(_b)) => 0.0,
+            _ => 0.0,
+        }
+    }
 }
 
 impl Reset<FitnessScore> for ResetEngine {

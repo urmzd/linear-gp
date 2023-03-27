@@ -1,12 +1,17 @@
 use std::{
     error::Error,
     fs,
+    iter::repeat_with,
     path::{Path, PathBuf},
 };
 
 use crate::core::{
-    characteristics::Save,
-    engines::core_engine::{Core, HyperParameters},
+    characteristics::{Load, Save},
+    engines::{
+        core_engine::{Core, HyperParameters},
+        status_engine::Status,
+    },
+    engines::{fitness_engine::FitnessScore, generate_engine::Generate},
 };
 
 use super::misc::VoidResultAnyError;
@@ -37,6 +42,7 @@ macro_rules! with_named_logger {
     }};
 }
 
+use itertools::Itertools;
 use serde::Serialize;
 #[allow(unused_imports)]
 pub(crate) use with_named_logger;
@@ -132,4 +138,26 @@ where
     populations.save(plot_path.to_str().unwrap())?;
 
     Ok(())
+}
+
+pub fn load_and_run_program<C>(
+    program_path: &str,
+    n_trials: usize,
+) -> Result<(FitnessScore, FitnessScore), Box<dyn Error>>
+where
+    C: Core,
+{
+    let program = C::Individual::load(program_path);
+    let original_fitness = C::Status::get_fitness(&program);
+
+    let mut trials: Vec<C::State> = repeat_with(|| C::Generate::generate(()))
+        .take(n_trials)
+        .collect_vec();
+
+    let mut population = vec![program];
+    C::eval_fitness(&mut population, &mut trials);
+
+    let new_fitness = C::Status::get_fitness(population.first().unwrap());
+
+    Ok((original_fitness, new_fitness))
 }

@@ -152,7 +152,7 @@ pub struct CoreEngine;
 ///
 /// The population should be a Vec of Programs or QPrograms.
 pub trait Core {
-    type Individual: Ord + Clone + Send + Sync + Serialize;
+    type Individual: Ord + Clone + Send + Sync + Serialize + DeserializeOwned;
     type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned + Args;
     type State: State;
     type FitnessMarker;
