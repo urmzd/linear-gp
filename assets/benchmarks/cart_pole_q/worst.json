@@ -2,16 +2,16 @@
   "q_table": {
     "table": [
       [
-        0.9995771805819245,
+        1.0511303607955866,
         0.0
       ],
       [
-        0.9999991511726595,
-        0.0
+        0.0,
+        1.0
       ],
       [
-        0.872708190618464,
-        0.9999999999999998
+        1.6969290559884938,
+        0.0
       ]
     ],
     "q_consts": {
@@ -24,42 +24,70 @@
     "freeze": true
   },
   "program": {
-    "id": "e6b85e00-793f-4402-a887-d9d7334b6473",
+    "id": "ebe7fe77-9c31-410f-b508-6bb26c213b13",
     "instructions": [
       {
         "src_idx": 1,
-        "tgt_idx": 1,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Divide",
+        "external_factor": 2.0035876244324244
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Mult",
+        "external_factor": 2.0035876244324244
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Mult",
+        "external_factor": 2.0035876244324244
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 2.0035876244324244
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
         "mode": "Internal",
         "op": "Divide",
         "external_factor": 2.0035876244324244
       },
       {
         "src_idx": 1,
-        "tgt_idx": 1,
-        "mode": "Internal",
-        "op": "Sub",
-        "external_factor": 2.0035876244324244
-      },
-      {
-        "src_idx": 2,
         "tgt_idx": 0,
         "mode": "Internal",
-        "op": "Sub",
+        "op": "Mult",
         "external_factor": 2.0035876244324244
       },
       {
-        "src_idx": 2,
-        "tgt_idx": 2,
+        "src_idx": 0,
+        "tgt_idx": 1,
         "mode": "External",
         "op": "Add",
+        "external_factor": 2.0035876244324244
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Divide",
         "external_factor": 2.0035876244324244
       }
     ],
     "registers": {
       "data": [
-        0.0,
-        0.0,
-        0.9792703182985733
+        0.39887005864276126,
+        -0.0,
+        0.0
       ]
     },
     "fitness": {
