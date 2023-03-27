@@ -80,7 +80,7 @@ def plot_fitness_benchmarks(
         title = f"{title} ({label})"
 
     ax.plot(generations, max_fitness, label="max")
-    ax.plot(generations, mean_fitness, label=r"$\mu$")
+    # ax.plot(generations, mean_fitness, label=r"$\mu$")
     ax.plot(generations, median_fitness, label="median")
     ax.plot(generations, min_fitness, label="min")
 
