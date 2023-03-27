@@ -24,7 +24,7 @@ fn performance_benchmark(c: &mut Criterion) {
             |b| {
                 b.iter(|| {
                     let (new_fitness, original_fitness) =
-                        load_and_run_program::<GymRsQEngine<MountainCarEnv, 2, 3>>(path, n_trials)
+                        load_and_run_program::<GymRsQEngine<MountainCarEnv, 2, 3>>(&path, n_trials)
                             .unwrap();
 
                     let improvement = new_fitness - original_fitness;
@@ -51,7 +51,7 @@ fn performance_benchmark(c: &mut Criterion) {
             / (improvement_values.len() - 1) as f64;
         let std_deviation = variance.sqrt();
 
-        println!("Benchmark for '{}'", program_path);
+        println!("Benchmark for '{}'", program_type);
         println!(
             "Number of times new_fitness is better than original_fitness: {}",
             better_count
