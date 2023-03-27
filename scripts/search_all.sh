@@ -4,7 +4,7 @@
 environments=("mountain-car-q" "mountain-car-lgp" "iris" "cart-pole-q" "cart-pole-lgp")
 
 # Set the number of trials and threads
-n_trials=150
+n_trials=40
 n_threads=4
 
 # Iterate through the environments and run the search.py script
