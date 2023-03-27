@@ -2,92 +2,316 @@
   "q_table": {
     "table": [
       [
-        1.0511303607955866,
+        0.020289467950154554,
+        0.0
+      ],
+      [
+        0.02238791663998043,
         0.0
       ],
       [
         0.0,
-        1.0
-      ],
-      [
-        1.6969290559884938,
         0.0
       ]
     ],
     "q_consts": {
-      "alpha": 0.6468107507279532,
-      "gamma": 0.6969290559884951,
-      "epsilon": 0.7019997155612936,
-      "alpha_decay": 0.01115868453045732,
-      "epsilon_decay": 0.4776154206995737
+      "alpha": 0.00407683428846628,
+      "gamma": 0.6828506348530993,
+      "epsilon": 0.8602793397345382,
+      "alpha_decay": 0.0946027078191214,
+      "epsilon_decay": 0.6772705627887166
     },
     "freeze": true
   },
   "program": {
-    "id": "ebe7fe77-9c31-410f-b508-6bb26c213b13",
+    "id": "2dbb523f-2658-42e3-a8e3-3920a0d2afa6",
     "instructions": [
       {
-        "src_idx": 1,
+        "src_idx": 2,
         "tgt_idx": 0,
-        "mode": "Internal",
+        "mode": "External",
         "op": "Divide",
-        "external_factor": 2.0035876244324244
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "Internal",
+        "op": "Mult",
+        "external_factor": 42.079726246452665
       },
       {
         "src_idx": 0,
         "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Divide",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 3,
         "mode": "External",
         "op": "Mult",
-        "external_factor": 2.0035876244324244
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Mult",
+        "external_factor": 42.079726246452665
       },
       {
         "src_idx": 0,
         "tgt_idx": 2,
         "mode": "Internal",
         "op": "Mult",
-        "external_factor": 2.0035876244324244
+        "external_factor": 42.079726246452665
       },
       {
-        "src_idx": 1,
-        "tgt_idx": 3,
+        "src_idx": 0,
+        "tgt_idx": 2,
         "mode": "External",
-        "op": "Divide",
-        "external_factor": 2.0035876244324244
+        "op": "Add",
+        "external_factor": 42.079726246452665
       },
       {
         "src_idx": 2,
         "tgt_idx": 2,
         "mode": "Internal",
         "op": "Divide",
-        "external_factor": 2.0035876244324244
-      },
-      {
-        "src_idx": 1,
-        "tgt_idx": 0,
-        "mode": "Internal",
-        "op": "Mult",
-        "external_factor": 2.0035876244324244
+        "external_factor": 42.079726246452665
       },
       {
         "src_idx": 0,
         "tgt_idx": 1,
         "mode": "External",
         "op": "Add",
-        "external_factor": 2.0035876244324244
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Mult",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
       },
       {
         "src_idx": 0,
         "tgt_idx": 3,
         "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Mult",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "Internal",
         "op": "Divide",
-        "external_factor": 2.0035876244324244
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Mult",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 1,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
       }
     ],
     "registers": {
       "data": [
-        0.39887005864276126,
-        -0.0,
-        0.0
+        -81531.14837764241,
+        43670.2768397142,
+        -43663.79955638589
       ]
     },
     "fitness": {
