@@ -99,16 +99,17 @@ impl State for IrisState {
 impl Reset<IrisState> for ResetEngine {
     fn reset(item: &mut IrisState) {
         item.idx = 0;
-        item.data.shuffle(&mut generator());
     }
 }
 
 impl Generate<(), IrisState> for GenerateEngine {
     fn generate(_using: ()) -> IrisState {
         let runtime = Runtime::new().unwrap();
-        let data = runtime
+        let mut data = runtime
             .block_on(download_and_load_csv(IRIS_DATASET_LINK))
             .expect("Failed to download and load the dataset");
+
+        data.shuffle(&mut generator());
 
         IrisState { data, idx: 0 }
     }
@@ -164,7 +165,10 @@ mod test {
                 .crossover_percent(0.)
                 .build()?;
 
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+            let populations = parameters
+                .build_engine()
+                .take(parameters.n_generations)
+                .collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -196,7 +200,10 @@ mod test {
                 .crossover_percent(0.)
                 .build()?;
 
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+            let populations = parameters
+                .build_engine()
+                .take(parameters.n_generations)
+                .collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -222,7 +229,10 @@ mod test {
                 .crossover_percent(1.0)
                 .build()?;
 
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+            let populations = parameters
+                .build_engine()
+                .take(parameters.n_generations)
+                .collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -248,7 +258,10 @@ mod test {
                 .crossover_percent(0.5)
                 .build()?;
 
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+            let populations = parameters
+                .build_engine()
+                .take(parameters.n_generations)
+                .collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;

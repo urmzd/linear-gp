@@ -2,16 +2,16 @@
   "q_table": {
     "table": [
       [
-        1.0386925160418783,
-        0.013180988227945053
+        0.7750409209380108,
+        0.3271711713329913
       ],
       [
-        0.0,
-        1.0
+        0.2171473860591224,
+        0.0018405471382237151
       ],
       [
-        1.500342445526268,
-        0.49943476869751113
+        0.5334523650770019,
+        0.003064444917899606
       ]
     ],
     "q_consts": {
@@ -24,81 +24,46 @@
     "freeze": true
   },
   "program": {
-    "id": "c54ee1cd-6852-46c1-8cd8-6b269a444ece",
+    "id": "65190203-ce68-44f0-86e9-46a5b8891527",
     "instructions": [
       {
-        "src_idx": 1,
-        "tgt_idx": 1,
+        "src_idx": 2,
+        "tgt_idx": 2,
         "mode": "External",
-        "op": "Add",
+        "op": "Divide",
         "external_factor": 0.7685098560879533
       },
       {
-        "src_idx": 2,
-        "tgt_idx": 1,
+        "src_idx": 1,
+        "tgt_idx": 2,
         "mode": "Internal",
-        "op": "Divide",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 2,
-        "mode": "External",
-        "op": "Add",
+        "op": "Sub",
         "external_factor": 0.7685098560879533
       },
       {
         "src_idx": 1,
         "tgt_idx": 2,
-        "mode": "External",
-        "op": "Divide",
+        "mode": "Internal",
+        "op": "Sub",
         "external_factor": 0.7685098560879533
       },
       {
         "src_idx": 1,
-        "tgt_idx": 3,
-        "mode": "External",
-        "op": "Add",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 0,
-        "tgt_idx": 0,
+        "tgt_idx": 1,
         "mode": "External",
         "op": "Mult",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 0,
-        "tgt_idx": 1,
-        "mode": "Internal",
-        "op": "Divide",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 1,
-        "tgt_idx": 2,
-        "mode": "Internal",
-        "op": "Add",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 1,
-        "tgt_idx": 2,
-        "mode": "Internal",
-        "op": "Add",
         "external_factor": 0.7685098560879533
       }
     ],
     "registers": {
       "data": [
         0.0,
-        0.08962839866186836,
-        -0.00007143578288473134
+        -0.0,
+        0.0
       ]
     },
     "fitness": {
-      "Valid": 500.0
+      "Valid": 1.0
     }
   }
 }
