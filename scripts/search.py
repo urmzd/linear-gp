@@ -69,7 +69,7 @@ def build_objective(
     study_name: str, trial: optuna.Trial, lgp_parameters: dict[str, Any] | None = None
 ) -> float:
 
-    env, _timestamp = study_name.split("_")
+    env, _= study_name.split("_")
 
     max_instructions = None
     external_factor = None
@@ -86,10 +86,8 @@ def build_objective(
     base_command = [
         "./target/release/lgp",
         env,
-        "--max-instructions",
-        max_instructions,
-        "--external-factor",
-        external_factor,
+        f"--max-instructions={max_instructions}",
+        f"--external-factor={external_factor}",
     ]
 
     if lgp_parameters:

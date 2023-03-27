@@ -2,14 +2,10 @@ name: experiments
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "**.rs"
-      - ".github/**.yml"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "scripts/**"
-      - "docker-compose.yml"
+    inputs:
+      number_of_experiments:
+        description: "The number of trials to average."
+        required: true
 
 jobs:
   experiment:
@@ -63,16 +59,12 @@ jobs:
         run: ./scripts/search_all.sh
 
       - name: Run Experiments
-        run: cargo nextest run --no-fail-fast --release --no-capture
+        run: ./scripts/run_experiments.py ${{ github.event.inputs.number_of_experiments }}
 
       - name: Run Benchmarks
         run: cargo bench
 
-      - name: Produce Assets
-        run: ./scripts/produce_assets.py
-
-      - name: Upload Assets
-        uses: EndBug/add-and-commit@v9
+      - uses: actions/upload-artifact@v3
         with:
-          add: "assets"
-          pull: "--rebase --autostash"
+          name: "experiment-${{ github.run_id }}"
+          path: "assets"

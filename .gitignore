@@ -3,8 +3,10 @@
 .vscode
 .idea
 
-assets/logs
+assets/experiments
 
 notes.md
 
 docs
+
+**/population.json

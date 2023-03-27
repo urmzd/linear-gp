@@ -1,4 +1,5 @@
 use std::{
+    env,
     error::Error,
     fs,
     iter::repeat_with,
@@ -17,37 +18,15 @@ use crate::core::{
 
 use super::misc::VoidResultAnyError;
 
-pub const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
-pub const LOG_PREFIX: &'static str = "assets/logs/";
+pub fn benchmark_prefix() -> String {
+    env::var("BENCHMARK_PREFIX").expect("BENCHMARK_PREFIX must be set")
+}
 
-#[allow(unused_macros)]
-macro_rules! with_named_logger {
-    ($name:expr, $($body:tt)*) => {{
-        const NAME: &'static str = $name;
-
-        let shared_dir = std::path::Path::new($crate::utils::benchmark_tools::LOG_PREFIX).join(format!("{}/",NAME));
-
-        $crate::utils::benchmark_tools::create_path(shared_dir.to_str().unwrap(), false).unwrap();
-
-        let file_appender = tracing_appender::rolling::hourly(shared_dir, "default.log");
-        let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
-
-        let subscriber = tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-        .json()
-        .with_writer(non_blocking)
-        .finish();
-
-        tracing::subscriber::with_default(subscriber, || {
-            $($body)*
-        })
-    }};
+pub fn log_prefix() -> String {
+    env::var("LOG_PREFIX").expect("LOG_PREFIX must be set")
 }
 
 use itertools::Itertools;
-use serde::Serialize;
-#[allow(unused_imports)]
-pub(crate) use with_named_logger;
 
 pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     let path = Path::new(path);
@@ -65,7 +44,7 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     Ok(path.to_owned())
 }
 
-pub fn save_benchmarks<C>(
+pub fn save_experiment<C>(
     populations: &Vec<Vec<C::Individual>>,
     params: &HyperParameters<C>,
     test_name: &str,
@@ -74,7 +53,7 @@ where
     C: Core,
 {
     let best_path = create_path(
-        Path::new(BENCHMARK_PREFIX)
+        Path::new(&benchmark_prefix())
             .join(test_name)
             .join("best.json")
             .to_str()
@@ -83,7 +62,7 @@ where
     )?;
 
     let median_path = create_path(
-        Path::new(BENCHMARK_PREFIX)
+        Path::new(&benchmark_prefix())
             .join(test_name)
             .join("median.json")
             .to_str()
@@ -92,7 +71,7 @@ where
     )?;
 
     let worst_path = create_path(
-        Path::new(BENCHMARK_PREFIX)
+        Path::new(&benchmark_prefix())
             .join(test_name)
             .join("worst.json")
             .to_str()
@@ -101,9 +80,18 @@ where
     )?;
 
     let params_path = create_path(
-        Path::new(BENCHMARK_PREFIX)
+        Path::new(&benchmark_prefix())
             .join(test_name)
             .join("params.json")
+            .to_str()
+            .unwrap(),
+        true,
+    )?;
+
+    let plot_path = create_path(
+        Path::new(&benchmark_prefix())
+            .join(test_name)
+            .join("population.json")
             .to_str()
             .unwrap(),
         true,
@@ -130,23 +118,6 @@ where
     median.save(median_path.to_str().unwrap())?;
     best.save(best_path.to_str().unwrap())?;
     params.save(params_path.to_str().unwrap())?;
-
-    Ok(())
-}
-
-pub fn save_results<T>(populations: &Vec<Vec<T>>, test_name: &str) -> VoidResultAnyError
-where
-    T: Serialize,
-{
-    let plot_path = create_path(
-        Path::new(LOG_PREFIX)
-            .join(test_name)
-            .join("population.json")
-            .to_str()
-            .unwrap(),
-        true,
-    )?;
-
     populations.save(plot_path.to_str().unwrap())?;
 
     Ok(())
