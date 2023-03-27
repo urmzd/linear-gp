@@ -5,3 +5,4 @@ pub mod generate_engine;
 pub mod mutate_engine;
 pub mod reset_engine;
 pub mod status_engine;
+pub mod freeze_engine;

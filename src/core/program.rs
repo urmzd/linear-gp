@@ -13,6 +13,7 @@ use super::{
     engines::{
         breed_engine::{Breed, BreedEngine},
         fitness_engine::FitnessScore,
+        freeze_engine::{Freeze, FreezeEngine},
         generate_engine::{Generate, GenerateEngine},
         mutate_engine::{Mutate, MutateEngine},
         reset_engine::{Reset, ResetEngine},
@@ -40,6 +41,8 @@ impl Reset<Program> for ResetEngine {
         ResetEngine::reset(&mut item.fitness);
     }
 }
+
+impl Freeze<Program> for FreezeEngine {}
 
 impl Status<Program> for StatusEngine {
     fn set_fitness(program: &mut Program, fitness: FitnessScore) {

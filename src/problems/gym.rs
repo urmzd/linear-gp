@@ -5,6 +5,7 @@ use gym_rs::core::Env;
 use crate::core::engines::breed_engine::BreedEngine;
 use crate::core::engines::core_engine::Core;
 use crate::core::engines::fitness_engine::FitnessEngine;
+use crate::core::engines::freeze_engine::FreezeEngine;
 use crate::core::engines::generate_engine::Generate;
 use crate::core::engines::generate_engine::GenerateEngine;
 use crate::core::engines::mutate_engine::MutateEngine;
@@ -117,6 +118,7 @@ where
     type Breed = BreedEngine;
     type Mutate = MutateEngine;
     type Status = StatusEngine;
+    type Freeze = FreezeEngine;
 }
 
 impl<T, const N_PUTS: usize, const N_ACTS: usize> Core for GymRsEngine<T, N_PUTS, N_ACTS>
@@ -133,6 +135,7 @@ where
     type Breed = BreedEngine;
     type Mutate = MutateEngine;
     type Status = StatusEngine;
+    type Freeze = FreezeEngine;
 }
 
 #[cfg(test)]
@@ -142,7 +145,8 @@ mod tests {
     use super::*;
     use crate::core::config::load_hyper_parameters;
     use crate::core::engines::core_engine::HyperParameters;
-    use crate::utils::benchmark_tools::{log_benchmarks, save_benchmarks, with_named_logger};
+    
+    use crate::utils::benchmark_tools::{save_benchmarks, save_results, with_named_logger};
     use crate::utils::misc::VoidResultAnyError;
 
     use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
@@ -155,8 +159,8 @@ mod tests {
                 load_hyper_parameters("assets/parameters/cart-pole-q.json")?;
             let populations = parameters.build_engine().take(100).collect_vec();
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })
@@ -170,8 +174,8 @@ mod tests {
 
             let populations = parameters.build_engine().take(100).collect_vec();
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })
@@ -184,8 +188,8 @@ mod tests {
                 load_hyper_parameters("assets/parameters/mountain-car-lgp.json")?;
             let populations = parameters.build_engine().take(100).collect_vec();
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })
@@ -198,8 +202,8 @@ mod tests {
                 load_hyper_parameters("assets/parameters/mountain-car-q.json")?;
             let populations = parameters.build_engine().take(100).collect_vec();
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })

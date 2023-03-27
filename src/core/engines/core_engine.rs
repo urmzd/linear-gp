@@ -15,7 +15,7 @@ use crate::{
 
 use super::{
     fitness_engine::Fitness, generate_engine::Generate, mutate_engine::Mutate,
-    status_engine::Status,
+    status_engine::Status, freeze_engine::Freeze,
 };
 use derive_builder::Builder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -162,6 +162,7 @@ pub trait Core {
     type Breed: Breed<Self::Individual>;
     type Mutate: Mutate<Self::ProgramParameters, Self::Individual>;
     type Status: Status<Self::Individual>;
+    type Freeze: Freeze<Self::Individual>;
 
     fn init_population(
         program_parameters: Self::ProgramParameters,

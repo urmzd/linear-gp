@@ -9,6 +9,7 @@ use crate::core::{
     characteristics::{Load, Save},
     engines::{
         core_engine::{Core, HyperParameters},
+        freeze_engine::{Freeze},
         status_engine::Status,
     },
     engines::{fitness_engine::FitnessScore, generate_engine::Generate},
@@ -63,7 +64,7 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
     Ok(path.to_owned())
 }
 
-pub fn log_benchmarks<C>(
+pub fn save_benchmarks<C>(
     populations: &Vec<Vec<C::Individual>>,
     params: &HyperParameters<C>,
     test_name: &str,
@@ -109,20 +110,30 @@ where
 
     let last_population = populations.last().unwrap();
 
-    let (worst, median, best) = populations
+    let (mut worst, mut median, mut best) = populations
         .last()
-        .map(|p| (p.last(), p.get(last_population.len() / 2), p.first()))
+        .map(|p| {
+            (
+                p.last().cloned().unwrap(),
+                p.get(last_population.len() / 2).cloned().unwrap(),
+                p.first().cloned().unwrap(),
+            )
+        })
         .unwrap();
 
-    worst.unwrap().save(worst_path.to_str().unwrap())?;
-    median.unwrap().save(median_path.to_str().unwrap())?;
-    best.unwrap().save(best_path.to_str().unwrap())?;
+    C::Freeze::freeze(&mut worst);
+    C::Freeze::freeze(&mut median);
+    C::Freeze::freeze(&mut best);
+
+    worst.save(worst_path.to_str().unwrap())?;
+    median.save(median_path.to_str().unwrap())?;
+    best.save(best_path.to_str().unwrap())?;
     params.save(params_path.to_str().unwrap())?;
 
     Ok(())
 }
 
-pub fn save_benchmarks<T>(populations: &Vec<Vec<T>>, test_name: &str) -> VoidResultAnyError
+pub fn save_results<T>(populations: &Vec<Vec<T>>, test_name: &str) -> VoidResultAnyError
 where
     T: Serialize,
 {
