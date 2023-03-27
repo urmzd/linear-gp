@@ -7,7 +7,7 @@
   "n_trials": 5,
   "seed": null,
   "program_parameters": {
-    "max_instructions": 6,
+    "max_instructions": 12,
     "instruction_generator_parameters": {
       "n_extras": 1,
       "external_factor": 9.18981693963246,

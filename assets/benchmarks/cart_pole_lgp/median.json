@@ -1,17 +1,45 @@
 {
-  "id": "247a7ab6-8845-42f3-8575-522847fc049a",
+  "id": "bcad7515-01bd-48f5-a683-68dbaa067fbb",
   "instructions": [
     {
-      "src_idx": 1,
+      "src_idx": 2,
       "tgt_idx": 3,
       "mode": "External",
       "op": "Divide",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Mult",
       "external_factor": 9.18981693963246
     }
   ],
   "registers": {
     "data": [
-      0.0,
+      4.306669697950851,
       0.0,
       0.0
     ]

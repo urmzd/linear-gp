@@ -1,4 +1,4 @@
-name: Experiment Runs
+name: experiments
 
 on:
   push:
@@ -12,8 +12,8 @@ on:
       - "scripts"
 
 jobs:
-  test:
-    name: Run Tests and Examples
+  experiment:
+    name: Run Experiments
     runs-on: ubuntu-latest
     env:
       RUST_BACKTRACE: 1
