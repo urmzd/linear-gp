@@ -156,6 +156,7 @@ mod test {
                 .build()?;
             let parameters = HyperParametersBuilder::<IrisEngine>::default()
                 .program_parameters(program_parameters)
+                .n_trials(1)
                 .mutation_percent(0.)
                 .crossover_percent(0.)
                 .build()?;
