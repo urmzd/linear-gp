@@ -79,19 +79,17 @@ def plot_fitness_benchmarks(
     if label != "":
         title = f"{title} ({label})"
 
-    ax.plot(generations, max_fitness, label="max", linestyle="-", marker="o")
-    ax.plot(generations, mean_fitness, label=r"$\mu$", linestyle="--", marker="v")
-    ax.plot(generations, median_fitness, label="median", linestyle="-.", marker="s")
-    ax.plot(generations, min_fitness, label="min", linestyle=":", marker="D")
-    ax.plot(generations, std_fitness, label=r"$\sigma$", linestyle="-", marker="x")
+    ax.plot(generations, max_fitness, label="max")
+    ax.plot(generations, mean_fitness, label=r"$\mu$")
+    ax.plot(generations, median_fitness, label="median")
+    ax.plot(generations, min_fitness, label="min")
+
+    ax.errorbar(generations, mean_fitness, yerr=std_fitness, label=r"$\mu \pm \sigma$")
 
     ax.set_title(title)
-
     ax.set_xlabel("Generation")
     ax.set_ylabel("Fitness")
-
     ax.grid(visible=True, which="both")
-
     ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1))
 
     fig_path: Path = Path("assets/images/")
