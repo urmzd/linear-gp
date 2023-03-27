@@ -1,99 +1,71 @@
 {
-  "id": "8cec1d32-e8ef-44c3-95ee-a5e31529ab6e",
+  "id": "97934572-7bea-4547-badc-e6d990a458ce",
   "instructions": [
     {
-      "src_idx": 2,
-      "tgt_idx": 2,
+      "src_idx": 0,
+      "tgt_idx": 3,
       "mode": "External",
       "op": "Sub",
-      "external_factor": 9.18981693963246
+      "external_factor": 8.352816931000032
     },
     {
-      "src_idx": 2,
+      "src_idx": 0,
       "tgt_idx": 0,
       "mode": "External",
       "op": "Sub",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 0,
-      "mode": "External",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Divide",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Divide",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "Internal",
-      "op": "Add",
-      "external_factor": 9.18981693963246
+      "external_factor": 8.352816931000032
     },
     {
       "src_idx": 2,
       "tgt_idx": 3,
       "mode": "External",
+      "op": "Divide",
+      "external_factor": 8.352816931000032
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 8.352816931000032
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "External",
       "op": "Add",
-      "external_factor": 9.18981693963246
+      "external_factor": 8.352816931000032
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Add",
+      "external_factor": 8.352816931000032
     },
     {
       "src_idx": 0,
       "tgt_idx": 1,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 9.18981693963246
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 8.352816931000032
     },
     {
       "src_idx": 2,
       "tgt_idx": 0,
       "mode": "Internal",
-      "op": "Divide",
-      "external_factor": 9.18981693963246
+      "op": "Add",
+      "external_factor": 8.352816931000032
     }
   ],
   "registers": {
     "data": [
-      -0.8208779597273081,
-      0.0,
-      3.123061075399831
+      22.785544075257775,
+      230.058196040008,
+      40.4351578425997
     ]
   },
   "fitness": {
-    "Valid": 1.0
+    "Valid": 7.0
   }
 }
