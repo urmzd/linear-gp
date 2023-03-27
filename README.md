@@ -22,7 +22,6 @@ sudo apt-get install python
 
 1. Setup the environment:
 
-
 ```bash
 docker-compose up -d
 
@@ -44,18 +43,17 @@ cargo build --release
 ./scripts/search_all.sh
 ```
 
-## Testing
-
-To run all tests, execute the following command.
-
+3. Run tests using the updated script. 
 ```bash
 cargo nextest run --no-fail-fast --release --no-capture
 ```
 
-## Benchmarks
+4. Produce graphs and tables.
+```bash
+./scripts/produce_assets.py
+```
 
-To check how well individuals perform after training, use the following command.
-
+5. Run benchmarks
 ```bash
 cargo bench
 ```
