@@ -1,15 +1,8 @@
 {
-  "id": "97934572-7bea-4547-badc-e6d990a458ce",
+  "id": "e0f8d659-c4ab-4bc0-9c78-fccbdfb37100",
   "instructions": [
     {
-      "src_idx": 0,
-      "tgt_idx": 3,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
+      "src_idx": 2,
       "tgt_idx": 0,
       "mode": "External",
       "op": "Sub",
@@ -23,49 +16,63 @@
       "external_factor": 8.352816931000032
     },
     {
-      "src_idx": 0,
+      "src_idx": 2,
       "tgt_idx": 2,
-      "mode": "External",
+      "mode": "Internal",
       "op": "Sub",
       "external_factor": 8.352816931000032
     },
     {
       "src_idx": 1,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Add",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
       "tgt_idx": 1,
       "mode": "Internal",
+      "op": "Mult",
+      "external_factor": 8.352816931000032
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 0,
+      "mode": "External",
       "op": "Divide",
       "external_factor": 8.352816931000032
     },
     {
       "src_idx": 2,
-      "tgt_idx": 0,
+      "tgt_idx": 2,
       "mode": "Internal",
       "op": "Add",
+      "external_factor": 8.352816931000032
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 8.352816931000032
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Mult",
+      "external_factor": 8.352816931000032
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Sub",
       "external_factor": 8.352816931000032
     }
   ],
   "registers": {
     "data": [
-      22.785544075257775,
-      230.058196040008,
-      40.4351578425997
+      0.21982563466677524,
+      0.0,
+      0.21982563466677524
     ]
   },
   "fitness": {
-    "Valid": 7.0
+    "Valid": 1.0
   }
 }
