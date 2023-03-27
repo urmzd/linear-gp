@@ -1,92 +1,36 @@
 {
-  "id": "a39ab557-364b-4ef7-acff-fad583aaa520",
+  "id": "f2c0bbde-fd7b-4978-b60a-9ee33237ee0f",
   "instructions": [
     {
-      "src_idx": 0,
-      "tgt_idx": 3,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 3,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 0,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 8.352816931000032
-    },
-    {
       "src_idx": 2,
-      "tgt_idx": 3,
-      "mode": "External",
+      "tgt_idx": 1,
+      "mode": "Internal",
       "op": "Divide",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Sub",
       "external_factor": 8.352816931000032
     },
     {
       "src_idx": 1,
       "tgt_idx": 2,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 0,
       "mode": "Internal",
-      "op": "Add",
-      "external_factor": 8.352816931000032
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "External",
       "op": "Divide",
       "external_factor": 8.352816931000032
     },
     {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Sub",
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Divide",
       "external_factor": 8.352816931000032
     }
   ],
   "registers": {
     "data": [
-      15.52374544501844,
-      16.074011600341738,
-      61.621010823930376
+      0.0,
+      0.0,
+      0.0
     ]
   },
   "fitness": {
-    "Valid": 500.0
+    "Valid": 1.0
   }
 }
