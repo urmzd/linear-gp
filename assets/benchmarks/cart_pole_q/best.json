@@ -2,16 +2,16 @@
   "q_table": {
     "table": [
       [
-        0.0,
-        0.0
+        0.00848076096402618,
+        0.40129306170563933
       ],
       [
-        0.36770707412226844,
-        0.0
+        0.975828507194162,
+        0.7113569866012305
       ],
       [
-        0.0,
-        0.0
+        0.999892291319951,
+        0.9244874077858849
       ]
     ],
     "q_consts": {
@@ -24,8 +24,85 @@
     "freeze": true
   },
   "program": {
-    "id": "b250c411-fb72-4954-b51c-e64b6a5356b1",
+    "id": "7e2713ea-6cdf-41d7-8332-fac56ce13a0e",
     "instructions": [
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 1,
+        "mode": "Internal",
+        "op": "Divide",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Mult",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 79.95902441661005
+      },
       {
         "src_idx": 0,
         "tgt_idx": 0,
@@ -35,22 +112,50 @@
       },
       {
         "src_idx": 0,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 1,
         "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Divide",
+        "external_factor": 79.95902441661005
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 0,
         "mode": "External",
         "op": "Mult",
         "external_factor": 79.95902441661005
       },
       {
         "src_idx": 1,
-        "tgt_idx": 3,
+        "tgt_idx": 1,
         "mode": "External",
-        "op": "Add",
+        "op": "Divide",
         "external_factor": 79.95902441661005
       },
       {
-        "src_idx": 2,
-        "tgt_idx": 2,
-        "mode": "External",
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "Internal",
         "op": "Divide",
         "external_factor": 79.95902441661005
       },
@@ -58,26 +163,26 @@
         "src_idx": 2,
         "tgt_idx": 1,
         "mode": "Internal",
-        "op": "Sub",
+        "op": "Mult",
         "external_factor": 79.95902441661005
       },
       {
-        "src_idx": 1,
+        "src_idx": 2,
         "tgt_idx": 2,
-        "mode": "Internal",
-        "op": "Add",
+        "mode": "External",
+        "op": "Sub",
         "external_factor": 79.95902441661005
       }
     ],
     "registers": {
       "data": [
-        0.0,
-        0.0,
-        20.6422699456572
+        1.7038192791662283,
+        0.00982017109922251,
+        0.3332816772977539
       ]
     },
     "fitness": {
-      "Valid": 1.0
+      "Valid": 500.0
     }
   }
 }

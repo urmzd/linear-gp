@@ -159,20 +159,21 @@ mod test {
             let parameters = HyperParametersBuilder::<IrisEngine>::default()
                 .program_parameters(program_parameters)
                 .n_trials(1)
+                .n_generations(200)
                 .mutation_percent(0.)
                 .crossover_percent(0.)
                 .build()?;
 
-            let populations = parameters.build_engine().take(500).collect_vec();
+            let populations = parameters.build_engine().take(200).collect_vec();
+
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             let last_population = populations.last().unwrap();
             assert!(last_population
                 .iter()
                 .all(|individual| Some(StatusEngine::get_fitness(individual))
                     == last_population.first().map(StatusEngine::get_fitness)));
-
-            save_benchmarks(&populations, &parameters, NAME)?;
-            save_results(&populations, NAME)?;
 
             Ok(())
         })
