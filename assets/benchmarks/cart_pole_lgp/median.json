@@ -1,33 +1,320 @@
 {
-  "id": "9a5dc519-9653-4021-a05e-dc8a4c1f8164",
+  "id": "387fba31-094a-49d4-821b-b0adc15dc3f1",
   "instructions": [
     {
-      "src_idx": 1,
-      "tgt_idx": 1,
-      "mode": "Internal",
-      "op": "Sub",
-      "external_factor": 8.352816931000032
+      "src_idx": 2,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
     },
     {
       "src_idx": 2,
       "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Mult",
-      "external_factor": 8.352816931000032
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 42.079726246452665
     },
     {
       "src_idx": 2,
       "tgt_idx": 1,
       "mode": "Internal",
       "op": "Divide",
-      "external_factor": 8.352816931000032
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Add",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Mult",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Sub",
+      "external_factor": 42.079726246452665
     }
   ],
   "registers": {
     "data": [
+      31498033.02604609,
       0.0,
-      0.0,
-      0.0
+      118.28914870058783
     ]
   },
   "fitness": {
