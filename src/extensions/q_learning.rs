@@ -262,10 +262,10 @@ impl Generate<QProgramGeneratorParameters, QProgram> for GenerateEngine {
 #[derive(Debug, Clone, Args, Deserialize, Serialize, Copy, Builder)]
 pub struct QProgramGeneratorParameters {
     #[command(flatten)]
-    program_parameters: ProgramGeneratorParameters,
+    pub program_parameters: ProgramGeneratorParameters,
     #[builder(default)]
     #[command(flatten)]
-    consts: QConsts,
+    pub consts: QConsts,
 }
 
 #[derive(Debug, Clone, Copy, Args, Serialize, Deserialize, Builder)]

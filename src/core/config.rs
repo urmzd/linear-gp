@@ -1,3 +1,4 @@
+use crate::core::engines::reset_engine::{Reset, ResetEngine};
 use crate::core::engines::status_engine::{Status, StatusEngine};
 use crate::{
     core::engines::core_engine::HyperParameters,
@@ -7,7 +8,7 @@ use crate::{
     },
 };
 use clap::Parser;
-use config::{Config, Environment, File, FileSourceFile};
+use config::{Config, Environment, File};
 use gym_rs::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
 use serde::{Deserialize, Serialize};
 
@@ -34,10 +35,11 @@ pub enum Accuator {
 }
 
 impl Accuator {
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         // Use the run engine macro for each branch of the enum
         match self {
             Accuator::MountainCarQ(hyperparameters) => {
+                ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
                 run_accuator!(GymRsQEngine, hyperparameters)
             }
             Accuator::MountainCarLGP(hyperparameters) => {
@@ -47,6 +49,7 @@ impl Accuator {
                 run_accuator!(IrisEngine, hyperparameters)
             }
             Accuator::CartPoleQ(hyperparameters) => {
+                ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
                 run_accuator!(GymRsQEngine, hyperparameters)
             }
             Accuator::CartPoleLGP(hyperparameters) => {
