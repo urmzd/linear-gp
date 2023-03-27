@@ -4,13 +4,12 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "src/**.rs"
-      - "tests/**.rs"
-      - "examples/**.rs"
+      - "**.rs"
       - ".github/**.yml"
       - "Cargo.toml"
       - "Cargo.lock"
-      - "scripts"
+      - "scripts/**"
+      - "docker-compose.yml"
 
 jobs:
   experiment:
