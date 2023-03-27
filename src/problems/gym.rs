@@ -140,10 +140,8 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::core::engines::core_engine::HyperParametersBuilder;
-    use crate::core::instruction::InstructionGeneratorParametersBuilder;
-    use crate::core::program::ProgramGeneratorParametersBuilder;
-    use crate::extensions::q_learning::QProgramGeneratorParametersBuilder;
+    use crate::core::config::load_hyper_parameters;
+    use crate::core::engines::core_engine::HyperParameters;
     use crate::utils::benchmark_tools::{log_benchmarks, save_benchmarks, with_named_logger};
     use crate::utils::misc::VoidResultAnyError;
 
@@ -153,19 +151,22 @@ mod tests {
     #[test]
     fn cart_pole_q() -> VoidResultAnyError {
         with_named_logger!("cart_pole_q", {
-            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-                .n_actions(GymRsInput::<CartPoleEnv, 4, 2>::N_ACTIONS)
-                .n_inputs(GymRsInput::<CartPoleEnv, 4, 2>::N_INPUTS)
-                .build()?;
-            let program_parameters = ProgramGeneratorParametersBuilder::default()
-                .instruction_generator_parameters(instruction_parameters)
-                .build()?;
-            let q_program_parameters = QProgramGeneratorParametersBuilder::default()
-                .program_parameters(program_parameters)
-                .build()?;
-            let parameters = HyperParametersBuilder::<GymRsQEngine<CartPoleEnv, 4, 2>>::default()
-                .program_parameters(q_program_parameters)
-                .build()?;
+            let parameters: HyperParameters<GymRsQEngine<CartPoleEnv, 4, 2>> =
+                load_hyper_parameters("assets/parameters/cart-pole-q.json")?;
+            let populations = parameters.build_engine().take(100).collect_vec();
+
+            log_benchmarks(&populations, &parameters, NAME)?;
+            save_benchmarks(&populations, NAME)?;
+
+            Ok(())
+        })
+    }
+
+    #[test]
+    fn cart_pole_lgp() -> VoidResultAnyError {
+        with_named_logger!("cart_pole_lgp", {
+            let parameters: HyperParameters<GymRsEngine<CartPoleEnv, 4, 2>> =
+                load_hyper_parameters("assets/parameters/cart-pole-lgp.json")?;
 
             let populations = parameters.build_engine().take(100).collect_vec();
 
@@ -177,42 +178,10 @@ mod tests {
     }
 
     #[test]
-    fn cart_pole_default() -> VoidResultAnyError {
-        with_named_logger!("cart_pole_default", {
-            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-                .n_actions(GymRsInput::<CartPoleEnv, 4, 2>::N_ACTIONS)
-                .n_inputs(GymRsInput::<CartPoleEnv, 4, 2>::N_INPUTS)
-                .build()?;
-            let program_parameters = ProgramGeneratorParametersBuilder::default()
-                .instruction_generator_parameters(instruction_parameters)
-                .build()?;
-            let parameters = HyperParametersBuilder::<GymRsEngine<CartPoleEnv, 4, 2>>::default()
-                .program_parameters(program_parameters)
-                .build()?;
-
-            let populations = parameters.build_engine().take(100).collect_vec();
-
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
-
-            Ok(())
-        })
-    }
-
-    #[test]
-    fn mountain_cart_default() -> VoidResultAnyError {
-        with_named_logger!("mountain_car_default", {
-            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-                .n_actions(GymRsInput::<MountainCarEnv, 2, 3>::N_ACTIONS)
-                .n_inputs(GymRsInput::<MountainCarEnv, 2, 3>::N_INPUTS)
-                .build()?;
-            let program_parameters = ProgramGeneratorParametersBuilder::default()
-                .instruction_generator_parameters(instruction_parameters)
-                .build()?;
-            let parameters = HyperParametersBuilder::<GymRsEngine<MountainCarEnv, 2, 3>>::default()
-                .program_parameters(program_parameters)
-                .build()?;
-
+    fn mountain_cart_lgp() -> VoidResultAnyError {
+        with_named_logger!("mountain_car_lgp", {
+            let parameters: HyperParameters<GymRsEngine<MountainCarEnv, 2, 3>> =
+                load_hyper_parameters("assets/parameters/mountain-car-lgp.json")?;
             let populations = parameters.build_engine().take(100).collect_vec();
 
             log_benchmarks(&populations, &parameters, NAME)?;
@@ -225,21 +194,8 @@ mod tests {
     #[test]
     fn mountain_car_q() -> VoidResultAnyError {
         with_named_logger!("mountain_car_q", {
-            let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-                .n_actions(GymRsInput::<MountainCarEnv, 2, 3>::N_ACTIONS)
-                .n_inputs(GymRsInput::<MountainCarEnv, 2, 3>::N_INPUTS)
-                .build()?;
-            let program_parameters = ProgramGeneratorParametersBuilder::default()
-                .instruction_generator_parameters(instruction_parameters)
-                .build()?;
-            let q_program_parameters = QProgramGeneratorParametersBuilder::default()
-                .program_parameters(program_parameters)
-                .build()?;
-            let parameters =
-                HyperParametersBuilder::<GymRsQEngine<MountainCarEnv, 2, 3>>::default()
-                    .program_parameters(q_program_parameters)
-                    .build()?;
-
+            let parameters: HyperParameters<GymRsQEngine<MountainCarEnv, 2, 3>> =
+                load_hyper_parameters("assets/parameters/mountain-car-q.json")?;
             let populations = parameters.build_engine().take(100).collect_vec();
 
             log_benchmarks(&populations, &parameters, NAME)?;

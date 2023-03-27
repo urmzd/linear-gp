@@ -12,6 +12,8 @@ use config::{Config, Environment, File};
 use gym_rs::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
 use serde::{Deserialize, Serialize};
 
+use super::engines::core_engine::Core;
+
 // Generate a macro which takes hyperparameters, builds the necessary engine and run its
 // outputting the best score for each generation
 macro_rules! run_accuator {
@@ -22,6 +24,7 @@ macro_rules! run_accuator {
         {
             println!("{}", StatusEngine::get_fitness(population.first().unwrap()));
         }
+        println!("{}", serde_json::to_string(&$hyperparameters).unwrap());
     };
 }
 
@@ -52,7 +55,7 @@ impl Accuator {
                     .instruction_generator_parameters
                     .n_inputs = 2;
 
-                run_accuator!(GymRsQEngine, hyperparameters)
+                run_accuator!(GymRsQEngine, hyperparameters);
             }
             Accuator::MountainCarLGP(hyperparameters) => {
                 hyperparameters
@@ -64,7 +67,7 @@ impl Accuator {
                     .instruction_generator_parameters
                     .n_inputs = 2;
 
-                run_accuator!(GymRsEngine, hyperparameters)
+                run_accuator!(GymRsEngine, hyperparameters);
             }
             Accuator::Iris(hyperparameters) => {
                 hyperparameters
@@ -75,7 +78,7 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 4;
-                run_accuator!(IrisEngine, hyperparameters)
+                run_accuator!(IrisEngine, hyperparameters);
             }
             Accuator::CartPoleQ(hyperparameters) => {
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
@@ -89,7 +92,7 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 4;
-                run_accuator!(GymRsQEngine, hyperparameters)
+                run_accuator!(GymRsQEngine, hyperparameters);
             }
             Accuator::CartPoleLGP(hyperparameters) => {
                 hyperparameters
@@ -100,18 +103,23 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 4;
-                run_accuator!(GymRsEngine, hyperparameters)
+                run_accuator!(GymRsEngine, hyperparameters);
             }
         }
     }
 }
 
-pub fn load_configuration(filename: &str) -> Result<Accuator, Box<dyn std::error::Error>> {
+pub fn load_hyper_parameters<C>(
+    filename: &str,
+) -> Result<HyperParameters<C>, Box<dyn std::error::Error>>
+where
+    C: Core,
+{
     let settings = Config::builder()
         .add_source(File::with_name(filename))
         .add_source(Environment::default())
         .build()?;
 
-    let accuator: Accuator = settings.try_deserialize()?;
-    Ok(accuator)
+    let parameters: HyperParameters<C> = settings.try_deserialize()?;
+    Ok(parameters)
 }
