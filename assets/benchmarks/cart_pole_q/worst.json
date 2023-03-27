@@ -2,16 +2,16 @@
   "q_table": {
     "table": [
       [
-        1.527188372817791,
-        0.013180988227945053
+        5.22014104369722e-9,
+        0.9162327883652447
       ],
       [
-        0.0,
-        1.0
+        0.7208921721763296,
+        0.1607903845224863
       ],
       [
-        1.1475012978998982,
-        0.4994347686975177
+        0.8462609837296305,
+        0.4822060116473635
       ]
     ],
     "q_consts": {
@@ -24,81 +24,32 @@
     "freeze": true
   },
   "program": {
-    "id": "9ad4795f-0a57-4f22-a2a3-497dc593dc76",
+    "id": "c884ed7b-f1a2-4f71-ac77-ab5e64349fc2",
     "instructions": [
       {
         "src_idx": 1,
         "tgt_idx": 1,
         "mode": "External",
-        "op": "Add",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 1,
-        "mode": "Internal",
         "op": "Divide",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 2,
-        "mode": "External",
-        "op": "Add",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 1,
-        "tgt_idx": 2,
-        "mode": "External",
-        "op": "Divide",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 1,
-        "tgt_idx": 3,
-        "mode": "External",
-        "op": "Add",
         "external_factor": 0.7685098560879533
       },
       {
         "src_idx": 0,
         "tgt_idx": 0,
         "mode": "External",
-        "op": "Mult",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 0,
-        "tgt_idx": 1,
-        "mode": "Internal",
         "op": "Divide",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 2,
-        "mode": "Internal",
-        "op": "Divide",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 1,
-        "tgt_idx": 2,
-        "mode": "Internal",
-        "op": "Add",
         "external_factor": 0.7685098560879533
       }
     ],
     "registers": {
       "data": [
         0.0,
-        0.009384696918061281,
-        0.0018351252473554807
+        0.0,
+        0.0
       ]
     },
     "fitness": {
-      "Valid": 4.0
+      "Valid": 1.0
     }
   }
 }
