@@ -86,10 +86,8 @@ def build_objective(
     base_command = [
         "./target/release/lgp",
         env,
-        "--max-instructons",
+        "--max-instructions",
         max_instructions,
-        "--n-extras",
-        1,
         "--external-factor",
         external_factor,
     ]
@@ -185,7 +183,7 @@ def main(args: argparse.Namespace) -> None:
         # todo: check for assets/parameters/{env_name}-lgp.json
         # load the parameters and set max_instructions and external_factor
         # to the values found in the file
-        lgp_params = f"assets/parameters/{env_name}-q.json"
+        lgp_params = f"assets/parameters/{env_name}-lgp.json"
         assert Path(lgp_params).exists()
         with open(lgp_params, "r"):
             parameters = json.loads(lgp_params)
