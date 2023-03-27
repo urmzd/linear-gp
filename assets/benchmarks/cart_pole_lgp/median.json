@@ -1,61 +1,19 @@
 {
-  "id": "451b1917-3c9a-46a8-8f64-38f84f24eedb",
+  "id": "247a7ab6-8845-42f3-8575-522847fc049a",
   "instructions": [
     {
-      "src_idx": 2,
-      "tgt_idx": 2,
-      "mode": "Internal",
-      "op": "Divide",
-      "external_factor": 71.48707622713236
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 0,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 71.48707622713236
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 1,
-      "mode": "Internal",
-      "op": "Sub",
-      "external_factor": 71.48707622713236
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Mult",
-      "external_factor": 71.48707622713236
-    },
-    {
       "src_idx": 1,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Add",
-      "external_factor": 71.48707622713236
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Divide",
-      "external_factor": 71.48707622713236
-    },
-    {
-      "src_idx": 0,
       "tgt_idx": 3,
       "mode": "External",
-      "op": "Mult",
-      "external_factor": 71.48707622713236
+      "op": "Divide",
+      "external_factor": 9.18981693963246
     }
   ],
   "registers": {
     "data": [
-      -0.0,
       0.0,
-      26.12787519805881
+      0.0,
+      0.0
     ]
   },
   "fitness": {
