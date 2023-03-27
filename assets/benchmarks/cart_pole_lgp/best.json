@@ -1,25 +1,32 @@
 {
-  "id": "9c8165d8-da4c-404f-bb82-9146aaab7e39",
+  "id": "609bccc2-3987-47e4-b211-cdec7bfe5526",
   "instructions": [
     {
-      "src_idx": 1,
+      "src_idx": 2,
       "tgt_idx": 1,
-      "mode": "Internal",
-      "op": "Mult",
+      "mode": "External",
+      "op": "Sub",
       "external_factor": 42.079726246452665
     },
     {
       "src_idx": 1,
       "tgt_idx": 2,
-      "mode": "Internal",
-      "op": "Add",
+      "mode": "External",
+      "op": "Mult",
       "external_factor": 42.079726246452665
     },
     {
-      "src_idx": 1,
-      "tgt_idx": 0,
+      "src_idx": 2,
+      "tgt_idx": 1,
       "mode": "External",
-      "op": "Mult",
+      "op": "Divide",
+      "external_factor": 42.079726246452665
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Add",
       "external_factor": 42.079726246452665
     }
   ],
@@ -27,7 +34,7 @@
     "data": [
       0.0,
       0.0,
-      0.0
+      -14.14004207322818
     ]
   },
   "fitness": {

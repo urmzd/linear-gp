@@ -2,34 +2,139 @@
   "q_table": {
     "table": [
       [
-        0.007405171158699934,
-        0.025227567641328837
-      ],
-      [
-        0.04882914688364426,
-        0.0
-      ],
-      [
         0.0,
+        0.666245167876158
+      ],
+      [
+        4.874974467867436e-14,
+        0.0006641988279903957
+      ],
+      [
+        1.5915057690297802,
         0.0
       ]
     ],
     "q_consts": {
-      "alpha": 0.00407683428846628,
-      "gamma": 0.6828506348530993,
-      "epsilon": 0.8602793397345382,
-      "alpha_decay": 0.0946027078191214,
-      "epsilon_decay": 0.6772705627887166
+      "alpha": 0.07987879259267247,
+      "gamma": 0.940473100494515,
+      "epsilon": 0.7737575443477425,
+      "alpha_decay": 0.9917534517470452,
+      "epsilon_decay": 0.4601074673656628
     },
     "freeze": true
   },
   "program": {
-    "id": "c32bc255-30da-4402-a49e-244936b3f91d",
+    "id": "8a4402d8-159f-4e5d-bb66-f6b4f689dc29",
     "instructions": [
+      {
+        "src_idx": 2,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Divide",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
       {
         "src_idx": 0,
         "tgt_idx": 1,
         "mode": "External",
+        "op": "Divide",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 2,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 2,
+        "mode": "Internal",
         "op": "Add",
         "external_factor": 42.079726246452665
       },
@@ -42,63 +147,98 @@
       },
       {
         "src_idx": 0,
-        "tgt_idx": 1,
+        "tgt_idx": 3,
         "mode": "External",
-        "op": "Mult",
+        "op": "Add",
         "external_factor": 42.079726246452665
       },
       {
         "src_idx": 2,
-        "tgt_idx": 0,
+        "tgt_idx": 3,
         "mode": "External",
-        "op": "Divide",
-        "external_factor": 42.079726246452665
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 0,
-        "mode": "Internal",
-        "op": "Mult",
+        "op": "Sub",
         "external_factor": 42.079726246452665
       },
       {
         "src_idx": 0,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
         "tgt_idx": 3,
         "mode": "External",
         "op": "Divide",
         "external_factor": 42.079726246452665
       },
       {
-        "src_idx": 1,
-        "tgt_idx": 0,
-        "mode": "Internal",
+        "src_idx": 0,
+        "tgt_idx": 3,
+        "mode": "External",
         "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 3,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Add",
         "external_factor": 42.079726246452665
       },
       {
         "src_idx": 2,
         "tgt_idx": 0,
         "mode": "Internal",
+        "op": "Add",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 42.079726246452665
+      },
+      {
+        "src_idx": 0,
+        "tgt_idx": 2,
+        "mode": "Internal",
         "op": "Divide",
         "external_factor": 42.079726246452665
       },
       {
-        "src_idx": 1,
-        "tgt_idx": 2,
-        "mode": "External",
-        "op": "Divide",
+        "src_idx": 2,
+        "tgt_idx": 1,
+        "mode": "Internal",
+        "op": "Sub",
         "external_factor": 42.079726246452665
       }
     ],
     "registers": {
       "data": [
-        5.521446535595685,
-        -2.7607232677978426,
-        0.0
+        0.9426789338943999,
+        -35.23917905842748,
+        27.942341935486997
       ]
     },
     "fitness": {
-      "Valid": 1.0
+      "Valid": 158.0
     }
   }
 }
