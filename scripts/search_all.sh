@@ -4,7 +4,6 @@
 lgp_environments=(
     "cart-pole-lgp"
     "mountain-car-lgp"
-    "iris-lgp"
 )
 
 q_environments=(
@@ -13,8 +12,8 @@ q_environments=(
 )
 
 # Set the number of trials and threads
-n_trials=40
-n_threads=4
+n_trials=10
+n_threads=5
 
 # Function to run the search.py script for each environment
 run_search() {

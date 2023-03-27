@@ -145,8 +145,8 @@ mod tests {
     use super::*;
     use crate::core::config::load_hyper_parameters;
     use crate::core::engines::core_engine::HyperParameters;
-    
-    use crate::utils::benchmark_tools::{save_benchmarks, save_results, with_named_logger};
+
+    use crate::utils::benchmark_tools::save_experiment;
     use crate::utils::misc::VoidResultAnyError;
 
     use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
@@ -154,58 +154,66 @@ mod tests {
 
     #[test]
     fn cart_pole_q() -> VoidResultAnyError {
-        with_named_logger!("cart_pole_q", {
-            let parameters: HyperParameters<GymRsQEngine<CartPoleEnv, 4, 2>> =
-                load_hyper_parameters("assets/parameters/cart-pole-q.json")?;
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+        let name = "cart_pole_q";
 
-            save_benchmarks(&populations, &parameters, NAME)?;
-            save_results(&populations, NAME)?;
+        let parameters: HyperParameters<GymRsQEngine<CartPoleEnv, 4, 2>> =
+            load_hyper_parameters("assets/parameters/cart-pole-q.json")?;
+        let populations = parameters
+            .build_engine()
+            .take(parameters.n_generations)
+            .collect_vec();
 
-            Ok(())
-        })
+        save_experiment(&populations, &parameters, name)?;
+
+        Ok(())
     }
 
     #[test]
     fn cart_pole_lgp() -> VoidResultAnyError {
-        with_named_logger!("cart_pole_lgp", {
-            let parameters: HyperParameters<GymRsEngine<CartPoleEnv, 4, 2>> =
-                load_hyper_parameters("assets/parameters/cart-pole-lgp.json")?;
+        let name = "cart_pole_lgp";
 
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+        let parameters: HyperParameters<GymRsEngine<CartPoleEnv, 4, 2>> =
+            load_hyper_parameters("assets/parameters/cart-pole-lgp.json")?;
 
-            save_benchmarks(&populations, &parameters, NAME)?;
-            save_results(&populations, NAME)?;
+        let populations = parameters
+            .build_engine()
+            .take(parameters.n_generations)
+            .collect_vec();
 
-            Ok(())
-        })
+        save_experiment(&populations, &parameters, name)?;
+
+        Ok(())
     }
 
     #[test]
     fn mountain_cart_lgp() -> VoidResultAnyError {
-        with_named_logger!("mountain_car_lgp", {
-            let parameters: HyperParameters<GymRsEngine<MountainCarEnv, 2, 3>> =
-                load_hyper_parameters("assets/parameters/mountain-car-lgp.json")?;
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+        let name = "mountain_car_lgp";
 
-            save_benchmarks(&populations, &parameters, NAME)?;
-            save_results(&populations, NAME)?;
+        let parameters: HyperParameters<GymRsEngine<MountainCarEnv, 2, 3>> =
+            load_hyper_parameters("assets/parameters/mountain-car-lgp.json")?;
+        let populations = parameters
+            .build_engine()
+            .take(parameters.n_generations)
+            .collect_vec();
 
-            Ok(())
-        })
+        save_experiment(&populations, &parameters, name)?;
+
+        Ok(())
     }
 
     #[test]
     fn mountain_car_q() -> VoidResultAnyError {
-        with_named_logger!("mountain_car_q", {
-            let parameters: HyperParameters<GymRsQEngine<MountainCarEnv, 2, 3>> =
-                load_hyper_parameters("assets/parameters/mountain-car-q.json")?;
-            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
+        let name = "mountain_car_q";
 
-            save_benchmarks(&populations, &parameters, NAME)?;
-            save_results(&populations, NAME)?;
+        let parameters: HyperParameters<GymRsQEngine<MountainCarEnv, 2, 3>> =
+            load_hyper_parameters("assets/parameters/mountain-car-q.json")?;
+        let populations = parameters
+            .build_engine()
+            .take(parameters.n_generations)
+            .collect_vec();
 
-            Ok(())
-        })
+        save_experiment(&populations, &parameters, name)?;
+
+        Ok(())
     }
 }
