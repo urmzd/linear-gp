@@ -1,6 +1,20 @@
 {
-  "id": "653d41d5-c842-4976-bacc-3f4aa288198f",
+  "id": "3a3b9b14-abf8-4e42-b75e-4f4f0734ec73",
   "instructions": [
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 10.0
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 10.0
+    },
     {
       "src_idx": 2,
       "tgt_idx": 2,
@@ -13,20 +27,6 @@
       "tgt_idx": 1,
       "mode": "External",
       "op": "Add",
-      "external_factor": 10.0
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 10.0
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 2,
-      "mode": "Internal",
-      "op": "Sub",
       "external_factor": 10.0
     },
     {
@@ -37,64 +37,29 @@
       "external_factor": 10.0
     },
     {
-      "src_idx": 1,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 10.0
-    },
-    {
       "src_idx": 3,
-      "tgt_idx": 2,
-      "mode": "Internal",
-      "op": "Add",
-      "external_factor": 10.0
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 0,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 10.0
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 2,
+      "tgt_idx": 3,
       "mode": "Internal",
       "op": "Mult",
       "external_factor": 10.0
     },
     {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 10.0
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Divide",
-      "external_factor": 10.0
-    },
-    {
-      "src_idx": 0,
+      "src_idx": 3,
       "tgt_idx": 0,
-      "mode": "External",
-      "op": "Sub",
+      "mode": "Internal",
+      "op": "Mult",
       "external_factor": 10.0
     }
   ],
   "registers": {
     "data": [
-      3.2766331588578393e220,
-      -9701.663937032205,
-      114.33606296779664,
-      8650.663937032203
+      5.4545836140244965,
+      -5637.0,
+      0.0,
+      0.0
     ]
   },
   "fitness": {
-    "Valid": 0.3333333333333333
+    "Valid": 0.6266666666666667
   }
 }

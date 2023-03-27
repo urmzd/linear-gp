@@ -1,18 +1,18 @@
 {
-  "id": "f2c0bbde-fd7b-4978-b60a-9ee33237ee0f",
+  "id": "9a5dc519-9653-4021-a05e-dc8a4c1f8164",
   "instructions": [
     {
-      "src_idx": 2,
+      "src_idx": 1,
       "tgt_idx": 1,
       "mode": "Internal",
-      "op": "Divide",
+      "op": "Sub",
       "external_factor": 8.352816931000032
     },
     {
-      "src_idx": 1,
-      "tgt_idx": 2,
+      "src_idx": 2,
+      "tgt_idx": 0,
       "mode": "Internal",
-      "op": "Divide",
+      "op": "Mult",
       "external_factor": 8.352816931000032
     },
     {
