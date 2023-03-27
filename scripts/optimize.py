@@ -47,15 +47,12 @@ def save_best_hyperparameters(
         }
 
     full_hp = {
-        "n_generations": 100,
         "population_size": 100,
         "gap": 0.5,
         "mutation_percent": 0.5,
         "crossover_percent": 0.5,
-        "fitness_parameters": {
-            "n_generations": 100,
-            "n_trials": 5,
-        },
+        "n_generations": 100,
+        "n_trials": 5,
         "program_parameters": program_parameters,
     }
 
