@@ -9,6 +9,7 @@ use crate::{
             breed_engine::BreedEngine,
             core_engine::Core,
             fitness_engine::FitnessEngine,
+            freeze_engine::FreezeEngine,
             generate_engine::{Generate, GenerateEngine},
             mutate_engine::MutateEngine,
             reset_engine::{Reset, ResetEngine},
@@ -127,6 +128,7 @@ impl Core for IrisEngine {
     type Breed = BreedEngine;
     type Mutate = MutateEngine;
     type Status = StatusEngine;
+    type Freeze = FreezeEngine;
 }
 
 #[cfg(test)]
@@ -138,7 +140,7 @@ mod test {
     use crate::core::engines::status_engine::Status;
     use crate::core::instruction::InstructionGeneratorParametersBuilder;
     use crate::core::program::ProgramGeneratorParametersBuilder;
-    use crate::utils::benchmark_tools::{log_benchmarks, save_benchmarks, with_named_logger};
+    use crate::utils::benchmark_tools::{save_benchmarks, save_results, with_named_logger};
     use crate::utils::misc::VoidResultAnyError;
 
     use super::*;
@@ -169,8 +171,8 @@ mod test {
                 .all(|individual| Some(StatusEngine::get_fitness(individual))
                     == last_population.first().map(StatusEngine::get_fitness)));
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })
@@ -195,8 +197,8 @@ mod test {
 
             let populations = parameters.build_engine().take(100).collect_vec();
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })
@@ -221,8 +223,8 @@ mod test {
 
             let populations = parameters.build_engine().take(100).collect_vec();
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })
@@ -247,8 +249,8 @@ mod test {
 
             let populations = parameters.build_engine().take(100).collect_vec();
 
-            log_benchmarks(&populations, &parameters, NAME)?;
-            save_benchmarks(&populations, NAME)?;
+            save_benchmarks(&populations, &parameters, NAME)?;
+            save_results(&populations, NAME)?;
 
             Ok(())
         })

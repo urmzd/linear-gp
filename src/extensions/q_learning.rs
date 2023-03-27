@@ -12,6 +12,7 @@ use crate::{
         engines::{
             breed_engine::{Breed, BreedEngine},
             fitness_engine::{Fitness, FitnessEngine, FitnessScore},
+            freeze_engine::{Freeze, FreezeEngine},
             generate_engine::{Generate, GenerateEngine},
             mutate_engine::{Mutate, MutateEngine},
             reset_engine::{Reset, ResetEngine},
@@ -29,6 +30,13 @@ use crate::{
 pub struct QTable {
     table: Vec<Vec<f64>>,
     q_consts: QConsts,
+    freeze: bool,
+}
+
+impl Freeze<QTable> for FreezeEngine {
+    fn freeze(item: &mut QTable) {
+        item.freeze = true;
+    }
 }
 
 impl Generate<(InstructionGeneratorParameters, QConsts), QTable> for GenerateEngine {
@@ -36,6 +44,7 @@ impl Generate<(InstructionGeneratorParameters, QConsts), QTable> for GenerateEng
         let mut table = QTable {
             table: vec![vec![0.; using.0.n_actions]; using.0.n_registers()],
             q_consts: using.1,
+            freeze: false,
         };
 
         ResetEngine::reset(&mut table);
@@ -113,7 +122,10 @@ impl QTable {
             * (current_reward + (self.q_consts.gamma * next_q_value) - current_q_value);
 
         self.table[current_action_state.register][current_action_state.action] += new_q_value;
-        self.q_consts.decay();
+
+        if !self.freeze {
+            self.q_consts.decay();
+        }
     }
 }
 
@@ -123,6 +135,12 @@ pub struct QProgram {
     #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub q_table: QTable,
     pub program: Program,
+}
+
+impl Freeze<QProgram> for FreezeEngine {
+    fn freeze(item: &mut QProgram) {
+        FreezeEngine::freeze(&mut item.q_table);
+    }
 }
 
 impl Reset<QProgram> for ResetEngine {
