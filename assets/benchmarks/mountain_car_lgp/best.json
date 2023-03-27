@@ -1,79 +1,121 @@
 {
-  "id": "022ec379-25f3-42f5-a75c-3fc5cbc1fa5d",
+  "id": "7209b0e1-42bd-4662-9b5c-ba1e6a2e13a4",
   "instructions": [
     {
-      "src_idx": 1,
-      "tgt_idx": 0,
+      "src_idx": 3,
+      "tgt_idx": 2,
       "mode": "Internal",
-      "op": "Sub",
-      "external_factor": 48.72861427688379
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Mult",
-      "external_factor": 48.72861427688379
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 48.72861427688379
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 48.72861427688379
+      "op": "Divide",
+      "external_factor": 75.5691307525135
     },
     {
       "src_idx": 2,
-      "tgt_idx": 0,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
       "mode": "External",
       "op": "Mult",
-      "external_factor": 48.72861427688379
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 3,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 3,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Add",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 75.5691307525135
     },
     {
       "src_idx": 0,
       "tgt_idx": 2,
       "mode": "Internal",
-      "op": "Add",
-      "external_factor": 48.72861427688379
+      "op": "Divide",
+      "external_factor": 75.5691307525135
     },
     {
       "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Divide",
+      "external_factor": 75.5691307525135
+    },
+    {
+      "src_idx": 3,
       "tgt_idx": 1,
       "mode": "External",
       "op": "Mult",
-      "external_factor": 48.72861427688379
+      "external_factor": 75.5691307525135
     },
     {
-      "src_idx": 0,
-      "tgt_idx": 3,
-      "mode": "Internal",
-      "op": "Mult",
-      "external_factor": 48.72861427688379
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 75.5691307525135
     },
     {
       "src_idx": 0,
       "tgt_idx": 1,
       "mode": "External",
-      "op": "Sub",
-      "external_factor": 48.72861427688379
+      "op": "Mult",
+      "external_factor": 75.5691307525135
     }
   ],
   "registers": {
     "data": [
-      -1.5198722842941492,
-      -4521707450.701234,
       0.0,
-      0.0
+      -14663.776883906668,
+      358.9200257714863,
+      52229.654338681044
     ]
   },
   "fitness": {
-    "Valid": -111.0
+    "Valid": -116.0
   }
 }
