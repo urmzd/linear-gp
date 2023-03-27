@@ -157,7 +157,7 @@ mod tests {
         with_named_logger!("cart_pole_q", {
             let parameters: HyperParameters<GymRsQEngine<CartPoleEnv, 4, 2>> =
                 load_hyper_parameters("assets/parameters/cart-pole-q.json")?;
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -172,7 +172,7 @@ mod tests {
             let parameters: HyperParameters<GymRsEngine<CartPoleEnv, 4, 2>> =
                 load_hyper_parameters("assets/parameters/cart-pole-lgp.json")?;
 
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -186,7 +186,7 @@ mod tests {
         with_named_logger!("mountain_car_lgp", {
             let parameters: HyperParameters<GymRsEngine<MountainCarEnv, 2, 3>> =
                 load_hyper_parameters("assets/parameters/mountain-car-lgp.json")?;
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -200,7 +200,7 @@ mod tests {
         with_named_logger!("mountain_car_q", {
             let parameters: HyperParameters<GymRsQEngine<MountainCarEnv, 2, 3>> =
                 load_hyper_parameters("assets/parameters/mountain-car-q.json")?;
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;

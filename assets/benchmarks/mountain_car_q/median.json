@@ -2,24 +2,24 @@
   "q_table": {
     "table": [
       [
-        -0.06247253971610525,
-        -0.017167999617721086,
-        0.03116589971313876
+        -0.009272163544467393,
+        -0.09059385233136348,
+        0.055440695088992395
       ],
       [
-        -0.036679395068564914,
-        -0.008358060923173611,
-        0.04956479044557742
+        -0.09925808223039216,
+        -0.1120845980607579,
+        0.040601932921492466
       ],
       [
-        0.0072527491510140365,
-        -0.0047902373209687205,
-        -0.0012993402420066308
+        0.036923930011178795,
+        0.01702115271504081,
+        0.013227104129754553
       ],
       [
-        -0.09912292897784075,
-        -0.02786655314785361,
-        0.014486709333568465
+        -0.0323259207655456,
+        -0.060944435772058,
+        0.019784918607661746
       ]
     ],
     "q_consts": {
@@ -32,47 +32,54 @@
     "freeze": true
   },
   "program": {
-    "id": "4a5dddbf-39ac-46e6-a47c-d0030f646bc6",
+    "id": "596b990c-955e-41e2-a09a-1c84e39bab9d",
     "instructions": [
       {
         "src_idx": 2,
-        "tgt_idx": 3,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Mult",
+        "external_factor": 1.3742252051259367
+      },
+      {
+        "src_idx": 2,
+        "tgt_idx": 1,
         "mode": "Internal",
         "op": "Mult",
         "external_factor": 1.3742252051259367
       },
       {
-        "src_idx": 1,
-        "tgt_idx": 2,
-        "mode": "Internal",
-        "op": "Mult",
-        "external_factor": 1.3742252051259367
-      },
-      {
-        "src_idx": 3,
-        "tgt_idx": 0,
-        "mode": "Internal",
-        "op": "Add",
+        "src_idx": 2,
+        "tgt_idx": 1,
+        "mode": "External",
+        "op": "Sub",
         "external_factor": 1.3742252051259367
       },
       {
         "src_idx": 0,
         "tgt_idx": 1,
         "mode": "External",
+        "op": "Divide",
+        "external_factor": 1.3742252051259367
+      },
+      {
+        "src_idx": 3,
+        "tgt_idx": 3,
+        "mode": "Internal",
+        "op": "Sub",
+        "external_factor": 1.3742252051259367
+      },
+      {
+        "src_idx": 3,
+        "tgt_idx": 0,
+        "mode": "Internal",
         "op": "Mult",
         "external_factor": 1.3742252051259367
       },
       {
-        "src_idx": 1,
+        "src_idx": 0,
         "tgt_idx": 0,
         "mode": "Internal",
-        "op": "Add",
-        "external_factor": 1.3742252051259367
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 1,
-        "mode": "External",
         "op": "Sub",
         "external_factor": 1.3742252051259367
       }

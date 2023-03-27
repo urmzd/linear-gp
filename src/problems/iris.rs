@@ -164,7 +164,7 @@ mod test {
                 .crossover_percent(0.)
                 .build()?;
 
-            let populations = parameters.build_engine().take(200).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -196,7 +196,7 @@ mod test {
                 .crossover_percent(0.)
                 .build()?;
 
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -222,7 +222,7 @@ mod test {
                 .crossover_percent(1.0)
                 .build()?;
 
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
@@ -248,7 +248,7 @@ mod test {
                 .crossover_percent(0.5)
                 .build()?;
 
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(parameters.n_generations).collect_vec();
 
             save_benchmarks(&populations, &parameters, NAME)?;
             save_results(&populations, NAME)?;
