@@ -8,20 +8,20 @@
   "seed": null,
   "program_parameters": {
     "program_parameters": {
-      "max_instructions": 45,
+      "max_instructions": 32,
       "instruction_generator_parameters": {
         "n_extras": 1,
-        "external_factor": 42.079726246452665,
+        "external_factor": 25.944813139106135,
         "n_actions": 2,
         "n_inputs": 4
       }
     },
     "consts": {
-      "alpha": 0.07987879259267247,
-      "gamma": 0.940473100494515,
-      "epsilon": 0.7737575443477425,
-      "alpha_decay": 0.9917534517470452,
-      "epsilon_decay": 0.4601074673656628
+      "alpha": 0.1033930485178155,
+      "gamma": 0.2180451105656588,
+      "epsilon": 0.33798956568931593,
+      "alpha_decay": 0.7053114717672202,
+      "epsilon_decay": 0.4127115367586178
     }
   }
 }
