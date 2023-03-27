@@ -141,7 +141,7 @@ where
     let plot_path = create_path(
         Path::new(LOG_PREFIX)
             .join(test_name)
-            .join("plot.json")
+            .join("population.json")
             .to_str()
             .unwrap(),
         true,

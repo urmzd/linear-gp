@@ -16,7 +16,7 @@ def plot_fitness_benchmarks(
     # Load programs from JSON file.
     basename: str = Path(path).name
 
-    with open(Path(path) / "plot.json", "r") as f:
+    with open(Path(path) / "population.json", "r") as f:
         programs: List[List[Dict[str, Any]]] = json.load(f)
 
     # Extract fitness scores and generation information from programs.
