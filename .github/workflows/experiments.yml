@@ -53,6 +53,12 @@ jobs:
       - name: Build Release
         run: cargo build --release
 
+      - name: Run Services
+        uses: isbang/compose-action@v1.4.1
+        with:
+          compose-file: "docker-compose.yml"
+          down-flags: "--rmi --volumes"
+
       - name: Start Required Search Service
         run: docker-compose up -d
 
