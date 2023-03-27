@@ -16,7 +16,7 @@ from threading import Lock
 
 STORAGE = "postgresql://user:password@localhost:5432/database"
 ENV = [
-    "iris",
+    "iris-lgp",
     "mountain-car-lgp",
     "cart-pole-lgp",
     "mountain-car-q",
@@ -137,7 +137,8 @@ def build_objective(
     prune_thresholds = {
         "cart": 400,
         "iris": 0.9,
-        "default": -150,
+        "mountain": -150,
+        "default": 0
     }
     threshold = prune_thresholds.get(env.split("-")[0], prune_thresholds["default"])
 
