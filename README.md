@@ -31,7 +31,7 @@ pip install -r scripts/requirements.txt
 cargo build --release
 ```
 
-2. Execute the search script.
+2. Execute the search script:
 ```bash
 # Display help
 ./scripts/search.py -h # help
@@ -43,17 +43,26 @@ cargo build --release
 ./scripts/search_all.sh
 ```
 
-3. Run tests using the updated script. 
+3. View search results:
+
+```bash
+    # using optuna dashboard
+    docker run -it --rm -p 8080:8080 -v `pwd`:/app -w /app \
+```
+
+4. Run tests using the updated hyperparameters:
+
 ```bash
 cargo nextest run --no-fail-fast --release --no-capture
 ```
 
-4. Produce graphs and tables.
+5. Produce graphs and tables:
+
 ```bash
 ./scripts/produce_assets.py
 ```
 
-5. Run benchmarks
+5. Determine how well individuals perform after training:
 ```bash
 cargo bench
 ```
