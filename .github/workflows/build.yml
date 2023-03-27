@@ -47,6 +47,9 @@ jobs:
           crate: cargo-nextest
           locked: true
 
+      - name: Build release
+        run: cargo build --release
+
       - name: Start Docker Services
         run: docker-compose up -d
 

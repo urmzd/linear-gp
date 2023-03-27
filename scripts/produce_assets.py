@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import json
-import json
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
@@ -46,13 +45,15 @@ def plot_fitness_benchmarks(
     median_fitness = [
         np.median(generation_fitness) for generation_fitness in fitness_scores
     ]
+    std_fitness = [np.std(generation_fitness) for generation_fitness in fitness_scores]
 
     # Create a pandas DataFrame with the statistics.
     data = {
-        "Max Fitness": max_fitness,
-        "Mean Fitness": mean_fitness,
-        "Median Fitness": median_fitness,
-        "Min Fitness": min_fitness,
+        "max_fitness": max_fitness,
+        "mean_fitness": mean_fitness,
+        "median_fitness": median_fitness,
+        "min_fitness": min_fitness,
+        "std_fitness": std_fitness,
     }
 
     df = pd.DataFrame(data)
@@ -61,7 +62,7 @@ def plot_fitness_benchmarks(
     # Save the DataFrame as a CSV file in the assets/tables directory.
     tables_path = Path("assets/tables/")
     tables_path.mkdir(parents=True, exist_ok=True)
-    df.to_csv(tables_path / f"{basename}_stats.csv")
+    df.to_csv(tables_path / f"{basename}.csv")
 
     # Plot fitness scores as lines.
     fig, ax = plt.subplots()
@@ -71,18 +72,21 @@ def plot_fitness_benchmarks(
     if label != "":
         title = f"{title} ({label})"
 
-    ax.plot(generations, max_fitness, label="Max")
-    ax.plot(generations, mean_fitness, label="Mean")
-    ax.plot(generations, median_fitness, label="Median")
-    ax.plot(generations, min_fitness, label="Min")
+    ax.plot(generations, max_fitness, label="max", linestyle="-", marker="o")
+    ax.plot(generations, mean_fitness, label=r"$\mu$", linestyle="--", marker="v")
+    ax.plot(generations, median_fitness, label="median", linestyle="-.", marker="s")
+    ax.plot(generations, min_fitness, label="min", linestyle=":", marker="D")
+    ax.plot(generations, std_fitness, label=r"$\sigma$", linestyle="-", marker="x")
+
+    ax.set_title(title)
+
     ax.set_xlabel("Generation")
     ax.set_ylabel("Fitness")
-    ax.grid(visible=True, which="both")
-    ax.set_title(title)
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1))
-    plt.tight_layout()
 
-    plt.show(fig)
+    ax.grid(visible=True, which="both")
+
+    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1))
+
     fig_path = Path("assets/images/")
     fig_path.mkdir(parents=True, exist_ok=True)
     fig.savefig(fig_path / f"{basename}.png", bbox_inches="tight", dpi=300)
