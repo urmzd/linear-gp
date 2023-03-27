@@ -14,8 +14,13 @@ import json
 from typing import Any, Dict
 
 STORAGE = "postgresql://user:password@localhost:5432/database"
-ENV = ["cart-pole", "mountain-car"]
-ALGORITHMS = ["q", "norm"]
+ENV = [
+    "mountain-car-q",
+    "mountain-car-lgp",
+    "iris",
+    "cart-pole-q",
+    "cart-pole-lgp",
+]
 
 
 def save_best_hyperparameters(
@@ -71,8 +76,8 @@ def load_study(study_name: str) -> optuna.Study:
     return study
 
 
-def create_study(env: str, algorithm: str) -> str:
-    study_name = f"{env}_{algorithm}_{int(time.time())}"
+def create_study(env: str) -> str:
+    study_name = f"{env}_{int(time.time())}"
     optuna.create_study(
         study_name=study_name,
         direction="maximize",
@@ -101,13 +106,12 @@ def build_objective(study_name: str, trial: optuna.Trial) -> float:
     max_instructions = trial.suggest_int("max_instructions", 1, 64)
     external_factor = trial.suggest_float("external_factor", 0.0, 100.0)
 
-    game, learning_type, _timestamp = study_name.split("_")
+    env, _timestamp = study_name.split("_")
 
     # Define the command to run with the CLI
     command = [
         "./target/release/lgp",
-        game,
-        learning_type,
+        env,
         "--n-trials",
         n_trials,
         "--population-size",
@@ -128,7 +132,7 @@ def build_objective(study_name: str, trial: optuna.Trial) -> float:
         external_factor,
     ]
 
-    if learning_type == "q":
+    if "q" in env:
         alpha = trial.suggest_float("alpha", 0.0, 1.0)
         epsilon = trial.suggest_float("epsilon", 0.0, 1.0)
         gamma = trial.suggest_float("gamma", 0.0, 1.0)
@@ -169,8 +173,11 @@ def build_objective(study_name: str, trial: optuna.Trial) -> float:
     if best_score == float("nan"):
         raise optuna.TrialPruned
 
-    if game == "cart-pole":
+    if "cart" in env:
         if best_score < 400:
+            raise optuna.TrialPruned()
+    elif "iris" in env:
+        if best_score < 0.9:
             raise optuna.TrialPruned()
     else:
         if best_score < -100:
@@ -183,17 +190,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Optimizer")
     parser.add_argument(
         "--env",
-        choices=ENV,
         type=str,
+        choices=ENV,
         required=True,
         help="The name of the environment to run simulation in.",
-    )
-    parser.add_argument(
-        "--algorithm",
-        choices=ALGORITHMS,
-        type=str,
-        required=True,
-        help="The type of algorithm to run.",
     )
     parser.add_argument(
         "--n-trials",
@@ -211,7 +211,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main(args: argparse.Namespace) -> None:
-    study_name = create_study(args.env, args.algorithm)
+    study_name = create_study(args.env)
     objective = partial(build_objective, study_name)
 
     n_trials = args.n_trials

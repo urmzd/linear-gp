@@ -15,6 +15,7 @@ use crate::core::environment::RlState;
 use crate::core::environment::State;
 use crate::core::program::Program;
 use crate::core::program::ProgramGeneratorParameters;
+use crate::extensions::interactive::UseRlFitness;
 use crate::extensions::q_learning::QProgram;
 use crate::extensions::q_learning::QProgramGeneratorParameters;
 
@@ -109,7 +110,7 @@ where
     type Individual = QProgram;
     type ProgramParameters = QProgramGeneratorParameters;
     type State = GymRsInput<T, N_PUTS, N_ACTS>;
-    type Marker = ();
+    type FitnessMarker = ();
     type Generate = GenerateEngine;
     type Fitness = FitnessEngine;
     type Reset = ResetEngine;
@@ -125,7 +126,7 @@ where
     type Individual = Program;
     type ProgramParameters = ProgramGeneratorParameters;
     type State = GymRsInput<T, N_PUTS, N_ACTS>;
-    type Marker = ();
+    type FitnessMarker = UseRlFitness;
     type Generate = GenerateEngine;
     type Fitness = FitnessEngine;
     type Reset = ResetEngine;
@@ -163,10 +164,7 @@ mod tests {
                 .program_parameters(program_parameters)
                 .build()?;
             let parameters = HyperParametersBuilder::<GymRsQEngine<CartPoleEnv, 4, 2>>::default()
-                .n_trials(5)
                 .program_parameters(q_program_parameters)
-                .mutation_percent(0.5)
-                .crossover_percent(0.5)
                 .build()?;
 
             let populations = parameters.build_engine().take(100).collect_vec();
@@ -189,10 +187,7 @@ mod tests {
                 .instruction_generator_parameters(instruction_parameters)
                 .build()?;
             let parameters = HyperParametersBuilder::<GymRsEngine<CartPoleEnv, 4, 2>>::default()
-                .n_trials(5)
                 .program_parameters(program_parameters)
-                .mutation_percent(0.5)
-                .crossover_percent(0.5)
                 .build()?;
 
             let populations = parameters.build_engine().take(100).collect_vec();
@@ -215,10 +210,7 @@ mod tests {
                 .instruction_generator_parameters(instruction_parameters)
                 .build()?;
             let parameters = HyperParametersBuilder::<GymRsEngine<MountainCarEnv, 2, 3>>::default()
-                .n_trials(5)
                 .program_parameters(program_parameters)
-                .mutation_percent(0.5)
-                .crossover_percent(0.5)
                 .build()?;
 
             let populations = parameters.build_engine().take(100).collect_vec();
@@ -245,10 +237,7 @@ mod tests {
                 .build()?;
             let parameters =
                 HyperParametersBuilder::<GymRsQEngine<MountainCarEnv, 2, 3>>::default()
-                    .n_trials(5)
                     .program_parameters(q_program_parameters)
-                    .mutation_percent(0.5)
-                    .crossover_percent(0.5)
                     .build()?;
 
             let populations = parameters.build_engine().take(100).collect_vec();

@@ -44,7 +44,7 @@ where
     #[builder(default = "100")]
     #[arg(long, default_value = "100")]
     pub n_generations: usize,
-    #[builder(default = "1")]
+    #[builder(default = "5")]
     #[arg(long, default_value = "5")]
     pub n_trials: usize,
     #[builder(default = "None")]
@@ -155,9 +155,9 @@ pub trait Core {
     type Individual: Ord + Clone + Send + Sync + Serialize;
     type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned + Args;
     type State: State;
-    type Marker;
+    type FitnessMarker;
     type Generate: Generate<Self::ProgramParameters, Self::Individual> + Generate<(), Self::State>;
-    type Fitness: Fitness<Self::Individual, Self::State, Self::Marker>;
+    type Fitness: Fitness<Self::Individual, Self::State, Self::FitnessMarker>;
     type Reset: Reset<Self::Individual> + Reset<Self::State>;
     type Breed: Breed<Self::Individual>;
     type Mutate: Mutate<Self::ProgramParameters, Self::Individual>;

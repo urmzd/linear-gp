@@ -120,7 +120,7 @@ impl Core for IrisEngine {
     type State = IrisState;
     type Individual = Program;
     type ProgramParameters = ProgramGeneratorParameters;
-    type Marker = ();
+    type FitnessMarker = ();
     type Generate = GenerateEngine;
     type Fitness = FitnessEngine;
     type Reset = ResetEngine;

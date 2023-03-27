@@ -28,7 +28,7 @@ pip install -r scripts/requirements.txt
 cargo build --release
 
 ./scripts/optimize.py -h # help
-./scripts/optimize.py --env cart-pole --algorithm q --n-trials 40 --n-threads 4 # run
+./scripts/optimize.py --env cart-pole-lgp --n-trials 160 --n-threads 4  
 ```
 
 ## Contributions
