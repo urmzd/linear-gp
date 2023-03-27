@@ -5,7 +5,8 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from typing import List, Dict, Any,
+from typing import List, Dict, Any
+
 
 def plot_fitness_benchmarks(
     path: str = "assets/logs/cart-pole-lgp",
