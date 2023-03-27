@@ -1,85 +1,64 @@
 {
-  "id": "511e4f59-b113-4860-8bb1-dc84162d96eb",
+  "id": "f7ee5f34-857b-4e00-94de-4bcd46641c4f",
   "instructions": [
     {
       "src_idx": 1,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 2,
       "tgt_idx": 0,
       "mode": "Internal",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 3,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 1,
-      "mode": "External",
       "op": "Divide",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 3,
-      "mode": "External",
-      "op": "Sub",
       "external_factor": 9.18981693963246
     },
     {
       "src_idx": 0,
       "tgt_idx": 2,
-      "mode": "External",
-      "op": "Divide",
+      "mode": "Internal",
+      "op": "Sub",
       "external_factor": 9.18981693963246
     },
     {
       "src_idx": 1,
-      "tgt_idx": 1,
-      "mode": "Internal",
+      "tgt_idx": 3,
+      "mode": "External",
       "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Divide",
       "external_factor": 9.18981693963246
     }
   ],
   "registers": {
     "data": [
-      0.0,
-      0.0,
-      -586.95948867524
+      36.764391740882544,
+      24.91119049381137,
+      -11.539508345893731
     ]
   },
   "fitness": {
-    "Valid": 1.0
+    "Valid": 8.0
   }
 }
