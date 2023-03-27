@@ -11,18 +11,18 @@ def plot_fitness_benchmarks(
     path: str = "assets/logs/cart-pole-lgp",
     label: str = "",
     fallback_fitness: float = -200.0,
-):
+) -> None:
     # Load programs from JSON file.
-    basename = Path(path).name
+    basename: str = Path(path).name
 
-    with open(Path(path) / "plot.json") as f:
-        programs = json.load(f)
+    with open(Path(path) / "plot.json", "r") as f:
+        programs: List[List[Dict[str, Any]]] = json.load(f)
 
     # Extract fitness scores and generation information from programs.
-    fitness_scores = []
-    generations = []
+    fitness_scores: List[List[float]] = []
+    generations: List[int] = []
     for i, program_group in enumerate(programs):
-        generation_fitness = []
+        generation_fitness: List[float] = []
         for program in program_group:
             if "program" in program:
                 program = program["program"]
@@ -37,18 +37,24 @@ def plot_fitness_benchmarks(
         generations.append(i)
 
     # Compute statistics of fitness scores.
-    mean_fitness = [
+    mean_fitness: List[float] = [
         np.mean(generation_fitness) for generation_fitness in fitness_scores
     ]
-    max_fitness = [np.max(generation_fitness) for generation_fitness in fitness_scores]
-    min_fitness = [np.min(generation_fitness) for generation_fitness in fitness_scores]
-    median_fitness = [
+    max_fitness: List[float] = [
+        np.max(generation_fitness) for generation_fitness in fitness_scores
+    ]
+    min_fitness: List[float] = [
+        np.min(generation_fitness) for generation_fitness in fitness_scores
+    ]
+    median_fitness: List[float] = [
         np.median(generation_fitness) for generation_fitness in fitness_scores
     ]
-    std_fitness = [np.std(generation_fitness) for generation_fitness in fitness_scores]
+    std_fitness: List[float] = [
+        np.std(generation_fitness) for generation_fitness in fitness_scores
+    ]
 
     # Create a pandas DataFrame with the statistics.
-    data = {
+    data: Dict[str, List[float]] = {
         "max_fitness": max_fitness,
         "mean_fitness": mean_fitness,
         "median_fitness": median_fitness,
@@ -56,18 +62,18 @@ def plot_fitness_benchmarks(
         "std_fitness": std_fitness,
     }
 
-    df = pd.DataFrame(data)
+    df: pd.DataFrame = pd.DataFrame(data)
     df.index.name = "Generation"
 
     # Save the DataFrame as a CSV file in the assets/tables directory.
-    tables_path = Path("assets/tables/")
+    tables_path: Path = Path("assets/tables/")
     tables_path.mkdir(parents=True, exist_ok=True)
     df.to_csv(tables_path / f"{basename}.csv")
 
     # Plot fitness scores as lines.
     fig, ax = plt.subplots()
 
-    title = "Fitness Evolution"
+    title: str = "Fitness Evolution"
 
     if label != "":
         title = f"{title} ({label})"
@@ -87,7 +93,7 @@ def plot_fitness_benchmarks(
 
     ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1))
 
-    fig_path = Path("assets/images/")
+    fig_path: Path = Path("assets/images/")
     fig_path.mkdir(parents=True, exist_ok=True)
     fig.savefig(fig_path / f"{basename}.png", bbox_inches="tight", dpi=300)
 

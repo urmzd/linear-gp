@@ -66,8 +66,8 @@ def run_optimization(
 
 def build_objective(study_name: str, trial: optuna.Trial) -> float:
     # Define the hyperparameters to optimize
-    max_instructions = trial.suggest_int("max_instructions", 1, 12)
-    external_factor = trial.suggest_float("external_factor", 0.0, 10.0)
+    max_instructions = trial.suggest_int("max_instructions", 1, 24)
+    external_factor = trial.suggest_float("external_factor", 0.0, 12.)
 
     env, _timestamp = study_name.split("_")
 
