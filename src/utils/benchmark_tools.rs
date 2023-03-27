@@ -9,7 +9,7 @@ use crate::core::{
     characteristics::{Load, Save},
     engines::{
         core_engine::{Core, HyperParameters},
-        freeze_engine::{Freeze},
+        freeze_engine::Freeze,
         status_engine::Status,
     },
     engines::{fitness_engine::FitnessScore, generate_engine::Generate},
@@ -18,13 +18,14 @@ use crate::core::{
 use super::misc::VoidResultAnyError;
 
 pub const BENCHMARK_PREFIX: &'static str = "assets/benchmarks/";
+pub const LOG_PREFIX: &'static str = "assets/logs/";
 
 #[allow(unused_macros)]
 macro_rules! with_named_logger {
     ($name:expr, $($body:tt)*) => {{
         const NAME: &'static str = $name;
 
-        let shared_dir = std::path::Path::new($crate::utils::benchmark_tools::BENCHMARK_PREFIX).join(format!("{}/",NAME));
+        let shared_dir = std::path::Path::new($crate::utils::benchmark_tools::LOG_PREFIX).join(format!("{}/",NAME));
 
         $crate::utils::benchmark_tools::create_path(shared_dir.to_str().unwrap(), false).unwrap();
 
@@ -138,7 +139,7 @@ where
     T: Serialize,
 {
     let plot_path = create_path(
-        Path::new(BENCHMARK_PREFIX)
+        Path::new(LOG_PREFIX)
             .join(test_name)
             .join("plot.json")
             .to_str()
