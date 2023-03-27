@@ -1,3 +1,4 @@
+use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
 use tokio::runtime::Runtime;
@@ -16,7 +17,7 @@ use crate::{
         environment::State,
         program::{Program, ProgramGeneratorParameters},
     },
-    utils::loader::download_and_load_csv,
+    utils::{loader::download_and_load_csv, random::generator},
 };
 
 pub const IRIS_DATASET_LINK: &'static str =
@@ -96,7 +97,8 @@ impl State for IrisState {
 
 impl Reset<IrisState> for ResetEngine {
     fn reset(item: &mut IrisState) {
-        item.idx = 0
+        item.idx = 0;
+        item.data.shuffle(&mut generator());
     }
 }
 

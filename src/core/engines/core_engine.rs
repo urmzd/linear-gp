@@ -45,7 +45,7 @@ where
     #[arg(long, default_value = "100")]
     pub n_generations: usize,
     #[builder(default = "1")]
-    #[arg(long, default_value = "1")]
+    #[arg(long, default_value = "5")]
     pub n_trials: usize,
     #[builder(default = "None")]
     #[arg(long)]
