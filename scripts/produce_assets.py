@@ -64,7 +64,7 @@ def plot_fitness_benchmarks(
     }
 
     df: pd.DataFrame = pd.DataFrame(data)
-    df.index.name = "Generation"
+    df.index.name = "generation"
 
     # Save the DataFrame as a CSV file in the assets/tables directory.
     tables_path: Path = Path("assets/tables/")
