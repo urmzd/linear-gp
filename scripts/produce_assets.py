@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-
+from typing import List, Dict, Any,
 
 def plot_fitness_benchmarks(
     path: str = "assets/logs/cart-pole-lgp",
@@ -37,24 +37,24 @@ def plot_fitness_benchmarks(
         generations.append(i)
 
     # Compute statistics of fitness scores.
-    mean_fitness: List[float] = [
+    mean_fitness: List[np.floating[Any]] = [
         np.mean(generation_fitness) for generation_fitness in fitness_scores
     ]
-    max_fitness: List[float] = [
+    max_fitness: List[Any] = [
         np.max(generation_fitness) for generation_fitness in fitness_scores
     ]
-    min_fitness: List[float] = [
+    min_fitness: List[Any] = [
         np.min(generation_fitness) for generation_fitness in fitness_scores
     ]
-    median_fitness: List[float] = [
+    median_fitness: List[np.floating[Any]] = [
         np.median(generation_fitness) for generation_fitness in fitness_scores
     ]
-    std_fitness: List[float] = [
+    std_fitness: List[np.floating[Any]] = [
         np.std(generation_fitness) for generation_fitness in fitness_scores
     ]
 
     # Create a pandas DataFrame with the statistics.
-    data: Dict[str, List[float]] = {
+    data: Dict[str, Any] = {
         "max_fitness": max_fitness,
         "mean_fitness": mean_fitness,
         "median_fitness": median_fitness,
