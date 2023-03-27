@@ -4,6 +4,8 @@
 .idea
 
 assets/logs
-assets/benchmarks
 
 notes.md
+
+**/plot.json
+**/*.log.*
