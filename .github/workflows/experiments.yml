@@ -57,7 +57,7 @@ jobs:
         uses: isbang/compose-action@v1.4.1
         with:
           compose-file: "docker-compose.yml"
-          down-flags: "--rmi --volumes"
+          down-flags: "--rmi=all --volumes"
 
       - name: Search For Optimal Parameters
         run: ./scripts/search_all.sh
