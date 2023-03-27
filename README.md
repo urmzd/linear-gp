@@ -3,7 +3,7 @@
 
 This repository contains a framework for solving tasks using linear genetic programming.
 
-![build passing](https://github.com/urmzd/linear-genetic-programming/actions/workflows/build.yml/badge.svg)
+![build passing](https://github.com/urmzd/linear-genetic-programming/actions/workflows/experiments.yml/badge.svg)
 
 ## Prerequisites
 
@@ -46,8 +46,8 @@ cargo build --release
 3. View search results:
 
 ```bash
-    # using optuna dashboard
-    docker run -it --rm -p 8080:8080 -v `pwd`:/app -w /app \
+# using optuna dashboard
+docker run -it --rm -p 8080:8080 -v `pwd`:/app -w /app \
 ```
 
 4. Run tests using the updated hyperparameters:
