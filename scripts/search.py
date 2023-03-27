@@ -3,6 +3,7 @@
 import argparse
 from concurrent.futures import Future, ThreadPoolExecutor
 from functools import partial
+import json
 from loguru import logger
 from pathlib import Path
 import time
@@ -15,11 +16,11 @@ from threading import Lock
 
 STORAGE = "postgresql://user:password@localhost:5432/database"
 ENV = [
-    "mountain-car-q",
-    "mountain-car-lgp",
     "iris",
-    "cart-pole-q",
+    "mountain-car-lgp",
     "cart-pole-lgp",
+    "mountain-car-q",
+    "cart-pole-q",
 ]
 
 global_best_score = None
@@ -64,30 +65,28 @@ def run_optimization(
     study.optimize(objective, n_trials=n_trials)
 
 
-def build_objective(study_name: str, trial: optuna.Trial) -> float:
-    # Define the hyperparameters to optimize
-    max_instructions = trial.suggest_int("max_instructions", 1, 24)
-    external_factor = trial.suggest_float("external_factor", 0.0, 12.)
+def build_objective(
+    study_name: str, trial: optuna.Trial, lgp_parameters: dict[str, Any] | None = None
+) -> float:
 
     env, _timestamp = study_name.split("_")
+
+    max_instructions = None
+    external_factor = None
+
+    if lgp_parameters is None:
+        max_instructions = trial.suggest_int("max_instructions", 1, 100)
+        external_factor = trial.suggest_float("external_factor", 0.0, 100.0)
+    else:
+        program_parameters = lgp_parameters["program_parameters"]
+        max_instructions = program_parameters["max_instructions"]
+        external_factor = program_parameters["external_factor"]
 
     # Define the command to run with the CLI
     base_command = [
         "./target/release/lgp",
         env,
-        "--n-trials",
-        5,
-        "--population-size",
-        100,
-        "--gap",
-        0.5,
-        "--mutation-percent",
-        0.5,
-        "--crossover-percent",
-        0.5,
-        "--n-generations",
-        100,
-        "--max-instructions",
+        "--max-instructons",
         max_instructions,
         "--n-extras",
         1,
@@ -95,8 +94,8 @@ def build_objective(study_name: str, trial: optuna.Trial) -> float:
         external_factor,
     ]
 
-    if "q" in env:
-        q_params = [
+    if lgp_parameters:
+        q_cli_parameters = [
             "--alpha",
             trial.suggest_float("alpha", 0.0, 1.0),
             "--alpha-decay",
@@ -109,7 +108,7 @@ def build_objective(study_name: str, trial: optuna.Trial) -> float:
             trial.suggest_float("epsilon_decay", 0.0, 1.0),
         ]
 
-        base_command.extend(q_params)
+        base_command.extend(q_cli_parameters)
 
     command = list(map(str, base_command))
     logger.trace(" ".join(command))
@@ -176,7 +175,22 @@ def parse_args() -> argparse.Namespace:
 
 def main(args: argparse.Namespace) -> None:
     study_name = create_study(args.env)
-    objective = partial(build_objective, study_name)
+
+    env_tokens = study_name.split("-")
+    learning_type = env_tokens[-1]
+    env_name = "-".join(env_tokens[:-1])
+
+    if learning_type == "q":
+        # todo: check for assets/parameters/{env_name}-lgp.json
+        # load the parameters and set max_instructions and external_factor
+        # to the values found in the file
+        lgp_params = f"assets/parameters/{env_name}-q.json"
+        assert Path(lgp_params).exists()
+        with open(lgp_params, "r"):
+            parameters = json.loads(lgp_params)
+            objective = partial(build_objective, study_name, lgp_parameters=parameters)
+    else:
+        objective = partial(build_objective, study_name)
 
     n_trials = args.n_trials
     results: List[Future[Any]] = []
