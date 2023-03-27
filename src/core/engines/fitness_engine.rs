@@ -8,11 +8,11 @@ use super::reset_engine::{Reset, ResetEngine};
 
 #[derive(Clone, Debug, Copy, PartialEq, Display, Serialize, Deserialize)]
 pub enum FitnessScore {
-    #[display(fmt = "valid: {}", _0)]
+    #[display(fmt = "{}", _0)]
     Valid(f64),
-    #[display(format = "out-of-bounds")]
+    #[display(format = "nan")]
     OutOfBounds,
-    #[display(format = "not-evaluated")]
+    #[display(format = "nan")]
     NotEvaluated,
 }
 
