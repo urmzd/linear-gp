@@ -40,19 +40,66 @@ impl Accuator {
         match self {
             Accuator::MountainCarQ(hyperparameters) => {
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
+
+                hyperparameters
+                    .program_parameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_actions = 3;
+                hyperparameters
+                    .program_parameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_inputs = 2;
+
                 run_accuator!(GymRsQEngine, hyperparameters)
             }
             Accuator::MountainCarLGP(hyperparameters) => {
+                hyperparameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_actions = 3;
+                hyperparameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_inputs = 2;
+
                 run_accuator!(GymRsEngine, hyperparameters)
             }
             Accuator::Iris(hyperparameters) => {
+                hyperparameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_actions = 3;
+                hyperparameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_inputs = 4;
                 run_accuator!(IrisEngine, hyperparameters)
             }
             Accuator::CartPoleQ(hyperparameters) => {
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
+                hyperparameters
+                    .program_parameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_actions = 2;
+                hyperparameters
+                    .program_parameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_inputs = 4;
                 run_accuator!(GymRsQEngine, hyperparameters)
             }
             Accuator::CartPoleLGP(hyperparameters) => {
+                hyperparameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_actions = 2;
+                hyperparameters
+                    .program_parameters
+                    .instruction_generator_parameters
+                    .n_inputs = 4;
                 run_accuator!(GymRsEngine, hyperparameters)
             }
         }

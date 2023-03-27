@@ -6,7 +6,10 @@ use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
 
 use crate::{
-    core::engines::{breed_engine::Breed, reset_engine::Reset},
+    core::{
+        engines::{breed_engine::Breed, reset_engine::Reset},
+        environment::State,
+    },
     utils::random::{generator, update_seed},
 };
 
@@ -151,7 +154,7 @@ pub struct CoreEngine;
 pub trait Core {
     type Individual: Ord + Clone + Send + Sync + Serialize;
     type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned + Args;
-    type State;
+    type State: State;
     type Marker;
     type Generate: Generate<Self::ProgramParameters, Self::Individual> + Generate<(), Self::State>;
     type Fitness: Fitness<Self::Individual, Self::State, Self::Marker>;
