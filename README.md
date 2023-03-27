@@ -3,7 +3,7 @@
 
 This repository contains a framework for solving tasks using linear genetic programming.
 
-![build passing](https://github.com/urmzd/linear-genetic-programming/actions/workflows/experiments.yml/badge.svg)
+![build passing](https://github.com/urmzd/linear-genetic-programming/actions/workflows/experiments/badge.svg)
 
 ## Prerequisites
 
