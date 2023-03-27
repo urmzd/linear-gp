@@ -59,9 +59,6 @@ jobs:
           compose-file: "docker-compose.yml"
           down-flags: "--rmi --volumes"
 
-      - name: Start Required Search Service
-        run: docker-compose up -d
-
       - name: Search For Optimal Parameters
         run: ./scripts/search_all.sh
 
