@@ -44,5 +44,5 @@ jobs:
       - name: Upload Assets
         uses: EndBug/add-and-commit@v9
         with:
-          add: "assets/images"
+          add: "assets"
           pull: "--rebase --autostash"
