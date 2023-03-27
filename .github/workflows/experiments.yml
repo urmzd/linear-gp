@@ -31,8 +31,9 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Retrieve cargo cache
+      - name: Run build
         uses: Swatinem/rust-cache@v2
+        run: cargo build --release
 
       - uses: actions/setup-python@v4
         with:
@@ -47,9 +48,6 @@ jobs:
           crate: cargo-nextest
           locked: true
 
-      - name: Build release
-        run: cargo build --release
-
       - name: Start Docker Services
         run: docker-compose up -d
 
@@ -62,12 +60,14 @@ jobs:
         env:
           RUST_BACKTRACE: 1
           RUST_LOG: debug
+        uses: Swatinem/rust-cache@v2
         run: cargo nextest run --no-fail-fast --release --no-capture
 
       - name: Produce Assets
         run: ./scripts/produce_assets.py
 
       - name: Run Benchmarks
+        uses: Swatinem/rust-cache@v2
         run: cargo bench
 
       - name: Upload Assets
