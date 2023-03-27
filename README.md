@@ -52,5 +52,13 @@ To run all tests, execute the following command.
 cargo nextest run --no-fail-fast --release --no-capture
 ```
 
+## Benchmarks
+
+To check how well individuals perform after training, use the following command.
+
+```bash
+cargo bench
+```
+
 ## Contributions
 Contributions are welcome. Please refer to the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
