@@ -33,10 +33,9 @@ impl Reward {
     }
 }
 
-/// simply a marker
-struct Rl;
+pub struct UseRlFitness;
 
-impl<T> Fitness<Program, T, Rl> for FitnessEngine
+impl<T> Fitness<Program, T, UseRlFitness> for FitnessEngine
 where
     T: RlState,
 {
