@@ -2,78 +2,43 @@
   "q_table": {
     "table": [
       [
-        0.5999123215863151,
-        0.4677948838380232
+        0.11404558290418632,
+        0.30022850305247717
       ],
       [
-        0.9765552005623948,
-        0.04256034284883871
+        0.23061844939638199,
+        0.0010804286325931634
       ],
       [
-        0.0,
+        0.5452173051459521,
         0.0
       ]
     ],
     "q_consts": {
-      "alpha": 0.7727737926324254,
-      "gamma": 0.5580312662260263,
-      "epsilon": 0.32263428698949725,
-      "alpha_decay": 0.39548388874306417,
-      "epsilon_decay": 0.005899258410533181
+      "alpha": 0.5383362682783306,
+      "gamma": 0.08724844356562467,
+      "epsilon": 0.9791449903388126,
+      "alpha_decay": 0.4504712386500149,
+      "epsilon_decay": 0.06095503699069371
     },
     "freeze": true
   },
   "program": {
-    "id": "f3ae8b7e-9660-402c-b323-f113a3e45859",
+    "id": "293fcadb-07e1-4ae5-8e8b-967060a379d7",
     "instructions": [
       {
-        "src_idx": 0,
-        "tgt_idx": 1,
-        "mode": "Internal",
-        "op": "Mult",
-        "external_factor": 0.7685098560879533
-      },
-      {
         "src_idx": 2,
-        "tgt_idx": 0,
-        "mode": "Internal",
-        "op": "Sub",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 2,
-        "mode": "Internal",
-        "op": "Sub",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 3,
-        "mode": "External",
-        "op": "Mult",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 0,
-        "mode": "External",
-        "op": "Sub",
-        "external_factor": 0.7685098560879533
-      },
-      {
-        "src_idx": 1,
         "tgt_idx": 1,
         "mode": "External",
-        "op": "Divide",
-        "external_factor": 0.7685098560879533
+        "op": "Add",
+        "external_factor": 2.075665289783043
       }
     ],
     "registers": {
       "data": [
         0.0,
         0.0,
-        -0.19032689347851403
+        -0.3121405108364804
       ]
     },
     "fitness": {
