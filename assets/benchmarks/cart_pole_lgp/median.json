@@ -1,11 +1,46 @@
 {
-  "id": "d84129af-4dc0-4a97-9a29-613212872254",
+  "id": "940130f2-5adc-4d6a-a52e-b74e86a33855",
   "instructions": [
     {
-      "src_idx": 1,
-      "tgt_idx": 3,
+      "src_idx": 0,
+      "tgt_idx": 0,
       "mode": "External",
       "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Mult",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 2,
+      "mode": "External",
+      "op": "Mult",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Mult",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Mult",
       "external_factor": 9.18981693963246
     },
     {
@@ -16,49 +51,35 @@
       "external_factor": 9.18981693963246
     },
     {
-      "src_idx": 2,
+      "src_idx": 0,
       "tgt_idx": 0,
       "mode": "Internal",
       "op": "Divide",
       "external_factor": 9.18981693963246
     },
     {
-      "src_idx": 0,
-      "tgt_idx": 2,
+      "src_idx": 1,
+      "tgt_idx": 0,
       "mode": "Internal",
       "op": "Sub",
       "external_factor": 9.18981693963246
     },
     {
       "src_idx": 1,
-      "tgt_idx": 3,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Sub",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 2,
-      "mode": "External",
-      "op": "Divide",
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Mult",
       "external_factor": 9.18981693963246
     }
   ],
   "registers": {
     "data": [
-      -2.3836346775034674,
-      1.275155351218865,
-      -0.0
+      -0.7376050081075963,
+      -0.5440611479854073,
+      0.0
     ]
   },
   "fitness": {
-    "Valid": 191.0
+    "Valid": 1.0
   }
 }

@@ -1,18 +1,39 @@
 {
-  "id": "79175ba5-1378-43ad-bec1-cfa11c0abe4e",
+  "id": "46d8323c-21b2-4ca0-8463-8804c130f29b",
   "instructions": [
     {
+      "src_idx": 0,
+      "tgt_idx": 1,
+      "mode": "External",
+      "op": "Sub",
+      "external_factor": 9.18981693963246
+    },
+    {
       "src_idx": 1,
-      "tgt_idx": 3,
+      "tgt_idx": 1,
       "mode": "External",
       "op": "Add",
       "external_factor": 9.18981693963246
     },
     {
-      "src_idx": 2,
-      "tgt_idx": 2,
+      "src_idx": 0,
+      "tgt_idx": 0,
       "mode": "Internal",
+      "op": "Sub",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "External",
       "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Mult",
       "external_factor": 9.18981693963246
     },
     {
@@ -23,42 +44,42 @@
       "external_factor": 9.18981693963246
     },
     {
-      "src_idx": 0,
-      "tgt_idx": 2,
-      "mode": "Internal",
-      "op": "Sub",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 3,
+      "src_idx": 2,
+      "tgt_idx": 0,
       "mode": "External",
       "op": "Add",
       "external_factor": 9.18981693963246
     },
     {
-      "src_idx": 0,
-      "tgt_idx": 2,
+      "src_idx": 2,
+      "tgt_idx": 0,
       "mode": "External",
-      "op": "Sub",
+      "op": "Mult",
       "external_factor": 9.18981693963246
     },
     {
-      "src_idx": 1,
-      "tgt_idx": 2,
+      "src_idx": 2,
+      "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Mult",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 2,
+      "tgt_idx": 0,
       "mode": "External",
-      "op": "Divide",
+      "op": "Sub",
       "external_factor": 9.18981693963246
     }
   ],
   "registers": {
     "data": [
-      -2.3836346775034674,
-      1.275155351218865,
-      0.0
+      12.69804339519132,
+      2.0389018398193763,
+      113.48661310053132
     ]
   },
   "fitness": {
-    "Valid": 191.0
+    "Valid": 1.0
   }
 }

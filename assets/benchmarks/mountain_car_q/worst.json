@@ -2,24 +2,24 @@
   "q_table": {
     "table": [
       [
-        -0.0027643571728377457,
-        -0.007118387642615659,
-        -0.013510372690736796
+        -0.0023028735036946264,
+        -0.05993000750246269,
+        -0.0054937195438796585
       ],
       [
-        -0.015999266898253966,
-        -0.033139497452648374,
-        0.03709751015767413
+        -0.03148278677285769,
+        -0.06214072279043291,
+        0.12676038569745024
       ],
       [
-        -0.02349039924638692,
-        -0.04251389635974826,
-        -0.0046639229668138755
+        -0.1323496261593521,
+        -0.07887089380029974,
+        -0.07440351641760193
       ],
       [
-        -0.01737550596975279,
-        -0.04291419153395315,
-        0.10046840777510127
+        -0.026411112486725237,
+        -0.051796833841275265,
+        -0.07491928828442551
       ]
     ],
     "q_consts": {
@@ -32,27 +32,34 @@
     "freeze": true
   },
   "program": {
-    "id": "3002edec-d102-4284-af1e-803355f55d87",
+    "id": "a075c187-7e7e-4687-a695-a8e85ccd3920",
     "instructions": [
       {
-        "src_idx": 3,
-        "tgt_idx": 3,
+        "src_idx": 0,
+        "tgt_idx": 2,
         "mode": "Internal",
         "op": "Sub",
         "external_factor": 1.3742252051259367
       },
       {
-        "src_idx": 3,
+        "src_idx": 2,
         "tgt_idx": 1,
-        "mode": "External",
+        "mode": "Internal",
         "op": "Add",
         "external_factor": 1.3742252051259367
       },
       {
-        "src_idx": 2,
+        "src_idx": 1,
         "tgt_idx": 1,
         "mode": "External",
-        "op": "Add",
+        "op": "Mult",
+        "external_factor": 1.3742252051259367
+      },
+      {
+        "src_idx": 1,
+        "tgt_idx": 0,
+        "mode": "External",
+        "op": "Sub",
         "external_factor": 1.3742252051259367
       },
       {
@@ -63,51 +70,42 @@
         "external_factor": 1.3742252051259367
       },
       {
-        "src_idx": 3,
-        "tgt_idx": 1,
-        "mode": "External",
-        "op": "Divide",
-        "external_factor": 1.3742252051259367
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 1,
-        "mode": "External",
-        "op": "Sub",
-        "external_factor": 1.3742252051259367
-      },
-      {
-        "src_idx": 2,
-        "tgt_idx": 1,
+        "src_idx": 1,
+        "tgt_idx": 0,
         "mode": "External",
         "op": "Mult",
         "external_factor": 1.3742252051259367
       },
       {
-        "src_idx": 1,
+        "src_idx": 3,
         "tgt_idx": 1,
-        "mode": "Internal",
+        "mode": "External",
         "op": "Sub",
         "external_factor": 1.3742252051259367
       },
       {
-        "src_idx": 1,
+        "src_idx": 0,
+        "tgt_idx": 0,
+        "mode": "Internal",
+        "op": "Mult",
+        "external_factor": 1.3742252051259367
+      },
+      {
+        "src_idx": 2,
         "tgt_idx": 3,
         "mode": "Internal",
-        "op": "Add",
+        "op": "Sub",
         "external_factor": 1.3742252051259367
       }
     ],
     "registers": {
       "data": [
-        0.0,
-        0.013955212209044774,
-        0.0,
-        0.013955212209044774
+        null,
+        -0.9397692009905535,
+        1.3880151235683722e171,
+        -1.3880151235683722e171
       ]
     },
-    "fitness": {
-      "Valid": -200.0
-    }
+    "fitness": "OutOfBounds"
   }
 }
