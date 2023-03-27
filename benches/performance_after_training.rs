@@ -1,6 +1,9 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
-use lgp::{problems::gym::GymRsQEngine, utils::benchmark_tools::load_and_run_program};
+use gym_rs::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
+use lgp::{
+    problems::gym::{GymRsEngine, GymRsQEngine},
+    utils::benchmark_tools::load_and_run_program,
+};
 
 const TYPES: &'static [&str] = &[
     "mountain_car_q",
@@ -23,9 +26,25 @@ fn performance_benchmark(c: &mut Criterion) {
             &format!("performance_after_trained_{}", program_type),
             |b| {
                 b.iter(|| {
-                    let (new_fitness, original_fitness) =
-                        load_and_run_program::<GymRsQEngine<MountainCarEnv, 2, 3>>(&path, n_trials)
-                            .unwrap();
+                    let (new_fitness, original_fitness) = match program_type {
+                        &"mountain_car_q" => load_and_run_program::<
+                            GymRsQEngine<MountainCarEnv, 2, 3>,
+                        >(&path, n_trials)
+                        .unwrap(),
+                        &"mountain_car_lgp" => load_and_run_program::<
+                            GymRsEngine<MountainCarEnv, 2, 3>,
+                        >(&path, n_trials)
+                        .unwrap(),
+                        &"cart_pole_q" => {
+                            load_and_run_program::<GymRsQEngine<CartPoleEnv, 4, 2>>(&path, n_trials)
+                                .unwrap()
+                        }
+                        &"cart_pole_lgp" => {
+                            load_and_run_program::<GymRsEngine<CartPoleEnv, 4, 2>>(&path, n_trials)
+                                .unwrap()
+                        }
+                        _ => panic!("Unknown program type"),
+                    };
 
                     let improvement = new_fitness - original_fitness;
 
