@@ -1,51 +1,16 @@
 {
-  "id": "b20b4556-ae04-4b73-95c2-ae7ff19911a5",
+  "id": "79175ba5-1378-43ad-bec1-cfa11c0abe4e",
   "instructions": [
     {
       "src_idx": 1,
-      "tgt_idx": 1,
-      "mode": "External",
-      "op": "Add",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 2,
-      "mode": "Internal",
-      "op": "Divide",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 0,
-      "mode": "External",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
-      "tgt_idx": 0,
-      "mode": "Internal",
-      "op": "Add",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 2,
       "tgt_idx": 3,
       "mode": "External",
-      "op": "Divide",
+      "op": "Add",
       "external_factor": 9.18981693963246
     },
     {
-      "src_idx": 1,
-      "tgt_idx": 1,
-      "mode": "Internal",
-      "op": "Mult",
-      "external_factor": 9.18981693963246
-    },
-    {
-      "src_idx": 1,
-      "tgt_idx": 0,
+      "src_idx": 2,
+      "tgt_idx": 2,
       "mode": "Internal",
       "op": "Add",
       "external_factor": 9.18981693963246
@@ -53,6 +18,27 @@
     {
       "src_idx": 2,
       "tgt_idx": 0,
+      "mode": "Internal",
+      "op": "Divide",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
+      "mode": "Internal",
+      "op": "Sub",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 1,
+      "tgt_idx": 3,
+      "mode": "External",
+      "op": "Add",
+      "external_factor": 9.18981693963246
+    },
+    {
+      "src_idx": 0,
+      "tgt_idx": 2,
       "mode": "External",
       "op": "Sub",
       "external_factor": 9.18981693963246
@@ -67,12 +53,12 @@
   ],
   "registers": {
     "data": [
-      0.0,
-      4.862888645698696,
-      -0.10149267154782916
+      -2.3836346775034674,
+      1.275155351218865,
+      0.0
     ]
   },
   "fitness": {
-    "Valid": 1.0
+    "Valid": 191.0
   }
 }
