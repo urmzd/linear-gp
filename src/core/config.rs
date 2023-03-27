@@ -32,9 +32,9 @@ macro_rules! run_accuator {
 pub enum Accuator {
     MountainCarQ(HyperParameters<GymRsQEngine<MountainCarEnv, 3, 2>>),
     MountainCarLGP(HyperParameters<GymRsEngine<MountainCarEnv, 3, 2>>),
-    Iris(HyperParameters<IrisEngine>),
     CartPoleQ(HyperParameters<GymRsQEngine<CartPoleEnv, 4, 2>>),
     CartPoleLGP(HyperParameters<GymRsEngine<CartPoleEnv, 4, 2>>),
+    IrisLgp(HyperParameters<IrisEngine>),
 }
 
 impl Accuator {
@@ -69,7 +69,7 @@ impl Accuator {
 
                 run_accuator!(GymRsEngine, hyperparameters);
             }
-            Accuator::Iris(hyperparameters) => {
+            Accuator::IrisLgp(hyperparameters) => {
                 hyperparameters
                     .program_parameters
                     .instruction_generator_parameters
