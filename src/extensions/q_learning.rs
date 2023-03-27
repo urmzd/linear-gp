@@ -332,14 +332,19 @@ impl QConsts {
 
 impl Default for QConsts {
     fn default() -> Self {
+        let alpha = generator().gen_range(0.0..1.);
+        let gamma = generator().gen_range(0.0..1.);
+        let epsilon = generator().gen_range(0.0..1.);
+        let alpha_decay = generator().gen_range(0.0..1.);
+        let epsilon_decay = generator().gen_range(0.0..1.);
         Self {
-            alpha: 0.25,
-            gamma: 0.90,
-            epsilon: 0.05,
-            alpha_decay: 0.0,
-            epsilon_decay: 0.0,
-            alpha_active: 0.25,
-            epsilon_active: 0.05,
+            alpha,
+            gamma,
+            epsilon,
+            alpha_decay,
+            epsilon_decay,
+            alpha_active: alpha,
+            epsilon_active: epsilon_decay,
         }
     }
 }
