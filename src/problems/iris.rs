@@ -144,8 +144,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn default() -> VoidResultAnyError {
-        with_named_logger!("iris_default", {
+    fn baseline() -> VoidResultAnyError {
+        with_named_logger!("iris_baseline", {
             let instruction_parameters = InstructionGeneratorParametersBuilder::default()
                 .n_actions(IrisState::N_ACTIONS)
                 .n_inputs(IrisState::N_INPUTS)
@@ -161,7 +161,7 @@ mod test {
                 .crossover_percent(0.)
                 .build()?;
 
-            let populations = parameters.build_engine().take(100).collect_vec();
+            let populations = parameters.build_engine().take(500).collect_vec();
 
             let last_population = populations.last().unwrap();
             assert!(last_population

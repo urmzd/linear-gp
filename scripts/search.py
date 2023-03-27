@@ -151,7 +151,7 @@ def build_objective(study_name: str, trial: optuna.Trial) -> float:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Optimizer")
+    parser = argparse.ArgumentParser(description="Parameter Searcher")
     parser.add_argument(
         "--env",
         type=str,
