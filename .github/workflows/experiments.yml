@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       number_of_experiments:
-        description: "The number of trials to average."
+        description: "The number of trials to run."
         required: true
 
 jobs:
