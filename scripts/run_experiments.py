@@ -27,7 +27,17 @@ def main(n_times: int, keep_artifacts=False):
 
         os.environ["BENCHMARK_PREFIX"] = str(current_folder / "benchmarks")
 
-        subprocess.run(["cargo", "nextest", "run", "--no-capture", "--release"])
+        subprocess.run(
+            [
+                "cargo",
+                "nextest",
+                "run",
+                "mountain_car",
+                "cart_pole",
+                "--no-capture",
+                "--release",
+            ]
+        )
 
         population_file = current_folder / "benchmarks"
         table_output_dir = current_folder / "tables"
