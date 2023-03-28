@@ -2,7 +2,6 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use glob::glob;
 use gym_rs::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
 use lgp::{
-    core::engines::fitness_engine::FitnessScore,
     problems::gym::{GymRsEngine, GymRsQEngine},
     utils::benchmark_tools::load_and_run_program,
 };

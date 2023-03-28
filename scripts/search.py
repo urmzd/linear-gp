@@ -200,7 +200,7 @@ def main(args: argparse.Namespace) -> None:
             objective = partial(
                 build_objective,
                 study_name,
-                arg.median_trials,
+                args.median_trials,
                 lgp_parameters=parameters,
             )
     else:
