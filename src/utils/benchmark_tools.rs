@@ -124,7 +124,7 @@ where
 }
 
 pub fn load_and_run_program<C>(
-    program_path: &str,
+    program_path: impl Into<PathBuf> + Clone,
     n_trials: usize,
 ) -> Result<(FitnessScore, FitnessScore), Box<dyn Error>>
 where

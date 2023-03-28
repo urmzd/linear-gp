@@ -28,6 +28,7 @@ config = "0.13"
 derive_builder = "0.12"
 reqwest = "0.11"
 rayon = "1.7"
+glob = "0.3.1"
 
 [dev-dependencies]
 criterion = "0.4.0"

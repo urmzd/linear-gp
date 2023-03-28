@@ -9,8 +9,6 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::utils::benchmark_tools::create_path;
 
-
-
 pub trait Load
 where
     Self: Sized + DeserializeOwned,
