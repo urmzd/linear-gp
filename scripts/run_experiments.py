@@ -9,7 +9,7 @@ import pandas as pd
 import argparse
 
 
-def get_max_fitness(df: pd.DataFrame):
+def get_max_fitness(df: pd.DataFrame) -> float:
     return df.iloc[-1]["Max Fitness"]
 
 
@@ -24,8 +24,10 @@ def main(n_times: int, keep_artifacts=False):
     for i in range(n_times):
         # Run cargo nextest
         current_folder = Path(os.path.join(BASE_DIR, f"iteration_{i+1}"))
+        population_file = current_folder / "benchmarks"
+        table_output_dir = current_folder / "tables"
 
-        os.environ["BENCHMARK_PREFIX"] = str(current_folder / "benchmarks")
+        os.environ["BENCHMARK_PREFIX"] = str(population_file)
 
         subprocess.run(
             [
@@ -38,9 +40,6 @@ def main(n_times: int, keep_artifacts=False):
                 "--release",
             ]
         )
-
-        population_file = current_folder / "benchmarks"
-        table_output_dir = current_folder / "tables"
 
         subprocess.run(
             [
@@ -90,10 +89,11 @@ def main(n_times: int, keep_artifacts=False):
             ]
         )
 
-    for folder_name in os.listdir(BASE_DIR):
-        folder_path = os.path.join(BASE_DIR, folder_name)
-        if folder_path != aggregate_folder:
-            shutil.rmtree(folder_path)
+    if not keep_artifacts:
+        for folder_name in os.listdir(BASE_DIR):
+            folder_path = os.path.join(BASE_DIR, folder_name)
+            if folder_path != aggregate_folder:
+                shutil.rmtree(folder_path)
 
 
 if __name__ == "__main__":

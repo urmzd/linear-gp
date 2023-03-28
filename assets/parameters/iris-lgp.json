@@ -1,1 +1,0 @@
-{"population_size":100,"gap":0.5,"mutation_percent":0.5,"crossover_percent":0.5,"n_generations":100,"n_trials":5,"seed":0,"program_parameters":{"max_instructions":98,"instruction_generator_parameters":{"n_extras":1,"external_factor":0.34780167072773516,"n_actions":3,"n_inputs":4}}}
