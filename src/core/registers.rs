@@ -3,14 +3,27 @@ use std::{ops::Index, slice::SliceIndex};
 
 use itertools::Itertools;
 use rand::seq::SliceRandom;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::utils::random::generator;
 
 use super::engines::reset_engine::{Reset, ResetEngine};
 
+fn deserialize_vec_with_null<'de, D>(deserializer: D) -> Result<Vec<f64>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let vec_opt: Option<Vec<Option<f64>>> = Deserialize::deserialize(deserializer)?;
+    Ok(vec_opt
+        .unwrap_or_default()
+        .into_iter()
+        .map(|x| x.unwrap_or(f64::NAN))
+        .collect())
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Registers {
+    #[serde(deserialize_with = "deserialize_vec_with_null")]
     data: Vec<f64>,
 }
 
