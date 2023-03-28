@@ -66,8 +66,8 @@ jobs:
       - name: Run Experiments
         run: ./scripts/run_experiments.py ${{ github.event.inputs.number_of_experiments }}
 
-      - name: Run Benchmarks
-        run: cargo bench
+      #- name: Run Benchmarks
+        #run: cargo bench
 
       - uses: actions/upload-artifact@v3
         with:
