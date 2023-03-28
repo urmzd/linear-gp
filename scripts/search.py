@@ -11,7 +11,6 @@ import time
 from typing import Any, Callable, List
 
 import optuna
-from optuna.visualization import plot_intermediate_values, plot_optimization_history
 from subprocess import Popen, PIPE
 from threading import Lock
 

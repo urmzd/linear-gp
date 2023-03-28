@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from typing import List, Dict, Any
 import argparse
+import glob
+import os
 
 DEFAULTS = {
     "iris_baseline": {
@@ -139,17 +141,17 @@ def main():
     args = parser.parse_args()
 
     if args.command == "tables":
-        for stem, values in DEFAULTS.items():
-            path = f"{args.input}/{stem}"
-            label = values["label"]
-            fallback_fitness = values["fallback_fitness"]
+        for test in os.listdir(args.input):
+            test_base = str(Path(test).stem)
+            path = f"{args.input}/{test_base}"
+            fallback_fitness = DEFAULTS[test]["fallback_fitness"]
             generate_tables(path, float(fallback_fitness), args.output)
 
     elif args.command == "figures":
-        for stem, values in DEFAULTS.items():
-            table_path = f"{args.input}/{stem}.csv"
-            label = values["label"]
-            generate_figures(table_path, label, args.output)
+        for test in glob.glob(f"{args.input}/*.csv"):
+            basename = Path(test).stem
+            label = DEFAULTS[basename]["label"]
+            generate_figures(test, label, args.output)
 
 
 if __name__ == "__main__":
