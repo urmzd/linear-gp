@@ -16,7 +16,7 @@ run_search() {
     local environments=("$@")
     for env in "${environments[@]}"; do
         echo "Running search.py for environment: $env"
-        ./scripts/search.py --env "$env" --n-trials "$N_TRIALS" --n-threads "$N_THREADS" &
+        ./scripts/search.py --env "$env" --n-trials "$SEARCH_ALL_N_TRIALS" --n-threads "$SEARCH_ALL_N_THREADS" &
     done
     wait  # Wait for all background processes to complete
 }

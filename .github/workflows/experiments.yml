@@ -13,8 +13,8 @@ jobs:
     env:
       RUST_BACKTRACE: 1
       RUST_LOG: debug
-      N_THREADS: 5
-      N_TRIALS: 10
+      SEARCH_ALL_N_THREADS: 5
+      SEARCH_ALL_N_TRIALS: 10
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -68,7 +68,7 @@ jobs:
         run: ./scripts/run_experiments.py ${{ github.event.inputs.number_of_experiments }}
 
       #- name: Run Benchmarks
-        #run: cargo bench
+      #run: cargo bench
 
       - uses: actions/upload-artifact@v3
         with:

@@ -1,10 +1,11 @@
 use core::fmt::Debug;
 use std::{
     cmp::Ordering,
+    iter::Sum,
     ops::{Add, Div, Mul, Sub},
 };
 
-use derive_more::{Display};
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 use super::reset_engine::{Reset, ResetEngine};
@@ -19,55 +20,79 @@ pub enum FitnessScore {
     NotEvaluated,
 }
 
-impl Add for FitnessScore {
-    type Output = f64;
+impl FitnessScore {
+    pub fn unwrap(self) -> f64 {
+        match self {
+            Self::Valid(f) => f,
+            _ => panic!("Fitness is not valid"),
+        }
+    }
 
-    fn add(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Valid(a), Self::Valid(b)) => a + b,
-            (Self::Valid(a), _) => a,
-            (_, Self::Valid(b)) => b,
-            _ => 0.0,
+    pub fn unwrap_or(self, default: f64) -> f64 {
+        match self {
+            Self::Valid(f) => f,
+            _ => default,
         }
     }
 }
 
+impl Add for FitnessScore {
+    type Output = FitnessScore;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Self::Valid(a), Self::Valid(b)) => Self::Valid(a + b),
+            (Self::Valid(a), _) => Self::Valid(a),
+            (_, Self::Valid(b)) => Self::Valid(b),
+            _ => Self::Valid(0.0),
+        }
+    }
+}
+
+impl Sum for FitnessScore {
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = FitnessScore>,
+    {
+        iter.fold(FitnessScore::NotEvaluated, |acc, score| acc + score)
+    }
+}
+
 impl Sub for FitnessScore {
-    type Output = f64;
+    type Output = FitnessScore;
 
     fn sub(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
-            (Self::Valid(a), Self::Valid(b)) => a - b,
-            (Self::Valid(a), _) => a,
-            (_, Self::Valid(b)) => -b,
-            _ => 0.0,
+            (Self::Valid(a), Self::Valid(b)) => Self::Valid(a - b),
+            (Self::Valid(a), _) => Self::Valid(a),
+            (_, Self::Valid(b)) => Self::Valid(-b),
+            _ => Self::Valid(0.0),
         }
     }
 }
 
 impl Mul for FitnessScore {
-    type Output = f64;
+    type Output = FitnessScore;
 
     fn mul(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
-            (Self::Valid(a), Self::Valid(b)) => a * b,
-            (Self::Valid(_a), _) => 0.,
-            (_, Self::Valid(_b)) => 0.,
-            _ => 0.0,
+            (Self::Valid(a), Self::Valid(b)) => Self::Valid(a * b),
+            (Self::Valid(_a), _) => Self::Valid(0.),
+            (_, Self::Valid(_b)) => Self::Valid(0.),
+            _ => Self::Valid(0.0),
         }
     }
 }
 
 impl Div for FitnessScore {
-    type Output = f64;
+    type Output = FitnessScore;
 
     fn div(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
-            (Self::Valid(a), Self::Valid(b)) => a / b,
-            (Self::Valid(a), _) if a >= 0. => f64::INFINITY,
-            (Self::Valid(a), _) if a < 0. => f64::NEG_INFINITY,
-            (_, Self::Valid(_b)) => 0.0,
-            _ => 0.0,
+            (Self::Valid(a), Self::Valid(b)) if b != 0. => Self::Valid(a / b),
+            (Self::Valid(_), _) => Self::OutOfBounds,
+            (_, Self::Valid(b)) if b != 0. => Self::Valid(0.),
+            _ => Self::OutOfBounds,
         }
     }
 }

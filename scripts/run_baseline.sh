@@ -7,7 +7,6 @@ BENCHMARK_PREFIX="/tmp/iris" cargo nextest run iris --no-capture --release
 
 mkdir -p "assets/experiments/baseline/figures"
 
-
 for path in /tmp/iris-tables/*.csv; do
     echo "Processing $path"
     mv "$path" "assets/experiments/baseline/"
