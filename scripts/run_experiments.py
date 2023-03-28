@@ -77,17 +77,16 @@ def main(n_times: int, keep_artifacts=False):
         agg_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
 
     # for each file in aggregate folder, using produce_assets.py to generate figures
-    for csv_file in glob(os.path.join(aggregate_folder, "*.csv")):
-        figure_output_dir = os.path.join(aggregate_folder, "figures")
-        os.makedirs(figure_output_dir, exist_ok=True)
-        subprocess.run(
-            [
-                "./scripts/asset_generator.py",
-                f"--input={Path(csv_file).parent}",
-                f"--output={figure_output_dir}",
-                "figures",
-            ]
-        )
+    figure_output_dir = os.path.join(aggregate_folder, "figures")
+    os.makedirs(figure_output_dir, exist_ok=True)
+    subprocess.run(
+        [
+            "./scripts/asset_generator.py",
+            f"--input={aggregate_folder}",
+            f"--output={figure_output_dir}",
+            "figures",
+        ]
+    )
 
     if not keep_artifacts:
         for folder_name in os.listdir(BASE_DIR):
