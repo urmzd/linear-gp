@@ -62,6 +62,7 @@ jobs:
 
       - name: Run Baseline
         run: ./scripts/run_baseline.sh
+        shell: bash
 
       - name: Run Experiments
         run: ./scripts/run_experiments.py ${{ github.event.inputs.number_of_experiments }}
