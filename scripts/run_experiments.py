@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-import statistics
 import subprocess
 from glob import glob
 import pandas as pd
