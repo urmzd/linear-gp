@@ -2,12 +2,14 @@
 
 import os
 from pathlib import Path
-import shutil
+import statistics
 import subprocess
 from glob import glob
 import pandas as pd
 import argparse
 
+def get_max_fitness(df: pd.DataFrame):
+    return df.iloc[-1]["Max Fitness"]
 
 def main(n_times: int):
     BASE_DIR = "assets/experiments"
@@ -58,9 +60,11 @@ def main(n_times: int):
     os.makedirs(aggregate_folder, exist_ok=True)
 
     for file_name, data_frames in aggregated_data.items():
-        combined_df = pd.concat(data_frames)
-        aggregate_info = combined_df.groupby("Generation").mean()
-        aggregate_info.to_csv(os.path.join(aggregate_folder, file_name))
+        # Compute aggregate information
+        max_fitness = {get_max_fitness(df): df for df in data_frames}
+        max_fitness_mean = statistics.mean(max_fitness.keys())
+        mean_df = max_fitness[max_fitness_mean]
+        mean_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
 
     # for each file in aggregate folder, using produce_assets.py to generate figures
     for csv_file in glob(os.path.join(aggregate_folder, "*.csv")):
@@ -80,7 +84,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Run commands N times and aggregate results"
     )
-    parser.add_argument("N_TIMES", type=int, help="Number of times to run the commands")
+    parser.add_argument("n_times", type=int, help="Number of times to run the commands")
 
     args = parser.parse_args()
-    main(args.N_TIMES)
+    main(args.n_times)
