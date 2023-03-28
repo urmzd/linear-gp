@@ -14,3 +14,5 @@ for path in /tmp/iris-tables/*.csv; do
 done
 
 ./scripts/asset_generator.py --input "assets/experiments/baseline" --output "assets/experiments/baseline/figures" figures
+
+ls -l "assets/experiments/baseline"
