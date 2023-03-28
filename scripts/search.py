@@ -4,6 +4,7 @@ import argparse
 from concurrent.futures import Future, ThreadPoolExecutor
 from functools import partial
 import json
+import statistics
 from loguru import logger
 from pathlib import Path
 import time
@@ -66,10 +67,13 @@ def run_optimization(
 
 
 def build_objective(
-    study_name: str, trial: optuna.Trial, lgp_parameters: dict[str, Any] | None = None
+    study_name: str,
+    median_trials: int,
+    trial: optuna.Trial,
+    lgp_parameters: dict[str, Any] | None = None,
 ) -> float:
 
-    env, _= study_name.split("_")
+    env, _ = study_name.split("_")
 
     max_instructions = None
     external_factor = None
@@ -80,7 +84,9 @@ def build_objective(
     else:
         program_parameters = lgp_parameters["program_parameters"]
         max_instructions = program_parameters["max_instructions"]
-        external_factor = program_parameters["instruction_generator_parameters"]["external_factor"]
+        external_factor = program_parameters["instruction_generator_parameters"][
+            "external_factor"
+        ]
 
     # Define the command to run with the CLI
     base_command = [
@@ -106,29 +112,34 @@ def build_objective(
 
         base_command.extend(q_cli_parameters)
 
+    champions = []
+
     command = list(map(str, base_command))
     logger.trace(" ".join(command))
+    hyperparameters = None
 
-    # Run the command and capture the output
-    process = Popen(command, stdout=PIPE, stderr=PIPE)
-    output, error = process.communicate()
+    for _ in range(median_trials):
+        # Run the command and capture the output
+        process = Popen(command, stdout=PIPE, stderr=PIPE)
+        output, error = process.communicate()
 
-    if error:
-        raise Exception(f"Error running command: {error.decode('utf-8')}")
+        if error:
+            raise Exception(f"Error running command: {error.decode('utf-8')}")
 
-    # Get the best score from the output
-    parsed_output = output.decode("utf-8").strip().split("\n")
-    scores = [float(score) for score in parsed_output[:-1]]
+        # Get the best score from the output
+        parsed_output = output.decode("utf-8").strip().split("\n")
+        scores = [float(score) for score in parsed_output[:-1]]
 
-    # Save hyperparameters
-    hyperparameters = parsed_output[-1]
+        # Save hyperparameters
+        hyperparameters = parsed_output[-1]
 
-    champion = scores[-1]
-    for score_idx, score in enumerate(scores[:-1]):
-        trial.report(score, score_idx)
+        champion = scores[-1]
+        champions.append(champion)
+
+    champion: float = statistics.median(champions)
 
     if champion == float("nan"):
-        raise optuna.TrialPruned
+        raise optuna.TrialPruned()
 
     prune_thresholds = {"cart": 400, "iris": 0.9, "mountain": -150, "default": 0}
     threshold = prune_thresholds.get(env.split("-")[0], prune_thresholds["default"])
@@ -157,6 +168,12 @@ def parse_args() -> argparse.Namespace:
         help="The number of trials to run per study",
     )
     parser.add_argument(
+        "--median-trials",
+        default=5,
+        type=int,
+        help="How many times the environment should be ran (to prevent stochasticity)",
+    )
+    parser.add_argument(
         "--n-threads",
         default=4,
         type=int,
@@ -180,9 +197,14 @@ def main(args: argparse.Namespace) -> None:
         assert Path(lgp_params).exists()
         with open(lgp_params, "r") as file:
             parameters = json.load(file)
-            objective = partial(build_objective, study_name, lgp_parameters=parameters)
+            objective = partial(
+                build_objective,
+                study_name,
+                arg.median_trials,
+                lgp_parameters=parameters,
+            )
     else:
-        objective = partial(build_objective, study_name)
+        objective = partial(build_objective, study_name, args.median_trials)
 
     n_trials = args.n_trials
     results: List[Future[Any]] = []
@@ -200,10 +222,10 @@ def main(args: argparse.Namespace) -> None:
     for future in results:
         future.result()
 
-    study = load_study(study_name)
+    load_study(study_name)
     save_best_hyperparameters(study_name)
-    plot_optimization_history(study)
-    plot_intermediate_values(study)
+    # plot_optimization_history(study)
+    # plot_intermediate_values(study)
     logger.info(
         f"best_score={global_best_score}, best_params={global_hyper_parameters}"
     )
