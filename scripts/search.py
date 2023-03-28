@@ -163,19 +163,19 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--n-trials",
-        default=150,
+        default=10,
         type=int,
         help="The number of trials to run per study",
     )
     parser.add_argument(
         "--median-trials",
-        default=5,
+        default=10,
         type=int,
         help="How many times the environment should be ran (to prevent stochasticity)",
     )
     parser.add_argument(
         "--n-threads",
-        default=4,
+        default=5,
         type=int,
         help="The number of threads to use per study",
     )
