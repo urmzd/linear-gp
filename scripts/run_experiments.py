@@ -63,11 +63,10 @@ def main(n_times: int):
 
     for file_name, data_frames in aggregated_data.items():
         # Compute aggregate information
-        max_fitness = {get_max_fitness(df): df for df in data_frames}
-        sorted(max_fitness.items())
-        middle_index = len(max_fitness) // 2
-        mean_df = max_fitness[max_fitness.keys()[middle_index]]
-        mean_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
+        sorted(data_frames, key=get_max_fitness)
+        middle_index = len(data_frames) // 2
+        median_df = data_frames[middle_index]
+        median_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
 
     # for each file in aggregate folder, using produce_assets.py to generate figures
     for csv_file in glob(os.path.join(aggregate_folder, "*.csv")):
