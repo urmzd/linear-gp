@@ -62,8 +62,8 @@ def main(n_times: int):
     for file_name, data_frames in aggregated_data.items():
         # Compute aggregate information
         max_fitness = {get_max_fitness(df): df for df in data_frames}
-        max_fitness_mean = statistics.mean(max_fitness.keys())
-        mean_df = max_fitness[max_fitness_mean]
+        sorted(max_fitness.items())
+        mean_df = max_fitness[len(max_fitness) // 2]
         mean_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
 
     # for each file in aggregate folder, using produce_assets.py to generate figures
