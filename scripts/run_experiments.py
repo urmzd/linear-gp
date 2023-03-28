@@ -8,8 +8,10 @@ from glob import glob
 import pandas as pd
 import argparse
 
+
 def get_max_fitness(df: pd.DataFrame):
     return df.iloc[-1]["Max Fitness"]
+
 
 def main(n_times: int):
     BASE_DIR = "assets/experiments"
@@ -63,7 +65,8 @@ def main(n_times: int):
         # Compute aggregate information
         max_fitness = {get_max_fitness(df): df for df in data_frames}
         sorted(max_fitness.items())
-        mean_df = max_fitness[len(max_fitness) // 2]
+        middle_index = len(max_fitness) // 2
+        mean_df = max_fitness[max_fitness.keys()[middle_index]]
         mean_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
 
     # for each file in aggregate folder, using produce_assets.py to generate figures
