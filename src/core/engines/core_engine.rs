@@ -14,8 +14,11 @@ use crate::{
 };
 
 use super::{
-    fitness_engine::Fitness, generate_engine::Generate, mutate_engine::Mutate,
-    status_engine::Status, freeze_engine::Freeze,
+    fitness_engine::{Fitness, FitnessScore},
+    freeze_engine::Freeze,
+    generate_engine::Generate,
+    mutate_engine::Mutate,
+    status_engine::Status,
 };
 use derive_builder::Builder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -44,8 +47,8 @@ where
     #[builder(default = "100")]
     #[arg(long, default_value = "100")]
     pub n_generations: usize,
-    #[builder(default = "5")]
-    #[arg(long, default_value = "5")]
+    #[builder(default = "100")]
+    #[arg(long, default_value = "100")]
     pub n_trials: usize,
     #[builder(default = "None")]
     #[arg(long)]
@@ -135,22 +138,6 @@ where
     }
 }
 
-pub struct CoreEngine;
-
-/// init_population should using GenerateEngine::generate(ProgramParameters or QProgramParameters)
-/// to generate a population of Programs or QPrograms respectively.
-///
-/// eval_fitness should use FitnessEngine::eval_fitness(Program or QProgram, Any State, Any Parameters) to evaluate the fitness of each individual.
-/// It should also take the n_trials and generate n_states, taking the median fitness associated with each
-/// n_trial. GenerateEngine::generate(State) should also exist to generate a new state.
-///
-/// rank should sort the population by fitness.
-///
-/// surive should drop the population by the given gap.
-///
-/// variation should use MutateEngine::mutate and BreedEngine::breed to fill the population with new indivudals.
-///
-/// The population should be a Vec of Programs or QPrograms.
 pub trait Core {
     type Individual: Ord + Clone + Send + Sync + Serialize + DeserializeOwned;
     type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned + Args;
@@ -177,7 +164,7 @@ pub trait Core {
 
     fn eval_fitness(population: &mut Vec<Self::Individual>, trials: &mut Vec<Self::State>) {
         for individual in population.iter_mut() {
-            let mut scores = trials
+            let scores = trials
                 .iter_mut()
                 .map(|trial| {
                     Self::Reset::reset(individual);
@@ -185,10 +172,11 @@ pub trait Core {
                     Self::Fitness::eval_fitness(individual, trial)
                 })
                 .collect_vec();
-
-            scores.sort();
-            let median = *scores.get(scores.len() / 2).unwrap();
-            Self::Status::set_fitness(individual, median);
+            
+            let n_trials = scores.len();
+            let mut average = scores.into_iter().sum();
+            average = average / FitnessScore::Valid(n_trials as f64);
+            Self::Status::set_fitness(individual, average);
         }
     }
 
