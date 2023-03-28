@@ -11,16 +11,12 @@ q_environments=(
     "cart-pole-q"
 )
 
-# Set the number of trials and threads
-n_trials=10
-n_threads=5
-
 # Function to run the search.py script for each environment
 run_search() {
     local environments=("$@")
     for env in "${environments[@]}"; do
         echo "Running search.py for environment: $env"
-        ./scripts/search.py --env "$env" --n-trials "$n_trials" --n-threads "$n_threads" &
+        ./scripts/search.py --env "$ENV" --n-trials "$N_TRIALS" --n-threads "$n_threads" &
     done
     wait  # Wait for all background processes to complete
 }

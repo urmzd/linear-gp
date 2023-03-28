@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import shutil
 import subprocess
 from glob import glob
 import pandas as pd
@@ -12,7 +13,7 @@ def get_max_fitness(df: pd.DataFrame):
     return df.iloc[-1]["Max Fitness"]
 
 
-def main(n_times: int):
+def main(n_times: int, keep_artifacts=False):
     BASE_DIR = "assets/experiments"
 
     # Create the base directory for storing artifacts
@@ -62,10 +63,9 @@ def main(n_times: int):
 
     for file_name, data_frames in aggregated_data.items():
         # Compute aggregate information
-        sorted(data_frames, key=get_max_fitness)
-        middle_index = len(data_frames) // 2
-        median_df = data_frames[middle_index]
-        median_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
+        agg_df = pd.concat(data_frames)
+        agg_df = agg_df.groupby("Generation", as_index=False).mean()
+        agg_df.to_csv(os.path.join(aggregate_folder, file_name), index=False)
 
     # for each file in aggregate folder, using produce_assets.py to generate figures
     for csv_file in glob(os.path.join(aggregate_folder, "*.csv")):
@@ -80,12 +80,23 @@ def main(n_times: int):
             ]
         )
 
+    for folder_name in os.listdir(BASE_DIR):
+        folder_path = os.path.join(BASE_DIR, folder_name)
+        if folder_path != aggregate_folder:
+            shutil.rmtree(folder_path)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Run commands N times and aggregate results"
     )
-    parser.add_argument("n_times", type=int, help="Number of times to run the commands")
+    parser.add_argument(
+        "n_times", type=int, default=100, help="Number of times to run the commands"
+    )
+
+    parser.add_argument(
+        "--keep-artifacts", type=bool, default=False, help="Keep the artifacts"
+    )
 
     args = parser.parse_args()
-    main(args.n_times)
+    main(args.n_times, args.keep_artifacts)
