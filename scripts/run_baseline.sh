@@ -7,8 +7,10 @@ BENCHMARK_PREFIX="/tmp/iris" cargo nextest run iris --no-capture --release
 
 mkdir -p "assets/experiments/baseline/figures"
 
+
 for path in /tmp/iris-tables/*.csv; do
     echo "Processing $path"
-    ./scripts/asset_generator.py --input "$path" --output "assets/experiments/baseline/figures" figures
     mv "$path" "assets/experiments/baseline/"
 done
+
+./scripts/asset_generator.py --input "assets/experiments/baseline" --output "assets/experiments/baseline/figures" figures
