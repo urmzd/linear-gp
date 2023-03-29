@@ -29,13 +29,14 @@
 \nocite{*}
 
 \begin{abstract}
-	% Write a brief summary of the research, its purpose, and findings.
+	Linear Genetic Programming (LGP) is a powerful technique that allows for a variety of problems to be solved using a linear representation of programs. However, there still exists some limitations to the technique,
+	such as the need for humans to explictly map registers to actions. This thesis propses a novel approach that uses Q-Learning on top of LGP (RLGP) to learn the optimal register-action assignments. In doing so, we introduce a new framework `linear-gp' written in compile-safe Rust is introduced that allows for extensive experimentation for future works.
 \end{abstract}
 
 \begin{acknowledgements}
 	I'd like to dedicate this piece of work to all those who've pushed me to continue my
-	pursuit of education. My brother Frebarz, who always encouraged me to push a little further. My Mother, Khalima and my sister Rita, whom both were the original motivators and continues to be the reason for my ambition. I'd also like to thank Dr. Malcolm Heywood for
-	his patience and support during the entirety of this thesis from conception to completion, and the opportunity to experience the world of academia.
+	pursuit of education. My brother Frebarz, who always encouraged me to push a little further. My Mother, Khalima and my sister Rita, whom both were the original motivators and continues to be the reason for my ambition. I'd also like to thank Dr. Heywood for
+	his patience and support during the entirety of this thesis, from conception to completion, and the opportunity to experience the world of academia.
 \end{acknowledgements}
 
 \mainmatter
@@ -43,19 +44,19 @@
 \chapter{Introduction}
 The rapid growth of technology and the increasing complexity of real-world problems demand efficient and effective optimization techniques. Evolutionary algorithms (EAs) have demonstrated significant potential in addressing these challenges by emulating the process of natural selection to search for optimal solutions. Linear Genetic Programming (LGP), a branch of Genetic Programming (GP), is one such EA that has gained attention in the field of computer science for its unique approach to tackling complex problems. By representing programs as a sequence of linear instructions, similar to what is found when programming imperatively, LGP allows for solutions that are not only interpretable but also more efficient to execute and manipulate.
 
-However, one problem that arises in LGP is that programs within the framework require humans to explicitly configure the action-register pairings. A pairing consists of a register and an associated action that the framework executes upon a program's execution. With the use of these explicit action-register pairs, we reduce the exploration capabilities of the programs, leading to suboptimal solutions. To address this issue, we propose a novel approach that combines the power of LGP with the Q-Learning algorithm, a popular model-free reinforcement learning technique.
+However, one problem that arises in LGP is that programs within the framework require humans to explicitly configure the action-register pairings. A pairing consists of a register and an associated action that the framework executes upon a program's completion. With the use of these explicit action-register pairs, we reduce the exploration capabilities of the programs, leading to suboptimal solutions. To address this issue, we propose a novel approach that combines the power of LGP with the Q-Learning algorithm, a popular model-free reinforcement learning technique.
 
 The resulting algorithm, Reinforced Linear Genetic Programming (RLGP), is then able to learn the optimal register-action assignments, potentially leading to more efficient and effective solutions. RLGP inherits the benefits of LGP, such as its linear representation and ease of manipulation while augmenting it with the adaptive capabilities of Q-Learning. This integration allows RLGP to explore and exploit the solution space more effectively, resulting in improved performance when addressing complex optimization problems.
 
 We evaluate the performance of RLGP on a variety of benchmark problems, including the CartPole and MountainCar environments from the OpenAI Gym library \cite{1606.01540}. These environments provide challenging tasks that require sophisticated decision-making and control strategies, making them suitable for assessing the effectiveness of RLGP. We compare the baseline LGP framework with the augmented RLGP framework in terms of solution quality, convergence speed, and adaptability to dynamic problem domains.
 
-By combining the strengths of LGP and Q-Learning, RLGP might represents a significant advancement in the field of evolutionary computation. This research not only contributes to the understanding of hybrid evolutionary algorithms but also paves the way for future work on incorporating reinforcement learning techniques into other EAs.
+By combining the strengths of LGP and Q-Learning, RLGP might represent a significant advancement in the field of evolutionary computation. This research not only contributes to the understanding of hybrid evolutionary algorithms but also paves the way for future work on incorporating reinforcement learning techniques into other EAs.
 
 \chapter{Background}
 \section{Linear Genetic Programming}
 Linear Genetic Programming (LGP) is an advanced form of Genetic Programming (GP), a powerful machine learning technique introduced by Brameier and Banzhaf in their seminal work \cite{brameier2001comparison}. Unlike the traditional tree-based GP, LGP represents programs as a linear sequence of instructions, similar to assembly language or machine code. This representation offers several advantages, such as improved evolvability, efficient execution, and simplicity of crossover and mutation operations.
 
-In LGP, programs are composed of registers and instructions, where each instruction manipulates the contents of registers using arithmetic, logical, or conditional operations. he evolutionary process is similar to that of canonical GP, but involves variation operators that act directly upon a linear set of instructions. The variations are as follows, reproduction (cloning), recombination (breeding) and mutation.
+In LGP, programs are composed of registers and instructions, where each instruction manipulates the contents of registers using arithmetic, logical, or conditional operations. The evolutionary process is similar to that of canonical GP, but involves variation operators that act directly upon a linear set of instructions. The variations are as follows, reproduction (cloning), recombination (breeding) and mutation.
 
 In their paper, Brameier and Banzhaf compared the performance of LGP to that of traditional GP and neural networks. They discovered that LGP had classification and generalization capabilities that were comparable to those of neural networks \cite{brameier2001comparison}. This finding was significant, as it demonstrated that LGP could serve as an alternative to neural networks for solving complex machine learning problems. Moreover, LGP's linear representation allows for more interpretable solutions, which is an important consideration in many applications where understanding the underlying model is crucial.
 
@@ -73,17 +74,19 @@ The paper also introduced several novel techniques for integrating Q-Learning in
 In the context of Reinforced Linear Genetic Programming (RLGP), the findings of Downing's paper suggest that integrating Q-Learning into the LGP framework could yield similar benefits. By combining the global search capabilities of LGP with the local search and adaptation of Q-Learning, the resulting algorithm, which could be referred to as RLGP, may be able to tackle complex and dynamic problem domains more effectively.
 
 \chapter{Methodology}
+
 \section{Framework Overview}
-We use the Rust programming language to implement the framework for our research. The framework is designed to be extensible and versatile, allowing
-for various types of problems to be solved using LGP and RLGP. The framework is also designed to be easily configurable, allowing for extensive experimentation. The framework consists of several engines, which together implement the core functionality. The primary engines can categorized into one of several categories. Variation engines, which allow operations such as two point crossover and mutation, which consists of replacing the contents of an instruction. Stochastic engines, which allow for random states and programs to be generated. Evaluation engines, which enable the system to determine the fitness of individuals within a population. With this in mind, we describe our representation of a program and the algorithms implemented by these engines to train the programs.
+We use the Rust programming language to implement the framework for our research, which can be found at \href{https://github.com/urmzd/linear-gp}{github.com/urmzd/linear-gp}. The framework is designed to be extensible and versatile, allowing
+for various types of problems to be solved using LGP and RLGP. The framework is also designed to be easily configurable, allowing for extensive experimentation. The framework consists of several engines, which together implement the core functionality. The primary engines can be categorized into one of several categories. Variation engines, which allow operations such as two point crossover and mutation, which consists of replacing the contents of an instruction. Stochastic engines, which allow for random states and programs to be generated. Evaluation engines, which enable the system to determine the fitness of individuals within a population. With this in mind, we describe our representation of a program and the algorithms implemented by these engines to train the programs.
 
 \subsection{Program Representation}
-A program can be thought of a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index and the operation to be performed as well as a mode flag. The mode flag is used to determine where the target register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environmment state). We can represent the program as a sequence of instructions in the following format. $$R[x] = R[x] <op>  R[y]$$ where R represents the registers, $x$ and $y$ represent the source and target register indices respectively, and $<op>$ represents the operation to be performed. In our case, we only allow four operations; addition (+),
-subtraction (-), multiplication(*) and division (/) by 2. Division is done by a non-zero constant to prevent divsion by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem. The size of the register set consist of $N_a$ which accounts for the number of actions, and $N_w$, the working registers which allow for intermediate calculations.
+A program can be thought of as a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index and the operation to be performed as well as a mode flag. The mode flag is used to determine where the target register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environmment state). We can represent the program as a sequence of instructions in the following format. $$R[x] = R[x] \langle op \rangle  R[y]$$ where R represents the registers, $x$ and $y$ represent the source and target register indices respectively, and $\langle op \rangle$ represents the operation to be performed. In our case, we only allow four operations; addition (+),
+subtraction (-), multiplication(*) and division (/) by 2. Division is done by a non-zero constant to prevent divsion by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem. The size of the register set consists of $N_a$ which accounts for the number of actions, and $N_w$, the working registers which allow for intermediate calculations.
 
 \subsection{The Algorithm}
 
-We outline the main Algorithm \ref{alg:genetic-algorithm}, as well as the operations that enable the algorithm to function. The core algorithm is responsible for the main loop of the algorithm. The core algorithm coordinates several engines allow for the Evolutionary process to occur. It starts off with initializing a population of programs, then evaluates the programs against the desired task using the appropriate fitness for the desired learning type, ranks the individuals based on their fitness score,
+We outline the genetic as shown in Algorithm \ref{alg:genetic-algorithm}
+as well as the operations that enable the algorithm to function, see Algorithms \ref{alg:breed}, \ref{alg:mutate}, \ref{alg:generate}, \ref{alg:fitness-baseline} . It starts off with initializing a population of programs, then evaluates the programs against the desired task using the appropriate fitness for the desired learning type, ranks the individuals based on their fitness score,
 dropping the least fit individuals by $GAP\%$, lastly producing a new population by filling the
 dropped spots by children produced by the remaining individuals in the population.
 
@@ -202,11 +205,11 @@ dropped spots by children produced by the remaining individuals in the populatio
 
 \section{Sanity Testing}
 As a means of ensuring that the framework was implemented correctly, we developed four tests.
-The first test (Figure \ref{fig:iris_baseline}) is a baseline test that only uses clones. As demonstrated,
+The first, Figure \ref{fig:iris_baseline}), is a baseline that ensures that the genetic algorithm works with only the reproduction operation. The second,
+Figure \ref{fig:iris_mutation} ensures that the mutation operation works. The third, Figure \ref{fig:iris_crossover}, ensures that
 all individuals converge to the best fitness score given enough generations. The second test (Figure \ref{fig:iris_mutation})
 ensures that mutation is working correctly. As demonstrated, the fitness score increases over time. The third test (Figure \ref{fig:iris_crossover})
-does the same, but for the two point crossover (breed) operation. The final test (Figure \ref{fig:iris_full}) ensures that both
-are able to work together.
+does the same, but for the recombination operation. The final test (Figure \ref{fig:iris_full}) ensures that recombination and mutation can work together to produce a better fitness score than either operation alone.
 
 \begin{figure}
 	\centering
@@ -401,8 +404,9 @@ In conclusion, our experiments demonstrate that the LGP framework outperforms th
 
 \chapter{Conclusion}
 
-Due to both time constraints and hardware constraints, extensive experimentation was unable to be performed. With further hyper parameter optimization and a different experimental setup, we believe that results could have improved. Nonetheless, the results are promising, and open a door for further exploration into the subject at hand. It also shows that at the very least the integration of Q-learning into LGP is feasible, and not detremental to the performance. In the future, we would like to
-explore different benchmarking approaches and open the door to different types of tasks besides those found in the classical control module \cite{1606.01540}, as it might explain which types of tasks RLGP might be better suited for.
+Due to the amount of time spent on reconfiguring the framework in addition to the short nature of this research project,
+various forms of experimentation did not occur. With the further optimization of hyperparameters and a different experimental setup, its possible that results could have improved. Nonetheless, the framework now exists for experimenting with easy, and opens a door for further exploration into the subject at hand. In the future, we would like to
+explore different benchmarking approaches and different types of tasks besides those found in the classical control module \cite{1606.01540}, as it might bring forth insight about the types of problems where RLGP can thrive.
 
 \bibliographystyle{plain}
 \bibliography{thesis}
