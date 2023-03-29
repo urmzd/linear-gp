@@ -57,8 +57,8 @@ jobs:
           compose-file: "docker-compose.yml"
           down-flags: "--rmi=all --volumes"
 
-      - name: Search For Optimal Parameters
-        run: ./scripts/search_all.sh
+      # - name: Search For Optimal Parameters
+      #   run: ./scripts/search_all.sh
 
       - name: Run Baseline
         run: ./scripts/run_baseline.sh
