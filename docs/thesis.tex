@@ -34,7 +34,7 @@
 
 \begin{acknowledgements}
 	I'd like to dedicate this piece of work to all those who've pushed me to continue my
-	pursuit of education. My brother Frebarz, who always encouraged me to push a little further. My Mother, Khalima and my sister Rita, whom without in my life, I would've never started in the first place. I'd also like to thank Dr. Malcolm Heywood for
+	pursuit of education. My brother Frebarz, who always encouraged me to push a little further. My Mother, Khalima and my sister Rita, whom both were the original motivators and continues to be the reason for my ambition. I'd also like to thank Dr. Malcolm Heywood for
 	his patience and support during the entirety of this thesis from conception to completion, and the opportunity to experience the world of academia.
 \end{acknowledgements}
 
@@ -55,7 +55,7 @@ By combining the strengths of LGP and Q-Learning, RLGP might represents a signif
 \section{Linear Genetic Programming}
 Linear Genetic Programming (LGP) is an advanced form of Genetic Programming (GP), a powerful machine learning technique introduced by Brameier and Banzhaf in their seminal work \cite{brameier2001comparison}. Unlike the traditional tree-based GP, LGP represents programs as a linear sequence of instructions, similar to assembly language or machine code. This representation offers several advantages, such as improved evolvability, efficient execution, and simplicity of crossover and mutation operations.
 
-In LGP, programs are composed of registers and instructions, where each instruction manipulates the contents of registers using arithmetic, logical, or conditional operations. The fitness of a program is determined by its ability to solve a given problem, such as regression, classification, or optimization tasks. The evolutionary process is similar to that of canonical GP, but involves variation operators that act directly upon a linear set of instructions.
+In LGP, programs are composed of registers and instructions, where each instruction manipulates the contents of registers using arithmetic, logical, or conditional operations. he evolutionary process is similar to that of canonical GP, but involves variation operators that act directly upon a linear set of instructions. The variations are as follows, reproduction (cloning), recombination (breeding) and mutation.
 
 In their paper, Brameier and Banzhaf compared the performance of LGP to that of traditional GP and neural networks. They discovered that LGP had classification and generalization capabilities that were comparable to those of neural networks \cite{brameier2001comparison}. This finding was significant, as it demonstrated that LGP could serve as an alternative to neural networks for solving complex machine learning problems. Moreover, LGP's linear representation allows for more interpretable solutions, which is an important consideration in many applications where understanding the underlying model is crucial.
 
@@ -75,31 +75,37 @@ In the context of Reinforced Linear Genetic Programming (RLGP), the findings of 
 \chapter{Methodology}
 \section{Framework Overview}
 We use the Rust programming language to implement the framework for our research. The framework is designed to be extensible and versatile, allowing
-for various types of problems to be solved using LGP and RLGP. The framework is also designed to be easily configurable, allowing for extensive experimentation. The framework consists of several engines, which together implement the core functionality. The primary engines can categorized into one of several categories. Variation engines, which allow operations such as two point crossover and mutation, which consists of replacing the contents of an instruction. Stochastic engines, which allow for random states and programs to be generated. Evaluation engines such as the which allows the system to determine the fitness of a program. With this in mind, we describe our representation of a program and the algorithms implemented by these engines to train the programs.
+for various types of problems to be solved using LGP and RLGP. The framework is also designed to be easily configurable, allowing for extensive experimentation. The framework consists of several engines, which together implement the core functionality. The primary engines can categorized into one of several categories. Variation engines, which allow operations such as two point crossover and mutation, which consists of replacing the contents of an instruction. Stochastic engines, which allow for random states and programs to be generated. Evaluation engines, which enable the system to determine the fitness of individuals within a population. With this in mind, we describe our representation of a program and the algorithms implemented by these engines to train the programs.
 
 \subsection{Program Representation}
-A program can be thought of a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index and the operation to be performed as well as a mode flag. The mode flag is used to determine where the target register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environmment state). We can represent the program as a sequence of instructions in the following format: $R[x] <op>= R[y]$ where R represents the registers, $x$ and $y$ represent the source and target register indices respectively, and $<op>$ represents the operation to be performed. In our case, we only allow four operations; addition (+),
-subtraction (-), multiplication(*) and division (/) by 2. Division is done by a non-zero constant as to prevent divsion by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem.
+A program can be thought of a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index and the operation to be performed as well as a mode flag. The mode flag is used to determine where the target register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environmment state). We can represent the program as a sequence of instructions in the following format. $$R[x] = R[x] <op>  R[y]$$ where R represents the registers, $x$ and $y$ represent the source and target register indices respectively, and $<op>$ represents the operation to be performed. In our case, we only allow four operations; addition (+),
+subtraction (-), multiplication(*) and division (/) by 2. Division is done by a non-zero constant to prevent divsion by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem. The size of the register set consist of $N_a$ which accounts for the number of actions, and $N_w$, the working registers which allow for intermediate calculations.
 
 \subsection{The Algorithm}
 
-We outline the main algorithm below, as well as the operations that enable
-the algorithm to function. The algorithm is implemented in the Core, which is responsible for the main loop of the algorithm. The core algorithm involves initializing a population of programs, evaluating the programs against the desired task using the FitnessEngine and associated learning type, ranking the individuals based on their fitness score,
-dropping the least fit individuals, as specified by GAP, then producing a new population by applying filling the
+We outline the main Algorithm \ref{alg:genetic-algorithm}, as well as the operations that enable the algorithm to function. The core algorithm is responsible for the main loop of the algorithm. The core algorithm coordinates several engines allow for the Evolutionary process to occur. It starts off with initializing a population of programs, then evaluates the programs against the desired task using the appropriate fitness for the desired learning type, ranks the individuals based on their fitness score,
+dropping the least fit individuals by $GAP\%$, lastly producing a new population by filling the
 dropped spots by children produced by the remaining individuals in the population.
 
 \begin{algorithm}[hb]
 	\caption{Genetic Algorithm}
+	\label{alg:genetic-algorithm}
 	\begin{algorithmic}[1]
-		\Procedure{GeneticAlgorithm}{}
+		\Procedure{Genetic Algorithm}{}
 		\State $P \gets \Call{InitializePopulation}{n\_individuals}$
-		\For{$i \in \{0, 1, \dots, n\_generations - 1\}$}
-		\State $\Call{Evaluate}{P_{i}, N\_TRIALS}$
-		\State $\Call{Rank}{P_{i}}$ \Comment{Rank individuals directly by fitness}
+		\For{$i \in \{1, \dots, n\_generations\}$}
+		\State $\Call{Evaluate}{P_{i}}$
+		\Comment {Evaluate the fitness of each individual in the population}
+		\State $\Call{Rank}{P_{i}}$
+		\Comment{Sort the individuals in the population by fitness}
 		\State $P_{i+1} \gets \Call{Clone}{P}$
-		\State $P_{i+1} \gets \Call{Survive}{P_{i+1}, GAP}$ \Comment{Drop GAP\% of the least fit individuals}
+		\Comment{Store the population and begin the next generation}
+		\State $P_{i+1} \gets \Call{Survive}{P_{i+1}, GAP}$
+		\Comment{Drop GAP\% of the population}
 		\State $parents \gets \Call{Select}{P_{i+1}}$
+		\Comment{Use tournament selection with size 2}
 		\State $P_{i+1} \gets \Call{Variation}{P_{i+1}}$
+		\Comment{Perform variation operations on the winners of selection}
 		\EndFor
 		\State \Return $P_{n\_generations}$
 		\EndProcedure
@@ -128,25 +134,22 @@ dropped spots by children produced by the remaining individuals in the populatio
 \end{algorithm}
 
 \begin{algorithm}[hb]
-	\caption{Mutate}
+	\caption{Mutate: Instruction Replacement}
 	\label{alg:mutate}
 	\begin{algorithmic}[1]
 		\Procedure{Mutate}{$P$}
 		\Comment{Given a program}
-		\State{$I \gets \Call{RandomInstruction}{P.instructions}$}
+		\State{$I \gets \Call{RandomInstruction}{P}$}
 		\Comment{Randomly select an instruction}
 		\State{$I' \gets \Call{GenerateRandomInstruction}{}$}
 		\Comment{Generate a new instruction}
-		\For{$prop \in \{operation,source, target\}$}
-		\State{$r \gets \Call{RandomNumber}{0, 1}$}
-		\If{$r < 0.5$}
-		\State{\Call{Replace}{$I, I', prop$}}
-		\Comment{Replace the property with a new value with a probability of 0.5}
+		\For{$p \in \{operation, source, target\}$}
+		\If{$\Call{Random}{0,1} < 0.5$}
+		\State{\Call{ReplaceProperty}{$I, I'$}}
 		\EndIf
 		\EndFor
-		\Comment{For each property of the instruction}
-		\State{$P.instructions \gets \Call{ReplaceInstruction}{P.instructions, I, I'}$}
-		\Comment{When replacing target, also replace mode to ensure valid programs}
+		\State{$\Call{ReplaceInstruction}{P, I}$}
+		\Comment{When replacing target, also replace mode to ensure we construct a valid instruction}
 		\State \textbf{return} $P$
 		\Comment{Return the child}
 		\EndProcedure
@@ -154,14 +157,14 @@ dropped spots by children produced by the remaining individuals in the populatio
 \end{algorithm}
 
 \begin{algorithm}[hb]
-	\caption{Generate}
+	\caption{Generate: Program Generation}
 	\label{alg:generate}
 	\begin{algorithmic}[1]
 		\Procedure{Generate}{$N, max\_instructions$}
 		\State{$n \gets \Call{Random}{1, max\_instructions}$}
 		\Comment{Generate a random number of instructions}
-		\State{$R \gets \Call{GenerateRegisterSet}{N + 1}$}
-		\Comment{Create a register set with N+1 registers}
+		\State{$R \gets \Call{GenerateRegisterSet}{A + W}$}
+		\Comment{Create a register set with A actions registers and W working registers}
 		\State{$I \gets \Call{GenerateInstructions}{n}$}
 		\Comment{Generate instructions}
 		\State{$P \gets \Call{CreateProgram}{R, I}$}
@@ -334,30 +337,28 @@ By following this experimental setup, we aimed to provide a thorough and unbiase
 
 This chapter analyzes the performance of a population of programs trained using Linear Genetic Programming (LGP)
 and a population of programs trained using Linear Genetic Programming Reinforced with Q-Learning (LGP-Q). The programs
-are trained on the cartpole-v1 and mountain-car-v0 environments \cite{1606.01540} as mentioned in the previous chapter.
-Once the results are explained, we analyze them to provide insight into the impact of Q-Learning on the performance of LGP. Note that we use the definition of done as referenced in the leaderboards, see \href{https://github.com/openai/gym/wiki/Leaderboard}{OpenAI Gym Leaderboard Wiki}. This means that terms such for results as maximum, mean, median and min are the statistics for experiments averaged over 100 trials.
+are trained on the cartpole-v1 and mountain-car-v0 environments \cite{1606.01540} as mentioned in the Reinforcment Integration section.
+Once the results are explained, we analyze them to provide insight into the impact of Q-Learning on the performance of LGP. Note that we use the definition of done as referenced in the leaderboards, see \href{https://github.com/openai/gym/wiki/Leaderboard}{OpenAI Gym Leaderboard Wiki}.
 
 \section{Experimental Results}
 
 \subsection{Cart Pole}
 
-Figure \ref{fig:cart-pole-comparison} shows a comparison of the two programs' performance. The baseline program achieved a maximum score of 150, while the LGP-Q program achieved a maximum score of 120. The median score for the baseline program was 150, with an average score of 115. The LGP-Q program had a median score of 120, with an average score of 106.
-
-The LGP-Q program was able to converge faster to a score of 120 than the baseline LGP program. However, once it reached 120, it began to plateau at around 15 generations. In contrast, the LGP program converged slower and reached a higher score before plateauing around 80 generations. These observations were consistent across the maximum, median, and mean fitness scores.
-
-Overall, while neither program was able to solve the cartpole-v1 environment, the LGP-Q program showed a faster convergence to a reasonable score, albeit with a lower maximum score than the baseline LGP program.
+Figure \ref{fig:cart-pole-comparison} shows a comparison of the two frameworks performance on the cartpole-v0 task. Over 100 exeriments, we observe that LGP averages a maxmium of 466, a median of 454, a median of 466 and minimum of 128. On the other hand, RLGP
+averages a maximum of 213, a median of 207, a mean of 213 a minimum of 31. In both cases,the population of the respective frameworks were able solve the problem. Both frameworks were able
+to generate a program in the first 10 generations that was able to solve the problem. However, the RLGP framework immediately plateaus, whilst the LGP framework continues to improve until hitting a plateau at 80 generations.
 
 \begin{figure}[hb]
 	\centering
 	\begin{subfigure}{1.0\textwidth}
 		\includegraphics[width=\linewidth]{cart_pole_lgp.png}
-		\caption{Baseline Linear Genetic Programming}
+		\caption{LGP cart-pole-v0}
 		\label{fig:cart-pole-lgp}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{1.0\textwidth}
 		\includegraphics[width=\linewidth]{cart_pole_q.png}
-		\caption{Linear Genetic Programming Reinforced with Q-Learning}
+		\caption{RLGP cart-pole-v0}
 		\label{fig:cart-pole-q}
 	\end{subfigure}
 	\caption{Comparison of Cart Pole}
@@ -367,13 +368,7 @@ Overall, while neither program was able to solve the cartpole-v1 environment, th
 
 \subsection{Mountain Car}
 
-Figure \ref{fig:mountain-car-comparison} shows a comparison between the performance of individuals who were trained on the baseline LGP algorithm and the Q-Learning enhanced algorithm. The baseline program achieved a maximum of
--106, median of -110 and a mean of -122. The Q-Learning enhanced program achieved a maximum of -113, median of -115 and a mean of -132.
-
-Both algorithms converged quickly to a score of -120 at around 10 generations.
-There's a small positive increase seen once the baseline program converges, whereas there's a small negative decrease seen once the Q-Learning enhanced program converges.
-
-Overall, both algorithms were able to solve the mountain-car-v0 environment in a reasonable amount of steps.
+Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that of the cartpole-v0 task. The RLGP framework falls short of solving the task, averaging a max of -114, a mean of-130, a median of -117.6685 and a min of -200. On the other hand, the LGP framework is able to solve the task, albeit narrowly, averaging a max -106, a mean of -126, a median of -120,and a min -200.0. Here, we observe that RLGP achieves a higher median score, with a slight upward trend whereas the LGP achieves a lower median, with no particular trend in any direction. Both of these framework look as they quickly converge to a value and then plateau.
 
 \begin{figure}[ht]
 	\centering
@@ -392,30 +387,22 @@ Overall, both algorithms were able to solve the mountain-car-v0 environment in a
 	\label{fig:mountain-car-comparison}
 \end{figure}
 
-
 \section{Discussion}
-Q-learning and other reinforcement learning algorithms' performance can depend on various factors, such as the nature of the environment, state and action space, hyperparameters, and the exploration-exploitation balance.
 
-In the case of the Mountain Car and Cart Pole environments, the differences in performance can be attributed to the following reasons:
+Initially, we would have expected for the frameworks to perform better on mountain-car-v0 than cart-pole-v1 as the state space is much simpler (one consists of 2 state properties whilst the other contains four). However, the opposite seems to be true,
+the cart pole task was able to be solved relatively easily in comparison to the mountain car task, in which RLGP failed to solve the problem. One explaination for this discrepancy is the difference in the nature of the tasks. The cart-pole task is inherently more continuous, allowing for small adjustments to have a direct impact on the balancing of the pole. On the other hand, the mountain car task requires more strategic and discrete actions to build up momentum and reach the goal. This may indicate that the LGP and RLGP frameworks are better suited to tackle continuous control problems.
 
-\begin{enumerate}
-	\item \textbf{State space}: The state space of Mountain Car is smaller and relatively simpler compared to Cart Pole. Mountain Car has two continuous variables (position and velocity), while Cart Pole has four (cart position, cart velocity, pole angle, and pole angular velocity). Q-learning can learn the simpler state space of the Mountain Car problem more effectively.
+Another contributing factor could be the exploration-exploitation trade-off present in RLGP. The Q-learning component might not be exploring the state space effectively, thus getting stuck in local optima and hindering the overall performance. In contrast, the LGP framework seems to be more robust in its exploration of the solution space, enabling it to perform better on both tasks.
 
-	\item \textbf{Exploration vs. Exploitation}: Q-learning uses an epsilon-greedy exploration strategy, which balances exploration (trying out new actions) and exploitation (choosing the best-known action). In the Mountain Car problem, exploration helps the algorithm find the optimal policy by trying various actions in different states. In the Cart Pole problem, the optimal policy might be harder to find, as even slight deviations in exploration can cause the pole to fall.
+Moreover, the difference in performance may also be attributed to the limitations of the genetic programming approach. While LGP and RLGP are capable of discovering compact and interpretable representations of policies, they are not guaranteed to find the global optimum. The search process depends on the initial population and variation operators, which can impact the quality of the solutions found. The experimental set up might have been poor, and the parameters beneifical to LGP might not have been optimal for RLGP. Its possible that
+we could've seen better results if Q leanring parameters was not simply a wrapper on top of a preexisting configuration.
 
-	\item \textbf{Reward structure}: The reward structure in Mountain Car is sparse, meaning the agent only gets a reward when it reaches the goal. In contrast, Cart Pole has a more dense reward structure, where the agent gets a reward for every time step it manages to keep the pole upright. Sparse rewards can sometimes make learning more difficult, but in this case, Q-learning seems to work well in the Mountain Car environment despite this challenge. In Cart Pole, the dense rewards can make it harder for Q-learning to differentiate between good and bad actions since the agent gets a reward for each time step it doesn't fail, which might lead to sub-optimal policies.
-
-	\item \textbf{Hyperparameters}: The performance of Q-learning also depends on hyperparameters like learning rate, discount factor, and epsilon (exploration rate). These parameters might need different tuning for different environments. It is possible that the provided hyperparameters are better suited for the Mountain Car environment than the Cart Pole environment.
-\end{enumerate}
-
-When looking at the mean, median, and maximum scores achieved by the algorithms in both environments, we can observe that the baseline LGP program generally performs better than the LGP-Q program in the Cart Pole environment, with a higher maximum, median, and mean score. In contrast, the LGP-Q program converges faster in the Cart Pole environment, but plateaus at a lower score. In the Mountain Car environment, both algorithms converge quickly to a score of -120 and show similar performances. The small differences in maximum, median, and mean scores in the Mountain Car environment further highlight the factors discussed above, as they demonstrate how the nature of the environment, state space, and reward structure, as well as the choice of hyperparameters, can impact the performance of the algorithms.
+In conclusion, our experiments demonstrate that the LGP framework outperforms the RLGP framework in both cart-pole and mountain car tasks. Although both frameworks were able to solve the cart-pole task, RLGP failed to solve the mountain car task, suggesting that the integration of Q-learning into genetic programming may not always lead to improved performance. Future work could involve investigating alternative reinforcement learning algorithms, adapting exploration strategies, or incorporating domain knowledge to enhance the performance of genetic programming-based frameworks. Additionally, it would be valuable to test these frameworks on a broader range of tasks to better understand their strengths and limitations.
 
 \chapter{Conclusion}
 
-Overall there seems to be some promise in using Q-learning.
-
-\section{Future Work}
-% Describe potential future steps and improvements for your research.
+Due to both time constraints and hardware constraints, extensive experimentation was unable to be performed. With further hyper parameter optimization and a different experimental setup, we believe that results could have improved. Nonetheless, the results are promising, and open a door for further exploration into the subject at hand. It also shows that at the very least the integration of Q-learning into LGP is feasible, and not detremental to the performance. In the future, we would like to
+explore different benchmarking approaches and open the door to different types of tasks besides those found in the classical control module \cite{1606.01540}, as it might explain which types of tasks RLGP might be better suited for.
 
 \bibliographystyle{plain}
 \bibliography{thesis}
