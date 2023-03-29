@@ -1,8 +1,5 @@
 /// Defines a single state which can use the current context to get the next data.
 pub trait State: Sized {
-    const N_INPUTS: usize;
-    const N_ACTIONS: usize;
-
     fn get_value(&self, at_idx: usize) -> f64;
     /// Updates the impact of the factor.
     /// For example, if data[0] has been accessed, we increase the index so data[1] is accessed next (in classification).

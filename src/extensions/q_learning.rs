@@ -11,7 +11,7 @@ use crate::{
     core::{
         engines::{
             breed_engine::{Breed, BreedEngine},
-            fitness_engine::{Fitness, FitnessEngine, FitnessScore},
+            fitness_engine::{Fitness, FitnessEngine},
             freeze_engine::{Freeze, FreezeEngine},
             generate_engine::{Generate, GenerateEngine},
             mutate_engine::{Mutate, MutateEngine},
@@ -91,7 +91,9 @@ impl QTable {
     pub fn get_action_register(&self, registers: &Registers) -> Option<ActionRegisterPair> {
         let winning_register = match registers.argmax(ArgmaxInput::All).any() {
             ActionRegister::Value(register) => register,
-            _ => return None,
+            _ => {
+                return None;
+            }
         };
 
         let prob = generator().gen_range((0.)..(1.));
@@ -165,16 +167,15 @@ where
 }
 
 impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
-    fn eval_fitness(
-        program: &mut QProgram,
-        states: &mut T,
-    ) -> crate::core::engines::fitness_engine::FitnessScore {
+    fn eval_fitness(program: &mut QProgram, states: &mut T) -> f64 {
         let mut score = 0.;
 
         // We run the program and determine what action to take at the step = 0.
         let mut current_action_state = match get_action_state(states, program) {
             Some(action_state) => action_state,
-            None => return FitnessScore::OutOfBounds,
+            None => {
+                return f64::NEG_INFINITY;
+            }
         };
 
         // We execute the selected action and continue to repeat the cycle until termination.
@@ -189,7 +190,9 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
 
             let next_action_state = match get_action_state(state, program) {
                 Some(action_state) => action_state,
-                None => return FitnessScore::OutOfBounds,
+                None => {
+                    return f64::NEG_INFINITY;
+                }
             };
 
             // We only update when there is a transition.
@@ -210,7 +213,7 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
             initial_state = serde_json::to_string(&states.get_initial_state()).unwrap()
         );
 
-        FitnessScore::Valid(score)
+        score
     }
 }
 
@@ -243,11 +246,11 @@ impl Status<QProgram> for StatusEngine {
         StatusEngine::valid(&item.program)
     }
 
-    fn set_fitness(program: &mut QProgram, fitness: FitnessScore) {
+    fn set_fitness(program: &mut QProgram, fitness: f64) {
         program.program.fitness = fitness;
     }
 
-    fn get_fitness(program: &QProgram) -> FitnessScore {
+    fn get_fitness(program: &QProgram) -> f64 {
         program.program.fitness
     }
 

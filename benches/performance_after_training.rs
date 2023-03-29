@@ -2,7 +2,6 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use glob::glob;
 use gym_rs::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
 use lgp::{
-    core::engines::fitness_engine::FitnessScore,
     problems::gym::{GymRsEngine, GymRsQEngine},
     utils::benchmark_tools::load_and_run_program,
 };
@@ -44,36 +43,35 @@ fn performance_benchmark(c: &mut Criterion) {
                 c.bench_function(&bench_id, |b| {
                     b.iter(|| {
                         let (new_fitness, original_fitness) = match program_type {
-                            &"mountain_car_q" => load_and_run_program::<
-                                GymRsQEngine<MountainCarEnv, 2, 3>,
-                            >(&path, n_trials)
-                            .unwrap(),
-
-                            &"mountain_car_lgp" => load_and_run_program::<
-                                GymRsEngine<MountainCarEnv, 2, 3>,
-                            >(&path, n_trials)
-                            .unwrap(),
-
-                            &"cart_pole_q" => {
-                                load_and_run_program::<GymRsQEngine<CartPoleEnv, 4, 2>>(
-                                    &path, n_trials,
+                            &"mountain_car_q" => {
+                                load_and_run_program::<GymRsQEngine<MountainCarEnv>>(
+                                    &path, n_trials, -200.,
                                 )
                                 .unwrap()
                             }
-                            &"cart_pole_lgp" => load_and_run_program::<
-                                GymRsEngine<CartPoleEnv, 4, 2>,
-                            >(&path, n_trials)
+
+                            &"mountain_car_lgp" => {
+                                load_and_run_program::<GymRsEngine<MountainCarEnv>>(
+                                    &path, n_trials, -200.,
+                                )
+                                .unwrap()
+                            }
+
+                            &"cart_pole_q" => load_and_run_program::<GymRsQEngine<CartPoleEnv>>(
+                                &path, n_trials, 500.,
+                            )
+                            .unwrap(),
+                            &"cart_pole_lgp" => load_and_run_program::<GymRsEngine<CartPoleEnv>>(
+                                &path, n_trials, 500.,
+                            )
                             .unwrap(),
                             _ => panic!("Unknown program type"),
                         };
 
                         let improvement = new_fitness - original_fitness;
 
-                        match improvement {
-                            FitnessScore::Valid(_) => {
-                                better_count += 1;
-                            }
-                            _ => {}
+                        if improvement.is_finite() {
+                            better_count += 1;
                         }
 
                         improvement_values.push(improvement);
@@ -82,8 +80,8 @@ fn performance_benchmark(c: &mut Criterion) {
             }
         }
 
-        let mean = improvement_values.iter().cloned().sum::<FitnessScore>()
-            / FitnessScore::Valid(improvement_values.len() as f64);
+        let mean =
+            improvement_values.iter().cloned().sum::<f64>() / improvement_values.len() as f64;
         let median = {
             let mut sorted = improvement_values.clone();
             sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -91,7 +89,7 @@ fn performance_benchmark(c: &mut Criterion) {
         };
         let variance = improvement_values
             .iter()
-            .map(|v| (*v - mean).unwrap().powi(2))
+            .map(|v| (*v - mean).powi(2))
             .sum::<f64>()
             / (improvement_values.len() - 1) as f64;
         let std_deviation = variance.sqrt();

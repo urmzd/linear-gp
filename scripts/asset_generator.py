@@ -13,24 +13,21 @@ import os
 DEFAULTS = {
     "iris_baseline": {
         "label": "Iris without Crossover or Mutation",
-        "fallback_fitness": 0,
     },
-    "iris_crossover": {"label": "Iris with Crossover", "fallback_fitness": 0},
-    "iris_mutation": {"label": "Iris with Mutation", "fallback_fitness": 0},
-    "iris_full": {"label": "Iris with Crossover and Mutation", "fallback_fitness": 0},
-    "cart_pole_lgp": {"label": "Cart Pole GP", "fallback_fitness": 0},
-    "cart_pole_q": {"label": "Cart Pole Q-Learning", "fallback_fitness": 0},
-    "mountain_car_lgp": {"label": "Mountain Cart GP", "fallback_fitness": -200},
+    "iris_crossover": {"label": "Iris with Crossover"},
+    "iris_mutation": {"label": "Iris with Mutation"},
+    "iris_full": {"label": "Iris with Crossover and Mutation"},
+    "cart_pole_lgp": {"label": "Cart Pole GP"},
+    "cart_pole_q": {"label": "Cart Pole Q-Learning"},
+    "mountain_car_lgp": {"label": "Mountain Cart GP"},
     "mountain_car_q": {
         "label": "Mountain Car Q-Learning",
-        "fallback_fitness": -200,
     },
 }
 
 
 def generate_tables(
     path: str,
-    fallback_fitness: float = 0.0,
     output_dir: str = "assets/tables",
 ) -> None:
     # Load programs from JSON file.
@@ -48,11 +45,7 @@ def generate_tables(
             if "program" in program:
                 program = program["program"]
 
-            if "Valid" in program["fitness"]:
-                fitness = program["fitness"]["Valid"]
-            else:
-                fitness = fallback_fitness
-            generation_fitness.append(fitness)
+            generation_fitness.append(program["fitness"])
 
         fitness_scores.append(generation_fitness)
         generations.append(i)
@@ -144,8 +137,7 @@ def main():
         for test in os.listdir(args.input):
             test_base = str(Path(test).stem)
             path = f"{args.input}/{test_base}"
-            fallback_fitness = DEFAULTS[test]["fallback_fitness"]
-            generate_tables(path, float(fallback_fitness), args.output)
+            generate_tables(path, args.output)
 
     elif args.command == "figures":
         for test in glob.glob(f"{args.input}/*.csv"):

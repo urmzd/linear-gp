@@ -21,20 +21,17 @@ use crate::extensions::q_learning::QProgram;
 use crate::extensions::q_learning::QProgramGeneratorParameters;
 
 #[derive(Clone, Debug)]
-pub struct GymRsInput<E: Env, const N_INPUTS: usize, const N_ACTIONS: usize> {
+pub struct GymRsInput<E: Env> {
     environment: E,
     terminated: bool,
     episode_idx: usize,
     initial_state: E::Observation,
 }
 
-impl<T, const N_PUTS: usize, const N_ACTS: usize> State for GymRsInput<T, N_PUTS, N_ACTS>
+impl<E> State for GymRsInput<E>
 where
-    T: Env,
+    E: Env,
 {
-    const N_INPUTS: usize = N_PUTS;
-    const N_ACTIONS: usize = N_ACTS;
-
     fn get_value(&self, idx: usize) -> f64 {
         self.environment.get_observation_property(idx)
     }
@@ -42,7 +39,7 @@ where
     fn execute_action(&mut self, action: usize) -> f64 {
         let action_reward = self.environment.step(action);
         self.episode_idx += 1;
-        self.terminated = self.episode_idx >= T::episode_length() || action_reward.done;
+        self.terminated = self.episode_idx >= E::episode_length() || action_reward.done;
         action_reward.reward
     }
 
@@ -55,7 +52,7 @@ where
     }
 }
 
-impl<T, const N_PUTS: usize, const N_ACTS: usize> RlState for GymRsInput<T, N_PUTS, N_ACTS>
+impl<T> RlState for GymRsInput<T>
 where
     T: Env,
 {
@@ -68,12 +65,11 @@ where
     }
 }
 
-impl<T, const N_PUTS: usize, const N_ACTS: usize> Reset<GymRsInput<T, N_PUTS, N_ACTS>>
-    for ResetEngine
+impl<T> Reset<GymRsInput<T>> for ResetEngine
 where
     T: Env,
 {
-    fn reset(item: &mut GymRsInput<T, N_PUTS, N_ACTS>) {
+    fn reset(item: &mut GymRsInput<T>) {
         item.environment.reset(None, false, None);
         item.environment.set_observation(item.initial_state);
         item.terminated = false;
@@ -81,12 +77,11 @@ where
     }
 }
 
-impl<T, const N_PUTS: usize, const N_ACTS: usize> Generate<(), GymRsInput<T, N_PUTS, N_ACTS>>
-    for GenerateEngine
+impl<T> Generate<(), GymRsInput<T>> for GenerateEngine
 where
     T: Env,
 {
-    fn generate(_from: ()) -> GymRsInput<T, N_PUTS, N_ACTS> {
+    fn generate(_from: ()) -> GymRsInput<T> {
         let mut environment: T = Env::new();
         let (initial_state, _) = environment.reset(None, false, None);
 
@@ -100,17 +95,17 @@ where
 }
 
 #[derive(Clone)]
-pub struct GymRsQEngine<T, const N_PUTS: usize, const N_ACTS: usize>(PhantomData<T>);
+pub struct GymRsQEngine<T>(PhantomData<T>);
 #[derive(Clone)]
-pub struct GymRsEngine<T, const N_PUTS: usize, const N_ACTS: usize>(PhantomData<T>);
+pub struct GymRsEngine<T>(PhantomData<T>);
 
-impl<T, const N_PUTS: usize, const N_ACTS: usize> Core for GymRsQEngine<T, N_PUTS, N_ACTS>
+impl<T> Core for GymRsQEngine<T>
 where
     T: Env,
 {
     type Individual = QProgram;
     type ProgramParameters = QProgramGeneratorParameters;
-    type State = GymRsInput<T, N_PUTS, N_ACTS>;
+    type State = GymRsInput<T>;
     type FitnessMarker = ();
     type Generate = GenerateEngine;
     type Fitness = FitnessEngine;
@@ -121,13 +116,13 @@ where
     type Freeze = FreezeEngine;
 }
 
-impl<T, const N_PUTS: usize, const N_ACTS: usize> Core for GymRsEngine<T, N_PUTS, N_ACTS>
+impl<T> Core for GymRsEngine<T>
 where
     T: Env,
 {
     type Individual = Program;
     type ProgramParameters = ProgramGeneratorParameters;
-    type State = GymRsInput<T, N_PUTS, N_ACTS>;
+    type State = GymRsInput<T>;
     type FitnessMarker = UseRlFitness;
     type Generate = GenerateEngine;
     type Fitness = FitnessEngine;
@@ -156,7 +151,7 @@ mod tests {
     fn cart_pole_q() -> VoidResultAnyError {
         let name = "cart_pole_q";
 
-        let parameters: HyperParameters<GymRsQEngine<CartPoleEnv, 4, 2>> =
+        let parameters: HyperParameters<GymRsQEngine<CartPoleEnv>> =
             load_hyper_parameters("assets/parameters/cart-pole-q.json")?;
         let populations = parameters
             .build_engine()
@@ -172,7 +167,7 @@ mod tests {
     fn cart_pole_lgp() -> VoidResultAnyError {
         let name = "cart_pole_lgp";
 
-        let parameters: HyperParameters<GymRsEngine<CartPoleEnv, 4, 2>> =
+        let parameters: HyperParameters<GymRsEngine<CartPoleEnv>> =
             load_hyper_parameters("assets/parameters/cart-pole-lgp.json")?;
 
         let populations = parameters
@@ -189,7 +184,7 @@ mod tests {
     fn mountain_cart_lgp() -> VoidResultAnyError {
         let name = "mountain_car_lgp";
 
-        let parameters: HyperParameters<GymRsEngine<MountainCarEnv, 2, 3>> =
+        let parameters: HyperParameters<GymRsEngine<MountainCarEnv>> =
             load_hyper_parameters("assets/parameters/mountain-car-lgp.json")?;
         let populations = parameters
             .build_engine()
@@ -205,7 +200,7 @@ mod tests {
     fn mountain_car_q() -> VoidResultAnyError {
         let name = "mountain_car_q";
 
-        let parameters: HyperParameters<GymRsQEngine<MountainCarEnv, 2, 3>> =
+        let parameters: HyperParameters<GymRsQEngine<MountainCarEnv>> =
             load_hyper_parameters("assets/parameters/mountain-car-q.json")?;
         let populations = parameters
             .build_engine()

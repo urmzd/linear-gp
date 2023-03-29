@@ -30,10 +30,10 @@ macro_rules! run_accuator {
 
 #[derive(Parser, Deserialize, Serialize)]
 pub enum Accuator {
-    MountainCarQ(HyperParameters<GymRsQEngine<MountainCarEnv, 3, 2>>),
-    MountainCarLGP(HyperParameters<GymRsEngine<MountainCarEnv, 3, 2>>),
-    CartPoleQ(HyperParameters<GymRsQEngine<CartPoleEnv, 4, 2>>),
-    CartPoleLGP(HyperParameters<GymRsEngine<CartPoleEnv, 4, 2>>),
+    MountainCarQ(HyperParameters<GymRsQEngine<MountainCarEnv>>),
+    MountainCarLGP(HyperParameters<GymRsEngine<MountainCarEnv>>),
+    CartPoleQ(HyperParameters<GymRsQEngine<CartPoleEnv>>),
+    CartPoleLGP(HyperParameters<GymRsEngine<CartPoleEnv>>),
     IrisLgp(HyperParameters<IrisEngine>),
 }
 
@@ -54,6 +54,7 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 2;
+                hyperparameters.default_fitness = -200.0;
 
                 run_accuator!(GymRsQEngine, hyperparameters);
             }
@@ -66,6 +67,7 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 2;
+                hyperparameters.default_fitness = -200.0;
 
                 run_accuator!(GymRsEngine, hyperparameters);
             }
@@ -78,6 +80,7 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 4;
+
                 run_accuator!(IrisEngine, hyperparameters);
             }
             Accuator::CartPoleQ(hyperparameters) => {
@@ -92,6 +95,8 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 4;
+                hyperparameters.default_fitness = 500.0;
+
                 run_accuator!(GymRsQEngine, hyperparameters);
             }
             Accuator::CartPoleLGP(hyperparameters) => {
@@ -103,6 +108,8 @@ impl Accuator {
                     .program_parameters
                     .instruction_generator_parameters
                     .n_inputs = 4;
+                hyperparameters.default_fitness = 500.0;
+
                 run_accuator!(GymRsEngine, hyperparameters);
             }
         }

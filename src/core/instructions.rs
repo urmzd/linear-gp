@@ -77,17 +77,13 @@ pub type Instructions = Vec<Instruction>;
 #[cfg(test)]
 mod tests {
 
-    use crate::{
-        core::{
-            engines::{
-                breed_engine::{Breed, BreedEngine},
-                generate_engine::{Generate, GenerateEngine},
-            },
-            environment::State,
-            instruction::InstructionGeneratorParameters,
-            program::ProgramGeneratorParameters,
+    use crate::core::{
+        engines::{
+            breed_engine::{Breed, BreedEngine},
+            generate_engine::{Generate, GenerateEngine},
         },
-        utils::test::TestInput,
+        instruction::InstructionGeneratorParameters,
+        program::ProgramGeneratorParameters,
     };
 
     #[test]
@@ -99,8 +95,8 @@ mod tests {
             instruction_generator_parameters: InstructionGeneratorParameters {
                 n_extras: 1,
                 external_factor: 10.,
-                n_inputs: TestInput::N_INPUTS,
-                n_actions: TestInput::N_ACTIONS,
+                n_inputs: 4,
+                n_actions: 2,
             },
         };
 

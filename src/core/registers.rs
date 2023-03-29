@@ -25,12 +25,7 @@ where
 pub struct Registers {
     #[serde(deserialize_with = "deserialize_vec_with_null")]
     data: Vec<f64>,
-}
-
-impl From<Vec<f64>> for Registers {
-    fn from(data: Vec<f64>) -> Self {
-        Registers { data }
-    }
+    n_actions: usize,
 }
 
 pub enum ArgmaxResult {
@@ -65,7 +60,7 @@ impl ArgmaxResult {
 
 pub enum ArgmaxInput {
     All,
-    To(usize),
+    ActionRegisters,
 }
 
 impl Reset<Registers> for ResetEngine {
@@ -77,16 +72,16 @@ impl Reset<Registers> for ResetEngine {
 }
 
 impl Registers {
-    pub fn new(n_registers: usize) -> Self {
-        let data = vec![0.; n_registers];
+    pub fn new(n_actions: usize, n_working_registers: usize) -> Self {
+        let data = vec![0.; n_actions + n_working_registers];
 
-        Registers { data }
+        Registers { data, n_actions }
     }
 
     pub fn argmax(&self, range: ArgmaxInput) -> ArgmaxResult {
         let range_to_use = match range {
             ArgmaxInput::All => 0..(self.data.len()),
-            ArgmaxInput::To(to) => 0..(to),
+            ArgmaxInput::ActionRegisters => 0..(self.n_actions),
         };
 
         let sliced_data = &self.data[range_to_use];
@@ -112,17 +107,17 @@ impl Registers {
     }
 
     pub fn len(&self) -> usize {
-        let Registers { data } = self;
+        let Registers { data, .. } = self;
         data.len()
     }
 
     pub fn update(&mut self, index: usize, value: f64) {
-        let Registers { data } = self;
+        let Registers { data, .. } = self;
         data[index] = value;
     }
 
     pub fn get(&self, index: usize) -> &f64 {
-        let Registers { data } = self;
+        let Registers { data, .. } = self;
         data.get(index).unwrap()
     }
 
@@ -148,7 +143,7 @@ mod tests {
 
     #[test]
     fn given_registers_when_indexed_with_range_then_slice_is_returned() {
-        let mut registers = Registers::new(10);
+        let mut registers = Registers::new(9, 1);
         registers.update(0, 1.);
 
         let slice = &registers[0..2];
