@@ -12,7 +12,6 @@ use uuid::Uuid;
 use super::{
     engines::{
         breed_engine::{Breed, BreedEngine},
-        fitness_engine::FitnessScore,
         freeze_engine::{Freeze, FreezeEngine},
         generate_engine::{Generate, GenerateEngine},
         mutate_engine::{Mutate, MutateEngine},
@@ -45,20 +44,20 @@ impl Reset<Program> for ResetEngine {
 impl Freeze<Program> for FreezeEngine {}
 
 impl Status<Program> for StatusEngine {
-    fn set_fitness(program: &mut Program, fitness: FitnessScore) {
+    fn set_fitness(program: &mut Program, fitness: f64) {
         program.fitness = fitness;
     }
 
-    fn get_fitness(program: &Program) -> FitnessScore {
+    fn get_fitness(program: &Program) -> f64 {
         program.fitness
     }
 
     fn valid(item: &Program) -> bool {
-        item.fitness.is_valid()
+        item.fitness.is_finite()
     }
 
     fn evaluated(item: &Program) -> bool {
-        item.fitness.is_evaluated()
+        !item.fitness.is_nan()
     }
 }
 
@@ -67,7 +66,7 @@ pub struct Program {
     pub id: Uuid,
     pub instructions: Instructions,
     pub registers: Registers,
-    pub fitness: FitnessScore,
+    pub fitness: f64,
 }
 
 impl PartialEq for Program {
@@ -78,7 +77,7 @@ impl PartialEq for Program {
 
 impl Ord for Program {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.fitness.cmp(&other.fitness)
+        f64::total_cmp(&self.fitness, &other.fitness)
     }
 }
 
@@ -86,7 +85,7 @@ impl Eq for Program {}
 
 impl PartialOrd for Program {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.fitness.partial_cmp(&other.fitness)
+        Some(self.cmp(other))
     }
 }
 
@@ -106,7 +105,10 @@ impl Generate<ProgramGeneratorParameters, Program> for GenerateEngine {
             ..
         } = using;
 
-        let registers = Registers::new(instruction_generator_parameters.n_registers());
+        let registers = Registers::new(
+            instruction_generator_parameters.n_actions,
+            instruction_generator_parameters.n_extras,
+        );
         let n_instructions = generator().gen_range(1..=max_instructions);
         let instructions =
             repeat_with(|| GenerateEngine::generate(instruction_generator_parameters))
@@ -117,7 +119,7 @@ impl Generate<ProgramGeneratorParameters, Program> for GenerateEngine {
             id: Uuid::new_v4(),
             instructions,
             registers,
-            fitness: FitnessScore::NotEvaluated,
+            fitness: f64::NAN,
         }
     }
 }
@@ -162,7 +164,7 @@ impl Breed<Program> for BreedEngine {
 #[cfg(test)]
 mod tests {
 
-    use crate::{core::instruction::InstructionGeneratorParameters, utils::test::TestInput};
+    use crate::core::instruction::InstructionGeneratorParameters;
 
     use super::*;
 
@@ -171,8 +173,8 @@ mod tests {
         let params = InstructionGeneratorParameters {
             n_extras: 1,
             external_factor: 10.,
-            n_actions: TestInput::N_ACTIONS,
-            n_inputs: TestInput::N_INPUTS,
+            n_actions: 4,
+            n_inputs: 2,
         };
         let instructions_a: Instructions =
             (0..10).map(|_| GenerateEngine::generate(params)).collect();
@@ -195,8 +197,8 @@ mod tests {
         let instruction_generator_parameters = InstructionGeneratorParameters {
             n_extras: 1,
             external_factor: 10.,
-            n_actions: TestInput::N_ACTIONS,
-            n_inputs: TestInput::N_INPUTS,
+            n_actions: 2,
+            n_inputs: 4,
         };
         let program_params = ProgramGeneratorParameters {
             max_instructions: 100,

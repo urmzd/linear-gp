@@ -8,12 +8,12 @@ use std::{
 
 use crate::core::{
     characteristics::{Load, Save},
+    engines::generate_engine::Generate,
     engines::{
         core_engine::{Core, HyperParameters},
         freeze_engine::Freeze,
         status_engine::Status,
     },
-    engines::{fitness_engine::FitnessScore, generate_engine::Generate},
 };
 
 use super::misc::VoidResultAnyError;
@@ -126,7 +126,8 @@ where
 pub fn load_and_run_program<C>(
     program_path: impl Into<PathBuf> + Clone,
     n_trials: usize,
-) -> Result<(FitnessScore, FitnessScore), Box<dyn Error>>
+    default_fitness: f64,
+) -> Result<(f64, f64), Box<dyn Error>>
 where
     C: Core,
 {
@@ -138,7 +139,7 @@ where
         .collect_vec();
 
     let mut population = vec![program];
-    C::eval_fitness(&mut population, &mut trials);
+    C::eval_fitness(&mut population, &mut trials, default_fitness);
 
     let new_fitness = C::Status::get_fitness(population.first().unwrap());
 

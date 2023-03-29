@@ -33,9 +33,6 @@ struct SingleInput {
 }
 
 impl State for TestInput {
-    const N_INPUTS: usize = 4;
-    const N_ACTIONS: usize = 2;
-
     fn get_value(&self, at_idx: usize) -> f64 {
         let item = &self.data[self.idx];
 

@@ -64,9 +64,6 @@ pub struct IrisState {
 }
 
 impl State for IrisState {
-    const N_INPUTS: usize = 4;
-    const N_ACTIONS: usize = 3;
-
     fn get_value(&self, idx: usize) -> f64 {
         let item = &self.data[self.idx];
 
@@ -150,8 +147,8 @@ mod test {
     fn baseline() -> VoidResultAnyError {
         let name = "iris_baseline";
         let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
+            .n_actions(3)
+            .n_inputs(4)
             .build()?;
         let program_parameters = ProgramGeneratorParametersBuilder::default()
             .max_instructions(100)
@@ -185,8 +182,8 @@ mod test {
     fn mutation() -> VoidResultAnyError {
         let name = "iris_mutation";
         let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
+            .n_actions(3)
+            .n_inputs(4)
             .build()?;
         let program_parameters = ProgramGeneratorParametersBuilder::default()
             .max_instructions(100)
@@ -196,6 +193,7 @@ mod test {
             .program_parameters(program_parameters)
             .mutation_percent(1.0)
             .crossover_percent(0.)
+            .n_trials(1)
             .build()?;
 
         let populations = parameters
@@ -212,8 +210,8 @@ mod test {
     fn crossover() -> VoidResultAnyError {
         let name = "iris_crossover";
         let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
+            .n_actions(3)
+            .n_inputs(4)
             .build()?;
         let program_parameters = ProgramGeneratorParametersBuilder::default()
             .max_instructions(100)
@@ -223,6 +221,7 @@ mod test {
             .program_parameters(program_parameters)
             .mutation_percent(0.)
             .crossover_percent(1.0)
+            .n_trials(1)
             .build()?;
 
         let populations = parameters
@@ -240,8 +239,8 @@ mod test {
         let name = "iris_full";
 
         let instruction_parameters = InstructionGeneratorParametersBuilder::default()
-            .n_actions(IrisState::N_ACTIONS)
-            .n_inputs(IrisState::N_INPUTS)
+            .n_actions(3)
+            .n_inputs(4)
             .build()?;
         let program_parameters = ProgramGeneratorParametersBuilder::default()
             .max_instructions(100)
@@ -251,6 +250,7 @@ mod test {
             .program_parameters(program_parameters)
             .mutation_percent(0.5)
             .crossover_percent(0.5)
+            .n_trials(1)
             .build()?;
 
         let populations = parameters

@@ -14,11 +14,8 @@ use crate::{
 };
 
 use super::{
-    fitness_engine::{Fitness, FitnessScore},
-    freeze_engine::Freeze,
-    generate_engine::Generate,
-    mutate_engine::Mutate,
-    status_engine::Status,
+    fitness_engine::Fitness, freeze_engine::Freeze, generate_engine::Generate,
+    mutate_engine::Mutate, status_engine::Status,
 };
 use derive_builder::Builder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -32,6 +29,9 @@ pub struct HyperParameters<C>
 where
     C: Core,
 {
+    #[builder(default = "0.")]
+    #[arg(long, default_value = "0.")]
+    pub default_fitness: f64,
     #[builder(default = "100")]
     #[arg(long, default_value = "100")]
     pub population_size: usize,
@@ -99,7 +99,11 @@ where
 
         let mut population = self.next_population.clone();
 
-        C::eval_fitness(&mut population, &mut self.trials);
+        C::eval_fitness(
+            &mut population,
+            &mut self.trials,
+            self.params.default_fitness,
+        );
         C::rank(&mut population);
 
         assert!(population.iter().all(C::Status::evaluated));
@@ -162,9 +166,13 @@ pub trait Core {
         population
     }
 
-    fn eval_fitness(population: &mut Vec<Self::Individual>, trials: &mut Vec<Self::State>) {
+    fn eval_fitness(
+        population: &mut Vec<Self::Individual>,
+        trials: &mut Vec<Self::State>,
+        default_fitness: f64,
+    ) {
         for individual in population.iter_mut() {
-            let scores = trials
+            let mut scores = trials
                 .iter_mut()
                 .map(|trial| {
                     Self::Reset::reset(individual);
@@ -172,10 +180,13 @@ pub trait Core {
                     Self::Fitness::eval_fitness(individual, trial)
                 })
                 .collect_vec();
-            
+
             let n_trials = scores.len();
-            let mut average = scores.into_iter().sum();
-            average = average / FitnessScore::Valid(n_trials as f64);
+            scores = scores
+                .into_iter()
+                .map(|s| if !s.is_finite() { default_fitness } else { s })
+                .collect_vec();
+            let average = scores.into_iter().sum::<f64>() / n_trials as f64;
             Self::Status::set_fitness(individual, average);
         }
     }
