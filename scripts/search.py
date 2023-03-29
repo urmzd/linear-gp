@@ -115,7 +115,7 @@ def build_objective(
 
     command = list(map(str, base_command))
     logger.trace(" ".join(command))
-    hyperparameters = None
+    pairings = []
 
     for _ in range(median_trials):
         # Run the command and capture the output
@@ -131,11 +131,12 @@ def build_objective(
 
         # Save hyperparameters
         hyperparameters = parsed_output[-1]
-
         champion = scores[-1]
-        champions.append(champion)
 
-    champion: float = statistics.median(champions)
+        pairings.append((champion, hyperparameters))
+
+    pairings.sort(key=lambda x: x[0])
+    champion, hyperparameters = pairings[len(pairings) // 2]
 
     if champion == float("nan"):
         raise optuna.TrialPruned()
