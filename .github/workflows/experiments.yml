@@ -57,15 +57,15 @@ jobs:
           compose-file: "docker-compose.yml"
           down-flags: "--rmi=all --volumes"
 
-      # - name: Search For Optimal Parameters
-      #   run: ./scripts/search_all.sh
+      - name: Search For Optimal Parameters
+        run: ./scripts/search_all.sh
+
+      - name: Run Experiments
+        run: ./scripts/run_experiments.py ${{ github.event.inputs.number_of_experiments }}
 
       - name: Run Baseline
         run: ./scripts/run_baseline.sh
         shell: bash
-
-      - name: Run Experiments
-        run: ./scripts/run_experiments.py ${{ github.event.inputs.number_of_experiments }}
 
       #- name: Run Benchmarks
       #run: cargo bench
