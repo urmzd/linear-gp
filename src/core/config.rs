@@ -16,7 +16,7 @@ use super::engines::core_engine::Core;
 
 // Generate a macro which takes hyperparameters, builds the necessary engine and run its
 // outputting the best score for each generation
-macro_rules! run_accuator {
+macro_rules! run_actuator {
     ($engine:ident, $hyperparameters:ident) => {
         for population in $hyperparameters
             .build_engine()
@@ -29,7 +29,7 @@ macro_rules! run_accuator {
 }
 
 #[derive(Parser, Deserialize, Serialize)]
-pub enum Accuator {
+pub enum Actuator {
     MountainCarQ(HyperParameters<GymRsQEngine<MountainCarEnv>>),
     MountainCarLGP(HyperParameters<GymRsEngine<MountainCarEnv>>),
     CartPoleQ(HyperParameters<GymRsQEngine<CartPoleEnv>>),
@@ -37,11 +37,11 @@ pub enum Accuator {
     IrisLgp(HyperParameters<IrisEngine>),
 }
 
-impl Accuator {
+impl Actuator {
     pub fn run(&mut self) {
         // Use the run engine macro for each branch of the enum
         match self {
-            Accuator::MountainCarQ(hyperparameters) => {
+            Actuator::MountainCarQ(hyperparameters) => {
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
 
                 hyperparameters
@@ -56,9 +56,9 @@ impl Accuator {
                     .n_inputs = 2;
                 hyperparameters.default_fitness = -200.0;
 
-                run_accuator!(GymRsQEngine, hyperparameters);
+                run_actuator!(GymRsQEngine, hyperparameters);
             }
-            Accuator::MountainCarLGP(hyperparameters) => {
+            Actuator::MountainCarLGP(hyperparameters) => {
                 hyperparameters
                     .program_parameters
                     .instruction_generator_parameters
@@ -69,9 +69,9 @@ impl Accuator {
                     .n_inputs = 2;
                 hyperparameters.default_fitness = -200.0;
 
-                run_accuator!(GymRsEngine, hyperparameters);
+                run_actuator!(GymRsEngine, hyperparameters);
             }
-            Accuator::IrisLgp(hyperparameters) => {
+            Actuator::IrisLgp(hyperparameters) => {
                 hyperparameters
                     .program_parameters
                     .instruction_generator_parameters
@@ -81,9 +81,9 @@ impl Accuator {
                     .instruction_generator_parameters
                     .n_inputs = 4;
 
-                run_accuator!(IrisEngine, hyperparameters);
+                run_actuator!(IrisEngine, hyperparameters);
             }
-            Accuator::CartPoleQ(hyperparameters) => {
+            Actuator::CartPoleQ(hyperparameters) => {
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
                 hyperparameters
                     .program_parameters
@@ -97,9 +97,9 @@ impl Accuator {
                     .n_inputs = 4;
                 hyperparameters.default_fitness = 500.0;
 
-                run_accuator!(GymRsQEngine, hyperparameters);
+                run_actuator!(GymRsQEngine, hyperparameters);
             }
-            Accuator::CartPoleLGP(hyperparameters) => {
+            Actuator::CartPoleLGP(hyperparameters) => {
                 hyperparameters
                     .program_parameters
                     .instruction_generator_parameters
@@ -110,7 +110,7 @@ impl Accuator {
                     .n_inputs = 4;
                 hyperparameters.default_fitness = 500.0;
 
-                run_accuator!(GymRsEngine, hyperparameters);
+                run_actuator!(GymRsEngine, hyperparameters);
             }
         }
     }
