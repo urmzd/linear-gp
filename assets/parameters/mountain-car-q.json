@@ -1,1 +1,28 @@
-{"default_fitness":-200.0,"population_size":100,"gap":0.5,"mutation_percent":0.5,"crossover_percent":0.5,"n_generations":100,"n_trials":100,"seed":null,"program_parameters":{"program_parameters":{"max_instructions":10,"instruction_generator_parameters":{"n_extras":1,"external_factor":2.0736207078591695,"n_actions":3,"n_inputs":2}},"consts":{"alpha":0.9973629496495072,"gamma":0.39901321062297757,"epsilon":0.8400771173101154,"alpha_decay":0.6876951222663272,"epsilon_decay":0.5125287069666674}}}
+{
+    "default_fitness": -200.0,
+    "population_size": 100,
+    "gap": 0.5,
+    "mutation_percent": 0.5,
+    "crossover_percent": 0.5,
+    "n_generations": 100,
+    "n_trials": 100,
+    "seed": null,
+    "program_parameters": {
+        "program_parameters": {
+            "max_instructions": 10,
+            "instruction_generator_parameters": {
+                "n_extras": 1,
+                "external_factor": 2.0736207078591695,
+                "n_actions": 3,
+                "n_inputs": 2
+            }
+        },
+        "consts": {
+            "alpha": 0.9973629496495072,
+            "gamma": 0.39901321062297757,
+            "epsilon": 0.8400771173101154,
+            "alpha_decay": 0.6876951222663272,
+            "epsilon_decay": 0.5125287069666674
+        }
+    }
+}
