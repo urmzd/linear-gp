@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-#!/bin/bash
-
 # Remove the file extension
 filename=$(basename -- "$1")
 filename="${filename%.*}"
