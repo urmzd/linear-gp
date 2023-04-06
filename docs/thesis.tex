@@ -8,7 +8,7 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{mathptmx}
-\usepackage[scaled=.90]{helvet}
+% \usepackage[scaled=.90]{helvet}
 \usepackage{courier}
 \usepackage{array}
 \usepackage[cache=false]{minted}
@@ -43,13 +43,13 @@
 \end{abstract}
 
 \begin{acknowledgements}
-This work is lovingly dedicated to all the wonderful people in my life who have supported me in my educational endeavors. My deepest gratitude goes to my brother Frebarz, who consistently encouraged me to reach new heights. To my mother, Khalima, as well as my sisters Rita and Rukhafzo, who have always been my motivation and continue to fuel my ambitions. And to my late father Muhammad Naim Nazar Muhammad (09/25/1958 - 06/29/2006), whose cherished memory and unwavering dedication to his passions have inspired my own journey.
+	This work is lovingly dedicated to all the wonderful people in my life who have supported me in my educational endeavors. My deepest gratitude goes to my brother Frebarz, who consistently encouraged me to reach new heights. To my mother, Khalima, as well as my sisters Rita and Rukhafzo, who have always been my motivation and continue to fuel my ambitions. And to my late father Muhammad Naim Nazar Muhammad (09/25/1958 - 06/29/2006), whose cherished memory and unwavering dedication to his passions have inspired my own journey.
 
-I also want to express my heartfelt appreciation to my dear friends, who have played an integral role in this adventure. Your friendship, understanding, and steadfast support have been invaluable as I navigated the challenges and victories of my academic pursuits. Each of you has been a constant source of encouragement, inspiration, and motivation. So, a heartfelt thank you to Kerel, Colin, Mohammed, Efaj, Assib, Jason, Chris, and everyone else who has been an active and cherished part of my life.
+	I also want to express my heartfelt appreciation to my dear friends, who have played an integral role in this adventure. Your friendship, understanding, and steadfast support have been invaluable as I navigated the challenges and victories of my academic pursuits. Each of you has been a constant source of encouragement, inspiration, and motivation. So, a heartfelt thank you to Kerel, Colin, Mohammed, Efaj, Assib, Jason, Chris, and everyone else who has been an active and cherished part of my life.
 
-Furthermore, I would like to extend a warm dedication to my young niece Eva. It brings me joy to see your curiosity and enthusiasm grow as you learn about the world around you. My hope is that my own journey inspires you to embrace your dreams and keep exploring new possibilities. Eva, remember that with determination, a curious mind, and the love and support of your family, you can achieve great things. Keep learning, and know that I will always be rooting for you.
+	Furthermore, I would like to extend a warm dedication to my young niece Eva. It brings me joy to see your curiosity and enthusiasm grow as you learn about the world around you. My hope is that my own journey inspires you to embrace your dreams and keep exploring new possibilities. Eva, remember that with determination, a curious mind, and the love and support of your family, you can achieve great things. Keep learning, and know that I will always be rooting for you.
 
-Finally, I am immensely grateful to Dr.\ Heywood for his patience and unwavering guidance throughout the entire process of this thesis, from its inception to completion. His mentorship has allowed me to immerse myself in the world of academia and further ignite my passion for learning and discovery. To each and every one of you who have played a significant role in my academic journey, I offer my sincere thanks and appreciation. Your love and support mean the world to me.
+	Finally, I am immensely grateful to Dr.\ Heywood for his patience and unwavering guidance throughout the entire process of this thesis, from its inception to completion. His mentorship has allowed me to immerse myself in the world of academia and further ignite my passion for learning and discovery. To each and every one of you who have played a significant role in my academic journey, I offer my sincere thanks and appreciation. Your love and support mean the world to me.
 \end{acknowledgements}
 
 \mainmatter
@@ -100,7 +100,7 @@ For instance, programs that do not use Q-Learning during their fitness evaluatio
 \end{itemize}
 For example, when referencing gap, we use the notation $H_{gap}$.
 
-\begin{table}[hb]
+\begin{table}[b]
 	\centering
 	\begin{tabular}{|l|l|l|}
 		\hline
@@ -164,9 +164,7 @@ The core LGP algorithm (Algorithm \ref{alg:core}) starts by initializing a popul
 The breeding operation, called Two-Point Crossover (Algorithm \ref{alg:breed}), is used to create offspring by combining parts of two parent programs. It starts by cloning the parent programs, selecting two random points in their instruction sets, and swapping the chunks between them. This operation generates two new offspring. However, only one of the offspring is selected at random and returned, as per the modification.
 The mutation operation, called Instruction Replacement (Algorithm \ref{alg:mutate}), is used to introduce random changes into a program. It selects a random instruction from the program and replaces it with a newly generated random instruction. Additionally, it may randomly decide to replace only certain properties (operation, source, or target) of the selected instruction.
 The program generation operation (Algorithm \ref{alg:generate}) creates a new program by generating a random number of instructions and a register set, consisting of action registers $H_{n\_actions}$ and working registers $H_{n\_extras}$. The resulting program is then returned.
-
-
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Core: Linear Genetic Programming}
 	\label{alg:core}
 	\begin{algorithmic}[1]
@@ -181,8 +179,7 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State \Return $P_{H_{n\_generations} - 1}$
 	\end{algorithmic}
 \end{algorithm}
-
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Breed: Two-Point Crossover}
 	\label{alg:breed}
 	\begin{algorithmic}[1]
@@ -194,8 +191,7 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State \textbf{return} $P_1', P_2'$
 	\end{algorithmic}
 \end{algorithm}
-
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Mutate: Instruction Replacement}
 	\label{alg:mutate}
 	\begin{algorithmic}[1]
@@ -210,8 +206,7 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State \textbf{return} $P$
 	\end{algorithmic}
 \end{algorithm}
-
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Generate: Program Generation}
 	\label{alg:generate}
 	\begin{algorithmic}[1]
@@ -230,28 +225,23 @@ Figure \ref{fig:iris_crossover}, ensures the two point crossover operation works
 Figure \ref{fig:iris_mutation} ensures that the mutation operation works.
 Figure \ref{fig:iris_full} ensures that recombination and mutation can work together to produce a better fitness score than either operation alone.
 We also outline the fitness algorithm used for the iris dataset in Algorithm \ref{alg:fitness-iris}.
-
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Fitness: Iris}
 	\label{alg:fitness-iris}
 	\begin{algorithmic}[1]
 		\State{$score \gets 0$}
 		\For{$I \in inputs$}
-		\State{$\Call{Execute}{P, I}$}
-		\State{$pred \gets \Call{Argmax}{output.action\_registers}$}
+		\State{$\Call{Execute}{Program, I}$}
+		\State{$pred \gets \Call{Argmax}{Program.Registers[0:H_{n\_actions}]}$}
 		\If{$pred = I$}
 		\State{$score \pm 1$}
 		\EndIf
 		\EndFor
 		\State{$accuracy \gets \frac{score}{|inputs|}$}
-		\State{$action \gets \Call{Argmax}{output.action\_registers}$}
-		\State{$observation, reward, done, info \gets env.step(action)$}
-		\State{$score \gets score + reward$}
-		\State return $score$
+		\State return $accuracy$
 	\end{algorithmic}
 \end{algorithm}
-
-\begin{figure}[hb]
+\begin{figure}[b]
 	\centering
 	\begin{subfloat}[LGP: Iris Reproduction]{\includegraphics[width=\textwidth]{iris_baseline.png}\label{fig:iris_baseline}}
 	\end{subfloat}
@@ -262,8 +252,7 @@ We also outline the fitness algorithm used for the iris dataset in Algorithm \re
 	\caption{Performance comparison of different genetic programming methods on iris dataset}
 	\label{fig:iris_comparison}
 \end{figure}
-
-\begin{figure}[hb]
+\begin{figure}[b]
 	\ContinuedFloat
 	\centering
 
@@ -285,7 +274,7 @@ For the cartpole-v1 environment, the agent's goal is to balance a pole on top of
 
 With this in mind, we outline an alternative fitness algorithm used to baseline the framework on classical reinforcement learning problems, Algorithm \ref{alg:fitness-gym}.
 
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Fitness: Gym Integration}
 	\label{alg:fitness-gym}
 	\begin{algorithmic}[1]
@@ -295,7 +284,7 @@ With this in mind, we outline an alternative fitness algorithm used to baseline 
 		\State{$Action \gets \Call{Argmax}{Program.Registers[0:H_{n\_actions}]}$}
 		\State{$Reward, Done \gets Sim(Action, Environment)$}
 		\If{Done}
-			\State break
+		\State break
 		\EndIf
 		\State{$score \pm reward$}
 		\EndFor
@@ -310,22 +299,22 @@ The Q Table consists of a 2D array of size $N_R \times N_A$, where $N_R$ is the 
 	Q(R[x_t], a_t) \leftarrow Q(R[x_t], a_t) + \alpha \left(r_{t+1} + \gamma \max_a Q(R[x_{t+1}], a) - Q(R[x_t], a_t)\right)
 \end{equation}
 In this formula, $Q$ represents the Q Table, $R$ represents the set of registers, $a$ represents the available actions, $r_{t+1}$ is the reward at time step $t+1$, $\alpha$ is the learning rate, and $\gamma$ is the discount factor. The value $x_t$ represents the current state, while $x_{t+1}$ represents the next state. The update rule calculates the new Q value for the current state-action pair based on the observed reward and the maximum Q value for the next state.
-Moreover, during register selection, we apply a greedy selection policy with probability $1-\epsilon$. $\epsilon$ exists to allow us to configure the exploration-exploitation factor, i.e., maintain register selection diversity.
+Moreover, during register selection, we apply a greedy selection policy (Algorithm \ref{alg:q-learning-greedy-selection}) with probability $1-\epsilon$. $\epsilon$ exists to allow us to configure the exploration-exploitation factor, i.e., maintain register selection diversity.
 
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Q Learning: $\epsilon$-Greedy Selection Policy}
 	\label{alg:q-learning-greedy-selection}
-	\begin{algorithmic}
-		\State $a \gets \Call{Argmax}{Q}$
+	\begin{algorithmic}[1]
+		\State $\Call{Execute}{Program, State}$
+		\State $WinningRegister \gets \Call{Argmax}{Program.Registers} $
+		\State $a \gets \Call{Argmax}{Q[WinningRegister]}$
 		\If{$\Call{Random}{0, 1} < \epsilon$}
-		\State $a \gets \Call{Random}{0, N_A}$
+		\State $a \gets \Call{Random}{0, H_{n\_actions}}$
 		\EndIf
 		\State \textbf{return} $a$
 	\end{algorithmic}
-
 \end{algorithm}
-
-\begin{algorithm}[hb]
+\begin{algorithm}[b]
 	\caption{Fitness: Q Learning}
 	\label{alg:fitness-q}
 	\begin{algorithmic}[1]
@@ -355,38 +344,35 @@ Moreover, during register selection, we apply a greedy selection policy with pro
 In this section, we outline the experiment setup used to evaluate the performance of the proposed Q-Learning LGP algorithm in comparison to the baseline LGP. The experiments were conducted in two main stages: hyperparameter optimization and performance evaluation.
 
 \subsection{Hyperparameter Optimization}
+First, we employed the Optuna hyperparameter optimization library \cite{akiba2019optuna} to identify the optimal parameters for the baseline LGP programs.
+Optuna is a flexible and efficient hyperparameter optimization framework that enables automatic exploration of hyperparameter spaces in pursuit of the best settings for a given algorithm.
+After determining the optimal parameters for the baseline LGP programs, we conducted a separate search using Optuna to find the optimal Q-Learning constants for the Reinforced Linear Genetic Programming (RLGP) programs.
+This process was aimed at fine-tuning the RLGP algorithm's performance by selecting the most suitable Q-Learning parameters based on the problem domain and the characteristics of the LGP framework.
+The resulting parameters were then integrated into the RLGP algorithm by extending the LGP parameters, as shown in \ref{code:cart-pole-parameters}, \ref{code:cart-pole-q-parameters}, \ref{code:mountain-car-parameters}, and \ref{code:mountain-car-q-parameters}.
 
-First, we utilized the Optuna hyperparameter optimization library \cite{akiba2019optuna} to find the optimal parameters for the baseline LGP programs.
-Optuna is a flexible and efficient hyperparameter optimization framework that allows for the automatic exploration of hyperparameter spaces in search of the best settings for a given algorithm.
-Once the optimal parameters for the baseline LGP programs were identified, we conducted a separate search using Optuna to find the optimal Q-Learning constants for the Reinforced Linear Genetic Programming (RLGP) programs.
-This process aimed to fine-tune the RLGP algorithm's performance by selecting the most suitable Q-Learning parameters based on the problem domain and the characteristics of the LGP framework.
-
-\begin{listing}[hb]
-	\centering
-	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-lgp.json}
-	\caption{Mountain Car Parameters}
-	\label{code:mountain-car-parameters}
-\end{listing}
-
-\begin{listing}[hb]
-	\centering
-	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-q.json}
-	\caption{Mountain Car Q-Learning Parameters}
-	\label{code:mountain-car-q-parameters}
-\end{listing}
-
-\begin{listing}[hb]
+\begin{listing}[b]
 	\centering
 	\inputminted[breaklines]{json}{../assets/parameters/cart-pole-lgp.json}
 	\caption{Cart Pole Parameters}
 	\label{code:cart-pole-parameters}
 \end{listing}
-
-\begin{listing}[hb]
+\begin{listing}[b]
 	\centering
 	\inputminted[breaklines]{json}{../assets/parameters/cart-pole-q.json}
 	\caption{Cart Pole Q-Learning Parameters}
 	\label{code:cart-pole-q-parameters}
+\end{listing}
+\begin{listing}[b]
+	\centering
+	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-lgp.json}
+	\caption{Mountain Car Parameters}
+	\label{code:mountain-car-parameters}
+\end{listing}
+\begin{listing}[b]
+	\centering
+	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-q.json}
+	\caption{Mountain Car Q-Learning Parameters}
+	\label{code:mountain-car-q-parameters}
 \end{listing}
 
 \subsection{Performance Evaluation}
@@ -414,7 +400,7 @@ Figure \ref{fig:cart-pole-comparison} shows a comparison of the two frameworks p
 averages a maximum of 213, a median of 207, a mean of 213 a minimum of 31. In both cases,the population of the respective frameworks were able solve the problem. Both frameworks were able
 to generate a program in the first 10 generations that was able to solve the problem. However, the RLGP framework immediately plateaus, whilst the LGP framework continues to improve until hitting a plateau at 80 generations.
 
-\begin{figure}[hb]
+\begin{figure}[b]
 	\centering
 	\begin{subfigure}{1.0\textwidth}
 		\includegraphics[width=\linewidth]{cart_pole_lgp.png}
@@ -442,7 +428,7 @@ to generate a program in the first 10 generations that was able to solve the pro
 
 Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that of the cartpole-v0 task. The RLGP framework falls short of solving the task, averaging a maximum of -114, a mean of-130, a median of -117 and a minimum of -200. On the other hand, the LGP framework is able to solve the task, albeit narrowly, averaging a maximum -106, a mean of -126, a median of -120,and a minimum -200. Here, we observe that RLGP achieves a higher median score, with a slight upward trend whereas the LGP achieves a lower median, with no particular trend in any direction. Both of these framework look as they quickly converge to a value and then plateau.
 
-\begin{figure}[hb]
+\begin{figure}[b]
 	\centering
 	\begin{subfigure}{1.0\textwidth}
 		\includegraphics[width=\linewidth]{mountain_car_lgp.png}
