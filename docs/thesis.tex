@@ -43,11 +43,13 @@
 \end{abstract}
 
 \begin{acknowledgements}
-	This piece of work is dedicated to all the special people in my life who have supported me during my pursuit of education. My heartfelt gratitude goes to my brother Frebarz, who consistently encouraged me to push a little further. To my mother, Khalima, as well as my sisters Rita and Rukhafzo, who were the original motivators and continue to be the driving force behind my ambition. And to my father Muhammad Naim Nazar Muhammad (09/25/1958 - 06/29/2006), whose memory and unwavering dedication to his passions have paved the way for mine.
+This work is lovingly dedicated to all the wonderful people in my life who have supported me in my educational endeavors. My deepest gratitude goes to my brother Frebarz, who consistently encouraged me to reach new heights. To my mother, Khalima, as well as my sisters Rita and Rukhafzo, who have always been my motivation and continue to fuel my ambitions. And to my late father Muhammad Naim Nazar Muhammad (09/25/1958 - 06/29/2006), whose cherished memory and unwavering dedication to his passions have inspired my own journey.
 
-	I would also like to extend my appreciation to my close friends, who have been an integral part of this journey. Your camaraderie, understanding, and unwavering support have been invaluable as I navigated the challenges and triumphs of my academic pursuits. You all have been a constant source of encouragement, inspiration, and motivation.
+I also want to express my heartfelt appreciation to my dear friends, who have played an integral role in this adventure. Your friendship, understanding, and steadfast support have been invaluable as I navigated the challenges and victories of my academic pursuits. Each of you has been a constant source of encouragement, inspiration, and motivation. So, a heartfelt thank you to Kerel, Colin, Mohammed, Efaj, Assib, Jason, Chris, and everyone else who has been an active and cherished part of my life.
 
-	Lastly, I am grateful to Dr.\ Heywood for his patience and steadfast support throughout the entire process of this thesis, from conception to completion. His guidance has given me the opportunity to delve into the world of academia and further ignite my passion for learning and discovery. To each and every one of you who have played a significant role in my academic journey, I offer my sincere thanks and appreciation.
+Furthermore, I would like to extend a warm dedication to my young niece Eva. It brings me joy to see your curiosity and enthusiasm grow as you learn about the world around you. My hope is that my own journey inspires you to embrace your dreams and keep exploring new possibilities. Eva, remember that with determination, a curious mind, and the love and support of your family, you can achieve great things. Keep learning, and know that I will always be rooting for you.
+
+Finally, I am immensely grateful to Dr.\ Heywood for his patience and unwavering guidance throughout the entire process of this thesis, from its inception to completion. His mentorship has allowed me to immerse myself in the world of academia and further ignite my passion for learning and discovery. To each and every one of you who have played a significant role in my academic journey, I offer my sincere thanks and appreciation. Your love and support mean the world to me.
 \end{acknowledgements}
 
 \mainmatter
@@ -77,15 +79,15 @@ It is important to note that RGP represents programs as decision trees, while LG
 We utilize the Rust programming language to develop a flexible and extensible framework for our research, available at \url{https://github.com/urmzd/linear-gp}. The framework is specifically designed to address a wide range of problems using LGP and RLGP while offering extensive configurability for experimentation purposes. The framework is composed of multiple engines, each implementing core functionalities essential for the evolutionary process. The primary engines we focus on are described below:
 
 \begin{itemize}
-    \item \textbf{Core}: This engine establishes the fundamental processes the framework employs to evolve a population of individuals. It initializes the population, iteratively evaluates the fitness of individuals, performs selection, and applies genetic operations such as mutation and crossover to generate offspring.
+	\item \textbf{Core}: This engine establishes the fundamental processes the framework employs to evolve a population of individuals. It initializes the population, iteratively evaluates the fitness of individuals, performs selection, and applies genetic operations such as mutation and crossover to generate offspring.
 
-    \item \textbf{Breed}: This engine is responsible for defining the genetic operators that facilitate the exchange of genetic material between individuals. In particular, it outlines how individuals undergo crossover, generating offspring with a combination of their parents' genetic code.
+	\item \textbf{Breed}: This engine is responsible for defining the genetic operators that facilitate the exchange of genetic material between individuals. In particular, it outlines how individuals undergo crossover, generating offspring with a combination of their parents' genetic code.
 
-    \item \textbf{Mutate}: This engine focuses on the stochastic modification of single individuals within the population. It dictates how genetic alterations are applied to individuals, potentially leading to the discovery of novel and improved solutions.
+	\item \textbf{Mutate}: This engine focuses on the stochastic modification of single individuals within the population. It dictates how genetic alterations are applied to individuals, potentially leading to the discovery of novel and improved solutions.
 
-    \item \textbf{Fitness}: The Fitness engine is tasked with evaluating the performance of each individual in the population. It measures how well an individual can solve the target problem, providing a basis for selection and guiding the evolutionary search process.
+	\item \textbf{Fitness}: The Fitness engine is tasked with evaluating the performance of each individual in the population. It measures how well an individual can solve the target problem, providing a basis for selection and guiding the evolutionary search process.
 
-    \item \textbf{Generate}: This engine is concerned with the stochastic creation of individuals and environments. It defines the methods for generating new individuals with random genetic material, as well as the procedures for initializing problem-specific environments that influence the evaluation of individuals.
+	\item \textbf{Generate}: This engine is concerned with the stochastic creation of individuals and environments. It defines the methods for generating new individuals with random genetic material, as well as the procedures for initializing problem-specific environments that influence the evaluation of individuals.
 \end{itemize}
 
 \subsection{Framework Configuration \& Hyperparameters}
@@ -98,49 +100,49 @@ For instance, programs that do not use Q-Learning during their fitness evaluatio
 \end{itemize}
 For example, when referencing gap, we use the notation $H_{gap}$.
 
-\begin{table}[t]
-    \centering
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \textbf{Property} & \textbf{Type} & \textbf{Value Range} \\
-        \hline
-        default\_fitness & float & - \\
-        \hline
-        population\_size & int & [0,) \\
-        \hline
-        gap & float & (0, 1.) \\
-        \hline
-        mutation\_percent & float & [0, 1.0] \\
-        \hline
-        crossover\_percent & float & [0, 1.0] \\
-        \hline
-        n\_generations & int & [0,) \\
-        \hline
-        n\_trials & int & [1,) \\
-        \hline
-        seed & int or None & [0,) \\
-        \hline
-        max\_instructions & int & [1,) \\
-        \hline
-        n\_extras & int & [1,) \\
-        \hline
-        external\_factor & float & [0,) \\
-        \hline
-        n\_actions & int & - \\
-        \hline
-        n\_inputs & int & - \\
-        \hline
-        alpha & float & [0, 1.0] \\
-        \hline
-        gamma & float & [0, 1.0] \\
-        \hline
-        epsilon & float & [0, 1] \\
-        \hline
-        alpha\_decay & float & [0, 1] \\
-        \hline
-        epsilon\_decay & float & [0, 1] \\
-        \hline
-    \end{tabular}
+\begin{table}[hb]
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Property}  & \textbf{Type} & \textbf{Value Range} \\
+		\hline
+		default\_fitness   & float         & -                    \\
+		\hline
+		population\_size   & int           & [0,)                 \\
+		\hline
+		gap                & float         & (0, 1.)              \\
+		\hline
+		mutation\_percent  & float         & [0, 1.0]             \\
+		\hline
+		crossover\_percent & float         & [0, 1.0]             \\
+		\hline
+		n\_generations     & int           & [0,)                 \\
+		\hline
+		n\_trials          & int           & [1,)                 \\
+		\hline
+		seed               & int or None   & [0,)                 \\
+		\hline
+		max\_instructions  & int           & [1,)                 \\
+		\hline
+		n\_extras          & int           & [1,)                 \\
+		\hline
+		external\_factor   & float         & [0,)                 \\
+		\hline
+		n\_actions         & int           & -                    \\
+		\hline
+		n\_inputs          & int           & -                    \\
+		\hline
+		alpha              & float         & [0, 1.0]             \\
+		\hline
+		gamma              & float         & [0, 1.0]             \\
+		\hline
+		epsilon            & float         & [0, 1]               \\
+		\hline
+		alpha\_decay       & float         & [0, 1]               \\
+		\hline
+		epsilon\_decay     & float         & [0, 1]               \\
+		\hline
+	\end{tabular}
 	\caption{Hyperparameter}
 	\label{table:hyperparameters}
 \end{table}
@@ -154,7 +156,7 @@ The Q-learning algorithm also utilizes various hyperparameters. The initial lear
 
 \subsection{Program Representation}
 A program can be thought of as a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index, the operation to be performed and a mode flag. The mode flag is used to determine where the source register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environment state). We can represent the program as a sequence of instructions in the following format. $$R[y] \leftarrow R[y] \langle op \rangle  R[x]$$ $R$ represents the registers, $x$ and $y$ represent the and target register indices respectively, and $\langle op \rangle$ represents the operation to be performed. In our case, we only allow four operations; addition $(+)$,
-subtraction $(-)$, multiplication $(\times)$ and division $(\div)$ by $2$. Division is done by a non-zero constant to prevent division by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem. The size of the register set consists of $N_a$ which accounts for the number of actions, and $N_w$, the working registers which allow for intermediate calculations.
+subtraction $(-)$, multiplication $(\times)$ and division $(\div)$ by $2$. Division is done by a non-zero constant to prevent division by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem. The size of the register set consists of $H_{n\_actions} +  H_{n\_extras}$.
 
 \subsection{The Algorithm}
 In this work, we present a linear genetic programming (LGP) approach to evolve a population of programs to solve a given task. The core algorithm, as well as supporting operations, are outlined below.
@@ -176,7 +178,7 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State $P_{i+1} \gets \Call{Variation}{P_{i+1}}$
 		\Comment select individuals through tournament selection and apply variation operations
 		\EndFor
-    \State \Return $P_{H_{n\_generations} - 1}$
+		\State \Return $P_{H_{n\_generations} - 1}$
 	\end{algorithmic}
 \end{algorithm}
 
@@ -213,9 +215,9 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 	\caption{Generate: Program Generation}
 	\label{alg:generate}
 	\begin{algorithmic}[1]
-		\State{$n \gets \Call{Random}{1, max\_instructions}$}
-		\State{$R \gets \Call{GenerateRegisterSet}{A + W}$}
-		\State{$I \gets \Call{GenerateInstructions}{n}$}
+		\State{$n\_instructions \gets \Call{Random}{1, max\_instructions}$}
+		\State{$R \gets \Call{GenerateRegisterSet}{H_{n\_actions} + H_{n\_extras}}$}
+		\State{$I \gets \Call{GenerateInstructions}{n\_instructions}$}
 		\State{$P \gets \Call{CreateProgram}{R, I}$}
 		\State \textbf{return} $P$
 	\end{algorithmic}
@@ -234,11 +236,11 @@ We also outline the fitness algorithm used for the iris dataset in Algorithm \re
 	\label{alg:fitness-iris}
 	\begin{algorithmic}[1]
 		\State{$score \gets 0$}
-		\For{$i \in inputs$}
-		\State{$output \gets \Call{Execute}{P, i}$}
-		\State{$action \gets \Call{Argmax}{output.action\_registers}$}
-		\If{$action = expected\_outputs[i]$}
-		\State{$score \gets score + 1$}
+		\For{$I \in inputs$}
+		\State{$\Call{Execute}{P, I}$}
+		\State{$pred \gets \Call{Argmax}{output.action\_registers}$}
+		\If{$pred = I$}
+		\State{$score \pm 1$}
 		\EndIf
 		\EndFor
 		\State{$accuracy \gets \frac{score}{|inputs|}$}
@@ -262,15 +264,15 @@ We also outline the fitness algorithm used for the iris dataset in Algorithm \re
 \end{figure}
 
 \begin{figure}[hb]
-  \ContinuedFloat
+	\ContinuedFloat
 	\centering
 
 	\begin{subfloat}[LGP: Iris Mutation]{\includegraphics[width=\textwidth]{iris_mutation.png}\label{fig:iris_mutation}}
 	\end{subfloat}
 
 	\begin{subfloat}[LGP: Iris Recombination \& Mutation]{\includegraphics[width=\textwidth]{iris_full.png}\label{fig:iris_full}}
-  \end{subfloat}
-  \caption{(Continued) Performance comparison of different genetic programming methods on iris dataset}
+	\end{subfloat}
+	\caption{(Continued) Performance comparison of different genetic programming methods on iris dataset}
 	\label{fig:iris_comparison_continued}
 \end{figure}
 
@@ -288,11 +290,14 @@ With this in mind, we outline an alternative fitness algorithm used to baseline 
 	\label{alg:fitness-gym}
 	\begin{algorithmic}[1]
 		\State{$score \gets 0$}
-		\For{$i \in N_{EPISODES}$}
-		\State{$output \gets \Call{Execute}{P, observation}$}
-		\State{$action \gets \Call{Argmax}{output.action\_registers}$}
-		\State{$observation, reward, done, info \gets env.step(action)$}
-		\State{$score \gets score + reward$}
+		\For{$i\in N_{Episodes}$}
+		\State{$\Call{Execute}{Program, Environment}$}
+		\State{$Action \gets \Call{Argmax}{Program.Registers[0:H_{n\_actions}]}$}
+		\State{$Reward, Done \gets Sim(Action, Environment)$}
+		\If{Done}
+			\State break
+		\EndIf
+		\State{$score \pm reward$}
 		\EndFor
 		\State \textbf{return} $score$
 	\end{algorithmic}
@@ -305,18 +310,18 @@ The Q Table consists of a 2D array of size $N_R \times N_A$, where $N_R$ is the 
 	Q(R[x_t], a_t) \leftarrow Q(R[x_t], a_t) + \alpha \left(r_{t+1} + \gamma \max_a Q(R[x_{t+1}], a) - Q(R[x_t], a_t)\right)
 \end{equation}
 In this formula, $Q$ represents the Q Table, $R$ represents the set of registers, $a$ represents the available actions, $r_{t+1}$ is the reward at time step $t+1$, $\alpha$ is the learning rate, and $\gamma$ is the discount factor. The value $x_t$ represents the current state, while $x_{t+1}$ represents the next state. The update rule calculates the new Q value for the current state-action pair based on the observed reward and the maximum Q value for the next state.
-Moreover, during register selection, we apply a greedy selection policy with probability $1-\epsilon$, which allows us to configure the exploration-exploitation factor.
+Moreover, during register selection, we apply a greedy selection policy with probability $1-\epsilon$. $\epsilon$ exists to allow us to configure the exploration-exploitation factor, i.e., maintain register selection diversity.
 
 \begin{algorithm}[hb]
-    \caption{Q Learning: $\epsilon$-Greedy Selection Policy}
-    \label{alg:q-learning-greedy-selection}
-    \begin{algorithmic}
-        \State $a \gets \Call{Argmax}{Q}$
-        \If{$\Call{Random}{0, 1} < \epsilon$}
-        \State $a \gets \Call{Random}{0, N_A}$
-        \EndIf
-        \State \textbf{return} $a$
-    \end{algorithmic}
+	\caption{Q Learning: $\epsilon$-Greedy Selection Policy}
+	\label{alg:q-learning-greedy-selection}
+	\begin{algorithmic}
+		\State $a \gets \Call{Argmax}{Q}$
+		\If{$\Call{Random}{0, 1} < \epsilon$}
+		\State $a \gets \Call{Random}{0, N_A}$
+		\EndIf
+		\State \textbf{return} $a$
+	\end{algorithmic}
 
 \end{algorithm}
 
@@ -353,7 +358,7 @@ In this section, we outline the experiment setup used to evaluate the performanc
 
 First, we utilized the Optuna hyperparameter optimization library \cite{akiba2019optuna} to find the optimal parameters for the baseline LGP programs.
 Optuna is a flexible and efficient hyperparameter optimization framework that allows for the automatic exploration of hyperparameter spaces in search of the best settings for a given algorithm.
-Once the optimal parameters for the baseline LGP programs were identified, we conducted a separate search using Optuna to find the optimal Q-Learning constants for the Reinforced Linear Genetic Programming (RLGP) programs. 
+Once the optimal parameters for the baseline LGP programs were identified, we conducted a separate search using Optuna to find the optimal Q-Learning constants for the Reinforced Linear Genetic Programming (RLGP) programs.
 This process aimed to fine-tune the RLGP algorithm's performance by selecting the most suitable Q-Learning parameters based on the problem domain and the characteristics of the LGP framework.
 
 \begin{listing}[hb]
@@ -425,12 +430,13 @@ to generate a program in the first 10 generations that was able to solve the pro
 	\caption{Comparison of RLGP vs LGP Performance on Cart Pole}
 	\label{fig:cart-pole-comparison}
 \end{figure}
-%[
-  %table head={
-      %\caption{Cart Pole RLGP Aggregated Results}
-      %\label{table:cart-pole-rlgp-results}\\
-    %}]
-\csvautolongtable{../assets/experiments/aggregate_results/cart_pole_q.csv}
+
+%\csvautolongtable[
+%after head={
+%\caption{Cart Pole RLGP Aggregated Results}
+%\label{table:cart-pole-rlgp-results}\\
+%}
+%]{../assets/experiments/aggregate_results/cart_pole_q.csv}
 
 \subsection{Mountain Car}
 
