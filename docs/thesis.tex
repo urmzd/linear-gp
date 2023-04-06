@@ -92,7 +92,7 @@ We utilize the Rust programming language to develop a flexible and extensible fr
 
 \subsection{Framework Configuration \& Hyperparameters}
 
-The available framework configuration properties are listed in \ref{table:hyperparameters}. Note that note all configurations are always used.
+The available framework configuration properties are listed in \ref{tab:hyperparameters}. Note that note all configurations are always used.
 For instance, programs that do not use Q-Learning during their fitness evaluation, $H_{alpha}$, $H_{gamma}$, $H_{epsilon}$, $H_{alpha\_decay}$ or $H_{epsilon\_decay}$ is not required.
 \begin{itemize}
 	\item $H$ denotes the set of hyperparameters.
@@ -100,7 +100,7 @@ For instance, programs that do not use Q-Learning during their fitness evaluatio
 \end{itemize}
 For example, when referencing gap, we use the notation $H_{gap}$.
 
-\begin{table}[b]
+\begin{table}[!htb]
 	\centering
 	\begin{tabular}{|l|l|l|}
 		\hline
@@ -144,7 +144,7 @@ For example, when referencing gap, we use the notation $H_{gap}$.
 		\hline
 	\end{tabular}
 	\caption{Hyperparameter}
-	\label{table:hyperparameters}
+	\label{tab:hyperparameters}
 \end{table}
 The genetic algorithm involves several hyperparameters that influence its behavior. \texttt{default\_fitness} is the default fitness value assigned to individuals in the population when there is an issue with their fitness evaluation. The number of individuals in each generation is determined by \texttt{population\_size}. The \texttt{gap} parameter represents the percentage of the population that is replaced with offspring in each generation. The \texttt{mutation\_percent} and \texttt{crossover\_percent} values control the proportions of individuals generated through mutation and crossover processes, respectively.
 
@@ -155,7 +155,11 @@ The \texttt{external\_factor} parameter adjusts the amplification or reduction o
 The Q-learning algorithm also utilizes various hyperparameters. The initial learning rate, \texttt{alpha}, sets the pace for updating action value estimates. The \texttt{gamma} parameter acts as the discount factor for future rewards, affecting the balance between immediate and long-term rewards. The probability of selecting a random action is controlled by \texttt{epsilon}, allowing the algorithm to explore the state space. Over time, the learning rate and exploration rate decay at rates specified by \texttt{alpha\_decay} and \texttt{epsilon\_decay}, respectively, allowing a shift from exploration to exploitation.
 
 \subsection{Program Representation}
-A program can be thought of as a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index, the operation to be performed and a mode flag. The mode flag is used to determine where the source register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environment state). We can represent the program as a sequence of instructions in the following format. $$R[y] \leftarrow R[y] \langle op \rangle  R[x]$$ $R$ represents the registers, $x$ and $y$ represent the and target register indices respectively, and $\langle op \rangle$ represents the operation to be performed. In our case, we only allow four operations; addition $(+)$,
+A program can be thought of as a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index, the operation to be performed and a mode flag. The mode flag is used to determine where the source register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environment state). We can represent the program as a sequence of instructions in the following format.
+\begin{equation}
+	R[y] \leftarrow R[y] \langle op \rangle  R[x]
+\end{equation}
+$R$ represents the registers, $x$ and $y$ represent the and target register indices respectively, and $\langle op \rangle$ represents the operation to be performed. In our case, we only allow four operations; addition $(+)$,
 subtraction $(-)$, multiplication $(\times)$ and division $(\div)$ by $2$. Division is done by a non-zero constant to prevent division by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem. The size of the register set consists of $H_{n\_actions} +  H_{n\_extras}$.
 
 \subsection{The Algorithm}
@@ -164,7 +168,7 @@ The core LGP algorithm (Algorithm \ref{alg:core}) starts by initializing a popul
 The breeding operation, called Two-Point Crossover (Algorithm \ref{alg:breed}), is used to create offspring by combining parts of two parent programs. It starts by cloning the parent programs, selecting two random points in their instruction sets, and swapping the chunks between them. This operation generates two new offspring. However, only one of the offspring is selected at random and returned, as per the modification.
 The mutation operation, called Instruction Replacement (Algorithm \ref{alg:mutate}), is used to introduce random changes into a program. It selects a random instruction from the program and replaces it with a newly generated random instruction. Additionally, it may randomly decide to replace only certain properties (operation, source, or target) of the selected instruction.
 The program generation operation (Algorithm \ref{alg:generate}) creates a new program by generating a random number of instructions and a register set, consisting of action registers $H_{n\_actions}$ and working registers $H_{n\_extras}$. The resulting program is then returned.
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Core: Linear Genetic Programming}
 	\label{alg:core}
 	\begin{algorithmic}[1]
@@ -179,7 +183,7 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State \Return $P_{H_{n\_generations} - 1}$
 	\end{algorithmic}
 \end{algorithm}
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Breed: Two-Point Crossover}
 	\label{alg:breed}
 	\begin{algorithmic}[1]
@@ -188,10 +192,10 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State{$I_2 \gets P_2'.instructions$}
 		\State{$p_1, p_2 \gets \Call{RandomChunk}{I_1, I_2}$}
 		\State{$I_1[p_1:p_2], I_2[p_1:p_2] \gets I_2[p_1:p_2], I_1[p_1:p_2]$}
-		\State \textbf{return} $P_1', P_2'$
+		\State \textbf{return} $\Call{RandomOne}{P_1', P_2'}$
 	\end{algorithmic}
 \end{algorithm}
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Mutate: Instruction Replacement}
 	\label{alg:mutate}
 	\begin{algorithmic}[1]
@@ -206,7 +210,7 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State \textbf{return} $P$
 	\end{algorithmic}
 \end{algorithm}
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Generate: Program Generation}
 	\label{alg:generate}
 	\begin{algorithmic}[1]
@@ -225,7 +229,7 @@ Figure \ref{fig:iris_crossover}, ensures the two point crossover operation works
 Figure \ref{fig:iris_mutation} ensures that the mutation operation works.
 Figure \ref{fig:iris_full} ensures that recombination and mutation can work together to produce a better fitness score than either operation alone.
 We also outline the fitness algorithm used for the iris dataset in Algorithm \ref{alg:fitness-iris}.
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Fitness: Iris}
 	\label{alg:fitness-iris}
 	\begin{algorithmic}[1]
@@ -241,7 +245,7 @@ We also outline the fitness algorithm used for the iris dataset in Algorithm \re
 		\State return $accuracy$
 	\end{algorithmic}
 \end{algorithm}
-\begin{figure}[b]
+\begin{figure}[!htb]
 	\centering
 	\begin{subfloat}[LGP: Iris Reproduction]{\includegraphics[width=\textwidth]{iris_baseline.png}\label{fig:iris_baseline}}
 	\end{subfloat}
@@ -252,7 +256,7 @@ We also outline the fitness algorithm used for the iris dataset in Algorithm \re
 	\caption{Performance comparison of different genetic programming methods on iris dataset}
 	\label{fig:iris_comparison}
 \end{figure}
-\begin{figure}[b]
+\begin{figure}[!htb]
 	\ContinuedFloat
 	\centering
 
@@ -274,7 +278,7 @@ For the cartpole-v1 environment, the agent's goal is to balance a pole on top of
 
 With this in mind, we outline an alternative fitness algorithm used to baseline the framework on classical reinforcement learning problems, Algorithm \ref{alg:fitness-gym}.
 
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Fitness: Gym Integration}
 	\label{alg:fitness-gym}
 	\begin{algorithmic}[1]
@@ -301,7 +305,7 @@ The Q Table consists of a 2D array of size $N_R \times N_A$, where $N_R$ is the 
 In this formula, $Q$ represents the Q Table, $R$ represents the set of registers, $a$ represents the available actions, $r_{t+1}$ is the reward at time step $t+1$, $\alpha$ is the learning rate, and $\gamma$ is the discount factor. The value $x_t$ represents the current state, while $x_{t+1}$ represents the next state. The update rule calculates the new Q value for the current state-action pair based on the observed reward and the maximum Q value for the next state.
 Moreover, during register selection, we apply a greedy selection policy (Algorithm \ref{alg:q-learning-greedy-selection}) with probability $1-\epsilon$. $\epsilon$ exists to allow us to configure the exploration-exploitation factor, i.e., maintain register selection diversity.
 
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Q Learning: $\epsilon$-Greedy Selection Policy}
 	\label{alg:q-learning-greedy-selection}
 	\begin{algorithmic}[1]
@@ -314,7 +318,7 @@ Moreover, during register selection, we apply a greedy selection policy (Algorit
 		\State \textbf{return} $WinningRegister, Action$
 	\end{algorithmic}
 \end{algorithm}
-\begin{algorithm}[b]
+\begin{algorithm}[!htb]
 	\caption{Fitness: Q Learning}
 	\label{alg:fitness-q}
 	\begin{algorithmic}[1]
@@ -349,25 +353,25 @@ After determining the optimal parameters for the baseline LGP programs, we condu
 This process was aimed at fine-tuning the RLGP algorithm's performance by selecting the most suitable Q-Learning parameters based on the problem domain and the characteristics of the LGP framework.
 The resulting parameters were then integrated into the RLGP algorithm by extending the LGP parameters, as shown in \ref{code:cart-pole-parameters}, \ref{code:cart-pole-q-parameters}, \ref{code:mountain-car-parameters}, and \ref{code:mountain-car-q-parameters}.
 
-\begin{listing}[b]
+\begin{listing}[!htb]
 	\centering
 	\inputminted[breaklines]{json}{../assets/parameters/cart-pole-lgp.json}
 	\caption{Cart Pole Parameters}
 	\label{code:cart-pole-parameters}
 \end{listing}
-\begin{listing}[b]
+\begin{listing}[!htb]
 	\centering
 	\inputminted[breaklines]{json}{../assets/parameters/cart-pole-q.json}
 	\caption{Cart Pole Q-Learning Parameters}
 	\label{code:cart-pole-q-parameters}
 \end{listing}
-\begin{listing}[b]
+\begin{listing}[!htb]
 	\centering
 	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-lgp.json}
 	\caption{Mountain Car Parameters}
 	\label{code:mountain-car-parameters}
 \end{listing}
-\begin{listing}[b]
+\begin{listing}[!htb]
 	\centering
 	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-q.json}
 	\caption{Mountain Car Q-Learning Parameters}
@@ -395,7 +399,8 @@ Once the results are explained, we analyze them to provide insight into the impa
 
 \subsection{Cart Pole}
 
-Figure \ref{fig:cart-pole-comparison} shows a comparison of the two frameworks performance on the cartpole-v0 task. Over 100 experiments, we observe that LGP averages a maximum of 466, a median of 454, a median of 466 and minimum of 128. On the other hand, RLGP
+Figure \ref{fig:cart-pole-comparison} with reference tables \ref{tab:cart-pole-lgp} and \ref{tab:cart-pole-q} show a comparison of the two frameworks performance on the cartpole-v0 task. 
+Over 100 experiments, we observe that LGP averages a maximum of 466, a median of 454, a median of 466 and minimum of 128. On the other hand, RLGP
 averages a maximum of 213, a median of 207, a mean of 213 a minimum of 31. In both cases,the population of the respective frameworks were able solve the problem. Both frameworks were able
 to generate a program in the first 10 generations that was able to solve the problem. However, the RLGP framework immediately plateaus, whilst the LGP framework continues to improve until hitting a plateau at 80 generations.
 
@@ -416,16 +421,10 @@ to generate a program in the first 10 generations that was able to solve the pro
 	\label{fig:cart-pole-comparison}
 \end{figure}
 
-%\csvautolongtable[
-%after head={
-%\caption{Cart Pole RLGP Aggregated Results}
-%\label{table:cart-pole-rlgp-results}\\
-%}
-%]{../assets/experiments/aggregate_results/cart_pole_q.csv}
 
 \subsection{Mountain Car}
 
-Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that of the cartpole-v0 task. The RLGP framework falls short of solving the task, averaging a maximum of -114, a mean of-130, a median of -117 and a minimum of -200. On the other hand, the LGP framework is able to solve the task, albeit narrowly, averaging a maximum -106, a mean of -126, a median of -120,and a minimum -200. Here, we observe that RLGP achieves a higher median score, with a slight upward trend whereas the LGP achieves a lower median, with no particular trend in any direction. Both of these framework look as they quickly converge to a value and then plateau.
+Figure \ref{fig:mountain-car-comparison} alongside tables \ref{tab:mountain-car-lgp} and \ref{tab:mountain-car-q} demonstrates a similar pattern to that of the cartpole-v0 task. The RLGP framework falls short of solving the task, averaging a maximum of -114, a mean of-130, a median of -117 and a minimum of -200. On the other hand, the LGP framework is able to solve the task, albeit narrowly, averaging a maximum -106, a mean of -126, a median of -120,and a minimum -200. Here, we observe that RLGP achieves a higher median score, with a slight upward trend whereas the LGP achieves a lower median, with no particular trend in any direction. Both of these framework look as they quickly converge to a value and then plateau.
 
 \begin{figure}[b]
 	\centering
@@ -444,7 +443,6 @@ Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that 
 	\label{fig:mountain-car-comparison}
 \end{figure}
 
-
 \section{Discussion}
 
 Initially, we would have expected for the frameworks to perform better on mountain-car-v0 than cart-pole-v1 as the state space is much simpler (one consists of 2 state properties whilst the other contains four). However, the opposite seems to be true,
@@ -456,6 +454,46 @@ Moreover, the difference in performance may also be attributed to the limitation
 we could've seen better results if Q learning parameters was not simply a wrapper on top of a preexisting configuration.
 
 In conclusion, our experiments demonstrate that the LGP framework outperforms the RLGP framework in both cart-pole and mountain car tasks. Although both frameworks were able to solve the cart-pole task, RLGP failed to solve the mountain car task, suggesting that the integration of Q-learning into genetic programming may not always lead to improved performance. Future work could involve investigating alternative reinforcement learning algorithms, adapting exploration strategies, or incorporating domain knowledge to enhance the performance of genetic programming-based frameworks. Additionally, it would be valuable to test these frameworks on a broader range of tasks to better understand their strengths and limitations.
+
+\csvautolongtable[
+	table head=\caption{LGP Cart Pole Aggregated Results}\label{tab:cart-pole-lgp}\\\hline
+	\csvlinetotablerow\\\hline
+	\endfirsthead\hline
+	\csvlinetotablerow\\\hline
+	\endhead\hline
+	\endfoot,
+	respect all
+]{../assets/experiments/aggregate_results/cart_pole_lgp.csv}
+
+\csvautolongtable[
+	table head=\caption{RLGP Cart Pole Aggregated Results}\label{tab:cart-pole-q}\\\hline
+	\csvlinetotablerow\\\hline
+	\endfirsthead\hline
+	\csvlinetotablerow\\\hline
+	\endhead\hline
+	\endfoot,
+	respect all
+]{../assets/experiments/aggregate_results/cart_pole_q.csv}
+
+ \csvautolongtable[
+	 table head=\caption{LGP Mountain Car Aggregated Results}\label{tab:mountain-car-lgp}\\\hline
+	 \csvlinetotablerow\\\hline
+	 \endfirsthead\hline
+	 \csvlinetotablerow\\\hline
+	 \endhead\hline
+	 \endfoot,
+	 respect all
+ ]{../assets/experiments/aggregate_results/mountain_car_lgp.csv}
+
+ \csvautolongtable[
+	 table head=\caption{RLGP Mountain Car Aggregated Results}\label{tab:mountain-car-q}\\\hline
+	 \csvlinetotablerow\\\hline
+	 \endfirsthead\hline
+	 \csvlinetotablerow\\\hline
+	 \endhead\hline
+	 \endfoot,
+	 respect all
+ ]{../assets/experiments/aggregate_results/mountain_car_q.csv}
 
 \chapter{Conclusion}
 
