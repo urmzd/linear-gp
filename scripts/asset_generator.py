@@ -66,10 +66,10 @@ def generate_tables(
 
     # Create a pandas DataFrame with the statistics.
     data: Dict[str, Any] = {
-        "Max Fitness": max_fitness,
-        "Mean Fitness": mean_fitness,
-        "Median Fitness": median_fitness,
-        "Min Fitness": min_fitness,
+        "Max": max_fitness,
+        "Mean": mean_fitness,
+        "Median": median_fitness,
+        "Min": min_fitness,
     }
 
     df: pd.DataFrame = pd.DataFrame(data)

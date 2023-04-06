@@ -11,8 +11,10 @@
 \usepackage[scaled=.90]{helvet}
 \usepackage{courier}
 \usepackage{array}
-\usepackage{minted}
-\usepackage{listings}
+\usepackage[cache=false]{minted}
+\usepackage{csvsimple-l3}
+\usepackage{longtable}
+\usepackage{tablefootnote}
 
 \graphicspath{{../assets/experiments/aggregate_results/figures}{../assets/experiments/baseline/figures}}
 
@@ -37,14 +39,13 @@
 \nocite{*}
 
 \begin{abstract}
-	Linear Genetic Programming (LGP) is a powerful technique that allows for a variety of problems to be solved using a linear representation of programs. However, there still exists some limitations to the technique,
-	such as the need for humans to explicitly map registers to actions. This thesis proposes a novel approach that uses Q-Learning on top of LGP (RLGP) to learn the optimal register-action assignments. In doing so, we introduce a new framework `linear-gp' written in memory-safe Rust that allows for extensive experimentation for future works.
+	Linear Genetic Programming (LGP) is a powerful technique that allows for a variety of problems to be solved using a linear representation of programs. However, there still exists some limitations to the technique, such as the need for humans to explicitly map registers to actions. This thesis proposes a novel approach that uses Q-Learning on top of LGP, Reinforced Linear Genetic Programming (RLGP) to learn the optimal register-action assignments. In doing so, we introduce a new framework `linear-gp' written in memory-safe Rust that allows for extensive experimentation for future works.
 \end{abstract}
 
 \begin{acknowledgements}
-	This piece of work is dedicated to all the special people in my life who have supported me during my pursuit of education. My heartfelt gratitude goes to my brother Frebarz, who consistently encouraged me to push a little further. To my mother, Khalima, as well as my sisters Rita and Rukhafzo, who were the original motivators and continue to be the driving force behind my ambition. And to my father Mukhammadnaim Nazar Muhammad, whose memory and unwavering dedication to his passions have paved the way for mine.
+	This piece of work is dedicated to all the special people in my life who have supported me during my pursuit of education. My heartfelt gratitude goes to my brother Frebarz, who consistently encouraged me to push a little further. To my mother, Khalima, as well as my sisters Rita and Rukhafzo, who were the original motivators and continue to be the driving force behind my ambition. And to my father Muhammad Naim Nazar Muhammad (09/25/1958 - 06/29/2006), whose memory and unwavering dedication to his passions have paved the way for mine.
 
-	I would also like to extend my appreciation to my close friends, who have been an integral part of this journey. Your camaraderie, understanding, and unwavering support have been invaluable as I navigated the challenges and triumphs of my academic pursuits. You have not only provided me with a safe and nurturing environment to grow, but you have also been a constant source of encouragement, inspiration, and motivation.
+	I would also like to extend my appreciation to my close friends, who have been an integral part of this journey. Your camaraderie, understanding, and unwavering support have been invaluable as I navigated the challenges and triumphs of my academic pursuits. You all have been a constant source of encouragement, inspiration, and motivation.
 
 	Lastly, I am grateful to Dr.\ Heywood for his patience and steadfast support throughout the entire process of this thesis, from conception to completion. His guidance has given me the opportunity to delve into the world of academia and further ignite my passion for learning and discovery. To each and every one of you who have played a significant role in my academic journey, I offer my sincere thanks and appreciation.
 \end{acknowledgements}
@@ -53,116 +54,146 @@
 
 \chapter{Introduction}
 The rapid growth of technology and the increasing complexity of real-world problems demand efficient and effective optimization techniques. Evolutionary algorithms (EAs) have demonstrated significant potential in addressing these challenges by emulating the process of natural selection to search for optimal solutions \cite{poli08}. Linear Genetic Programming (LGP), a branch of Genetic Programming (GP), is one such EA that has gained attention in the field of computer science for its unique approach to tackling complex problems \cite{song03}. By representing programs as a sequence of linear instructions, similar to what is found when programming imperatively, LGP allows for solutions that are not only potentially more interpretable but also more efficient to execute and manipulate.
-
-However, one problem that arises in LGP is that programs within the framework require humans to explicitly configure the action-register pairings. A pairing consists of a register and an associated action that the framework executes upon a program's completion. With the use of these explicit action-register pairs, we reduce the exploration capabilities of the programs, leading to suboptimal solutions. To address this issue, we propose a novel approach that combines the power of LGP with the Q-Learning algorithm, a popular model-free reinforcement learning technique \cite{sutton2018reinforcement}.
-
 The resulting algorithm, Reinforced Linear Genetic Programming (RLGP), is then able to learn the optimal register-action assignments, potentially leading to more efficient and effective solutions. RLGP inherits the benefits of LGP, such as its linear representation and ease of manipulation while augmenting it with the adaptive capabilities of Q-Learning. This integration allows RLGP to explore and exploit the solution space more effectively, resulting in improved performance when addressing complex optimization problems.
-
 We evaluate the performance of RLGP on a variety of benchmark problems, including the cartpole-v1 and mountain-car-v0 environments from the OpenAI Gym library \cite{1606.01540}. These environments provide challenging tasks that require sophisticated decision-making and control strategies, making them suitable for assessing the effectiveness of RLGP. We compare the baseline LGP framework with the augmented RLGP framework in terms of solution quality, convergence speed, and adaptability to dynamic problem domains.
-
 By combining the strengths of LGP and Q-Learning, RLGP might represent a significant advancement in the field of evolutionary computation. This research not only contributes to the understanding of hybrid evolutionary algorithms but also paves the way for future work on incorporating reinforcement learning techniques into other EAs.
 
 \chapter{Background}
 \section{Linear Genetic Programming}
 Linear Genetic Programming (LGP) is an advanced form of Genetic Programming (GP), a powerful machine learning technique introduced by Brameier and Banzhaf in their seminal work \cite{brameier2001comparison}. Unlike the traditional tree-based GP, LGP represents programs as a linear sequence of instructions, similar to assembly language or machine code \cite{koza93}. This representation offers several advantages, such as improved evolvability, efficient execution, and simplicity of crossover and mutation operations.
-
 In LGP, programs are composed of registers and instructions, where each instruction manipulates the contents of registers using arithmetic, logical, or conditional operations. The evolutionary process is similar to that of canonical GP, but involves variation operators that act directly upon a linear set of instructions. The variations are as follows, reproduction (cloning), recombination (breeding) and mutation.
-
 In their paper, Brameier and Banzhaf compared the performance of LGP to that of traditional GP and neural networks. They discovered that LGP had classification and generalization capabilities that were comparable to those of neural networks \cite{brameier2001comparison}. This finding was significant, as it demonstrated that LGP could serve as an alternative to neural networks for solving complex machine learning problems. Moreover, LGP's linear representation allows for more interpretable solutions, which is an important consideration in many applications where understanding the underlying model is crucial.
-
 The paper further explored the benefits of LGP's linear representation, such as improved evolvability and more efficient execution. These advantages make LGP an attractive choice for solving complex problems, as it can produce high-quality solutions more quickly than traditional GP methods. Additionally, the simplicity of crossover and mutation operations in LGP ensures that the evolutionary process remains efficient and effective, allowing for the exploration of a diverse range of solutions.
-
 Brameier and Banzhaf's work on LGP laid the foundation for further research into the capabilities and applications of this powerful machine learning technique. The findings of their paper highlight the potential of LGP as a robust and versatile machine learning approach, particularly in scenarios where both high performance and interpretability are required.
-
 \section{Reinforced Genetic Programming}
 In the RGP paper, Downing applied the Reinforced Genetic Programming approach to several benchmark problems, including function optimization and control tasks \cite{downing1995reinforced}. The results showed that RGP significantly outperformed traditional Genetic Programming and other baseline algorithms in terms of convergence speed, solution quality, and robustness. This demonstrated the effectiveness of incorporating Q-Learning into the genetic programming framework to guide the exploration and exploitation of the search space.
-
 One of the key findings of the paper was that the combination of Genetic Programming and Q-Learning allowed RGP to adapt more efficiently to changing environments and problem landscapes. By utilizing the reinforcement signals from the environment, RGP could dynamically adjust its search strategy, making it more responsive to the changes in the problem domain. This ability to adapt and learn from the environment is particularly relevant to real-world problems, where the solution space may be dynamic, noisy, or uncertain.
-
 The paper also introduced several novel techniques for integrating Q-Learning into the Genetic Programming framework, such as the use of Q-values to bias the selection of genetic operations and the incorporation of reinforcement signals into the fitness function. These innovations allowed RGP to leverage the strengths of both Genetic Programming and Q-Learning, resulting in a more powerful and flexible optimization algorithm.
-
 In the context of Reinforced Linear Genetic Programming (RLGP), the findings of Downing's paper suggest that integrating Q-Learning into the LGP framework could yield similar benefits. By combining the global search capabilities of LGP with the local search and adaptation of Q-Learning, the resulting algorithm, which could be referred to as RLGP, may be able to tackle complex and dynamic problem domains more effectively.
-
 It is important to note that RGP represents programs as decision trees, while LGP uses linear sequences of instructions for program representation. This fundamental difference necessitates adopting a distinct approach when incorporating Q-learning into LGP.
-
 \chapter{Methodology}
 
 \section{Framework Overview}
-We use the Rust programming language to implement the framework for our research, which can be found at \href{https://github.com/urmzd/linear-gp}{github.com/urmzd/linear-gp}. The framework is designed to be extensible and versatile, allowing
-for various types of problems to be solved using LGP and RLGP. The framework is also designed to be easily configurable, allowing for extensive experimentation. The framework consists of several engines, which together implement the core functionality.
-The existing engines are as follows.
+
+
+We utilize the Rust programming language to develop a flexible and extensible framework for our research, available at \url{https://github.com/urmzd/linear-gp}. The framework is specifically designed to address a wide range of problems using LGP and RLGP while offering extensive configurability for experimentation purposes. The framework is composed of multiple engines, each implementing core functionalities essential for the evolutionary process. The primary engines we focus on are described below:
+
 \begin{itemize}
-	\item Breed: 
-	\item Core: 
-	\item Fitness:
-	\item Freeze:
-	\item Generate:
-	\item Mutate:
-	\item Reset:
-	\item Status:
+    \item \textbf{Core}: This engine establishes the fundamental processes the framework employs to evolve a population of individuals. It initializes the population, iteratively evaluates the fitness of individuals, performs selection, and applies genetic operations such as mutation and crossover to generate offspring.
+
+    \item \textbf{Breed}: This engine is responsible for defining the genetic operators that facilitate the exchange of genetic material between individuals. In particular, it outlines how individuals undergo crossover, generating offspring with a combination of their parents' genetic code.
+
+    \item \textbf{Mutate}: This engine focuses on the stochastic modification of single individuals within the population. It dictates how genetic alterations are applied to individuals, potentially leading to the discovery of novel and improved solutions.
+
+    \item \textbf{Fitness}: The Fitness engine is tasked with evaluating the performance of each individual in the population. It measures how well an individual can solve the target problem, providing a basis for selection and guiding the evolutionary search process.
+
+    \item \textbf{Generate}: This engine is concerned with the stochastic creation of individuals and environments. It defines the methods for generating new individuals with random genetic material, as well as the procedures for initializing problem-specific environments that influence the evaluation of individuals.
 \end{itemize}
 
 \subsection{Framework Configuration \& Hyperparameters}
 
-The available framework configuration properties are listed in \ref{table:hyperparameters}.
-
+The available framework configuration properties are listed in \ref{table:hyperparameters}. Note that note all configurations are always used.
+For instance, programs that do not use Q-Learning during their fitness evaluation, $H_{alpha}$, $H_{gamma}$, $H_{epsilon}$, $H_{alpha\_decay}$ or $H_{epsilon\_decay}$ is not required.
 \begin{itemize}
 	\item $H$ denotes the set of hyperparameters.
 	\item $H_{p}$ denotes the set of hyperparameters that are related to a specific property $p$.
 \end{itemize}
-
 For example, when referencing gap, we use the notation $H_{gap}$.
 
-\begin{table}[hb]
-	\centering
-	\begin{tabular}{|p{3.5cm}|p{3cm}|p{2.5cm}|p{1.5cm}|p{1.5cm}|}
-		\hline
-		\textbf{Hyperparameter Group} & \textbf{Hyperparameter} & \textbf{Default Value} & \textbf{Static Type} & \textbf{Value Range} \\ \hline
-		\multirow{7}{*}{Common}       & population\_size        & 100                    & integer              & [0,)                    \\ \cline{2-5}
-		                              & gap                     & 0.5                    & float                & [0, 1]               \\ \cline{2-5}
-		                              & mutation                & 0.5                    & float                & [0, 1]               \\ \cline{2-5}
-		                              & crossover               & 0.5                    & float                & [0, 1]               \\ \cline{2-5}
-																	& n\_generations          & 100                    & integer              & [0,)                    \\ \cline{2-5}
-																	& n\_trials               & 100                    & integer              & [0,)                    \\ \cline{2-5}
-		                              & seed                    & Random & integer              & -                    \\ \hline
-		Program                       & max\_instructions       & 12                     & integer              & [1,)                    \\ \hline
-		\multirow{2}{*}{Instruction}  & n\_extras               & 1                      & integer              & [0,)                    \\ \cline{2-5}
-		                              & external\_factor        & 10.0                   & float                & [1,)                    \\ \hline
-		\multirow{5}{*}{Q-Learning}   & alpha                   & 0.1                    & float                & [0, 1]               \\ \cline{2-5}
-		                              & gamma                   & 0.9                    & float                & [0, 1]               \\ \cline{2-5}
-		                              & epsilon                 & 0.05                   & float                & [0, 1]               \\ \cline{2-5}
-		                              & alpha\_decay            & 0.01                   & float                & [0, 1]               \\ \cline{2-5}
-		                              & epsilon\_decay          & 0.001                  & float                & [0, 1]               \\ \hline
-	\end{tabular}
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Property} & \textbf{Type} & \textbf{Value Range} \\
+        \hline
+        default\_fitness & float & - \\
+        \hline
+        population\_size & int & [0,) \\
+        \hline
+        gap & float & (0, 1.) \\
+        \hline
+        mutation\_percent & float & [0, 1.0] \\
+        \hline
+        crossover\_percent & float & [0, 1.0] \\
+        \hline
+        n\_generations & int & [0,) \\
+        \hline
+        n\_trials & int & [1,) \\
+        \hline
+        seed & int or None & [0,) \\
+        \hline
+        max\_instructions & int & [1,) \\
+        \hline
+        n\_extras & int & [1,) \\
+        \hline
+        external\_factor & float & [0,) \\
+        \hline
+        n\_actions & int & - \\
+        \hline
+        n\_inputs & int & - \\
+        \hline
+        alpha & float & [0, 1.0] \\
+        \hline
+        gamma & float & [0, 1.0] \\
+        \hline
+        epsilon & float & [0, 1] \\
+        \hline
+        alpha\_decay & float & [0, 1] \\
+        \hline
+        epsilon\_decay & float & [0, 1] \\
+        \hline
+    \end{tabular}
 	\caption{Hyperparameter}
 	\label{table:hyperparameters}
 \end{table}
 
+\begin{description}
+    \item{\textbf{default\_fitness}:} The default fitness value assigned to individuals in the population. This value is used to initialize the fitness of all individuals in the population. 
+    \item{\textbf{population\_size}:} The number of individuals in each generation of the genetic algorithm. 
+    \item{\textbf{gap}:} The percentage of the population that is replaced with offspring in each generation. 
+    \item{\textbf{mutation\_percent}:} The percentage of individuals in the population who will be generated from mutation. 
+    \item{\textbf{crossover\_percent}:} The percentage of individuals in the population who will be generated from crossover. 
+    \item{\textbf{n\_generations}:} The number of generations the genetic algorithm will run for. 
+    \item{\textbf{n\_trials}:} The number of times the genetic algorithm will be run with the same settings. 
+    \item{\textbf{seed}:} The seed used for random number generation. 
+    \item{\textbf{max\_instructions}:} The maximum number of instructions in the genetic program. 
+    \item{\textbf{n\_extras}:} The number of extra instructions added to the instruction set. 
+    \item{\textbf{external\_factor}:} A factor used to determine the probability of selecting an external instruction during program generation. 
+    \item{\textbf{n\_actions}:} The number of possible actions the program can perform. 
+    \item{\textbf{n\_inputs}:} The number of inputs the program can take. 
+    \item{\textbf{alpha}:} The initial learning rate for the Q-learning algorithm. 
+    \item{\textbf{gamma}:} The discount factor for future rewards in the Q-learning algorithm. 
+    \item{\textbf{epsilon}:} The probability of selecting a random action in the Q-learning algorithm. 
+    \item{\textbf{alpha\_decay}:} The rate at which the learning rate decays over time in the Q-learning algorithm. 
+    \item{\textbf{epsilon\_decay}:} The rate at which the exploration rate decays over time in the Q-learning algorithm. 
+\end{description}
+
 \subsection{Program Representation}
-A program can be thought of as a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index, the operation to be performed and a mode flag. The mode flag is used to determine where the source register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environment state). We can represent the program as a sequence of instructions in the following format. $$R[y] \leftarrow R[y] \langle op \rangle  R[x]$$ where $R$ represents the registers, $x$ and $y$ represent the and target register indices respectively, and $\langle op \rangle$ represents the operation to be performed. In our case, we only allow four operations; addition $(+)$,
+A program can be thought of as a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index, the operation to be performed and a mode flag. The mode flag is used to determine where the source register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environment state). We can represent the program as a sequence of instructions in the following format. $$R[y] \leftarrow R[y] \langle op \rangle  R[x]$$ $R$ represents the registers, $x$ and $y$ represent the and target register indices respectively, and $\langle op \rangle$ represents the operation to be performed. In our case, we only allow four operations; addition $(+)$,
 subtraction $(-)$, multiplication $(\times)$ and division $(\div)$ by $2$. Division is done by a non-zero constant to prevent division by zero errors that would likely crash the system. This representation makes it easy to implement variation operations, but also easy to digest for humans unlike other machine learning techniques and tree-based programs, which convolute the internal process used to solve a problem. The size of the register set consists of $N_a$ which accounts for the number of actions, and $N_w$, the working registers which allow for intermediate calculations.
 
 \subsection{The Algorithm}
+In this work, we present a linear genetic programming (LGP) approach to evolve a population of programs to solve a given task. The core algorithm, as well as supporting operations, are outlined below.
+The core LGP algorithm (Algorithm \ref{alg:core}) starts by initializing a population of programs, where each program is evaluated against the desired task using a suitable fitness function. The programs are then ranked based on their fitness scores, and the least fit individuals are dropped by a given percentage, denoted as $H_{gap}$. The remaining individuals in the population are used to produce new offspring, which fill the dropped spots, thus creating a new generation of the population.
+The breeding operation, called Two-Point Crossover (Algorithm \ref{alg:breed}), is used to create offspring by combining parts of two parent programs. It starts by cloning the parent programs, selecting two random points in their instruction sets, and swapping the chunks between them. This operation generates two new offspring. However, only one of the offspring is selected at random and returned, as per the modification.
+The mutation operation, called Instruction Replacement (Algorithm \ref{alg:mutate}), is used to introduce random changes into a program. It selects a random instruction from the program and replaces it with a newly generated random instruction. Additionally, it may randomly decide to replace only certain properties (operation, source, or target) of the selected instruction.
+The program generation operation (Algorithm \ref{alg:generate}) creates a new program by generating a random number of instructions and a register set, consisting of action registers (A) and working registers (W). The resulting program is then returned.
 
-We outline the genetic as shown in Algorithm \ref{alg:core}
-as well as the operations that enable the algorithm to function, see Algorithms \ref{alg:breed}, \ref{alg:mutate}, \ref{alg:generate}, \ref{alg:fitness-iris} . It starts off with initializing a population of programs, then evaluates the programs against the desired task using the appropriate fitness for the desired learning type, ranks the individuals based on their fitness score,
-dropping the least fit individuals by $H_{gap}$, lastly producing a new population by filling the
-dropped spots by children produced by the remaining individuals in the population.
 
 \begin{algorithm}[hb]
-  \caption{Core: Linear Genetic Programming}
-  \label{alg:core}
-  \begin{algorithmic}[1]
-    \State $P_{0} \gets \Call{InitializePopulation}{population\_size}$
-    \For{$i \in \{0, 1, \ldots, H_{n\_generations}-1\}$}
-      \State $\Call{Evaluate}{P_{i}}$
-      \State $\Call{Rank}{P_{i}}$
-      \State $P_{i+1} \gets \Call{Survive}{P_{i}, H_{gap}}$
-      \State $parents \gets \Call{Select}{P_{i+1}}$
-      \State $P_{i+1} \gets \Call{Variation}{P_{i+1}}$
-    \EndFor
-    \State \Return $P_{n\_generations}$
-  \end{algorithmic}
+	\caption{Core: Linear Genetic Programming}
+	\label{alg:core}
+	\begin{algorithmic}[1]
+		\State $P_{0} \gets \Call{InitializePopulation}{H_{population\_size}}$
+		\For{$i \in \{0, 1, \ldots, H_{n\_generations}-1\}$}
+		\State $\Call{Evaluate}{P_{i}}$
+		\State $\Call{Rank}{P_{i}}$
+		\State $P_{i+1} \gets \Call{Survive}{P_{i}, H_{gap}}$
+		\State $P_{i+1} \gets \Call{Variation}{P_{i+1}}$
+		\Comment we select individuals through tournament selection and apply variation operations
+		\EndFor
+    \State \Return $P_{H_{n\_generations} - 1}$
+	\end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[hb]
@@ -206,13 +237,13 @@ dropped spots by children produced by the remaining individuals in the populatio
 	\end{algorithmic}
 \end{algorithm}
 
-\subsection{Testing}
+\subsection{Validating The Algorithm}
 As a means of ensuring that the framework was implemented correctly, we developed four tests.
-The first, Figure \ref{fig:iris_baseline}), is a baseline that ensures that the genetic algorithm works with only the reproduction operation. The second,
-Figure \ref{fig:iris_mutation} ensures that the mutation operation works. The third, Figure \ref{fig:iris_crossover}, ensures that
-all individuals converge to the best fitness score given enough generations. The second test (Figure \ref{fig:iris_mutation})
-ensures that mutation is working correctly. As demonstrated, the fitness score increases over time. The third test (Figure \ref{fig:iris_crossover})
-does the same, but for the recombination operation. The final test (Figure \ref{fig:iris_full}) ensures that recombination and mutation can work together to produce a better fitness score than either operation alone.
+Figure \ref{fig:iris_baseline} is a baseline that ensures that the genetic algorithm works with only the reproduction operation.
+Figure \ref{fig:iris_crossover}, ensures the two point crossover operation works as expected.
+Figure \ref{fig:iris_mutation} ensures that the mutation operation works.
+Figure \ref{fig:iris_full} ensures that recombination and mutation can work together to produce a better fitness score than either operation alone.
+We also outline the fitness algorithm used for the iris dataset in Algorithm \ref{alg:fitness-iris}.
 
 \begin{algorithm}[hb]
 	\caption{Fitness: Iris}
@@ -230,95 +261,91 @@ does the same, but for the recombination operation. The final test (Figure \ref{
 		\State{$action \gets \Call{Argmax}{output.action\_registers}$}
 		\State{$observation, reward, done, info \gets env.step(action)$}
 		\State{$score \gets score + reward$}
-		\EndFor
 		\State return $score$
 	\end{algorithmic}
 \end{algorithm}
 
-\begin{figure}
+\begin{figure}[hb]
 	\centering
-	\begin{subfigure}[b]{0.48\textwidth}
-		\includegraphics[width=\textwidth]{iris_baseline.png}
-		\caption{LGP Without Variation On Iris}
-		\label{fig:iris_baseline}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.48\textwidth}
-		\includegraphics[width=\textwidth]{iris_crossover.png}
-		\caption{LGP With Breed On Iris}
-		\label{fig:iris_crossover}
-	\end{subfigure}
+	\begin{subfloat}[LGP: Iris Reproduction]{\includegraphics[width=\textwidth]{iris_baseline.png}\label{fig:iris_baseline}}
+	\end{subfloat}
 
-	\medskip
-
-	\begin{subfigure}[b]{0.48\textwidth}
-		\includegraphics[width=\textwidth]{iris_mutation.png}
-		\caption{LGP Using Only Mutation On Iris}
-		\label{fig:iris_mutation}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.48\textwidth}
-		\includegraphics[width=\textwidth]{iris_full.png}
-		\caption{LGP Using Both Mutation and Breeding On Iris}
-		\label{fig:iris_full}
-	\end{subfigure}
+	\begin{subfloat}[LGP: Iris Recombination]{\includegraphics[width=\textwidth]{iris_crossover.png}\label{fig:iris_crossover}}
+	\end{subfloat}
 
 	\caption{Performance comparison of different genetic programming methods on iris dataset}
 	\label{fig:iris_comparison}
 \end{figure}
 
-\section{Reinforcement Learning Integration}
-We extend the fitness algorithm to work with both a Rust port of the OpenAI mountain car environment (mountain-car-v0) \cite{1606.01540} and the OpenAI Cart Pole environment ($cartpole-v1$) \cite{1606.01540}.
+\begin{figure}[hb]
+  \ContinuedFloat
+	\centering
+
+	\begin{subfloat}[LGP: Iris Mutation]{\includegraphics[width=\textwidth]{iris_mutation.png}\label{fig:iris_mutation}}
+	\end{subfloat}
+
+	\begin{subfloat}[LGP: Iris Recombination \& Mutation]{\includegraphics[width=\textwidth]{iris_full.png}\label{fig:iris_full}}
+  \end{subfloat}
+  \caption{(Continued) Performance comparison of different genetic programming methods on iris dataset}
+	\label{fig:iris_comparison_continued}
+\end{figure}
+
+\section{OpenAI Gym Integration}
+We extend the fitness algorithm to work with a Rust port  of OpenAI's mountain-car-v0 and cartpole-v1 environment \cite{1606.01540}. The code can be viewed at (\url{https://github.com/urmzd/gym-rs}).
 
 For the mountain-car-v0 environment, the agent's goal is to drive a car up a steep hill. The car is subject to gravity and has limited power. The car must learn to rock back and forth to build momentum before reaching the goal area at the top of the hill. The environment has two state variables representing the position, and velocity of the car. The car has three possible actions: push left, push right, or no push. The reward function for the environment gives a value of $-1$ at each time step until the car reaches the goal area, at which point the reward becomes $0$. The problem is considered solved when the car reaches the goal area with an average reward of -110 over 100 consecutive trials.
 
 For the cartpole-v1 environment, the agent's goal is to balance a pole on top of a cart that can move left or right. The pole is subject to gravity, and the goal is to keep the pole upright for as long as possible. The environment has four continuous state variables representing the position and velocity of the cart and pole. The cart has two possible actions: move left or move right. The reward function for the environment gives a value of $1$ at each time step that the pole remains upright. The problem is considered solved when the pole remains upright for at least $195$ consecutive time steps over 100 consecutive trials.
 
-With this in mind, we outline an alternative fitness algorithm used to baseline the framework on classical reinforcement learning problems, Algorithm \ref{alg:fitness-rl}.
+With this in mind, we outline an alternative fitness algorithm used to baseline the framework on classical reinforcement learning problems, Algorithm \ref{alg:fitness-gym}.
 
 \begin{algorithm}[hb]
-	\caption{Fitness}
-	\label{alg:fitness-rl}
+	\caption{Fitness: Gym Integration}
+	\label{alg:fitness-gym}
 	\begin{algorithmic}[1]
-		\Procedure{Fitness}{$P, env$}
-		\Comment{Given a program and an environment}
 		\State{$score \gets 0$}
 		\For{$i \in N_{EPISODES}$}
-		\State{$done \gets False$}
-		\While{$done = False$}
 		\State{$output \gets \Call{Execute}{P, observation}$}
-		\Comment{Execute the program for each input}
 		\State{$action \gets \Call{Argmax}{output.action\_registers}$}
-		\Comment{Argmax over the action registers}
 		\State{$observation, reward, done, info \gets env.step(action)$}
-		\Comment{Step the environment}
 		\State{$score \gets score + reward$}
-		\EndWhile
 		\EndFor
 		\State \textbf{return} $score$
-		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
 \section{Q Learning Integration}
-We extend Algorithm \ref{alg:fitness-rl} further to support Q Learning (Algorithm \ref{alg:fitness-rlq}).
+We extend Algorithm \ref{alg:fitness-gym} further to support Q Learning (Algorithm \ref{alg:fitness-q}).
 The Q Table consists of a 2D array of size $N_R \times N_A$, where $N_R$ is the number of registers the program can work with and $N_A$ is the number of available actions an agent can take. The Q Table is initialized to all zeros and updates only a different register has been selected. The Q Table is updated using the following formula.
 \begin{equation}
 	Q(R[x_t], a_t) \leftarrow Q(R[x_t], a_t) + \alpha \left(r_{t+1} + \gamma \max_a Q(R[x_{t+1}], a) - Q(R[x_t], a_t)\right)
 \end{equation}
-
 In this formula, $Q$ represents the Q Table, $R$ represents the set of registers, $a$ represents the available actions, $r_{t+1}$ is the reward at time step $t+1$, $\alpha$ is the learning rate, and $\gamma$ is the discount factor. The value $x_t$ represents the current state, while $x_{t+1}$ represents the next state. The update rule calculates the new Q value for the current state-action pair based on the observed reward and the maximum Q value for the next state.
+Moreover, during register selection, we apply a greedy selection policy with probability $1-\epsilon$, which allows us to configure the exploration-exploitation factor.
+
+\begin{algorithm}[hb]
+    \caption{Q Learning: $\epsilon$-Greedy Selection Policy}
+    \label{alg:q-learning-greedy-selection}
+    \begin{algorithmic}
+        \State $a \gets \Call{Argmax}{Q}$
+        \If{$\Call{Random}{0, 1} < \epsilon$}
+        \State $a \gets \Call{Random}{0, N_A}$
+        \EndIf
+        \State \textbf{return} $a$
+    \end{algorithmic}
+
+\end{algorithm}
 
 \begin{algorithm}[hb]
 	\caption{Fitness: Q Learning}
-	\label{alg:fitness-rlq}
+	\label{alg:fitness-q}
 	\begin{algorithmic}[1]
 		\State $score \gets 0$
 		\State $a_{t} \gets \Call{GetActionState}{S, P}$
 		\While{$t < N_{episodes}$}
 		\State $r_{t + 1} \gets \Call{st.ExecuteAction}{a_{t}}$
-		\State $sc \gets sc + r{t + 1}$
-		\If{$\Call{s.IsTerminal}{}$}
+		\State $score \pm r_{t + 1}$
+		\If{$\Call{IsTerminal}{}$}
 		\State \textbf{break}
 		\EndIf
 		\State $next\_as \gets \Call{GetActionState}{st, P}$
@@ -334,44 +361,44 @@ In this formula, $Q$ represents the Q Table, $R$ represents the set of registers
 	\end{algorithmic}
 \end{algorithm}
 
+\section{Experiment Setup}
 
-\section{Experimental Setup}
-
-In this section, we outline the experimental setup used to evaluate the performance of the proposed Q-Learning LGP algorithm in comparison to the baseline LGP. The experiments were conducted in two main stages: hyperparameter optimization and performance evaluation.
+In this section, we outline the experiment setup used to evaluate the performance of the proposed Q-Learning LGP algorithm in comparison to the baseline LGP. The experiments were conducted in two main stages: hyperparameter optimization and performance evaluation.
 
 \subsection{Hyperparameter Optimization}
 
-First, we utilized the Optuna hyperparameter optimization library \cite{akiba2019optuna} to find the optimal parameters for the baseline LGP programs. Optuna is a flexible and efficient hyperparameter optimization framework that allows for the automatic exploration of hyperparameter spaces in search of the best settings for a given algorithm.
+First, we utilized the Optuna hyperparameter optimization library \cite{akiba2019optuna} to find the optimal parameters for the baseline LGP programs.
+Optuna is a flexible and efficient hyperparameter optimization framework that allows for the automatic exploration of hyperparameter spaces in search of the best settings for a given algorithm.
+Once the optimal parameters for the baseline LGP programs were identified, we conducted a separate search using Optuna to find the optimal Q-Learning constants for the Reinforced Linear Genetic Programming (RLGP) programs. 
+This process aimed to fine-tune the RLGP algorithm's performance by selecting the most suitable Q-Learning parameters based on the problem domain and the characteristics of the LGP framework.
 
-Once the optimal parameters for the baseline LGP programs were identified, we conducted a separate search using Optuna to find the optimal Q-Learning constants for the Reinforced Linear Genetic Programming (RLGP) programs. This process aimed to fine-tune the RLGP algorithm's performance by selecting the most suitable Q-Learning parameters based on the problem domain and the characteristics of the LGP framework.
+\begin{listing}[hb]
+	\centering
+	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-lgp.json}
+	\caption{Mountain Car Parameters}
+	\label{code:mountain-car-parameters}
+\end{listing}
 
-\begin{figure}[hb]
-  \centering
-  \inputminted[breaklines]{json}{../assets/parameters/mountain-car.json}
-  \caption{Mountain Car Parameters}
-  \label{code:mountain-car-parameters}
-\end{figure}
+\begin{listing}[hb]
+	\centering
+	\inputminted[breaklines]{json}{../assets/parameters/mountain-car-q.json}
+	\caption{Mountain Car Q-Learning Parameters}
+	\label{code:mountain-car-q-parameters}
+\end{listing}
 
-\begin{figure}[hb]
-  \centering
-  \inputminted[breaklines]{json}{../assets/parameters/mountain-car-q.json}
-  \caption{Mountain Car Q-Learning Parameters}
-  \label{code:mountain-car-q-parameters}
-\end{figure}
+\begin{listing}[hb]
+	\centering
+	\inputminted[breaklines]{json}{../assets/parameters/cart-pole-lgp.json}
+	\caption{Cart Pole Parameters}
+	\label{code:cart-pole-parameters}
+\end{listing}
 
-\begin{figure}[hb]
-  \centering
-  \inputminted[breaklines]{json}{../assets/parameters/cart-pole.json}
-  \caption{Cart Pole Parameters}
-  \label{code:cart-pole-parameters}
-\end{figure}
-
-\begin{figure}[hb]
-  \centering
-  \inputminted[breaklines]{json}{../assets/parameters/cart-pole-q.json}
-  \caption{Cart Pole Q-Learning Parameters}
-  \label{code:cart-pole-q-parameters}
-\end{figure}
+\begin{listing}[hb]
+	\centering
+	\inputminted[breaklines]{json}{../assets/parameters/cart-pole-q.json}
+	\caption{Cart Pole Q-Learning Parameters}
+	\label{code:cart-pole-q-parameters}
+\end{listing}
 
 \subsection{Performance Evaluation}
 
@@ -379,7 +406,7 @@ After obtaining the optimal parameters for both baseline LGP and RLGP, we procee
 
 For each experiment, we calculated the mean, median, minimum, and maximum performance scores obtained by both baseline LGP and RLGP. These summary statistics provided a comprehensive overview of the algorithms' performance, highlighting their strengths and weaknesses across different trials and problem instances.
 
-Finally, we plotted the average results (mean, median, min, max) for each experiment to visually compare the performance of the baseline LGP and RLGP algorithms. This visualization allowed us to identify trends and patterns in the algorithms' performance and gain insights into the benefits of incorporating Q-Learning into the LGP framework.
+Finally, we plot the average mean, median, min, max for each experiment to visually compare the performance of the baseline LGP and RLGP algorithms. This visualization allowed us to identify trends and patterns in the algorithms' performance and gain insights into the benefits of incorporating Q-Learning into the LGP framework.
 
 By following this experimental setup, we aimed to provide a thorough and unbiased evaluation of the proposed Q-Learning LGP algorithm, demonstrating its potential advantages over the baseline LGP and paving the way for future research and development in this area.
 
@@ -388,7 +415,7 @@ By following this experimental setup, we aimed to provide a thorough and unbiase
 This chapter analyzes the performance of a population of programs trained using Linear Genetic Programming (LGP)
 and a population of programs trained using Linear Genetic Programming Reinforced with Q-Learning (LGP-Q). The programs
 are trained on the cartpole-v1 and mountain-car-v0 environments \cite{1606.01540} as mentioned in the Reinforcement Integration section.
-Once the results are explained, we analyze them to provide insight into the impact of Q-Learning on the performance of LGP. Note that we use the definition of done as referenced on the \href{https://github.com/openai/gym/wiki/Leaderboard}{OpenAI Gym Leaderboard Wiki}.
+Once the results are explained, we analyze them to provide insight into the impact of Q-Learning on the performance of LGP. Note that we use the definition of done as referenced on \url{https://github.com/openai/gym/wiki/Leaderboard}.
 
 \section{Experimental Results}
 
@@ -415,10 +442,15 @@ to generate a program in the first 10 generations that was able to solve the pro
 	\label{fig:cart-pole-comparison}
 \end{figure}
 
+\csvautolongtable[
+  table head={
+      \caption{Cart Pole RLGP Aggregated Results}
+      \label{table:cart-pole-rlgp-results}
+    }]{../assets/experiments/aggregate_results/cart_pole_q.csv}
 
 \subsection{Mountain Car}
 
-Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that of the cartpole-v0 task. The RLGP framework falls short of solving the task, averaging a maximum of -114, a mean of-130, a median of -117 and a minimum of -200. On the other hand, the LGP framework is able to solve the task, albeit narrowly, averaging a maximum -106, a mean of -126, a median of -120,and a minimum -200.0. Here, we observe that RLGP achieves a higher median score, with a slight upward trend whereas the LGP achieves a lower median, with no particular trend in any direction. Both of these framework look as they quickly converge to a value and then plateau.
+Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that of the cartpole-v0 task. The RLGP framework falls short of solving the task, averaging a maximum of -114, a mean of-130, a median of -117 and a minimum of -200. On the other hand, the LGP framework is able to solve the task, albeit narrowly, averaging a maximum -106, a mean of -126, a median of -120,and a minimum -200. Here, we observe that RLGP achieves a higher median score, with a slight upward trend whereas the LGP achieves a lower median, with no particular trend in any direction. Both of these framework look as they quickly converge to a value and then plateau.
 
 \begin{figure}[ht]
 	\centering
@@ -436,6 +468,7 @@ Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that 
 	\caption{Comparison of RLGP vs LGP performance on Mountain Car}
 	\label{fig:mountain-car-comparison}
 \end{figure}
+
 
 \section{Discussion}
 
