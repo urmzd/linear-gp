@@ -61,10 +61,14 @@ cargo nextest run --no-fail-fast --release --no-capture
 ./scripts/produce_assets.py
 ```
 
-5. Determine how well individuals perform after training:
+6. Determine how well individuals perform after training:
 ```bash
 cargo bench
 ```
+
+## GitHub Actions Workflow
+
+The repository includes a GitHub Actions workflow file that automates the process of running experiments, searching for optimal parameters, and benchmarking. The workflow is triggered manually and accepts the number of experiments as input. The workflow file can be found at `.github/workflows/experiments.yml`.
 
 ## Contributions
 Contributions are welcome. Please refer to the guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
