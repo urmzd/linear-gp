@@ -74,8 +74,6 @@ It is important to note that RGP represents programs as decision trees, while LG
 \chapter{Methodology}
 
 \section{Framework Overview}
-
-
 We utilize the Rust programming language to develop a flexible and extensible framework for our research, available at \url{https://github.com/urmzd/linear-gp}. The framework is specifically designed to address a wide range of problems using LGP and RLGP while offering extensive configurability for experimentation purposes. The framework is composed of multiple engines, each implementing core functionalities essential for the evolutionary process. The primary engines we focus on are described below:
 
 \begin{itemize}
@@ -100,7 +98,7 @@ For instance, programs that do not use Q-Learning during their fitness evaluatio
 \end{itemize}
 For example, when referencing gap, we use the notation $H_{gap}$.
 
-\begin{table}[htbp]
+\begin{table}[t]
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
@@ -146,27 +144,13 @@ For example, when referencing gap, we use the notation $H_{gap}$.
 	\caption{Hyperparameter}
 	\label{table:hyperparameters}
 \end{table}
+The genetic algorithm involves several hyperparameters that influence its behavior. \texttt{default\_fitness} is the default fitness value assigned to individuals in the population when there is an issue with their fitness evaluation. The number of individuals in each generation is determined by \texttt{population\_size}. The \texttt{gap} parameter represents the percentage of the population that is replaced with offspring in each generation. The \texttt{mutation\_percent} and \texttt{crossover\_percent} values control the proportions of individuals generated through mutation and crossover processes, respectively.
 
-\begin{description}
-    \item{\textbf{default\_fitness}:} The default fitness value assigned to individuals in the population. This value is used to initialize the fitness of all individuals in the population. 
-    \item{\textbf{population\_size}:} The number of individuals in each generation of the genetic algorithm. 
-    \item{\textbf{gap}:} The percentage of the population that is replaced with offspring in each generation. 
-    \item{\textbf{mutation\_percent}:} The percentage of individuals in the population who will be generated from mutation. 
-    \item{\textbf{crossover\_percent}:} The percentage of individuals in the population who will be generated from crossover. 
-    \item{\textbf{n\_generations}:} The number of generations the genetic algorithm will run for. 
-    \item{\textbf{n\_trials}:} The number of times the genetic algorithm will be run with the same settings. 
-    \item{\textbf{seed}:} The seed used for random number generation. 
-    \item{\textbf{max\_instructions}:} The maximum number of instructions in the genetic program. 
-    \item{\textbf{n\_extras}:} The number of extra instructions added to the instruction set. 
-    \item{\textbf{external\_factor}:} A factor used to determine the probability of selecting an external instruction during program generation. 
-    \item{\textbf{n\_actions}:} The number of possible actions the program can perform. 
-    \item{\textbf{n\_inputs}:} The number of inputs the program can take. 
-    \item{\textbf{alpha}:} The initial learning rate for the Q-learning algorithm. 
-    \item{\textbf{gamma}:} The discount factor for future rewards in the Q-learning algorithm. 
-    \item{\textbf{epsilon}:} The probability of selecting a random action in the Q-learning algorithm. 
-    \item{\textbf{alpha\_decay}:} The rate at which the learning rate decays over time in the Q-learning algorithm. 
-    \item{\textbf{epsilon\_decay}:} The rate at which the exploration rate decays over time in the Q-learning algorithm. 
-\end{description}
+The algorithm runs for a set number of generations, specified by \texttt{n\_generations}. During fitness evaluation, a program must interact with an environment a certain number of times, determined by \texttt{n\_trials}, and the results are aggregated to produce a final value. The pseudorandom number generator (PRNG) is initialized with a seed, \texttt{seed}, or noise from the system if set to None. The genetic program has a maximum number of instructions, \texttt{max\_instructions}, and a certain number of working registers, specified by \texttt{n\_extras}.
+
+The \texttt{external\_factor} parameter adjusts the amplification or reduction of inputs from external sources. The program has \texttt{n\_actions} possible choices or action registers, while the number of feature values for an input from an external source is determined by \texttt{n\_inputs}.
+
+The Q-learning algorithm also utilizes various hyperparameters. The initial learning rate, \texttt{alpha}, sets the pace for updating action value estimates. The \texttt{gamma} parameter acts as the discount factor for future rewards, affecting the balance between immediate and long-term rewards. The probability of selecting a random action is controlled by \texttt{epsilon}, allowing the algorithm to explore the state space. Over time, the learning rate and exploration rate decay at rates specified by \texttt{alpha\_decay} and \texttt{epsilon\_decay}, respectively, allowing a shift from exploration to exploitation.
 
 \subsection{Program Representation}
 A program can be thought of as a container holding instructions and a set of registers. A single instruction consists of the source register index, the target register index, the operation to be performed and a mode flag. The mode flag is used to determine where the source register is located. If set, the mode flag indicates that the target register is located outside the program. In other words, the value held in the target register is given by an external source (such as the features of some dataset or the environment state). We can represent the program as a sequence of instructions in the following format. $$R[y] \leftarrow R[y] \langle op \rangle  R[x]$$ $R$ represents the registers, $x$ and $y$ represent the and target register indices respectively, and $\langle op \rangle$ represents the operation to be performed. In our case, we only allow four operations; addition $(+)$,
@@ -177,7 +161,7 @@ In this work, we present a linear genetic programming (LGP) approach to evolve a
 The core LGP algorithm (Algorithm \ref{alg:core}) starts by initializing a population of programs, where each program is evaluated against the desired task using a suitable fitness function. The programs are then ranked based on their fitness scores, and the least fit individuals are dropped by a given percentage, denoted as $H_{gap}$. The remaining individuals in the population are used to produce new offspring, which fill the dropped spots, thus creating a new generation of the population.
 The breeding operation, called Two-Point Crossover (Algorithm \ref{alg:breed}), is used to create offspring by combining parts of two parent programs. It starts by cloning the parent programs, selecting two random points in their instruction sets, and swapping the chunks between them. This operation generates two new offspring. However, only one of the offspring is selected at random and returned, as per the modification.
 The mutation operation, called Instruction Replacement (Algorithm \ref{alg:mutate}), is used to introduce random changes into a program. It selects a random instruction from the program and replaces it with a newly generated random instruction. Additionally, it may randomly decide to replace only certain properties (operation, source, or target) of the selected instruction.
-The program generation operation (Algorithm \ref{alg:generate}) creates a new program by generating a random number of instructions and a register set, consisting of action registers (A) and working registers (W). The resulting program is then returned.
+The program generation operation (Algorithm \ref{alg:generate}) creates a new program by generating a random number of instructions and a register set, consisting of action registers $H_{n\_actions}$ and working registers $H_{n\_extras}$. The resulting program is then returned.
 
 
 \begin{algorithm}[hb]
@@ -190,7 +174,7 @@ The program generation operation (Algorithm \ref{alg:generate}) creates a new pr
 		\State $\Call{Rank}{P_{i}}$
 		\State $P_{i+1} \gets \Call{Survive}{P_{i}, H_{gap}}$
 		\State $P_{i+1} \gets \Call{Variation}{P_{i+1}}$
-		\Comment we select individuals through tournament selection and apply variation operations
+		\Comment select individuals through tournament selection and apply variation operations
 		\EndFor
     \State \Return $P_{H_{n\_generations} - 1}$
 	\end{algorithmic}
@@ -441,18 +425,18 @@ to generate a program in the first 10 generations that was able to solve the pro
 	\caption{Comparison of RLGP vs LGP Performance on Cart Pole}
 	\label{fig:cart-pole-comparison}
 \end{figure}
-
-\csvautolongtable[
-  table head={
-      \caption{Cart Pole RLGP Aggregated Results}
-      \label{table:cart-pole-rlgp-results}
-    }]{../assets/experiments/aggregate_results/cart_pole_q.csv}
+%[
+  %table head={
+      %\caption{Cart Pole RLGP Aggregated Results}
+      %\label{table:cart-pole-rlgp-results}\\
+    %}]
+\csvautolongtable{../assets/experiments/aggregate_results/cart_pole_q.csv}
 
 \subsection{Mountain Car}
 
 Figure \ref{fig:mountain-car-comparison} demonstrates a similar pattern to that of the cartpole-v0 task. The RLGP framework falls short of solving the task, averaging a maximum of -114, a mean of-130, a median of -117 and a minimum of -200. On the other hand, the LGP framework is able to solve the task, albeit narrowly, averaging a maximum -106, a mean of -126, a median of -120,and a minimum -200. Here, we observe that RLGP achieves a higher median score, with a slight upward trend whereas the LGP achieves a lower median, with no particular trend in any direction. Both of these framework look as they quickly converge to a value and then plateau.
 
-\begin{figure}[ht]
+\begin{figure}[hb]
 	\centering
 	\begin{subfigure}{1.0\textwidth}
 		\includegraphics[width=\linewidth]{mountain_car_lgp.png}
