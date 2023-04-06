@@ -9,9 +9,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       
-      - name: Set working directory
-        run: cd docs
-      
       - name: Install LaTeX
         run: sudo apt-get install -y --no-install-recommends texlive-full
         
@@ -21,6 +18,7 @@ jobs:
       - name: Compile LaTeX Document
         run: ../scripts/compile_latex.sh thesis.tex
         shell: bash
+        working-directory: docs
         
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v3
