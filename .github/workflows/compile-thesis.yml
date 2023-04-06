@@ -1,0 +1,29 @@
+name: Compile Thesis
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set working directory
+        run: cd docs
+      
+      - name: Install LaTeX
+        run: sudo apt-get install -y --no-install-recommends texlive-full
+        
+      - name: Install Pygments
+        run: sudo apt-get install -y python3-pygments
+      
+      - name: Compile LaTeX Document
+        run: ../scripts/compile_latex.sh thesis.tex
+        shell: bash
+        
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Urmzd_Mukhammadnaim_RLGP_Thesis.pdf
+          path: thesis.pdf
