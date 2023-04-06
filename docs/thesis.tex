@@ -282,8 +282,8 @@ With this in mind, we outline an alternative fitness algorithm used to baseline 
 		\For{$i\in N_{Episodes}$}
 		\State{$\Call{Execute}{Program, Environment}$}
 		\State{$Action \gets \Call{Argmax}{Program.Registers[0:H_{n\_actions}]}$}
-		\State{$Reward, Done \gets Sim(Action, Environment)$}
-		\If{Done}
+		\State{$Reward, Terminal \gets Sim(Action, Environment)$}
+		\If{Terminal}
 		\State break
 		\EndIf
 		\State{$score \pm reward$}
@@ -307,11 +307,11 @@ Moreover, during register selection, we apply a greedy selection policy (Algorit
 	\begin{algorithmic}[1]
 		\State $\Call{Execute}{Program, State}$
 		\State $WinningRegister \gets \Call{Argmax}{Program.Registers} $
-		\State $a \gets \Call{Argmax}{Q[WinningRegister]}$
+		\State $Action \gets \Call{Argmax}{Q[WinningRegister]}$
 		\If{$\Call{Random}{0, 1} < \epsilon$}
-		\State $a \gets \Call{Random}{0, H_{n\_actions}}$
+		\State $Action \gets \Call{Random}{0, H_{n\_actions}}$
 		\EndIf
-		\State \textbf{return} $a$
+		\State \textbf{return} $WinningRegister, Action$
 	\end{algorithmic}
 \end{algorithm}
 \begin{algorithm}[b]
@@ -319,23 +319,22 @@ Moreover, during register selection, we apply a greedy selection policy (Algorit
 	\label{alg:fitness-q}
 	\begin{algorithmic}[1]
 		\State $score \gets 0$
-		\State $a_{t} \gets \Call{GetActionState}{S, P}$
+		\State $R_{t}, a_{t} \gets \Call{GreedySelection}{Program, Environment}$
 		\While{$t < N_{episodes}$}
-		\State $r_{t + 1} \gets \Call{st.ExecuteAction}{a_{t}}$
+		\State $r_{t + 1}, Terminal \gets \Call{Sim}{a_{t}, Environment}$
 		\State $score \pm r_{t + 1}$
-		\If{$\Call{IsTerminal}{}$}
+		\If{$\Call{Terminal}{}$}
 		\State \textbf{break}
 		\EndIf
-		\State $next\_as \gets \Call{GetActionState}{st, P}$
-		\If{$next\_as = \text{None}$}
-		\State \Return $-\infty$
+		\State $R_{t+1}, a_{t+1} \gets \Call{GreedySelection}{Program, Environment}$
+		\If{$R_{t} \neq R_{t+1}$}
+		\State $\Call{QTableUpdate}{R_{t+1}, a_{t+1}, R_{t}}$
 		\EndIf
-		\If{$cur\_as.register \neq next\_as.register$}
-		\State $\Call{P.q\_table.Update}{cur\_as, rw, next\_as}$
-		\EndIf
-		\State $cur\_as \gets next\_as$
+		\State ${R_{t} \leftarrow R_{t+1}}$
+		\State ${a_{t} \leftarrow a_{t+1}}$
+		\State ${t \leftarrow t+1}$
 		\EndWhile
-		\State \Return $sc$
+		\State \Return $score$
 	\end{algorithmic}
 \end{algorithm}
 
