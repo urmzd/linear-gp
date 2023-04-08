@@ -1,4 +1,4 @@
-name: experiments
+name: Experiments
 
 on:
   workflow_dispatch:

@@ -24,4 +24,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Urmzd_Mukhammadnaim_RLGP_Thesis.pdf
-          path: thesis.pdf
+          path: docs/thesis.pdf
