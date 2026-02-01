@@ -7,21 +7,54 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      
+        uses: actions/checkout@v4
+
       - name: Install LaTeX
         run: sudo apt-get install -y --no-install-recommends texlive-full
-        
+
       - name: Install Pygments
         run: sudo apt-get install -y python3-pygments
-      
+
       - name: Compile LaTeX Document
         run: ../scripts/compile_latex.sh thesis.tex
         shell: bash
         working-directory: docs
-        
+
       - name: Upload PDF artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Urmzd_Mukhammadnaim_RLGP_Thesis.pdf
           path: docs/thesis.pdf
+
+  arxiv:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install LaTeX
+        run: sudo apt-get install -y --no-install-recommends texlive-full
+
+      - name: Install Pygments
+        run: sudo apt-get install -y python3-pygments
+
+      - name: Compile thesis to generate .bbl file
+        run: |
+          latexmk -pdf -pdflatex="pdflatex -shell-escape -interaction=nonstopmode" -use-make thesis.tex
+        working-directory: docs
+
+      - name: Create arXiv package
+        run: |
+          mkdir -p arxiv_build
+          cp docs/thesis.tex arxiv_build/
+          cp docs/thesis.bbl arxiv_build/
+          cp docs/dalcsthesis.cls arxiv_build/
+          cp -r assets arxiv_build/
+          tar -czvf arxiv_submission.tar.gz -C arxiv_build .
+
+      - name: Upload arXiv package
+        uses: actions/upload-artifact@v4
+        with:
+          name: arxiv_submission.tar.gz
+          path: arxiv_submission.tar.gz
