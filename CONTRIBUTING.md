@@ -72,6 +72,27 @@ docker-compose up -d
 - Install the Rust plugin
 - Enable rustfmt on save
 
+### Pre-commit Hooks
+
+This project uses [pre-commit](https://pre-commit.com/) to enforce code quality before commits and pushes.
+
+**Setup:**
+```bash
+# Install pre-commit hooks (runs on every commit)
+pre-commit install
+
+# Install pre-push hooks (runs cargo test before push)
+pre-commit install --hook-type pre-push
+
+# Run all hooks manually on all files
+pre-commit run --all-files
+```
+
+**Hooks included:**
+- **General:** trailing-whitespace, end-of-file-fixer, check-merge-conflict
+- **Python (ruff):** linting and formatting
+- **Rust:** cargo fmt and clippy on commit, cargo test on push
+
 ## Code Style
 
 ### Rust
@@ -110,6 +131,44 @@ cargo clippy -- -D warnings
 - Constants: `SCREAMING_SNAKE_CASE`
 - Trait implementations: Match the trait's naming
 
+### Logging Guidelines
+
+We use [tracing](https://docs.rs/tracing) for structured logging. Follow these guidelines when adding log statements:
+
+**Log Levels:**
+
+| Level | When to Use | Examples |
+|-------|-------------|----------|
+| `error!` | Unrecoverable errors | Failed assertions, panic conditions |
+| `warn!` | Recoverable issues | Deprecated usage, fallback behavior |
+| `info!` | Key milestones | Generation complete, experiment start/end |
+| `debug!` | Diagnostic details | Config values, fitness scores |
+| `trace!` | Very verbose | Instruction execution, Q-table updates |
+
+**Best Practices:**
+
+```rust
+use tracing::{debug, info, instrument, trace};
+
+// Use #[instrument] for function-level spans
+#[instrument(skip_all, fields(experiment = %name))]
+pub fn run_experiment(name: &str) -> Result<()> {
+    info!("Starting experiment");
+    // ...
+    debug!(config = ?config, "Loaded configuration");
+    // ...
+    trace!(instruction = ?instr, "Executing instruction");
+    Ok(())
+}
+```
+
+- Use structured fields (`key = value`) over string formatting
+- Use `%` for Display, `?` for Debug formatting
+- Add `#[instrument]` to key functions with `skip_all` for large parameters
+- Keep `info!` logs sparse - one per major operation
+- Use `trace!` for hot paths (instruction execution, Q-table updates)
+- Test with `RUST_LOG=lgp=trace` to verify output isn't excessive
+
 ### Python
 
 For automation scripts in `lgp_tools/`:
@@ -120,11 +179,14 @@ For automation scripts in `lgp_tools/`:
 - Document functions with docstrings
 
 ```bash
-# Format Python code (if black is installed)
-black lgp_tools/
+# Format Python code with ruff
+uv run ruff format lgp_tools
 
-# Check with flake8 (if installed)
-flake8 lgp_tools/
+# Lint Python code with ruff
+uv run ruff check lgp_tools
+
+# Fix lint issues automatically
+uv run ruff check --fix lgp_tools
 ```
 
 ## Testing
