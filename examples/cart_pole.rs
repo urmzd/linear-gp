@@ -95,6 +95,8 @@ fn main() {
     } else if best_fitness >= 200.0 {
         println!("Partial success. The program shows improvement but may need more generations.");
     } else {
-        println!("The program needs more evolution. Try increasing generations or population size.");
+        println!(
+            "The program needs more evolution. Try increasing generations or population size."
+        );
     }
 }

@@ -110,7 +110,12 @@ pub struct ExperimentParams {
 
 /// CLI structure for the LGP framework
 #[derive(Parser)]
-#[command(name = "lgp", author, version, about = "Linear Genetic Programming Framework")]
+#[command(
+    name = "lgp",
+    author,
+    version,
+    about = "Linear Genetic Programming Framework"
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -204,22 +209,23 @@ impl ExperimentParams {
 
     /// Run the experiment based on the selected environment
     pub fn run(&self) {
-        let default_fitness = self.default_fitness.unwrap_or_else(|| self.env_default_fitness());
+        let default_fitness = self
+            .default_fitness
+            .unwrap_or_else(|| self.env_default_fitness());
 
         match self.env {
             EnvironmentType::CartPoleLgp => {
-                let hyperparameters: HyperParameters<GymRsEngine<CartPoleEnv>> =
-                    HyperParameters {
-                        default_fitness,
-                        population_size: self.population_size,
-                        gap: self.gap,
-                        mutation_percent: self.mutation_percent,
-                        crossover_percent: self.crossover_percent,
-                        n_generations: self.n_generations,
-                        n_trials: self.n_trials,
-                        seed: self.seed,
-                        program_parameters: self.build_program_params(),
-                    };
+                let hyperparameters: HyperParameters<GymRsEngine<CartPoleEnv>> = HyperParameters {
+                    default_fitness,
+                    population_size: self.population_size,
+                    gap: self.gap,
+                    mutation_percent: self.mutation_percent,
+                    crossover_percent: self.crossover_percent,
+                    n_generations: self.n_generations,
+                    n_trials: self.n_trials,
+                    seed: self.seed,
+                    program_parameters: self.build_program_params(),
+                };
                 run_experiment!(hyperparameters);
             }
             EnvironmentType::CartPoleQ => {
