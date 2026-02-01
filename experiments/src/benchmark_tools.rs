@@ -1,4 +1,9 @@
-use std::{env, error::Error, iter::repeat_with, path::{Path, PathBuf}};
+use std::{
+    env,
+    error::Error,
+    iter::repeat_with,
+    path::{Path, PathBuf},
+};
 
 use lgp::core::{
     characteristics::{Load, Save},

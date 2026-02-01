@@ -50,7 +50,10 @@ fn main() {
     println!("Configuration:");
     println!("  Population size: {}", parameters.population_size);
     println!("  Generations: {}", parameters.n_generations);
-    println!("  Max instructions: {}", parameters.program_parameters.max_instructions);
+    println!(
+        "  Max instructions: {}",
+        parameters.program_parameters.max_instructions
+    );
     println!();
 
     // Step 4: Run evolution
