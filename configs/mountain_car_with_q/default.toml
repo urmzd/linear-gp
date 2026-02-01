@@ -1,0 +1,40 @@
+# MountainCar with Q-Learning Experiment
+#
+# Hybrid approach: LGP + Q-Learning for MountainCar.
+# Programs select states, Q-table selects actions.
+
+name = "mountain_car_with_q"
+environment = "MountainCar"
+
+[metadata]
+version = "1.0.0"
+description = "MountainCar with mutation, crossover, and Q-learning"
+
+[problem]
+n_inputs = 2
+n_actions = 3
+
+[hyperparameters]
+population_size = 100
+n_generations = 100
+n_trials = 100
+gap = 0.5
+default_fitness = -200.0
+# seed = 12345  # uncomment for reproducibility
+
+[hyperparameters.program]
+max_instructions = 50
+n_extras = 1
+external_factor = 10.0
+
+[[operations]]
+name = "mutation"
+parameters = { percent = 0.5 }
+
+[[operations]]
+name = "crossover"
+parameters = { percent = 0.5 }
+
+[[operations]]
+name = "q_learning"
+parameters = { alpha = 0.1, gamma = 0.9, epsilon = 0.05, alpha_decay = 0.01, epsilon_decay = 0.001 }

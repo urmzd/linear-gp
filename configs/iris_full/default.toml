@@ -1,0 +1,35 @@
+# Iris Full LGP Experiment
+#
+# Full Linear Genetic Programming with both mutation and crossover.
+
+name = "iris_full"
+environment = "Iris"
+
+[metadata]
+version = "1.0.0"
+description = "Iris with mutation and crossover"
+
+[problem]
+n_inputs = 4
+n_actions = 3
+
+[hyperparameters]
+population_size = 100
+n_generations = 200
+n_trials = 1
+gap = 0.5
+default_fitness = 0.0
+# seed = 12345  # uncomment for reproducibility
+
+[hyperparameters.program]
+max_instructions = 100
+n_extras = 1
+external_factor = 10.0
+
+[[operations]]
+name = "mutation"
+parameters = { percent = 0.5 }
+
+[[operations]]
+name = "crossover"
+parameters = { percent = 0.5 }

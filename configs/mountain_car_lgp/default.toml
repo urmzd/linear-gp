@@ -1,0 +1,36 @@
+# MountainCar LGP Experiment
+#
+# Pure Linear Genetic Programming for MountainCar.
+# The goal is to drive an underpowered car up a steep hill by building momentum.
+
+name = "mountain_car_lgp"
+environment = "MountainCar"
+
+[metadata]
+version = "1.0.0"
+description = "MountainCar with mutation and crossover"
+
+[problem]
+n_inputs = 2
+n_actions = 3
+
+[hyperparameters]
+population_size = 100
+n_generations = 100
+n_trials = 100
+gap = 0.5
+default_fitness = -200.0
+# seed = 12345  # uncomment for reproducibility
+
+[hyperparameters.program]
+max_instructions = 50
+n_extras = 1
+external_factor = 10.0
+
+[[operations]]
+name = "mutation"
+parameters = { percent = 0.5 }
+
+[[operations]]
+name = "crossover"
+parameters = { percent = 0.5 }
