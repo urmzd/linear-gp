@@ -149,7 +149,7 @@ impl Mutate<InstructionGeneratorParameters, Instruction> for MutateEngine {
 }
 
 impl Instruction {
-    pub fn apply<'b>(&self, registers: &'b mut Registers, input: &impl State) {
+    pub fn apply(&self, registers: &mut Registers, input: &impl State) {
         let target_value = match self.mode {
             Mode::External => self.external_factor * input.get_value(self.tgt_idx),
             _ => *registers.get(self.tgt_idx),

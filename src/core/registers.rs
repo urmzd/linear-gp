@@ -50,7 +50,7 @@ impl ArgmaxResult {
 
     pub fn any(&self) -> ActionRegister {
         match self {
-            ArgmaxResult::MaxValues(indices) if indices.len() >= 1 => {
+            ArgmaxResult::MaxValues(indices) if !indices.is_empty() => {
                 ActionRegister::Value(indices.choose(&mut generator()).copied().unwrap())
             }
             _ => ActionRegister::Overflow,
@@ -111,6 +111,10 @@ impl Registers {
         data.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
     pub fn update(&mut self, index: usize, value: f64) {
         let Registers { data, .. } = self;
         data[index] = value;
@@ -121,7 +125,7 @@ impl Registers {
         data.get(index).unwrap()
     }
 
-    pub fn iter(&self) -> Iter<f64> {
+    pub fn iter(&self) -> Iter<'_, f64> {
         self.data.iter()
     }
 }

@@ -1,22 +1,15 @@
 pub fn argmax<I: Iterator<Item = f64>>(iter: I) -> Option<usize> {
     let mut current_max = None;
-    let mut max_index = -1;
+    let mut max_index = None;
 
-    let mut index = 0;
-
-    for item in iter {
+    for (index, item) in iter.enumerate() {
         if Some(item) > current_max {
             current_max = Some(item);
-            max_index = index;
+            max_index = Some(index);
         }
-        index += 1;
     }
 
-    if max_index < 0 {
-        None
-    } else {
-        Some(max_index as usize)
-    }
+    max_index
 }
 
 #[cfg(test)]

@@ -7,14 +7,14 @@ use std::{
 
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::utils::benchmark_tools::create_path;
+use crate::utils::misc::create_path;
 
 pub trait Load
 where
     Self: Sized + DeserializeOwned,
 {
     fn load(path: impl Into<PathBuf>) -> Self {
-        let contents = read_to_string(&path.into()).unwrap();
+        let contents = read_to_string(path.into()).unwrap();
         let deserialized: Self = serde_json::from_str(&contents).unwrap();
 
         deserialized
@@ -33,6 +33,7 @@ where
         let mut file = OpenOptions::new()
             .write(true)
             .create(true)
+            .truncate(true)
             .open(Path::new(path))?;
 
         file.write_all(serialized.as_bytes())?;

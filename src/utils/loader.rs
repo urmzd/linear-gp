@@ -15,11 +15,7 @@ where
         .has_headers(false)
         .from_reader(content.as_bytes());
 
-    let inputs: Result<Vec<T>, _> = csv_reader
-        .deserialize()
-        .into_iter()
-        .map(|input| input)
-        .collect();
+    let inputs: Result<Vec<T>, _> = csv_reader.deserialize().collect();
 
     Ok(inputs?)
 }

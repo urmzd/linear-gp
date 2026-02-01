@@ -1,9 +1,9 @@
-use std::{cell::UnsafeCell, sync::Arc};
+use std::{cell::UnsafeCell, rc::Rc};
 
 use rand::{RngCore, SeedableRng};
 use rand_xoshiro::Xoshiro256PlusPlus;
 
-type InternalGenerator = Arc<UnsafeCell<Xoshiro256PlusPlus>>;
+type InternalGenerator = Rc<UnsafeCell<Xoshiro256PlusPlus>>;
 
 #[derive(Clone, Debug)]
 pub struct Random {
@@ -14,7 +14,7 @@ thread_local! {
     static GENERATOR: InternalGenerator = {
         let prng = Xoshiro256PlusPlus::from_entropy();
 
-        Arc::new(UnsafeCell::new(prng))
+        Rc::new(UnsafeCell::new(prng))
     }
 }
 

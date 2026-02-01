@@ -1,7 +1,9 @@
 use clap::Parser;
-use lgp::core::config::Actuator;
+use lgp::core::config::{Cli, Commands};
 
 fn main() {
-    let mut cli = Actuator::parse();
-    cli.run();
+    let cli = Cli::parse();
+    match cli.command {
+        Commands::Experiment(params) => params.run(),
+    }
 }
