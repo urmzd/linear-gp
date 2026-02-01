@@ -8,3 +8,13 @@ arxiv_submission.tar.gz
 draft_packages
 
 .gemini-clipboard
+
+# UV / Python
+.venv/
+uv.lock
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
