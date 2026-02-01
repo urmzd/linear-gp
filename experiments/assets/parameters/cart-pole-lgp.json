@@ -1,0 +1,19 @@
+{
+    "default_fitness": 500.0,
+    "population_size": 100,
+    "gap": 0.5,
+    "mutation_percent": 0.5,
+    "crossover_percent": 0.5,
+    "n_generations": 100,
+    "n_trials": 100,
+    "seed": null,
+    "program_parameters": {
+        "max_instructions": 23,
+        "instruction_generator_parameters": {
+            "n_extras": 1,
+            "external_factor": 92.04438205753976,
+            "n_actions": 2,
+            "n_inputs": 4
+        }
+    }
+}
