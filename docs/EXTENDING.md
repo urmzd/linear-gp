@@ -273,14 +273,13 @@ impl Core for XorEngine {
 
 ### Step 4: Register as an Experiment
 
-The new config system uses TOML files in the `configs/` directory. To add a new experiment:
+The config system uses TOML files in the `configs/` directory. To add a new experiment:
 
-1. **Create config directory:**
+1. **Create config directory and `default.toml`:**
    ```bash
    mkdir -p configs/xor_lgp
    ```
 
-2. **Create `default.toml` with experiment configuration:**
    ```toml
    # configs/xor_lgp/default.toml
    [experiment]
@@ -303,9 +302,44 @@ The new config system uses TOML files in the `configs/` directory. To add a new 
    crossover_rate = 0.5
    ```
 
-3. **Implement the State trait and Core trait** in `crates/lgp/src/problems/xor.rs`
+2. **Implement the State trait and Core trait** in `crates/lgp/src/problems/xor.rs`
 
-4. **Register the experiment** in `crates/lgp/src/core/experiment_config.rs`
+3. **Register the environment in `experiment_runner.rs`:**
+
+   Add a match arm in `crates/lgp-cli/src/experiment_runner.rs` (around line 81):
+
+   ```rust
+   // In run_experiment function's match statement:
+   match (config.environment.as_str(), config.has_q_learning()) {
+       // ... existing environments ...
+       ("Xor" | "xor", _) => run_xor(config, seed, &output)?,
+       _ => return Err(format!("Unknown environment: {}", config.environment).into()),
+   }
+   ```
+
+4. **Implement the run function** following existing patterns (e.g., `run_iris`):
+
+   ```rust
+   fn run_xor(
+       config: &ExperimentConfig,
+       seed: u64,
+       output: &ExperimentOutput,
+   ) -> Result<(), Box<dyn std::error::Error>> {
+       let parameters: HyperParameters<XorEngine> = HyperParameters {
+           default_fitness: config.hyperparameters.default_fitness,
+           population_size: config.hyperparameters.population_size,
+           gap: config.hyperparameters.gap,
+           mutation_percent: config.mutation_percent(),
+           crossover_percent: config.crossover_percent(),
+           n_generations: config.hyperparameters.n_generations,
+           n_trials: config.hyperparameters.n_trials,
+           seed: Some(seed),
+           program_parameters: build_program_params(config),
+       };
+
+       run_and_save::<XorEngine>(&parameters, output)
+   }
+   ```
 
 ### Step 5: Add Module Export
 
@@ -323,40 +357,41 @@ For RL problems, use the gym-rs adapter pattern or implement `RlState` directly.
 
 ### Using gym-rs
 
-If your environment implements the `gym_rs::core::Env` trait, you can use the existing `GymRsInput` adapter:
+If your environment implements the `gym_rs::core::Env` trait, you can use the existing `GymRsEngine` adapter. Registration is done in `crates/lgp-cli/src/experiment_runner.rs`:
 
-```rust
-// In crates/lgp/src/core/config.rs
-use gym_rs::envs::your_module::YourEnv;
+1. **Create TOML config:**
+   ```toml
+   # configs/your_env_lgp/default.toml
+   [experiment]
+   name = "your_env_lgp"
+   environment = "your_env"
 
-#[derive(Parser, Deserialize, Serialize)]
-pub enum Actuator {
-    // ... existing variants ...
-    YourEnvLGP(HyperParameters<GymRsEngine<YourEnv>>),
-    YourEnvQ(HyperParameters<GymRsQEngine<YourEnv>>),
-}
+   [problem]
+   n_inputs = 4   # YourEnv::OBSERVATION_SIZE
+   n_actions = 2  # YourEnv::ACTION_COUNT
 
-impl Actuator {
-    pub fn run(&mut self) {
-        match self {
-            Actuator::YourEnvLGP(hyperparameters) => {
-                hyperparameters
-                    .program_parameters
-                    .instruction_generator_parameters
-                    .n_actions = YourEnv::ACTION_COUNT;
-                hyperparameters
-                    .program_parameters
-                    .instruction_generator_parameters
-                    .n_inputs = YourEnv::OBSERVATION_SIZE;
-                hyperparameters.default_fitness = YOUR_DEFAULT_FITNESS;
+   [hyperparameters]
+   population_size = 100
+   n_generations = 500
+   # ... other parameters
+   ```
 
-                run_actuator!(GymRsEngine, hyperparameters);
-            }
-            // Similar for Q variant...
-        }
-    }
-}
-```
+2. **Add match arm in `experiment_runner.rs`:**
+   ```rust
+   use gym_rs::envs::your_module::YourEnv;
+
+   // In run_experiment function's match statement:
+   match (config.environment.as_str(), config.has_q_learning()) {
+       // ... existing environments ...
+       ("YourEnv" | "your_env", false) => run_your_env_lgp(config, seed, &output)?,
+       ("YourEnv" | "your_env", true) => {
+           run_your_env_q(config, seed, &output, config.q_learning_params().unwrap())?
+       }
+       _ => return Err(format!("Unknown environment: {}", config.environment).into()),
+   }
+   ```
+
+3. **Implement run functions** following the patterns for `run_cart_pole_lgp` and `run_cart_pole_q`.
 
 ### Custom RL Environment
 
@@ -614,7 +649,8 @@ To add a new problem:
 2. **Implement Reset** - Reset state for re-evaluation
 3. **Implement Generate** - Create initial state instances
 4. **Define Engine** - Implement `Core` trait
-5. **Register CLI** - Add variant to `Actuator` enum
-6. **Test** - Write unit and integration tests
+5. **Create TOML config** - Add `configs/<name>/default.toml` with experiment configuration
+6. **Register in experiment_runner** - Add match arm in `crates/lgp-cli/src/experiment_runner.rs`
+7. **Test** - Write unit and integration tests
 
 The framework's trait system allows mixing and matching components. You can use the default `BreedEngine`, `MutateEngine`, etc., or create custom implementations for specialized behavior.
