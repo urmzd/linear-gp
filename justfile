@@ -50,27 +50,27 @@ bench:
 # ============================================================================
 
 # Run CartPole with pure LGP
-cartpole-lgp *args:
+run-cartpole-lgp *args:
     cargo run -p lgp-experiments --release -- run cart-pole-lgp {{args}}
 
 # Run CartPole with Q-Learning
-cartpole-q *args:
+run-cartpole-q *args:
     cargo run -p lgp-experiments --release -- run cart-pole-q {{args}}
 
 # Run MountainCar with pure LGP
-mountaincar-lgp *args:
+run-mountaincar-lgp *args:
     cargo run -p lgp-experiments --release -- run mountain-car-lgp {{args}}
 
 # Run MountainCar with Q-Learning
-mountaincar-q *args:
+run-mountaincar-q *args:
     cargo run -p lgp-experiments --release -- run mountain-car-q {{args}}
 
 # Run Iris classification experiments
-iris *args:
+run-iris *args:
     cargo run -p lgp-experiments --release -- run iris-full {{args}}
 
 # Run all experiments in batch
-batch-experiments *args:
+run-experiments-batch *args:
     cargo run -p lgp-experiments --release -- batch {{args}}
 
 # ============================================================================
@@ -82,7 +82,7 @@ setup:
     uv sync
 
 # Hyperparameter search for a specific environment
-search env n_trials="40" n_threads="4" median_trials="10":
+search-env env n_trials="40" n_threads="4" median_trials="10":
     uv run python -m lgp_tools.cli search single {{env}} --n-trials {{n_trials}} --n-threads {{n_threads}} --median-trials {{median_trials}}
 
 # Search hyperparameters for all environments
@@ -90,19 +90,19 @@ search-all:
     uv run python -m lgp_tools.cli search all
 
 # Run baseline experiments (iris variants)
-baseline:
+run-baseline:
     uv run python -m lgp_tools.cli run baseline
 
 # Run N experiment iterations with aggregation
-experiments n="10":
+run-experiments n="10":
     uv run python -m lgp_tools.cli run experiments {{n}}
 
 # Generate tables from experiment results
-tables input="experiments/assets/output" output="experiments/assets/tables":
+generate-tables input="experiments/assets/output" output="experiments/assets/tables":
     uv run python -m lgp_tools.cli analyze tables --input {{input}} --output {{output}}
 
 # Generate figures from tables
-figures input="experiments/assets/tables" output="experiments/assets/figures":
+generate-figures input="experiments/assets/tables" output="experiments/assets/figures":
     uv run python -m lgp_tools.cli analyze figures --input {{input}} --output {{output}}
 
 # ============================================================================
@@ -110,15 +110,15 @@ figures input="experiments/assets/tables" output="experiments/assets/figures":
 # ============================================================================
 
 # Full pipeline: search-all -> experiments -> analyze
-pipeline-full:
+run-pipeline-full:
     uv run python -m lgp_tools.cli pipeline full
 
 # Quick pipeline: experiments -> analyze (skip search)
-pipeline-quick n="10":
+run-pipeline-quick n="10":
     uv run python -m lgp_tools.cli pipeline quick --iterations {{n}}
 
 # Baseline pipeline: iris experiments with analysis
-pipeline-baseline:
+run-pipeline-baseline:
     uv run python -m lgp_tools.cli pipeline baseline
 
 # ============================================================================
@@ -126,11 +126,11 @@ pipeline-baseline:
 # ============================================================================
 
 # Start PostgreSQL database for Optuna
-db-start:
+start-db:
     docker-compose up -d
 
 # Stop PostgreSQL database
-db-stop:
+stop-db:
     docker-compose down
 
 # ============================================================================
@@ -149,7 +149,7 @@ lint:
 check: fmt lint test
 
 # Generate and open documentation
-docs:
+open-docs:
     cargo doc --open
 
 # Watch for changes and run tests
