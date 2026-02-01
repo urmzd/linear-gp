@@ -6,6 +6,7 @@ use std::{
 };
 
 use serde::{de::DeserializeOwned, Serialize};
+use tracing;
 
 use crate::utils::misc::create_path;
 
@@ -28,7 +29,19 @@ where
     fn save(&self, path: &str) -> Result<String, Box<dyn Error>> {
         create_path(path, true)?;
 
-        let serialized = serde_json::to_string_pretty(&self)?;
+        tracing::trace!(path = path, "Attempting JSON serialization");
+        let serialized = match serde_json::to_string_pretty(&self) {
+            Ok(s) => s,
+            Err(e) => {
+                tracing::error!(path = path, error = %e, "JSON serialization failed");
+                return Err(e.into());
+            }
+        };
+        tracing::trace!(
+            path = path,
+            bytes = serialized.len(),
+            "Serialization successful"
+        );
 
         let mut file = OpenOptions::new()
             .write(true)

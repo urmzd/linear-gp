@@ -2,6 +2,7 @@
 
 use clap::Args;
 use std::path::PathBuf;
+use tracing::{debug, info, instrument};
 
 use crate::config_discovery::find_config;
 use crate::config_override::apply_overrides;
@@ -30,15 +31,23 @@ pub struct RunArgs {
     pub dry_run: bool,
 }
 
+#[instrument(skip_all, fields(experiment = %args.name, config_variant = %args.config))]
 pub fn execute(args: &RunArgs) -> Result<(), Box<dyn std::error::Error>> {
+    info!(experiment = %args.name, "Starting experiment execution");
+
+    debug!(config_path = ?args.name, variant = ?args.config, "Discovering config");
     let discovered = find_config(&args.name, &args.config)?;
+
+    debug!(path = ?discovered.config_path, "Loading experiment config");
     let mut config = ExperimentConfig::load(&discovered.config_path)?;
 
     if !args.overrides.is_empty() {
+        debug!(overrides = ?args.overrides, "Applying config overrides");
         apply_overrides(&mut config, &args.overrides)?;
     }
 
     if args.dry_run {
+        debug!("Dry run mode - printing config and exiting");
         println!("{}", toml::to_string_pretty(&config)?);
         return Ok(());
     }
@@ -53,7 +62,17 @@ pub fn execute(args: &RunArgs) -> Result<(), Box<dyn std::error::Error>> {
         if config.has_q_learning() { "yes" } else { "no" }
     );
 
+    info!(
+        environment = %config.environment,
+        mutation_percent = config.mutation_percent(),
+        crossover_percent = config.crossover_percent(),
+        q_learning = config.has_q_learning(),
+        "Experiment configuration loaded"
+    );
+
     let output = run_experiment(&config, &args.output_dir)?;
+
+    info!(output_dir = %output.base_dir.display(), "Experiment completed successfully");
 
     println!("Experiment complete!");
     println!("  Output: {}", output.base_dir.display());
