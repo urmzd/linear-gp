@@ -8,6 +8,45 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 
+/// Serde helper module for serializing Option<u64> as a string.
+/// This is necessary because TOML only supports signed 64-bit integers,
+/// and u64 values larger than i64::MAX would cause serialization to fail.
+mod optional_u64_as_string {
+    use serde::{self, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(value: &Option<u64>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match value {
+            Some(v) => serializer.serialize_str(&v.to_string()),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        use serde::de::Error;
+
+        // We need to handle both string and integer formats for backwards compatibility
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum StringOrInt {
+            String(String),
+            Int(u64),
+        }
+
+        let opt: Option<StringOrInt> = Option::deserialize(deserializer)?;
+        match opt {
+            Some(StringOrInt::String(s)) => s.parse().map(Some).map_err(D::Error::custom),
+            Some(StringOrInt::Int(n)) => Ok(Some(n)),
+            None => Ok(None),
+        }
+    }
+}
+
 /// Complete experiment configuration loaded from a TOML file.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ExperimentConfig {
@@ -49,7 +88,8 @@ pub struct HyperParams {
     #[serde(default)]
     pub default_fitness: f64,
     /// Random seed. If None, a random seed will be generated.
-    #[serde(default)]
+    /// Serialized as a string to support values > i64::MAX in TOML format.
+    #[serde(default, with = "optional_u64_as_string")]
     pub seed: Option<u64>,
     pub program: ProgramConfig,
 }
@@ -368,5 +408,94 @@ parameters = { alpha = 0.1, gamma = 0.9, epsilon = 0.05, alpha_decay = 0.01, eps
         assert_eq!(q_params.alpha, 0.1);
         assert_eq!(q_params.gamma, 0.9);
         assert_eq!(q_params.epsilon, 0.05);
+    }
+
+    #[test]
+    fn test_large_seed_serialization() {
+        // Test that seeds larger than i64::MAX can be serialized and deserialized
+        let large_seed: u64 = 16412768254277122702; // > i64::MAX (9223372036854775807)
+        assert!(large_seed > i64::MAX as u64);
+
+        let toml_str = r#"
+name = "test_large_seed"
+environment = "Test"
+
+[metadata]
+version = "1.0.0"
+
+[problem]
+n_inputs = 4
+n_actions = 3
+
+[hyperparameters]
+population_size = 100
+n_generations = 200
+seed = "16412768254277122702"
+
+[hyperparameters.program]
+max_instructions = 100
+"#;
+        // Test deserialization from string format
+        let config: ExperimentConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(config.hyperparameters.seed, Some(large_seed));
+
+        // Test round-trip serialization
+        let serialized = toml::to_string_pretty(&config).unwrap();
+        assert!(serialized.contains("seed = \"16412768254277122702\""));
+
+        // Test deserialization of the serialized config
+        let deserialized: ExperimentConfig = toml::from_str(&serialized).unwrap();
+        assert_eq!(deserialized.hyperparameters.seed, Some(large_seed));
+    }
+
+    #[test]
+    fn test_seed_backwards_compatibility() {
+        // Test that integer seeds (within i64 range) still work
+        let toml_str = r#"
+name = "test_int_seed"
+environment = "Test"
+
+[metadata]
+version = "1.0.0"
+
+[problem]
+n_inputs = 4
+n_actions = 3
+
+[hyperparameters]
+population_size = 100
+n_generations = 200
+seed = 12345
+
+[hyperparameters.program]
+max_instructions = 100
+"#;
+        let config: ExperimentConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(config.hyperparameters.seed, Some(12345));
+    }
+
+    #[test]
+    fn test_no_seed_serialization() {
+        // Test that configs without a seed work correctly
+        let toml_str = r#"
+name = "test_no_seed"
+environment = "Test"
+
+[metadata]
+version = "1.0.0"
+
+[problem]
+n_inputs = 4
+n_actions = 3
+
+[hyperparameters]
+population_size = 100
+n_generations = 200
+
+[hyperparameters.program]
+max_instructions = 100
+"#;
+        let config: ExperimentConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(config.hyperparameters.seed, None);
     }
 }
