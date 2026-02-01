@@ -67,14 +67,17 @@ just setup
 ### First Experiment
 
 ```bash
-# Run CartPole with pure LGP
-just cartpole-lgp
+# List available experiments
+just list
 
-# Run CartPole with Q-Learning
-just cartpole-q
+# Run CartPole with pure LGP
+just run cart_pole_lgp
 
 # Run Iris classification
-just iris
+just run iris_baseline
+
+# Run an example
+just run-example cart_pole
 
 # Run benchmarks
 just bench
@@ -84,40 +87,36 @@ just bench
 
 ```
 linear-gp/
-├── src/                        # Core LGP library
-│   ├── main.rs                 # CLI entry point
-│   ├── lib.rs                  # Library exports
-│   ├── core/                   # Core LGP implementation
-│   │   ├── config.rs           # CLI configuration
-│   │   ├── environment.rs      # State and RlState traits
-│   │   ├── program.rs          # Program structure
-│   │   ├── instruction.rs      # Instruction definition
-│   │   ├── instructions.rs     # Instruction collection
-│   │   ├── registers.rs        # Register management
-│   │   └── engines/            # Genetic algorithm engines
-│   ├── problems/               # Problem implementations
-│   │   ├── gym.rs              # OpenAI Gym environments
-│   │   └── iris.rs             # Iris classification
-│   └── extensions/             # Extended functionality
-│       ├── q_learning.rs       # Q-Learning integration
-│       ├── classification.rs   # Classification fitness
-│       └── interactive.rs      # RL fitness evaluation
-├── experiments/                # Thesis experiments (workspace member)
-│   ├── src/                    # lgp-experiments CLI
-│   └── assets/                 # Parameters, results, figures
-│       ├── parameters/         # Optimized hyperparameters (JSON)
-│       ├── output/             # Raw experiment outputs
-│       └── experiments/        # Aggregated results and figures
+├── crates/
+│   ├── lgp/                    # Core LGP library
+│   │   ├── src/
+│   │   │   ├── lib.rs          # Library exports
+│   │   │   ├── core/           # Core LGP implementation
+│   │   │   ├── problems/       # Problem implementations
+│   │   │   ├── extensions/     # Extended functionality
+│   │   │   └── utils/          # Utility functions
+│   │   ├── benches/            # Performance benchmarks
+│   │   └── tests/              # Integration tests
+│   └── lgp-cli/                # CLI application
+│       └── src/
+│           ├── main.rs         # CLI entry point
+│           ├── commands/       # Subcommands (experiment)
+│           ├── config_discovery.rs
+│           └── config_override.rs
+├── configs/                    # Experiment configurations
+│   ├── iris_baseline/default.toml
+│   ├── cart_pole_lgp/default.toml
+│   └── ...
 ├── lgp_tools/                  # Python CLI package
-│   ├── cli.py                  # Main CLI entry point
-│   ├── search.py               # Hyperparameter optimization
-│   ├── run.py                  # Experiment execution
-│   ├── analyze.py              # Tables and figures generation
-│   └── pipelines.py            # Composable workflows
-├── examples/                   # Rust API examples
-├── tests/                      # Integration smoke tests
-├── benches/                    # Performance benchmarks
-└── docs/                       # Additional documentation
+│   ├── cli.py                  # Main CLI (search, analyze)
+│   ├── config.py               # Config discovery
+│   └── models.py               # Pydantic models
+├── outputs/                    # Experiment outputs
+│   ├── parameters/             # Optimized hyperparameters
+│   ├── output/                 # Raw experiment outputs
+│   ├── tables/                 # CSV statistics
+│   └── figures/                # PNG plots
+└── docs/                       # Documentation
 ```
 
 ### Core Traits
@@ -135,72 +134,68 @@ See [docs/EXTENDING.md](docs/EXTENDING.md) for detailed trait documentation.
 
 ## CLI Reference
 
-### lgp-experiments (Rust)
+### lgp (Rust CLI)
 
-Run individual experiments or batch jobs:
+Run experiments with TOML-based configuration:
 
 ```bash
-# Run a specific experiment
-cargo run -p lgp-experiments --release -- run <EXPERIMENT> [OPTIONS]
+# List available experiments
+lgp list
 
-# Run all experiments in batch
-cargo run -p lgp-experiments --release -- batch [OPTIONS]
+# Run experiment with default config
+lgp run iris_baseline
+
+# Run with optimal config (after search)
+lgp run iris_baseline --config optimal
+
+# Run with overrides
+lgp run iris_baseline --override hyperparameters.program.max_instructions=50
+
+# Q-learning parameter overrides
+lgp run cart_pole_with_q --override operations.q_learning.alpha=0.5
+
+# Preview config (dry-run)
+lgp run iris_baseline --dry-run
+
+# Run a Rust example
+lgp example cart_pole
+
+# List available examples
+lgp example --list
 ```
 
 **Available Experiments:**
 
 | Experiment | Description |
 |------------|-------------|
-| `iris-baseline` | Iris baseline (no mutation, no crossover) |
-| `iris-mutation` | Iris with mutation only |
-| `iris-crossover` | Iris with crossover only |
-| `iris-full` | Iris full (mutation + crossover) |
-| `cart-pole-lgp` | CartPole with pure LGP |
-| `cart-pole-q` | CartPole with Q-Learning |
-| `mountain-car-lgp` | MountainCar with pure LGP |
-| `mountain-car-q` | MountainCar with Q-Learning |
-
-**Options:**
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--n-generations N` | Override number of generations | Config value |
-| `--output-prefix PATH` | Output directory | `experiments/assets/output` |
-
-**Examples:**
-
-```bash
-# Run CartPole with custom generations
-cargo run -p lgp-experiments --release -- run cart-pole-lgp --n-generations 200
-
-# Run all experiments
-cargo run -p lgp-experiments --release -- batch
-
-# Run specific experiments
-cargo run -p lgp-experiments --release -- batch --experiments iris-full,cart-pole-lgp
-```
+| `iris_baseline` | Iris baseline (no mutation, no crossover) |
+| `iris_mutation` | Iris with mutation only |
+| `iris_crossover` | Iris with crossover only |
+| `iris_full` | Iris full (mutation + crossover) |
+| `cart_pole_lgp` | CartPole with pure LGP |
+| `cart_pole_with_q` | CartPole with Q-Learning |
+| `mountain_car_lgp` | MountainCar with pure LGP |
+| `mountain_car_with_q` | MountainCar with Q-Learning |
 
 ### lgp-tools (Python)
 
-Python CLI for hyperparameter search, experiment orchestration, and analysis:
+Python CLI for hyperparameter search and analysis:
 
 ```bash
-# Hyperparameter search
-uv run lgp-tools search single <ENV>    # Search for a single environment
-uv run lgp-tools search all             # Search all environments
+# Search hyperparameters (all configs)
+uv run lgp-tools search
 
-# Run experiments
-uv run lgp-tools run baseline           # Run iris baseline experiments
-uv run lgp-tools run experiments N      # Run N iterations with aggregation
+# Search specific config
+uv run lgp-tools search iris_baseline
 
-# Generate analysis
-uv run lgp-tools analyze tables         # Generate CSV tables from results
-uv run lgp-tools analyze figures        # Generate PNG fitness plots
+# Search with custom options
+uv run lgp-tools search -t 20 -j 8 -m 5
 
-# Pipelines (composable workflows)
-uv run lgp-tools pipeline full          # Search -> experiments -> analyze
-uv run lgp-tools pipeline quick         # Experiments -> analyze (skip search)
-uv run lgp-tools pipeline baseline      # Iris baseline with analysis
+# Analyze results (generates tables + figures)
+uv run lgp-tools analyze
+
+# Analyze with custom paths
+uv run lgp-tools analyze --input outputs/output --output outputs
 ```
 
 ## Examples
@@ -208,11 +203,14 @@ uv run lgp-tools pipeline baseline      # Iris baseline with analysis
 Run Rust API examples to see the library in action:
 
 ```bash
+# List available examples
+lgp example --list
+
 # CartPole reinforcement learning example
-cargo run --example cart_pole
+lgp example cart_pole
 
 # Iris classification example
-cargo run --example iris_classification
+lgp example iris_classification
 ```
 
 ## Hyperparameter Search
@@ -223,7 +221,10 @@ The framework includes automated hyperparameter optimization using [Optuna](http
 
 ```bash
 # Start PostgreSQL backend
-just db-start
+just start-db
+
+# Stop PostgreSQL
+just stop-db
 
 # Verify database is running
 docker-compose ps
@@ -232,24 +233,26 @@ docker-compose ps
 ### Running Search
 
 ```bash
-# Search for a specific environment
-just search cart-pole-lgp 40 4 10
-# Args: environment, n_trials, n_threads, median_trials
+# Search for a specific config
+uv run lgp-tools search cart_pole_lgp
 
-# Search all environments (LGP first, then Q-Learning)
-just search-all
+# Search all configs (LGP first, then Q-Learning)
+uv run lgp-tools search
 
-# Or use lgp-tools directly
-uv run lgp-tools search single cart-pole-q --n-trials 100 --n-threads 8 --median-trials 15
+# Search with custom options
+uv run lgp-tools search cart_pole_with_q -t 100 -j 8 -m 15
 ```
 
-### Available Environments
+### Available Configs
 
-- `iris-lgp` - Iris classification
-- `cart-pole-lgp` - CartPole with pure LGP
-- `cart-pole-q` - CartPole with Q-Learning
-- `mountain-car-lgp` - MountainCar with pure LGP
-- `mountain-car-q` - MountainCar with Q-Learning
+- `iris_baseline` - Iris classification (baseline)
+- `iris_mutation` - Iris with mutation only
+- `iris_crossover` - Iris with crossover only
+- `iris_full` - Iris full (mutation + crossover)
+- `cart_pole_lgp` - CartPole with pure LGP
+- `cart_pole_with_q` - CartPole with Q-Learning
+- `mountain_car_lgp` - MountainCar with pure LGP
+- `mountain_car_with_q` - MountainCar with Q-Learning
 
 ### Parameters Searched
 
@@ -263,87 +266,74 @@ uv run lgp-tools search single cart-pole-q --n-trials 100 --n-threads 8 --median
 | `alpha_decay` (Q-Learning) | 0.0-1.0 |
 | `epsilon_decay` (Q-Learning) | 0.0-1.0 |
 
-Results are saved to `experiments/assets/parameters/<env>.json`.
+Results are saved to:
+- `outputs/parameters/<config>.json`
+- `configs/<config>/optimal.toml`
 
 ## Running Experiments
 
 ### Quick Start with Just
 
 ```bash
-# Run individual environments
-just cartpole-lgp
-just cartpole-q
-just mountaincar-lgp
-just mountaincar-q
-just iris
+# List available experiments
+just list
 
-# Run batch experiments
-just batch-experiments
+# Run individual experiments
+just run cart_pole_lgp
+just run cart_pole_with_q
+just run mountain_car_lgp
+just run iris_baseline
+
+# Run with dry-run to preview config
+just run iris_baseline --dry-run
 ```
 
-### Batch Experiments with Aggregation
+### Running with lgp
 
 ```bash
-# Run 10 iterations and aggregate results
-just experiments 10
+# Run with default config
+lgp run cart_pole_lgp
 
-# Or use lgp-tools directly
-uv run lgp-tools run experiments 10 --keep-artifacts
+# Run with optimized config (after search)
+lgp run cart_pole_lgp --config optimal
+
+# Run with parameter overrides
+lgp run cart_pole_lgp --override hyperparameters.n_generations=200
 ```
 
 ### Generating Visualizations
 
 ```bash
-# Generate CSV tables from experiment results
-just tables
+# Analyze results (generates tables + figures)
+uv run lgp-tools analyze
 
-# Generate fitness evolution plots
-just figures
-```
-
-### Pipelines
-
-Run complete workflows with a single command:
-
-```bash
-# Full pipeline: search -> experiments -> analyze
-just pipeline-full
-
-# Quick pipeline: experiments -> analyze (uses existing parameters)
-just pipeline-quick 10
-
-# Baseline pipeline: iris experiments with analysis
-just pipeline-baseline
+# Analyze with custom paths
+uv run lgp-tools analyze --input outputs/output --output outputs
 ```
 
 ### Output Structure
 
 ```
-experiments/assets/
-├── parameters/                 # Optimized hyperparameters
-│   ├── cart-pole-lgp.json
-│   ├── cart-pole-q.json
-│   ├── mountain-car-lgp.json
-│   └── mountain-car-q.json
+outputs/
+├── parameters/                 # Optimized hyperparameters (JSON)
+│   ├── cart_pole_lgp.json
+│   └── ...
 ├── output/                     # Raw experiment outputs
 │   └── <experiment>/
 │       ├── population.json
 │       ├── best.json
 │       ├── median.json
-│       └── worst.json
-└── experiments/
-    ├── baseline/               # Iris baseline results
-    │   ├── iris_baseline.csv
-    │   ├── iris_mutation.csv
-    │   ├── iris_crossover.csv
-    │   ├── iris_full.csv
-    │   └── figures/
-    └── aggregate_results/      # Aggregated RL results
-        ├── cart_pole_lgp.csv
-        ├── cart_pole_q.csv
-        ├── mountain_car_lgp.csv
-        ├── mountain_car_q.csv
-        └── figures/
+│       ├── worst.json
+│       └── params.json
+├── tables/                     # Generated CSV statistics
+│   └── <experiment>.csv
+└── figures/                    # Generated PNG plots
+    └── <experiment>.png
+
+configs/
+└── <experiment>/
+    ├── default.toml            # Default configuration
+    └── optimal.toml            # Generated by search
 ```
 
 ## Extending the Framework
