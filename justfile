@@ -38,9 +38,20 @@ bench:
 
 # === RUN EXPERIMENTS ===
 
+# Default log level for experiments (can be overridden)
+export RUST_LOG := env_var_or_default("RUST_LOG", "lgp=info,lgp_cli=info")
+
 # Run an experiment by name
 run name *args:
     cargo run -p lgp-cli --release -- run {{name}} {{args}}
+
+# Run an experiment with verbose (debug) logging (logs to file)
+run-verbose name *args:
+    RUST_LOG=lgp=debug,lgp_cli=debug cargo run -p lgp-cli --release -- --log-file debug-{{name}}.log run {{name}} {{args}}
+
+# Run an experiment with trace logging (very verbose, logs to file)
+run-trace name *args:
+    RUST_LOG=lgp=trace,lgp_cli=trace cargo run -p lgp-cli --release -- --log-file trace-{{name}}.log run {{name}} {{args}}
 
 # Run example by name
 run-example name:
