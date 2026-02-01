@@ -1,9 +1,11 @@
-[workspace]
-members = ["crates/lgp", "crates/lgp-cli"]
-resolver = "2"
+[package]
+name = "lgp"
+version = "1.0.0"
+edition = "2021"
+authors = ["Urmzd Mukhammadnaim; urmzd@dal.ca"]
+description = "A library to solve problems using linear genetic programming"
 
-[workspace.dependencies]
-# Common dependencies shared across crates
+[dependencies]
 csv = "1.1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -30,4 +32,10 @@ rayon = "1.7"
 glob = "0.3.1"
 toml = "0.8"
 chrono = "0.4"
+
+[dev-dependencies]
 criterion = "0.4.0"
+
+[[bench]]
+name = "performance_after_training"
+harness = false
