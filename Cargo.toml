@@ -1,3 +1,7 @@
+[workspace]
+members = [".", "experiments"]
+resolver = "2"
+
 [package]
 name = "lgp"
 version = "1.0.0"
