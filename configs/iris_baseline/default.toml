@@ -1,0 +1,33 @@
+# Iris Baseline Experiment
+#
+# No genetic operators (mutation/crossover) - tests pure random search with elitism.
+
+name = "iris_baseline"
+environment = "Iris"
+
+[metadata]
+version = "1.0.0"
+description = "Iris baseline - no genetic operators"
+title = "Iris without Crossover or Mutation"
+x_label = "Generation"
+y_label = "Fitness"
+tags = ["iris", "baseline", "no-operators"]
+
+[problem]
+n_inputs = 4
+n_actions = 3
+
+[hyperparameters]
+population_size = 100
+n_generations = 200
+n_trials = 1
+gap = 0.5
+default_fitness = 0.0
+# seed = 12345  # uncomment for reproducibility
+
+[hyperparameters.program]
+max_instructions = 100
+n_extras = 1
+external_factor = 10.0
+
+# No operations - pure random/elitism

@@ -1,0 +1,36 @@
+# CartPole LGP Experiment
+#
+# Pure Linear Genetic Programming for CartPole balancing.
+# Programs directly output actions.
+
+name = "cart_pole_lgp"
+environment = "CartPole"
+
+[metadata]
+version = "1.0.0"
+description = "CartPole with mutation and crossover"
+
+[problem]
+n_inputs = 4
+n_actions = 2
+
+[hyperparameters]
+population_size = 100
+n_generations = 100
+n_trials = 100
+gap = 0.5
+default_fitness = 500.0
+# seed = 12345  # uncomment for reproducibility
+
+[hyperparameters.program]
+max_instructions = 50
+n_extras = 1
+external_factor = 10.0
+
+[[operations]]
+name = "mutation"
+parameters = { percent = 0.5 }
+
+[[operations]]
+name = "crossover"
+parameters = { percent = 0.5 }
