@@ -96,7 +96,7 @@ impl QTable {
             }
         };
 
-        let prob = generator().gen_range((0.)..(1.));
+        let prob = generator().gen_range(0.0..1.0);
 
         let winning_action = if prob <= self.q_consts.epsilon_active {
             self.action_random()
@@ -159,11 +159,9 @@ where
     q_program.program.run(environment);
 
     // Get the winning action-register pair.
-    let action_state = q_program
+    q_program
         .q_table
-        .get_action_register(&q_program.program.registers);
-
-    action_state
+        .get_action_register(&q_program.program.registers)
 }
 
 impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
@@ -219,14 +217,14 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
 
 impl Breed<QProgram> for BreedEngine {
     fn two_point_crossover(mate_1: &QProgram, mate_2: &QProgram) -> (QProgram, QProgram) {
-        let (_child_1_program, _child_2_program) =
+        let (child_1_program, child_2_program) =
             BreedEngine::two_point_crossover(&mate_1.program, &mate_2.program);
 
         let mut child_1 = mate_1.clone();
         let mut child_2 = mate_2.clone();
 
-        child_1.program = child_1.program;
-        child_2.program = child_2.program;
+        child_1.program = child_1_program;
+        child_2.program = child_2_program;
 
         ResetEngine::reset(&mut child_1.program.id);
         ResetEngine::reset(&mut child_2.program.id);

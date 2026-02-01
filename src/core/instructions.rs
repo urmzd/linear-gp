@@ -15,8 +15,8 @@ impl Breed<Instructions> for BreedEngine {
         let mut instructions_a = mate_1.clone();
         let mut instructions_b = mate_2.clone();
 
-        debug_assert!(instructions_a.len() > 0);
-        debug_assert!(instructions_b.len() > 0);
+        debug_assert!(!instructions_a.is_empty());
+        debug_assert!(!instructions_b.is_empty());
 
         let a_start = generator().gen_range(0..instructions_a.len());
         let b_start = generator().gen_range(0..instructions_b.len());
@@ -65,8 +65,8 @@ impl Breed<Instructions> for BreedEngine {
         }
         .collect_vec();
 
-        debug_assert!(instructions_a.len() > 0, "instructions A after crossover");
-        debug_assert!(instructions_b.len() > 0, "instructions B after crossover");
+        debug_assert!(!instructions_a.is_empty(), "instructions A after crossover");
+        debug_assert!(!instructions_b.is_empty(), "instructions B after crossover");
 
         (instructions_a, instructions_b)
     }

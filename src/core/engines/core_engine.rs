@@ -128,7 +128,7 @@ where
         self.next_population = new_population;
         self.generation += 1;
 
-        return Some(population);
+        Some(population)
     }
 }
 
@@ -159,11 +159,9 @@ pub trait Core {
         program_parameters: Self::ProgramParameters,
         population_size: usize,
     ) -> Vec<Self::Individual> {
-        let population = repeat_with(|| Self::Generate::generate(program_parameters))
+        repeat_with(|| Self::Generate::generate(program_parameters))
             .take(population_size)
-            .collect();
-
-        population
+            .collect()
     }
 
     fn eval_fitness(
@@ -224,7 +222,7 @@ pub trait Core {
         mutation_percent: f64,
         program_parameters: Self::ProgramParameters,
     ) {
-        debug_assert!(population.len() > 0);
+        debug_assert!(!population.is_empty());
 
         let pop_cap = population.capacity();
         let pop_len = population.len();
@@ -255,7 +253,7 @@ pub trait Core {
                     let parent_b = population_to_read.iter().choose(&mut generator());
 
                     if let (Some(parent_a), Some(parent_b)) = (parent_a, parent_b) {
-                        let children = Self::Breed::two_point_crossover(&parent_a, &parent_b);
+                        let children = Self::Breed::two_point_crossover(parent_a, parent_b);
                         match generator().gen_range(0..2) {
                             0 => Some(children.0),
                             1 => Some(children.1),
