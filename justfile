@@ -1,13 +1,10 @@
-# Linear Genetic Programming Framework - Justfile
+# Linear Genetic Programming Framework
 # Run `just --list` to see all available recipes
 
-# Default recipe: show help
 default:
     @just --list
 
-# ============================================================================
-# BUILD COMMANDS
-# ============================================================================
+# === BUILD ===
 
 # Build release binary
 build:
@@ -21,9 +18,7 @@ build-dev:
 clean:
     cargo clean
 
-# ============================================================================
-# TEST COMMANDS
-# ============================================================================
+# === TEST ===
 
 # Run all tests
 test:
@@ -37,95 +32,57 @@ test-verbose:
 test-nextest:
     cargo nextest run --release
 
-# Run a specific test suite
-test-suite name:
-    cargo test --release {{name}}
-
 # Run benchmarks
 bench:
     cargo bench
 
-# ============================================================================
-# EXPERIMENT COMMANDS
-# ============================================================================
+# === RUN EXPERIMENTS ===
 
-# Run CartPole with pure LGP
-run-cartpole-lgp *args:
-    cargo run -p lgp-experiments --release -- run cart-pole-lgp {{args}}
+# Run an experiment by name
+run name *args:
+    cargo run -p lgp-cli --release -- run {{name}} {{args}}
 
-# Run CartPole with Q-Learning
-run-cartpole-q *args:
-    cargo run -p lgp-experiments --release -- run cart-pole-q {{args}}
+# Run example by name
+run-example name:
+    cargo run -p lgp-cli --release -- example {{name}}
 
-# Run MountainCar with pure LGP
-run-mountaincar-lgp *args:
-    cargo run -p lgp-experiments --release -- run mountain-car-lgp {{args}}
+# List available experiments
+list:
+    cargo run -p lgp-cli --release -- list
 
-# Run MountainCar with Q-Learning
-run-mountaincar-q *args:
-    cargo run -p lgp-experiments --release -- run mountain-car-q {{args}}
+# List available examples
+list-examples:
+    cargo run -p lgp-cli --release -- example --list
 
-# Run Iris classification experiments
-run-iris *args:
-    cargo run -p lgp-experiments --release -- run iris-full {{args}}
+# === EXPERIMENT PIPELINE ===
 
-# Run all experiments in batch
-run-experiments-batch *args:
-    cargo run -p lgp-experiments --release -- batch {{args}}
+# Run full experiment pipeline (search -> run -> analyze)
+experiment config="" *args:
+    uv run lgp-tools experiment {{config}} {{args}}
 
-# ============================================================================
-# PYTHON TOOLING (via UV)
-# ============================================================================
+# Run experiments without search (use existing optimal.toml)
+experiment-quick config="" n="10":
+    uv run lgp-tools experiment {{config}} --skip-search -n {{n}}
 
-# Setup Python environment with UV
-setup:
-    uv sync
+# === HYPERPARAMETER SEARCH ===
 
-# Hyperparameter search for a specific environment
-search-env env n_trials="40" n_threads="4" median_trials="10":
-    uv run python -m lgp_tools.cli search single {{env}} --n-trials {{n_trials}} --n-threads {{n_threads}} --median-trials {{median_trials}}
+# Search hyperparameters for a config
+search config *args:
+    uv run lgp-tools search {{config}} {{args}}
 
-# Search hyperparameters for all environments
-search-all:
-    uv run python -m lgp_tools.cli search all
+# Search all configs
+search-all *args:
+    uv run lgp-tools search {{args}}
 
-# Run baseline experiments (iris variants)
-run-baseline:
-    uv run python -m lgp_tools.cli run baseline
+# === ANALYSIS ===
 
-# Run N experiment iterations with aggregation
-run-experiments n="10":
-    uv run python -m lgp_tools.cli run experiments {{n}}
+# Analyze experiment results
+analyze *args:
+    uv run lgp-tools analyze {{args}}
 
-# Generate tables from experiment results
-generate-tables input="experiments/assets/output" output="experiments/assets/tables":
-    uv run python -m lgp_tools.cli analyze tables --input {{input}} --output {{output}}
+# === DATABASE ===
 
-# Generate figures from tables
-generate-figures input="experiments/assets/tables" output="experiments/assets/figures":
-    uv run python -m lgp_tools.cli analyze figures --input {{input}} --output {{output}}
-
-# ============================================================================
-# PIPELINES
-# ============================================================================
-
-# Full pipeline: search-all -> experiments -> analyze
-run-pipeline-full:
-    uv run python -m lgp_tools.cli pipeline full
-
-# Quick pipeline: experiments -> analyze (skip search)
-run-pipeline-quick n="10":
-    uv run python -m lgp_tools.cli pipeline quick --iterations {{n}}
-
-# Baseline pipeline: iris experiments with analysis
-run-pipeline-baseline:
-    uv run python -m lgp_tools.cli pipeline baseline
-
-# ============================================================================
-# DATABASE
-# ============================================================================
-
-# Start PostgreSQL database for Optuna
+# Start PostgreSQL database
 start-db:
     docker-compose up -d
 
@@ -133,51 +90,78 @@ start-db:
 stop-db:
     docker-compose down
 
-# ============================================================================
-# DEVELOPMENT
-# ============================================================================
+# === DEVELOPMENT ===
 
-# Format code
+# Format Rust code
 fmt:
     cargo fmt
+
+# Format Python code
+fmt-py:
+    uv run ruff format lgp_tools
+
+# Format all code
+fmt-all: fmt fmt-py
 
 # Run clippy linter
 lint:
     cargo clippy -- -D warnings
 
+# Lint Python code
+lint-py:
+    uv run ruff check lgp_tools
+
+# Lint all code
+lint-all: lint lint-py
+
 # Run all checks (format, lint, test)
 check: fmt lint test
 
+# Check all (Rust + Python)
+check-all: fmt-all lint-all test
+
+# Fix Python lint issues
+fix-py:
+    uv run ruff check --fix lgp_tools
+
+# Install pre-commit hooks
+hooks-install:
+    pre-commit install
+    pre-commit install --hook-type pre-push
+
+# Run hooks on all files
+hooks-run:
+    pre-commit run --all-files
+
 # Generate and open documentation
-open-docs:
+docs:
     cargo doc --open
 
 # Watch for changes and run tests
 watch:
     cargo watch -x test
 
-# ============================================================================
-# FULL SETUP
-# ============================================================================
+# === SETUP ===
 
-# Full development setup (Rust + Python + Database)
+# Setup Python environment with UV and install hooks
+setup:
+    uv sync --extra dev
+    pre-commit install
+    pre-commit install --hook-type pre-push
+
+# Full development setup (Rust + Python + Database + Hooks)
 setup-full:
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "Setting up development environment..."
-
-    # Build release binary
     echo "Building release binary..."
     cargo build --release
-
-    # Setup Python environment with UV
-    echo "Setting up Python environment with UV..."
-    uv sync
-
-    # Start database
+    echo "Setting up Python environment..."
+    uv sync --extra dev
+    echo "Installing pre-commit hooks..."
+    pre-commit install
+    pre-commit install --hook-type pre-push
     echo "Starting PostgreSQL..."
     docker-compose up -d
-
     echo "Setup complete!"
 
 # Verify all dependencies are installed
@@ -185,27 +169,8 @@ verify:
     #!/usr/bin/env bash
     set -euo pipefail
     echo "Verifying dependencies..."
-
-    echo -n "Rust: "
-    rustc --version || { echo "NOT FOUND"; exit 1; }
-
-    echo -n "Cargo: "
-    cargo --version || { echo "NOT FOUND"; exit 1; }
-
-    echo -n "UV: "
-    uv --version || { echo "NOT FOUND"; exit 1; }
-
-    echo -n "Docker: "
-    docker --version || { echo "NOT FOUND"; exit 1; }
-
-    echo -n "Docker Compose: "
-    docker-compose --version || { echo "NOT FOUND"; exit 1; }
-
-    echo -n "Release binary: "
-    if [ -f ./target/release/lgp ]; then
-        echo "OK"
-    else
-        echo "NOT FOUND (run 'just build')"
-    fi
-
+    rustc --version
+    cargo --version
+    uv --version
+    docker --version
     echo "All dependencies verified!"

@@ -46,15 +46,15 @@ jobs:
 
       - name: Run baseline
         if: ${{ github.event.inputs.experiment_type == 'baseline' }}
-        run: uv run python -m lgp_tools.cli pipeline baseline
+        run: uv run lgp-tools experiment iris_baseline --skip-search
 
       - name: Run experiments
         if: ${{ github.event.inputs.experiment_type == 'experiments' }}
-        run: uv run python -m lgp_tools.cli pipeline quick --iterations ${{ github.event.inputs.iterations }}
+        run: uv run lgp-tools experiment --skip-search -n ${{ github.event.inputs.iterations }}
 
       - name: Run full pipeline
         if: ${{ github.event.inputs.experiment_type == 'full_pipeline' }}
-        run: uv run python -m lgp_tools.cli pipeline full --iterations ${{ github.event.inputs.iterations }}
+        run: uv run lgp-tools experiment -n ${{ github.event.inputs.iterations }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

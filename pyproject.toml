@@ -20,10 +20,15 @@ dependencies = [
     "psycopg2-binary>=2.9",
     "SQLAlchemy>=2.0",
     "tqdm>=4.65",
+    "tomli>=2.0",
+    "tomli-w>=1.0",
 ]
 
 [project.scripts]
 lgp-tools = "lgp_tools.cli:app"
+
+[project.optional-dependencies]
+dev = ["ruff>=0.9.0", "pre-commit>=4.0.0"]
 
 [build-system]
 requires = ["uv_build>=0.9.28,<0.10.0"]
@@ -31,3 +36,20 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-root = ""
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+include = ["lgp_tools/**/*.py"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM"]
+ignore = ["E501", "B008"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lgp_tools"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
