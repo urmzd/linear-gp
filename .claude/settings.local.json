@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git diff-index:*)"
+      "Bash(git diff-index:*)",
+      "Bash(find:*)",
+      "Bash(/Users/urmzd/Documents/github/linear-gp/.venv/bin/python3:*)"
     ]
   }
 }
