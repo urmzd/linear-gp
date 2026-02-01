@@ -3,9 +3,18 @@ name: Experiments
 on:
   workflow_dispatch:
     inputs:
-      number_of_experiments:
-        description: "The number of trials to run."
+      experiment_type:
+        description: "Type of experiment to run"
         required: true
+        type: choice
+        options:
+          - baseline
+          - experiments
+          - full_pipeline
+      iterations:
+        description: "Number of experiment iterations"
+        required: false
+        default: "10"
 
 jobs:
   experiment:
@@ -13,64 +22,42 @@ jobs:
     env:
       RUST_BACKTRACE: 1
       RUST_LOG: debug
-      SEARCH_ALL_N_THREADS: 5
-      SEARCH_ALL_N_TRIALS: 10
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install OS Dependencies
-        run: |
-          sudo apt-get update -y
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          default: true
-
-      - name: Retrieve Cargo Cache
+      - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-          cache: "pip"
-          cache-dependency-path: "./scripts/requirements.txt"
+      - name: Setup Python via uv
+        uses: astral-sh/setup-uv@v5
 
-      - name: Install Python Dependencies
-        run: pip install -r ./scripts/requirements.txt
-
-      - name: Install Testing Framework
-        uses: baptiste0928/cargo-install@v1
-        with:
-          crate: cargo-nextest
-          locked: true
-
-      - name: Build Release
+      - name: Build release binary
         run: cargo build --release
 
-      - name: Run Services
+      - name: Start PostgreSQL
         uses: isbang/compose-action@v1.4.1
         with:
           compose-file: "docker-compose.yml"
           down-flags: "--rmi=all --volumes"
 
-      - name: Search For Optimal Parameters
-        run: ./scripts/search_all.sh
+      - name: Run baseline
+        if: ${{ github.event.inputs.experiment_type == 'baseline' }}
+        run: uv run python -m lgp_tools.cli pipeline baseline
 
-      - name: Run Experiments
-        run: ./scripts/run_experiments.py ${{ github.event.inputs.number_of_experiments }}
+      - name: Run experiments
+        if: ${{ github.event.inputs.experiment_type == 'experiments' }}
+        run: uv run python -m lgp_tools.cli pipeline quick --iterations ${{ github.event.inputs.iterations }}
 
-      - name: Run Baseline
-        run: ./scripts/run_baseline.sh
-        shell: bash
+      - name: Run full pipeline
+        if: ${{ github.event.inputs.experiment_type == 'full_pipeline' }}
+        run: uv run python -m lgp_tools.cli pipeline full --iterations ${{ github.event.inputs.iterations }}
 
-      #- name: Run Benchmarks
-      #run: cargo bench
-
-      - uses: actions/upload-artifact@v3
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: "experiment-${{ github.run_id }}"
           path: "assets"
