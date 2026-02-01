@@ -355,7 +355,7 @@ The framework is designed to be extensible. You can add:
 - Custom genetic operators (mutation, crossover)
 - Alternative fitness functions
 
-See [docs/EXTENDING.md](docs/EXTENDING.md) for a complete guide with code examples.
+See the [Quick Start](docs/EXTENDING.md#quick-start) for a minimal example, or [docs/EXTENDING.md](docs/EXTENDING.md) for the complete guide.
 
 ## Contributing
 
