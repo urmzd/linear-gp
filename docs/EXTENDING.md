@@ -110,7 +110,7 @@ The genetic algorithm loop:
 The `State` trait represents the environment or dataset that programs are evaluated against:
 
 ```rust
-// src/core/environment.rs
+// crates/lgp/src/core/environment.rs
 pub trait State: Sized {
     /// Get the value at a specific input index
     fn get_value(&self, at_idx: usize) -> f64;
@@ -140,7 +140,7 @@ pub trait RlState: State {
 The `Core` trait defines all components for a problem domain:
 
 ```rust
-// src/core/engines/core_engine.rs
+// crates/lgp/src/core/engines/core_engine.rs
 pub trait Core {
     type Individual: Ord + Clone + Send + Sync + Serialize + DeserializeOwned;
     type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned + Args;
@@ -163,7 +163,7 @@ Let's walk through adding a complete XOR classification problem.
 ### Step 1: Define the State
 
 ```rust
-// src/problems/xor.rs
+// crates/lgp/src/problems/xor.rs
 use serde::{Deserialize, Serialize};
 use crate::core::environment::State;
 
@@ -271,43 +271,45 @@ impl Core for XorEngine {
 }
 ```
 
-### Step 4: Register in CLI
+### Step 4: Register as an Experiment
 
-Add a new variant to the `Actuator` enum in `src/core/config.rs`:
+The new config system uses TOML files in the `configs/` directory. To add a new experiment:
 
-```rust
-use crate::problems::xor::XorEngine;
+1. **Create config directory:**
+   ```bash
+   mkdir -p configs/xor_lgp
+   ```
 
-#[derive(Parser, Deserialize, Serialize)]
-pub enum Actuator {
-    // ... existing variants ...
-    XorLgp(HyperParameters<XorEngine>),
-}
+2. **Create `default.toml` with experiment configuration:**
+   ```toml
+   # configs/xor_lgp/default.toml
+   [experiment]
+   name = "xor_lgp"
+   environment = "xor"
 
-impl Actuator {
-    pub fn run(&mut self) {
-        match self {
-            // ... existing matches ...
-            Actuator::XorLgp(hyperparameters) => {
-                hyperparameters
-                    .program_parameters
-                    .instruction_generator_parameters
-                    .n_actions = 2;  // Binary classification
-                hyperparameters
-                    .program_parameters
-                    .instruction_generator_parameters
-                    .n_inputs = 2;   // x1 and x2
+   [hyperparameters]
+   population_size = 50
+   n_generations = 100
+   n_trials = 10
+   gap = 0.5
 
-                run_actuator!(XorEngine, hyperparameters);
-            }
-        }
-    }
-}
-```
+   [hyperparameters.program]
+   max_instructions = 20
+   n_inputs = 2
+   n_actions = 2
+
+   [operations]
+   mutation_rate = 0.5
+   crossover_rate = 0.5
+   ```
+
+3. **Implement the State trait and Core trait** in `crates/lgp/src/problems/xor.rs`
+
+4. **Register the experiment** in `crates/lgp/src/core/experiment_config.rs`
 
 ### Step 5: Add Module Export
 
-In `src/problems/mod.rs`:
+In `crates/lgp/src/problems/mod.rs`:
 
 ```rust
 pub mod gym;
@@ -324,7 +326,7 @@ For RL problems, use the gym-rs adapter pattern or implement `RlState` directly.
 If your environment implements the `gym_rs::core::Env` trait, you can use the existing `GymRsInput` adapter:
 
 ```rust
-// In src/core/config.rs
+// In crates/lgp/src/core/config.rs
 use gym_rs::envs::your_module::YourEnv;
 
 #[derive(Parser, Deserialize, Serialize)]
@@ -433,7 +435,7 @@ impl Mutate<ProgramGeneratorParameters, Program> for AggressiveMutateEngine {
 
         for _ in 0..n_mutations {
             // Your mutation logic here
-            // See MutateEngine in src/core/engines/mutate_engine.rs for reference
+            // See MutateEngine in crates/lgp/src/core/engines/mutate_engine.rs for reference
         }
     }
 }
@@ -562,10 +564,10 @@ mod tests {
 
 ### Integration Test
 
-Create a test file in `tests/`:
+Create a test file in `crates/lgp/tests/`:
 
 ```rust
-// tests/xor_integration.rs
+// crates/lgp/tests/xor_integration.rs
 use lgp::core::engines::core_engine::HyperParameters;
 use lgp::problems::xor::XorEngine;
 
@@ -589,7 +591,7 @@ fn xor_solves_problem() {
 
 ### Benchmark Test
 
-Add to `benches/performance_after_training.rs`:
+Add to `crates/lgp/benches/performance_after_training.rs`:
 
 ```rust
 fn xor_benchmark(c: &mut Criterion) {

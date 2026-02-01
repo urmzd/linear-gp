@@ -112,7 +112,7 @@ cargo clippy -- -D warnings
 
 ### Python
 
-For automation scripts in `scripts/`:
+For automation scripts in `lgp_tools/`:
 
 - Follow PEP 8 style guidelines
 - Use type hints where practical
@@ -121,10 +121,10 @@ For automation scripts in `scripts/`:
 
 ```bash
 # Format Python code (if black is installed)
-black scripts/
+black lgp_tools/
 
 # Check with flake8 (if installed)
-flake8 scripts/
+flake8 lgp_tools/
 ```
 
 ## Testing
@@ -135,17 +135,24 @@ flake8 scripts/
 # Run all tests
 just test
 
+# Run tests for specific crate
+cargo test -p lgp
+cargo test -p lgp-cli
+
 # Run tests with output
 just test-verbose
 
 # Run specific test suite
-just test-suite iris
+cargo test -p lgp iris
 
 # Run with nextest (faster)
 just test-nextest
 
 # Run benchmarks
 just bench
+
+# Test experiment CLI (dry-run)
+lgp run iris_baseline --dry-run
 ```
 
 ### Writing Tests
@@ -189,11 +196,10 @@ After making changes that affect evolution:
 
 ```bash
 # Run baseline experiments
-just baseline
+just run iris_baseline
 
-# Generate statistics
-just tables
-just figures
+# Generate analysis
+just analyze
 ```
 
 ## Pull Request Process
