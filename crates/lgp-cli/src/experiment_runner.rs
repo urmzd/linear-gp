@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 use chrono::Utc;
 use itertools::Itertools;
 use rand::Rng;
+use tracing::{debug, info, instrument};
 
 use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
 use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
@@ -60,6 +61,11 @@ impl ExperimentOutput {
 }
 
 /// Run an experiment based on its configuration.
+#[instrument(skip_all, fields(
+    experiment = %config.name,
+    environment = %config.environment,
+    q_learning = config.has_q_learning()
+))]
 pub fn run_experiment(
     config: &ExperimentConfig,
     output_base: &Path,
@@ -70,12 +76,22 @@ pub fn run_experiment(
         .seed
         .unwrap_or_else(|| rand::thread_rng().gen());
 
+    debug!(seed = seed, "Using seed for experiment");
+
     // Generate run_id from timestamp
     let run_id = Utc::now().format("%Y%m%d_%H%M%S").to_string();
+    debug!(run_id = %run_id, "Generated run ID");
 
     // Create output structure
     let output = ExperimentOutput::new(output_base, &config.name, &run_id);
     output.create_dirs()?;
+    debug!(output_dir = %output.base_dir.display(), "Created output directories");
+
+    info!(
+        environment = %config.environment,
+        q_learning = config.has_q_learning(),
+        "Dispatching to environment runner"
+    );
 
     // Run based on environment and operations
     match (config.environment.as_str(), config.has_q_learning()) {
@@ -96,6 +112,9 @@ pub fn run_experiment(
         config.with_runtime_values(seed, &Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string());
     let config_path = output.config_dir().join("config.toml");
     resolved_config.save(&config_path)?;
+    debug!(config_path = %config_path.display(), "Saved resolved config");
+
+    info!("Experiment run completed successfully");
 
     Ok(output)
 }
@@ -309,10 +328,22 @@ where
     C::Freeze::freeze(&mut median);
     C::Freeze::freeze(&mut best);
 
+    debug!("Saving worst.json");
     worst.save(worst_path.to_str().unwrap())?;
+
+    debug!("Saving median.json");
     median.save(median_path.to_str().unwrap())?;
+
+    debug!("Saving best.json");
     best.save(best_path.to_str().unwrap())?;
+
+    debug!(seed = ?params.seed, "Saving params.json");
     params.save(params_path.to_str().unwrap())?;
+
+    debug!(
+        population_count = populations.len(),
+        "Saving population.json"
+    );
     populations.save(population_path.to_str().unwrap())?;
 
     Ok(())

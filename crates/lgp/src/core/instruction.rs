@@ -6,6 +6,7 @@ use rand::prelude::Distribution;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use tracing::trace;
 
 use crate::utils::random::generator;
 
@@ -157,6 +158,17 @@ impl Instruction {
 
         let source_value = *registers.get(self.src_idx);
         let new_source_value = self.op.apply(source_value, target_value);
+
+        trace!(
+            op = %self.op,
+            src_idx = self.src_idx,
+            tgt_idx = self.tgt_idx,
+            mode = ?self.mode,
+            source_value = source_value,
+            target_value = target_value,
+            result = new_source_value,
+            "Instruction applied"
+        );
 
         registers.update(self.src_idx, new_source_value);
     }

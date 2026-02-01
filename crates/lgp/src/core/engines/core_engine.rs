@@ -19,7 +19,7 @@ use super::{
 };
 use derive_builder::Builder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use tracing::info;
+use tracing::{debug, info, instrument, trace};
 
 #[derive(Debug, Deserialize, Serialize, Builder, Copy, Derivative, Parser)]
 #[command(author, version, about, long_about=None)]
@@ -71,11 +71,28 @@ impl<C> CoreIter<C>
 where
     C: Core,
 {
+    #[instrument(skip_all, fields(
+        population_size = hp.population_size,
+        n_generations = hp.n_generations,
+        n_trials = hp.n_trials,
+        gap = hp.gap,
+        mutation_percent = hp.mutation_percent,
+        crossover_percent = hp.crossover_percent,
+        seed = ?hp.seed
+    ))]
     pub fn new(hp: HyperParameters<C>) -> Self {
+        debug!("Initializing evolution engine");
+
         let current_population = C::init_population(hp.program_parameters, hp.population_size);
+        trace!(
+            individuals = current_population.len(),
+            "Initial population generated"
+        );
+
         let trials: Vec<C::State> = repeat_with(|| C::Generate::generate(()))
             .take(hp.n_trials)
             .collect_vec();
+        trace!(trials = trials.len(), "Trial environments generated");
 
         Self {
             generation: 0,
@@ -108,22 +125,49 @@ where
 
         assert!(population.iter().all(C::Status::evaluated));
 
+        let best_fitness = population.first().map(C::Status::get_fitness);
+        let median_fitness = population
+            .get(population.len() / 2)
+            .map(C::Status::get_fitness);
+        let worst_fitness = population.last().map(C::Status::get_fitness);
+
         info!(
-            best = serde_json::to_string(&population.first()).unwrap(),
-            median = serde_json::to_string(&population.get(population.len() / 2)).unwrap(),
-            worst = serde_json::to_string(&population.last()).unwrap(),
-            generation = serde_json::to_string(&self.generation).unwrap()
+            generation = self.generation,
+            best_fitness = ?best_fitness,
+            median_fitness = ?median_fitness,
+            worst_fitness = ?worst_fitness,
+            population_size = population.len(),
+            "Generation complete"
+        );
+
+        debug!(
+            best = serde_json::to_string(&population.first()).ok(),
+            median = serde_json::to_string(&population.get(population.len() / 2)).ok(),
+            worst = serde_json::to_string(&population.last()).ok(),
+            "Full individual details"
         );
 
         let mut new_population = population.clone();
 
+        trace!(
+            before_selection = new_population.len(),
+            "Starting selection"
+        );
         C::survive(&mut new_population, self.params.gap);
+        trace!(after_selection = new_population.len(), "Selection complete");
+
+        trace!(
+            crossover_percent = self.params.crossover_percent,
+            mutation_percent = self.params.mutation_percent,
+            "Starting variation"
+        );
         C::variation(
             &mut new_population,
             self.params.crossover_percent,
             self.params.mutation_percent,
             self.params.program_parameters,
         );
+        trace!(after_variation = new_population.len(), "Variation complete");
 
         self.next_population = new_population;
         self.generation += 1;

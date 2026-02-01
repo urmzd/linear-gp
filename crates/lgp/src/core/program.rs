@@ -7,6 +7,7 @@ use derive_builder::Builder;
 use rand::{seq::IteratorRandom, Rng};
 
 use serde::{Deserialize, Serialize};
+use tracing::{instrument, trace};
 use uuid::Uuid;
 
 use super::{
@@ -90,8 +91,10 @@ impl PartialOrd for Program {
 }
 
 impl Program {
+    #[instrument(skip_all, fields(program_id = %self.id, n_instructions = self.instructions.len()), level = "trace")]
     pub fn run(&mut self, input: &impl State) {
-        for instruction in &self.instructions {
+        for (idx, instruction) in self.instructions.iter().enumerate() {
+            trace!(instruction_idx = idx, "Executing instruction");
             instruction.apply(&mut self.registers, input)
         }
     }

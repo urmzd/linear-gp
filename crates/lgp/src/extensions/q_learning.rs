@@ -5,7 +5,7 @@ use derivative::Derivative;
 use derive_builder::Builder;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
-use tracing::info;
+use tracing::{debug, trace};
 
 use crate::{
     core::{
@@ -125,6 +125,17 @@ impl QTable {
 
         self.table[current_action_state.register][current_action_state.action] += new_q_value;
 
+        trace!(
+            register = current_action_state.register,
+            action = current_action_state.action,
+            reward = current_reward,
+            old_q = current_q_value,
+            delta_q = new_q_value,
+            alpha = self.q_consts.alpha_active,
+            gamma = self.q_consts.gamma,
+            "Q-table update"
+        );
+
         if !self.freeze {
             self.q_consts.decay();
         }
@@ -204,11 +215,17 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
             current_action_state = next_action_state;
         }
 
-        info!(
-            id = serde_json::to_string(&program.program.id.to_string()).unwrap(),
-            q_table = serde_json::to_string(&program.q_table).unwrap(),
-            score = serde_json::to_string(&score).unwrap(),
-            initial_state = serde_json::to_string(&states.get_initial_state()).unwrap()
+        debug!(
+            program_id = %program.program.id,
+            score = score,
+            "Q-Learning fitness evaluation complete"
+        );
+
+        trace!(
+            program_id = %program.program.id,
+            q_table = serde_json::to_string(&program.q_table).ok(),
+            initial_state = serde_json::to_string(&states.get_initial_state()).ok(),
+            "Full Q-Learning evaluation details"
         );
 
         score
