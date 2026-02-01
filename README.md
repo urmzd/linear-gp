@@ -108,12 +108,17 @@ linear-gp/
 │   ├── cart_pole_lgp/default.toml
 │   └── ...
 ├── lgp_tools/                  # Python CLI package
-│   ├── cli.py                  # Main CLI (search, analyze)
+│   ├── cli.py                  # Main CLI entry point
+│   ├── commands/               # CLI subcommands
+│   │   ├── analyze.py          # Results analysis
+│   │   ├── experiment.py       # End-to-end pipeline
+│   │   └── search.py           # Hyperparameter search
 │   ├── config.py               # Config discovery
 │   └── models.py               # Pydantic models
 ├── outputs/                    # Experiment outputs
-│   ├── parameters/             # Optimized hyperparameters
-│   ├── output/                 # Raw experiment outputs
+│   ├── parameters/             # Optimized hyperparameters (JSON)
+│   ├── <experiment>/           # Per-experiment outputs
+│   │   └── <timestamp>/        # Timestamped runs
 │   ├── tables/                 # CSV statistics
 │   └── figures/                # PNG plots
 └── docs/                       # Documentation
@@ -131,6 +136,56 @@ The framework is built around these key traits:
 - **`Mutate`** - Mutation operators for genetic variation
 
 See [docs/EXTENDING.md](docs/EXTENDING.md) for detailed trait documentation.
+
+## Logging and Tracing
+
+The framework includes comprehensive structured logging via the [tracing](https://docs.rs/tracing) ecosystem.
+
+### Quick Start
+
+```bash
+# Default (info level, pretty format)
+lgp run iris_baseline
+
+# Verbose mode (debug level)
+lgp -v run iris_baseline
+
+# JSON format for log aggregation
+lgp --log-format json run iris_baseline
+```
+
+### Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `RUST_LOG` | Control log level filtering | `lgp=debug`, `lgp=trace` |
+| `LGP_LOG_FORMAT` | Override output format | `pretty`, `compact`, `json` |
+
+### Log Level Guide
+
+| Level | Use Case | Example Output |
+|-------|----------|----------------|
+| `error` | Fatal issues only | Panics, unrecoverable errors |
+| `warn` | Potential problems | Deprecated features, suspicious values |
+| `info` | Progress updates (default) | Generation stats, experiment start/complete |
+| `debug` | Detailed diagnostics | Config loading, individual fitness scores |
+| `trace` | Very verbose | Instruction execution, Q-table updates |
+
+### Examples
+
+```bash
+# Debug level for LGP crate only
+RUST_LOG=lgp=debug lgp run iris_baseline
+
+# Trace level (very verbose - instruction-by-instruction)
+RUST_LOG=lgp=trace lgp run iris_baseline
+
+# Different levels for different modules
+RUST_LOG=lgp::core=trace,lgp=info lgp run iris_baseline
+
+# JSON output for log aggregation (ELK, Datadog, etc.)
+lgp --log-format json run iris_baseline 2>&1 | jq .
+```
 
 ## CLI Reference
 
@@ -196,6 +251,18 @@ uv run lgp-tools analyze
 
 # Analyze with custom paths
 uv run lgp-tools analyze --input outputs/output --output outputs
+
+# Run complete experiment pipeline (search -> run -> analyze)
+uv run lgp-tools experiment
+
+# Run single config
+uv run lgp-tools experiment iris_baseline
+
+# Run with 20 iterations
+uv run lgp-tools experiment -n 20
+
+# Skip search phase (use existing optimal.toml)
+uv run lgp-tools experiment --skip-search
 ```
 
 ## Examples
@@ -318,13 +385,17 @@ outputs/
 ├── parameters/                 # Optimized hyperparameters (JSON)
 │   ├── cart_pole_lgp.json
 │   └── ...
-├── output/                     # Raw experiment outputs
-│   └── <experiment>/
-│       ├── population.json
-│       ├── best.json
-│       ├── median.json
-│       ├── worst.json
-│       └── params.json
+├── <experiment>/               # Experiment outputs (timestamped runs)
+│   └── <timestamp>/            # e.g., 20260201_083623
+│       ├── config/
+│       │   └── config.toml     # Resolved config with seed/timestamp
+│       ├── outputs/
+│       │   ├── best.json       # Best individual from final generation
+│       │   ├── median.json     # Median individual
+│       │   ├── worst.json      # Worst individual
+│       │   ├── population.json # Full population history
+│       │   └── params.json     # Hyperparameters used
+│       └── post_process/       # Post-processing outputs
 ├── tables/                     # Generated CSV statistics
 │   └── <experiment>.csv
 └── figures/                    # Generated PNG plots
