@@ -34,8 +34,3 @@ jobs:
         uses: urmzd/semantic-release@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to crates.io
-        run: cargo publish -p lgp && cargo publish -p lgp-cli
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
