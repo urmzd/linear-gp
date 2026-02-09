@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git diff-index:*)",
       "Bash(find:*)",
-      "Bash(/Users/urmzd/Documents/github/linear-gp/.venv/bin/python3:*)"
+      "Bash(/Users/urmzd/Documents/github/linear-gp/.venv/bin/python3:*)",
+      "Bash(git -C /Users/urmzd/github/semantic-release tag --list)"
     ]
   }
 }

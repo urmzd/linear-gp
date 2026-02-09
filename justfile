@@ -152,6 +152,28 @@ docs:
 watch:
     cargo watch -x test
 
+# === RELEASE ===
+
+# Preview the next release
+release-plan:
+    sr plan
+
+# Dry-run a release (no side effects)
+release-dry-run:
+    sr release --dry-run
+
+# Execute a full release
+release:
+    sr release
+
+# Generate/update changelog
+changelog:
+    sr changelog
+
+# Show next version
+next-version:
+    sr version
+
 # === SETUP ===
 
 # Setup Python environment with UV and install hooks
