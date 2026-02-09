@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import tomllib
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -135,14 +135,14 @@ class QLearningConfig(BaseModel):
 # =============================================================================
 
 
-class InstructionMode(str, Enum):
+class InstructionMode(StrEnum):
     """Mode of instruction - external uses input values, internal uses registers."""
 
     EXTERNAL = "External"
     INTERNAL = "Internal"
 
 
-class InstructionOp(str, Enum):
+class InstructionOp(StrEnum):
     """Arithmetic operation for an instruction."""
 
     ADD = "Add"
