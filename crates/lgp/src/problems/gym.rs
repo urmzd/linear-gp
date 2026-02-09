@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 
 use gym_rs::core::Env;
+use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
+use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
+use gym_rs::utils::renderer::RenderMode;
 
 use crate::core::engines::breed_engine::BreedEngine;
 use crate::core::engines::core_engine::Core;
@@ -20,27 +23,67 @@ use crate::extensions::interactive::UseRlFitness;
 use crate::extensions::q_learning::QProgram;
 use crate::extensions::q_learning::QProgramGeneratorParameters;
 
+pub trait GymRsEnvExt: Env<Action = usize>
+where
+    Self::Observation: Copy + Into<Vec<f64>>,
+{
+    fn create() -> Self;
+    fn max_steps() -> usize;
+    fn set_state(&mut self, obs: Self::Observation);
+}
+
+impl GymRsEnvExt for CartPoleEnv {
+    fn create() -> Self {
+        CartPoleEnv::new(RenderMode::None)
+    }
+    fn max_steps() -> usize {
+        500
+    }
+    fn set_state(&mut self, obs: Self::Observation) {
+        self.state = obs;
+    }
+}
+
+impl GymRsEnvExt for MountainCarEnv {
+    fn create() -> Self {
+        MountainCarEnv::new(RenderMode::None)
+    }
+    fn max_steps() -> usize {
+        200
+    }
+    fn set_state(&mut self, obs: Self::Observation) {
+        self.state = obs;
+    }
+}
+
 #[derive(Clone, Debug)]
-pub struct GymRsInput<E: Env> {
+pub struct GymRsInput<E: GymRsEnvExt>
+where
+    E::Observation: Copy + Into<Vec<f64>>,
+{
     environment: E,
     terminated: bool,
     episode_idx: usize,
     initial_state: E::Observation,
+    observation: Vec<f64>,
 }
 
 impl<E> State for GymRsInput<E>
 where
-    E: Env,
+    E: GymRsEnvExt,
+    E::Observation: Copy + Into<Vec<f64>>,
 {
     fn get_value(&self, idx: usize) -> f64 {
-        self.environment.get_observation_property(idx)
+        self.observation[idx]
     }
 
     fn execute_action(&mut self, action: usize) -> f64 {
         let action_reward = self.environment.step(action);
         self.episode_idx += 1;
-        self.terminated = self.episode_idx >= E::episode_length() || action_reward.done;
-        action_reward.reward
+        self.observation = action_reward.observation.into();
+        self.terminated =
+            self.episode_idx >= E::max_steps() || action_reward.done || action_reward.truncated;
+        action_reward.reward.into_inner()
     }
 
     fn get(&mut self) -> Option<&mut Self> {
@@ -54,7 +97,8 @@ where
 
 impl<T> RlState for GymRsInput<T>
 where
-    T: Env,
+    T: GymRsEnvExt,
+    T::Observation: Copy + Into<Vec<f64>>,
 {
     fn is_terminal(&mut self) -> bool {
         self.terminated
@@ -67,11 +111,13 @@ where
 
 impl<T> Reset<GymRsInput<T>> for ResetEngine
 where
-    T: Env,
+    T: GymRsEnvExt,
+    T::Observation: Copy + Into<Vec<f64>>,
 {
     fn reset(item: &mut GymRsInput<T>) {
         item.environment.reset(None, false, None);
-        item.environment.set_observation(item.initial_state);
+        item.environment.set_state(item.initial_state);
+        item.observation = item.initial_state.into();
         item.terminated = false;
         item.episode_idx = 0;
     }
@@ -79,17 +125,20 @@ where
 
 impl<T> Generate<(), GymRsInput<T>> for GenerateEngine
 where
-    T: Env,
+    T: GymRsEnvExt,
+    T::Observation: Copy + Into<Vec<f64>>,
 {
     fn generate(_from: ()) -> GymRsInput<T> {
-        let mut environment: T = Env::new();
+        let mut environment: T = T::create();
         let (initial_state, _) = environment.reset(None, false, None);
+        let observation = initial_state.into();
 
         GymRsInput {
             environment,
             terminated: false,
             episode_idx: 0,
             initial_state,
+            observation,
         }
     }
 }
@@ -101,7 +150,8 @@ pub struct GymRsEngine<T>(PhantomData<T>);
 
 impl<T> Core for GymRsQEngine<T>
 where
-    T: Env,
+    T: GymRsEnvExt,
+    T::Observation: Copy + Into<Vec<f64>>,
 {
     type Individual = QProgram;
     type ProgramParameters = QProgramGeneratorParameters;
@@ -118,7 +168,8 @@ where
 
 impl<T> Core for GymRsEngine<T>
 where
-    T: Env,
+    T: GymRsEnvExt,
+    T::Observation: Copy + Into<Vec<f64>>,
 {
     type Individual = Program;
     type ProgramParameters = ProgramGeneratorParameters;

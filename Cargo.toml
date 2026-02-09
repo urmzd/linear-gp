@@ -2,6 +2,12 @@
 members = ["crates/lgp", "crates/lgp-cli"]
 resolver = "2"
 
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+authors = ["Urmzd Mukhammadnaim; urmzd@dal.ca"]
+description = "A library to solve problems using linear genetic programming"
+
 [workspace.dependencies]
 # Common dependencies shared across crates
 csv = "1.1"
@@ -20,7 +26,7 @@ itertools = "0.10"
 tracing = { version = "0.1", default-features = false }
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "json", "std"] }
-gym-rs = { git = "https://github.com/urmzd/gym-rs" }
+gym-rs = { git = "https://github.com/urmzd/gym-rs", default-features = false }
 uuid = { version = "1.2.2", features = ["v4", "serde"] }
 clap = { version = "4.1.8", features = ["derive"] }
 config = "0.13"
