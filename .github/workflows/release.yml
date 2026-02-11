@@ -37,7 +37,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run semantic release
-        uses: urmzd/semantic-release@v0
+        uses: urmzd/semantic-release@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           force: ${{ inputs.force }}
