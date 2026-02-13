@@ -135,14 +135,12 @@ check-all: fmt-all lint-all test
 fix-py:
     uv run ruff check --fix lgp_tools
 
-# Install pre-commit hooks
-hooks-install:
-    pre-commit install
-    pre-commit install --hook-type pre-push
-
-# Run hooks on all files
-hooks-run:
-    pre-commit run --all-files
+# Install git hooks from scripts/
+init_:
+    cp scripts/pre-commit .git/hooks/pre-commit
+    cp scripts/pre-push .git/hooks/pre-push
+    chmod +x .git/hooks/pre-commit .git/hooks/pre-push
+    @echo "Git hooks installed."
 
 # Generate and open documentation
 docs:
@@ -176,26 +174,17 @@ next-version:
 
 # === SETUP ===
 
-# Setup Python environment with UV and install hooks
-setup:
-    uv sync --extra dev
-    pre-commit install
-    pre-commit install --hook-type pre-push
-
-# Full development setup (Rust + Python + Database + Hooks)
-setup-full:
+# Initialize dev environment: sync Python deps, build Rust, install git hooks
+init:
     #!/usr/bin/env bash
     set -euo pipefail
+    echo "Syncing Python environment..."
+    uv sync --extra dev
     echo "Building release binary..."
     cargo build --release
-    echo "Setting up Python environment..."
-    uv sync --extra dev
-    echo "Installing pre-commit hooks..."
-    pre-commit install
-    pre-commit install --hook-type pre-push
-    echo "Starting PostgreSQL..."
-    docker-compose up -d
-    echo "Setup complete!"
+    echo "Installing git hooks..."
+    just init_
+    echo "Ready to go."
 
 # Verify all dependencies are installed
 verify:
