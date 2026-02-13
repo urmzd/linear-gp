@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> Checking for trailing whitespace and merge conflicts..."
+git diff --cached --check
+
+echo "==> Formatting Rust..."
+cargo fmt --all -- --check
+
+echo "==> Running Clippy..."
+cargo clippy --all-targets -- -D warnings
+
+echo "==> Linting Python..."
+uv run ruff check lgp_tools
+
+echo "==> Checking Python formatting..."
+uv run ruff format --check lgp_tools
+
+echo "All pre-commit checks passed."
