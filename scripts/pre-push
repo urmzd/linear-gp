@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> Running tests..."
+cargo test --release
+
+echo "All pre-push checks passed."
