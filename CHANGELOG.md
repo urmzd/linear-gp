@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 (2026-02-22)
+
+### Bug Fixes
+
+- embed iris dataset locally to avoid network/SSL failures ([f609bea](https://github.com/urmzd/linear-gp/commit/f609beacc9a41f5c4c56a0e48ee6d0e89c8ad210))
+
+
 ## 1.1.0 (2026-02-13)
 
 ### Features
