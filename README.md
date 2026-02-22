@@ -427,10 +427,6 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Testing requirements
 - Pull request process
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## References
 
 - Brameier, M., & Banzhaf, W. (2007). *Linear Genetic Programming*. Springer.
