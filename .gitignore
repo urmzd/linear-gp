@@ -25,3 +25,9 @@ outputs
 debug-*.log
 trace-*.log
 *.log
+.claude/
+.vscode/
+.env
+.env.*
+.DS_Store
+.idea/

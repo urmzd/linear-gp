@@ -1,7 +1,7 @@
+use csv::ReaderBuilder;
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 use strum::EnumCount;
-use tokio::runtime::Runtime;
 
 use crate::{
     core::{
@@ -18,11 +18,10 @@ use crate::{
         environment::State,
         program::{Program, ProgramGeneratorParameters},
     },
-    utils::{loader::download_and_load_csv, random::generator},
+    utils::random::generator,
 };
 
-pub const IRIS_DATASET_LINK: &str =
-    "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/bezdekIris.data";
+const IRIS_CSV: &str = include_str!("iris.csv");
 
 #[derive(
     Debug,
@@ -101,10 +100,14 @@ impl Reset<IrisState> for ResetEngine {
 
 impl Generate<(), IrisState> for GenerateEngine {
     fn generate(_using: ()) -> IrisState {
-        let runtime = Runtime::new().unwrap();
-        let mut data = runtime
-            .block_on(download_and_load_csv(IRIS_DATASET_LINK))
-            .expect("Failed to download and load the dataset");
+        let mut csv_reader = ReaderBuilder::new()
+            .has_headers(false)
+            .from_reader(IRIS_CSV.as_bytes());
+
+        let mut data: Vec<IrisInput> = csv_reader
+            .deserialize()
+            .collect::<Result<_, _>>()
+            .expect("Failed to parse iris dataset");
 
         data.shuffle(&mut generator());
 
