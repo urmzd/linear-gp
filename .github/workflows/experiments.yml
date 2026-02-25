@@ -42,7 +42,7 @@ jobs:
         run: cargo build --release
 
       - name: Start PostgreSQL
-        uses: isbang/compose-action@v1.4.1
+        uses: isbang/compose-action@v2.5.0
         with:
           compose-file: "docker-compose.yml"
           down-flags: "--rmi=all --volumes"
