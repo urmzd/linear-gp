@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0 (2026-02-27)
+
+### Features
+
+- publish lgp-cli to crates.io alongside lgp ([4d44799](https://github.com/urmzd/linear-gp/commit/4d447993cf50d70c5462acad89763d91416640ed))
+
+### Bug Fixes
+
+- use rust-lang/crates-io-auth-action for trusted publishing ([3754c1f](https://github.com/urmzd/linear-gp/commit/3754c1faa6cbf6f0bf87749c83ceaf86e220bf8f))
+
+
 ## 1.2.0 (2026-02-27)
 
 ### Features
