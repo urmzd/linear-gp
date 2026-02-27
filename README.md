@@ -83,6 +83,14 @@ just run-example cart_pole
 just bench
 ```
 
+## Packages
+
+| Package | Path | Description |
+|---------|------|-------------|
+| [lgp](crates/lgp/README.md) | `crates/lgp` | Core Rust library — traits, evolutionary engine, built-in problems |
+| [lgp-cli](crates/lgp-cli/README.md) | `crates/lgp-cli` | CLI binary (`lgp`) for running experiments with TOML configuration |
+| [lgp-tools](lgp_tools/README.md) | `lgp_tools` | Python CLI for hyperparameter search, experiment automation, and analysis |
+
 ## Project Architecture
 
 ```
