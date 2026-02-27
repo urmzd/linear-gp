@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      released: ${{ steps.sr.outputs.released }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,6 +40,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run semantic release
+        id: sr
         uses: urmzd/semantic-release@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -45,6 +48,7 @@ jobs:
 
   publish:
     needs: release
+    if: needs.release.outputs.released == 'true'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
