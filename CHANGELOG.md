@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.3.1 (2026-02-27)
+
+### Bug Fixes
+
+- skip crates.io publish when no release is created ([9c403bf](https://github.com/urmzd/linear-gp/commit/9c403bf3be6ff6d402929bd432a48b90412d1798))
+
+### Documentation
+
+- add per-package READMEs and link from top-level README ([2242111](https://github.com/urmzd/linear-gp/commit/2242111a97f03de76f5bae5c30bf528039bf2ae8))
+
+### Miscellaneous
+
+- lock ([f86236a](https://github.com/urmzd/linear-gp/commit/f86236ad6207e16ba47f9f79db9112c2e7f01344))
+- lock ([fa5f433](https://github.com/urmzd/linear-gp/commit/fa5f433fc4e7badefd57e43f469f754bb9b1bc9a))
+
+
 ## 1.3.0 (2026-02-27)
 
 ### Features
