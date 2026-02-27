@@ -31,7 +31,7 @@ jobs:
         run: cargo fmt --check
 
       - name: Run clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --features gym -- -D warnings
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -62,5 +62,8 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Run tests
-        run: cargo test --release
+      - name: Run tests (all features)
+        run: cargo test --release --features gym
+
+      - name: Verify lean build (no gym)
+        run: cargo check -p lgp --no-default-features

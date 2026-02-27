@@ -1,9 +1,9 @@
 use std::marker::PhantomData;
 
-use gym_rs::core::Env;
-use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
-use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
-use gym_rs::utils::renderer::RenderMode;
+use gymnasia::core::Env;
+use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
+use gymnasia::envs::classical_control::mountain_car::MountainCarEnv;
+use gymnasia::utils::renderer::RenderMode;
 
 use crate::core::engines::breed_engine::BreedEngine;
 use crate::core::engines::core_engine::Core;

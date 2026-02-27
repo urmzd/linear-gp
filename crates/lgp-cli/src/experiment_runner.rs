@@ -9,8 +9,8 @@ use itertools::Itertools;
 use rand::Rng;
 use tracing::{debug, info, instrument};
 
-use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
-use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
+use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
+use gymnasia::envs::classical_control::mountain_car::MountainCarEnv;
 
 use lgp::core::characteristics::Save;
 use lgp::core::engines::core_engine::{Core, HyperParameters};

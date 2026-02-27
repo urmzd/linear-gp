@@ -56,9 +56,10 @@ fn smoke_iris() {
 }
 
 /// Test that CartPole LGP works for 2 generations
+#[cfg(feature = "gym")]
 #[test]
 fn smoke_cart_pole_lgp() {
-    use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
+    use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
     use lgp::problems::gym::GymRsEngine;
 
     let instruction_parameters = InstructionGeneratorParametersBuilder::default()
@@ -97,9 +98,10 @@ fn smoke_cart_pole_lgp() {
 }
 
 /// Test that CartPole Q-Learning works for 2 generations
+#[cfg(feature = "gym")]
 #[test]
 fn smoke_cart_pole_q() {
-    use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
+    use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
     use lgp::extensions::q_learning::{QConsts, QProgramGeneratorParameters};
     use lgp::problems::gym::GymRsQEngine;
 
@@ -144,9 +146,10 @@ fn smoke_cart_pole_q() {
 }
 
 /// Test that MountainCar LGP works for 2 generations
+#[cfg(feature = "gym")]
 #[test]
 fn smoke_mountain_car_lgp() {
-    use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
+    use gymnasia::envs::classical_control::mountain_car::MountainCarEnv;
     use lgp::problems::gym::GymRsEngine;
 
     let instruction_parameters = InstructionGeneratorParametersBuilder::default()
@@ -185,9 +188,10 @@ fn smoke_mountain_car_lgp() {
 }
 
 /// Test that MountainCar Q-Learning works for 2 generations
+#[cfg(feature = "gym")]
 #[test]
 fn smoke_mountain_car_q() {
-    use gym_rs::envs::classical_control::mountain_car::MountainCarEnv;
+    use gymnasia::envs::classical_control::mountain_car::MountainCarEnv;
     use lgp::extensions::q_learning::{QConsts, QProgramGeneratorParameters};
     use lgp::problems::gym::GymRsQEngine;
 
