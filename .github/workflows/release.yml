@@ -59,5 +59,11 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Publish to crates.io
+      - name: Publish lgp to crates.io
         run: cargo publish -p lgp
+
+      - name: Wait for crates.io index update
+        run: sleep 30
+
+      - name: Publish lgp-cli to crates.io
+        run: cargo publish -p lgp-cli
