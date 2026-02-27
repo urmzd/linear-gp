@@ -25,7 +25,7 @@ itertools = "0.10"
 tracing = { version = "0.1", default-features = false }
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "json", "std"] }
-gym-rs = { git = "https://github.com/urmzd/gym-rs", default-features = false }
+gymnasia = { version = "1.0", default-features = false }
 uuid = { version = "1.2.2", features = ["v4", "serde"] }
 clap = { version = "4.1.8", features = ["derive"] }
 config = "0.13"

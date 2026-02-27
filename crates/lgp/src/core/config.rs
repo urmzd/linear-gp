@@ -1,20 +1,19 @@
+#[cfg(feature = "gym")]
 use crate::core::engines::reset_engine::{Reset, ResetEngine};
 use crate::core::engines::status_engine::{Status, StatusEngine};
-use crate::{
-    core::engines::core_engine::HyperParameters,
-    problems::{
-        gym::{GymRsEngine, GymRsQEngine},
-        iris::IrisEngine,
-    },
-};
+#[cfg(feature = "gym")]
+use crate::problems::gym::{GymRsEngine, GymRsQEngine};
+use crate::{core::engines::core_engine::HyperParameters, problems::iris::IrisEngine};
 use clap::{Parser, Subcommand, ValueEnum};
 use config::{Config, Environment, File};
-use gym_rs::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
+#[cfg(feature = "gym")]
+use gymnasia::envs::classical_control::{cartpole::CartPoleEnv, mountain_car::MountainCarEnv};
 use serde::{Deserialize, Serialize};
 
 use super::engines::core_engine::Core;
 use super::instruction::InstructionGeneratorParameters;
 use super::program::ProgramGeneratorParameters;
+#[cfg(feature = "gym")]
 use crate::extensions::q_learning::{QConsts, QProgramGeneratorParameters};
 
 /// Environment types supported by the framework
@@ -22,12 +21,16 @@ use crate::extensions::q_learning::{QConsts, QProgramGeneratorParameters};
 #[serde(rename_all = "kebab-case")]
 pub enum EnvironmentType {
     /// CartPole with pure Linear Genetic Programming
+    #[cfg(feature = "gym")]
     CartPoleLgp,
     /// CartPole with LGP + Q-Learning
+    #[cfg(feature = "gym")]
     CartPoleQ,
     /// MountainCar with pure Linear Genetic Programming
+    #[cfg(feature = "gym")]
     MountainCarLgp,
     /// MountainCar with LGP + Q-Learning
+    #[cfg(feature = "gym")]
     MountainCarQ,
     /// Iris classification with Linear Genetic Programming
     IrisLgp,
@@ -146,7 +149,9 @@ impl ExperimentParams {
     /// Get the number of inputs for the environment
     fn n_inputs(&self) -> usize {
         match self.env {
+            #[cfg(feature = "gym")]
             EnvironmentType::CartPoleLgp | EnvironmentType::CartPoleQ => 4,
+            #[cfg(feature = "gym")]
             EnvironmentType::MountainCarLgp | EnvironmentType::MountainCarQ => 2,
             EnvironmentType::IrisLgp => 4,
         }
@@ -155,7 +160,9 @@ impl ExperimentParams {
     /// Get the number of actions for the environment
     fn n_actions(&self) -> usize {
         match self.env {
+            #[cfg(feature = "gym")]
             EnvironmentType::CartPoleLgp | EnvironmentType::CartPoleQ => 2,
+            #[cfg(feature = "gym")]
             EnvironmentType::MountainCarLgp | EnvironmentType::MountainCarQ => 3,
             EnvironmentType::IrisLgp => 3,
         }
@@ -164,7 +171,9 @@ impl ExperimentParams {
     /// Get the default fitness for the environment
     fn env_default_fitness(&self) -> f64 {
         match self.env {
+            #[cfg(feature = "gym")]
             EnvironmentType::CartPoleLgp | EnvironmentType::CartPoleQ => 500.0,
+            #[cfg(feature = "gym")]
             EnvironmentType::MountainCarLgp | EnvironmentType::MountainCarQ => -200.0,
             EnvironmentType::IrisLgp => 0.0,
         }
@@ -189,6 +198,7 @@ impl ExperimentParams {
     }
 
     /// Build Q-Learning constants
+    #[cfg(feature = "gym")]
     fn build_q_consts(&self) -> QConsts {
         QConsts::new(
             self.alpha,
@@ -200,6 +210,7 @@ impl ExperimentParams {
     }
 
     /// Build Q-Program generator parameters
+    #[cfg(feature = "gym")]
     fn build_q_program_params(&self) -> QProgramGeneratorParameters {
         QProgramGeneratorParameters {
             program_parameters: self.build_program_params(),
@@ -214,6 +225,7 @@ impl ExperimentParams {
             .unwrap_or_else(|| self.env_default_fitness());
 
         match self.env {
+            #[cfg(feature = "gym")]
             EnvironmentType::CartPoleLgp => {
                 let hyperparameters: HyperParameters<GymRsEngine<CartPoleEnv>> = HyperParameters {
                     default_fitness,
@@ -228,6 +240,7 @@ impl ExperimentParams {
                 };
                 run_experiment!(hyperparameters);
             }
+            #[cfg(feature = "gym")]
             EnvironmentType::CartPoleQ => {
                 let mut hyperparameters: HyperParameters<GymRsQEngine<CartPoleEnv>> =
                     HyperParameters {
@@ -244,6 +257,7 @@ impl ExperimentParams {
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
                 run_experiment!(hyperparameters);
             }
+            #[cfg(feature = "gym")]
             EnvironmentType::MountainCarLgp => {
                 let hyperparameters: HyperParameters<GymRsEngine<MountainCarEnv>> =
                     HyperParameters {
@@ -259,6 +273,7 @@ impl ExperimentParams {
                     };
                 run_experiment!(hyperparameters);
             }
+            #[cfg(feature = "gym")]
             EnvironmentType::MountainCarQ => {
                 let mut hyperparameters: HyperParameters<GymRsQEngine<MountainCarEnv>> =
                     HyperParameters {

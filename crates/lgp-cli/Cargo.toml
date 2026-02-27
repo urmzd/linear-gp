@@ -11,7 +11,7 @@ name = "lgp"
 path = "src/main.rs"
 
 [dependencies]
-lgp = { path = "../lgp" }
+lgp = { path = "../lgp", features = ["gym"] }
 clap = { version = "4.1.8", features = ["derive"] }
 chrono = "0.4"
 toml = "0.8"
@@ -19,6 +19,6 @@ rand = "0.8.5"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 itertools = "0.10"
-gym-rs = { git = "https://github.com/urmzd/gym-rs", default-features = false }
+gymnasia = { version = "1.0", default-features = false }
 tracing = { version = "0.1", features = ["attributes"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "json", "std", "ansi"] }

@@ -7,7 +7,7 @@
 
 use itertools::Itertools;
 
-use gym_rs::envs::classical_control::cartpole::CartPoleEnv;
+use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
 
 use lgp::core::engines::core_engine::HyperParametersBuilder;
 use lgp::core::engines::status_engine::{Status, StatusEngine};

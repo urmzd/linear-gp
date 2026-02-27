@@ -608,9 +608,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
-name = "gym-rs"
-version = "0.4.0"
-source = "git+https://github.com/urmzd/gym-rs#6cfd84dbeacc6afaf8a8a473fac2d4793964fd07"
+name = "gymnasia"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3278e90dc6a211786ea279466e162ae47fc7b62f55c4e4f9527cd640d349fb7"
 dependencies = [
  "derivative",
  "derive-new",
@@ -780,7 +781,7 @@ dependencies = [
  "derive_builder",
  "derive_more",
  "glob",
- "gym-rs",
+ "gymnasia",
  "itertools",
  "lazy_static",
  "rand",
@@ -803,7 +804,7 @@ version = "1.1.1"
 dependencies = [
  "chrono",
  "clap 4.5.58",
- "gym-rs",
+ "gymnasia",
  "itertools",
  "lgp",
  "rand",
