@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0 (2026-02-27)
+
+### Features
+
+- feature-gate gym dependency and migrate to gymnasia for crates.io publishing ([a03866e](https://github.com/urmzd/linear-gp/commit/a03866e3cfc4775ac5b32cfcfbe0016e868f35a0))
+
+### Documentation
+
+- remove License section from README ([361d356](https://github.com/urmzd/linear-gp/commit/361d356b59c163736a354fe8a0c6ce805f93d619))
+
+### Miscellaneous
+
+- standardize GitHub Actions workflows ([ed8234e](https://github.com/urmzd/linear-gp/commit/ed8234eb38ab2cf8638f6d915becd1f9c9d9cfa8))
+
+
 ## 1.1.1 (2026-02-22)
 
 ### Bug Fixes
