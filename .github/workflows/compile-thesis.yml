@@ -21,7 +21,7 @@ jobs:
         working-directory: docs
 
       - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Urmzd_Mukhammadnaim_RLGP_Thesis.pdf
           path: docs/thesis.pdf
@@ -54,7 +54,7 @@ jobs:
           tar -czvf arxiv_submission.tar.gz -C arxiv_build .
 
       - name: Upload arXiv package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: arxiv_submission.tar.gz
           path: arxiv_submission.tar.gz
