@@ -15,6 +15,18 @@ on:
         description: "Number of experiment iterations"
         required: false
         default: "10"
+  workflow_call:
+    inputs:
+      experiment_type:
+        description: "Type of experiment to run"
+        required: false
+        type: string
+        default: "full_pipeline"
+      iterations:
+        description: "Number of experiment iterations"
+        required: false
+        type: string
+        default: "10"
 
 jobs:
   experiment:
@@ -48,16 +60,16 @@ jobs:
           down-flags: "--rmi=all --volumes"
 
       - name: Run baseline
-        if: ${{ github.event.inputs.experiment_type == 'baseline' }}
+        if: inputs.experiment_type == 'baseline'
         run: uv run lgp-tools experiment iris_baseline --skip-search
 
       - name: Run experiments
-        if: ${{ github.event.inputs.experiment_type == 'experiments' }}
-        run: uv run lgp-tools experiment --skip-search -n ${{ github.event.inputs.iterations }}
+        if: inputs.experiment_type == 'experiments'
+        run: uv run lgp-tools experiment --skip-search -n ${{ inputs.iterations }}
 
       - name: Run full pipeline
-        if: ${{ github.event.inputs.experiment_type == 'full_pipeline' }}
-        run: uv run lgp-tools experiment -n ${{ github.event.inputs.iterations }}
+        if: inputs.experiment_type == 'full_pipeline'
+        run: uv run lgp-tools experiment -n ${{ inputs.iterations }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

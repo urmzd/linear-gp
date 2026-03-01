@@ -79,3 +79,11 @@ jobs:
         run: cargo publish -p lgp-cli
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.crates-token.outputs.token }}
+
+  experiments:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    uses: ./.github/workflows/experiments.yml
+    with:
+      experiment_type: full_pipeline
+      iterations: "10"
