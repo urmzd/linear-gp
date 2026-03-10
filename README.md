@@ -426,6 +426,18 @@ The framework is designed to be extensible. You can add:
 
 See the [Quick Start](docs/EXTENDING.md#quick-start) for a minimal example, or [docs/EXTENDING.md](docs/EXTENDING.md) for the complete guide.
 
+## Agent Skill
+
+This project ships an [Agent Skill](https://github.com/vercel-labs/skills) for use with Claude Code, Cursor, and other compatible agents.
+
+**Install:**
+
+```sh
+npx skills add urmzd/linear-gp
+```
+
+Once installed, use `/lgp-experiment` to run experiments, tune hyperparameters, and analyze results.
+
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
