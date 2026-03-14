@@ -10,7 +10,6 @@ on:
         options:
           - baseline
           - experiments
-          - full_pipeline
       iterations:
         description: "Number of experiment iterations"
         required: false
@@ -21,7 +20,7 @@ on:
         description: "Type of experiment to run"
         required: false
         type: string
-        default: "full_pipeline"
+        default: "experiments"
       iterations:
         description: "Number of experiment iterations"
         required: false
@@ -33,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RUST_BACKTRACE: 1
-      RUST_LOG: debug
+      RUST_LOG: warn
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,10 +53,6 @@ jobs:
       - name: Run experiments
         if: inputs.experiment_type == 'experiments'
         run: cargo run -p lgp-cli --release -- experiment --skip-search -n ${{ inputs.iterations }}
-
-      - name: Run full pipeline
-        if: inputs.experiment_type == 'full_pipeline'
-        run: cargo run -p lgp-cli --release -- experiment -n ${{ inputs.iterations }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

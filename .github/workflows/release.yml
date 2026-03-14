@@ -85,5 +85,5 @@ jobs:
     if: needs.release.outputs.released == 'true'
     uses: ./.github/workflows/experiments.yml
     with:
-      experiment_type: full_pipeline
+      experiment_type: experiments
       iterations: "10"
