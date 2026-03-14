@@ -62,6 +62,15 @@ enum Commands {
 
     /// Run a Rust example
     Example(commands::example::ExampleArgs),
+
+    /// Analyze experiment results (generate tables and optional plots)
+    Analyze(commands::analyze::AnalyzeArgs),
+
+    /// Search for optimal hyperparameters
+    Search(commands::search::SearchArgs),
+
+    /// Run end-to-end experiment pipeline (search -> run -> analyze)
+    Experiment(commands::experiment::ExperimentArgs),
 }
 
 fn main() {
@@ -94,6 +103,9 @@ fn main() {
         Commands::List(args) => commands::list::execute(&args),
         Commands::Run(args) => commands::run::execute(&args),
         Commands::Example(args) => commands::example::execute(&args),
+        Commands::Analyze(args) => commands::analyze::execute(&args),
+        Commands::Search(args) => commands::search::execute(&args),
+        Commands::Experiment(args) => commands::experiment::execute(&args),
     };
     if let Err(e) = result {
         eprintln!("Error: {}", e);

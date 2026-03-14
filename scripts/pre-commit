@@ -10,10 +10,4 @@ cargo fmt --all -- --check
 echo "==> Running Clippy..."
 cargo clippy --all-targets -- -D warnings
 
-echo "==> Linting Python..."
-uv run ruff check lgp_tools
-
-echo "==> Checking Python formatting..."
-uv run ruff format --check lgp_tools
-
 echo "All pre-commit checks passed."

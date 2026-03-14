@@ -37,7 +37,7 @@ just run cart_pole_lgp --config optimal
 ## Full Pipeline
 
 ```sh
-# Search → Run → Analyze (end-to-end)
+# Search -> Run -> Analyze (end-to-end)
 just experiment cart_pole_lgp
 
 # Hyperparameter search only

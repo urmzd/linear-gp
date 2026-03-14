@@ -67,6 +67,14 @@ pub struct Metadata {
     pub description: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub run_timestamp: Option<String>,
+    #[serde(default)]
+    pub title: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub x_label: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub y_label: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tags: Vec<String>,
 }
 
 /// Problem-specific configuration.

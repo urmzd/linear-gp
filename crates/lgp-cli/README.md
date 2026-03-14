@@ -6,7 +6,7 @@ Command-line interface for running Linear Genetic Programming experiments.
 
 ## Overview
 
-`lgp-cli` provides the `lgp` binary for running LGP experiments using TOML-based configuration files. It supports listing available experiments, running them with config overrides, and executing Rust API examples.
+`lgp-cli` provides the `lgp` binary for running LGP experiments using TOML-based configuration files. It supports listing available experiments, running them with config overrides, hyperparameter search, result analysis, and end-to-end experiment pipelines.
 
 ## Installation
 
@@ -18,6 +18,9 @@ Or build from source:
 
 ```bash
 cargo build --release -p lgp-cli
+
+# With plot support (PNG chart generation)
+cargo build --release -p lgp-cli --features plot
 ```
 
 ## Usage
@@ -37,6 +40,15 @@ lgp run iris_baseline --override hyperparameters.program.max_instructions=50
 
 # Preview resolved config without running
 lgp run iris_baseline --dry-run
+
+# Search hyperparameters
+lgp search iris_baseline --n-trials 40 --n-threads 4
+
+# Analyze experiment results
+lgp analyze
+
+# Run full pipeline (search -> run -> analyze)
+lgp experiment iris_baseline --iterations 10
 
 # Run a Rust API example
 lgp example cart_pole
@@ -68,6 +80,38 @@ Runs an experiment by name. Configuration is loaded from `configs/<experiment>/d
 | `--config <NAME>` | Config variant to use (`default` or `optimal`) |
 | `--override <KEY=VALUE>` | Override a config parameter (repeatable) |
 | `--dry-run` | Print resolved config and exit |
+
+### `lgp search [CONFIG]`
+
+Search for optimal hyperparameters. If no config is specified, searches all configs.
+
+| Option | Description |
+|--------|-------------|
+| `--n-trials <N>` | Number of trials (default: 40) |
+| `--n-threads <N>` | Parallel threads (default: 4) |
+| `--median-trials <N>` | Runs for median (default: 10) |
+
+### `lgp analyze`
+
+Generate statistics tables (CSV) and optional plots (PNG) from experiment results.
+
+| Option | Description |
+|--------|-------------|
+| `--input <DIR>` | Input directory (default: `outputs`) |
+| `--output <DIR>` | Output directory (default: `outputs`) |
+
+### `lgp experiment [CONFIG]`
+
+Run end-to-end pipeline: search -> run -> analyze.
+
+| Option | Description |
+|--------|-------------|
+| `--iterations <N>` | Number of experiment iterations (default: 10) |
+| `--skip-search` | Skip hyperparameter search phase |
+| `--skip-analyze` | Skip analysis phase |
+| `--n-trials <N>` | Search trials (default: 40) |
+| `--n-threads <N>` | Search threads (default: 4) |
+| `--median-trials <N>` | Runs for median (default: 10) |
 
 ### `lgp example <NAME>`
 
