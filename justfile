@@ -10,6 +10,10 @@ default:
 build:
     cargo build --release
 
+# Build with plot feature
+build-plot:
+    cargo build --release --features plot
+
 # Build with debug symbols
 build-dev:
     cargo build
@@ -69,37 +73,23 @@ list-examples:
 
 # Run full experiment pipeline (search -> run -> analyze)
 experiment config="" *args:
-    uv run lgp-tools experiment {{config}} {{args}}
+    cargo run -p lgp-cli --release -- experiment {{config}} {{args}}
 
 # Run experiments without search (use existing optimal.toml)
 experiment-quick config="" n="10":
-    uv run lgp-tools experiment {{config}} --skip-search -n {{n}}
+    cargo run -p lgp-cli --release -- experiment {{config}} --skip-search -n {{n}}
 
 # === HYPERPARAMETER SEARCH ===
 
 # Search hyperparameters for a config
 search config *args:
-    uv run lgp-tools search {{config}} {{args}}
-
-# Search all configs
-search-all *args:
-    uv run lgp-tools search {{args}}
+    cargo run -p lgp-cli --release -- search {{config}} {{args}}
 
 # === ANALYSIS ===
 
 # Analyze experiment results
 analyze *args:
-    uv run lgp-tools analyze {{args}}
-
-# === DATABASE ===
-
-# Start PostgreSQL database
-start-db:
-    docker-compose up -d
-
-# Stop PostgreSQL database
-stop-db:
-    docker-compose down
+    cargo run -p lgp-cli --release -- analyze {{args}}
 
 # === DEVELOPMENT ===
 
@@ -107,33 +97,12 @@ stop-db:
 fmt:
     cargo fmt
 
-# Format Python code
-fmt-py:
-    uv run ruff format lgp_tools
-
-# Format all code
-fmt-all: fmt fmt-py
-
 # Run clippy linter
 lint:
     cargo clippy -- -D warnings
 
-# Lint Python code
-lint-py:
-    uv run ruff check lgp_tools
-
-# Lint all code
-lint-all: lint lint-py
-
 # Run all checks (format, lint, test)
 check: fmt lint test
-
-# Check all (Rust + Python)
-check-all: fmt-all lint-all test
-
-# Fix Python lint issues
-fix-py:
-    uv run ruff check --fix lgp_tools
 
 # Install git hooks from scripts/
 init_:
@@ -174,12 +143,10 @@ next-version:
 
 # === SETUP ===
 
-# Initialize dev environment: sync Python deps, build Rust, install git hooks
+# Initialize dev environment: build Rust and install git hooks
 init:
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "Syncing Python environment..."
-    uv sync --extra dev
     echo "Building release binary..."
     cargo build --release
     echo "Installing git hooks..."
@@ -193,6 +160,4 @@ verify:
     echo "Verifying dependencies..."
     rustc --version
     cargo --version
-    uv --version
-    docker --version
     echo "All dependencies verified!"

@@ -44,35 +44,23 @@ jobs:
       - name: Cache cargo dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Setup Python via uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Install dependencies
-        run: uv sync
-
       - name: Build release binary
         run: cargo build --release
 
-      - name: Start PostgreSQL
-        uses: isbang/compose-action@v1.4.1
-        with:
-          compose-file: "docker-compose.yml"
-          down-flags: "--rmi=all --volumes"
-
       - name: Run baseline
         if: inputs.experiment_type == 'baseline'
-        run: uv run lgp-tools experiment iris_baseline --skip-search
+        run: cargo run -p lgp-cli --release -- experiment iris_baseline --skip-search
 
       - name: Run experiments
         if: inputs.experiment_type == 'experiments'
-        run: uv run lgp-tools experiment --skip-search -n ${{ inputs.iterations }}
+        run: cargo run -p lgp-cli --release -- experiment --skip-search -n ${{ inputs.iterations }}
 
       - name: Run full pipeline
         if: inputs.experiment_type == 'full_pipeline'
-        run: uv run lgp-tools experiment -n ${{ inputs.iterations }}
+        run: cargo run -p lgp-cli --release -- experiment -n ${{ inputs.iterations }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: "experiment-${{ github.run_id }}"
-          path: "assets"
+          path: "outputs"

@@ -6,13 +6,12 @@ You are an agent working on **linear-gp** — a Rust framework for solving reinf
 
 ## Architecture
 
-Rust workspace + Python CLI tooling:
+Pure Rust workspace:
 
 | Package | Path | Role |
 |---------|------|------|
 | `lgp` | `crates/lgp` | Core library — traits, evolutionary engine, built-in problems |
-| `lgp-cli` | `crates/lgp-cli` | Rust CLI binary for running experiments with TOML config |
-| `lgp-tools` | `lgp_tools/` | Python CLI for hyperparameter search (Optuna), experiment automation, analysis |
+| `lgp-cli` | `crates/lgp-cli` | CLI binary (`lgp`) for running experiments, hyperparameter search, and analysis |
 
 ### Core Traits
 
@@ -27,11 +26,10 @@ Rust workspace + Python CLI tooling:
 
 ## Key Files
 
-- `crates/lgp-cli/src/main.rs` — Rust CLI entry point
+- `crates/lgp-cli/src/main.rs` — CLI entry point
 - `crates/lgp/src/lib.rs` — Core library exports
 - `crates/lgp/src/core/` — Core LGP implementation
 - `crates/lgp/src/problems/` — Problem implementations (CartPole, MountainCar, Iris)
-- `lgp_tools/cli.py` — Python CLI entry point
 - `configs/` — TOML experiment configurations (`default.toml`, `optimal.toml`)
 - `outputs/` — Experiment results (parameters, tables, figures)
 - `docs/EXTENDING.md` — Guide for adding new environments
@@ -41,25 +39,22 @@ Rust workspace + Python CLI tooling:
 | Task | Command |
 |------|---------|
 | Build | `just build` or `cargo build --release` |
+| Build (with plots) | `just build-plot` or `cargo build --release --features plot` |
 | Test | `just test` or `cargo test --release` |
 | Bench | `just bench` or `cargo bench` |
-| Lint (Rust) | `just lint` or `cargo clippy -- -D warnings` |
-| Lint (Python) | `just lint-py` or `uv run ruff check lgp_tools` |
-| Format (Rust) | `just fmt` or `cargo fmt` |
-| Format (Python) | `just fmt-py` or `uv run ruff format lgp_tools` |
+| Lint | `just lint` or `cargo clippy -- -D warnings` |
+| Format | `just fmt` or `cargo fmt` |
 | Run experiment | `just run <name>` (e.g., `just run cart_pole_lgp`) |
 | List experiments | `just list` |
-| Hyperparameter search | `just search <config>` or `uv run lgp-tools search <config>` |
-| Analyze results | `just analyze` or `uv run lgp-tools analyze` |
-| Full pipeline | `just experiment <config>` (search → run → analyze) |
-| Setup | `just init` (Python deps + Rust build + git hooks) |
-| Full setup | Build + Python deps + PostgreSQL for Optuna |
+| Hyperparameter search | `just search <config>` or `lgp search <config>` |
+| Analyze results | `just analyze` or `lgp analyze` |
+| Full pipeline | `just experiment <config>` (search -> run -> analyze) |
+| Setup | `just init` (Rust build + git hooks) |
 
 ## Code Style
 
 - Rust 2021 edition, Apache-2.0 license
 - `cargo fmt` and `cargo clippy -- -D warnings`
-- Python: `ruff` for formatting and linting
 - Structured logging via `tracing` (`RUST_LOG=lgp=debug`)
 - Parallel evaluation via `rayon`
 

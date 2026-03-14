@@ -27,7 +27,6 @@ types:
 
 version_files:
   - Cargo.toml
-  - pyproject.toml
 
 changelog:
   file: CHANGELOG.md

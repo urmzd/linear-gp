@@ -12,9 +12,10 @@ Linear Genetic Programming (LGP) is a variant of genetic programming that evolve
 - **Modular architecture** - Trait-based design for easy extension to new problem domains
 - **Multiple problem types** - Built-in support for OpenAI Gym environments and classification tasks
 - **Q-Learning integration** - Hybrid LGP + Q-Learning for enhanced reinforcement learning
-- **Hyperparameter optimization** - Automated search using Optuna with PostgreSQL backend
+- **Hyperparameter search** - Built-in random search with parallel evaluation
 - **Parallel evaluation** - Rayon-powered parallel fitness evaluation
-- **Experiment automation** - Python CLI tools for batch experiments and visualization
+- **Experiment automation** - Full pipeline: search, run, and analyze from a single CLI
+- **Optional plotting** - PNG chart generation via `plotters` (behind `--features plot`)
 
 ### Supported Environments
 
@@ -31,22 +32,17 @@ Linear Genetic Programming (LGP) is a variant of genetic programming that evolve
 | Dependency | Version | Installation |
 |------------|---------|--------------|
 | Rust | 1.70+ | [rustup.rs](https://rustup.rs/) |
-| UV | Latest | [docs.astral.sh/uv](https://docs.astral.sh/uv/) |
-| Docker | 20.10+ | [docker.com](https://www.docker.com/) |
-| Docker Compose | 2.0+ | Included with Docker Desktop |
 | just | Latest | `cargo install just` |
 
 **macOS:**
 ```bash
-brew install rust uv docker docker-compose
+brew install rust
 cargo install just
 ```
 
 **Ubuntu:**
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-curl -LsSf https://astral.sh/uv/install.sh | sh
-sudo apt-get install docker.io docker-compose
 cargo install just
 ```
 
@@ -57,11 +53,8 @@ cargo install just
 git clone https://github.com/urmzd/linear-gp.git
 cd linear-gp
 
-# Full setup (builds binary, installs Python deps, starts database)
-just setup-full
-
-# Or Python environment only
-just setup
+# Build and install git hooks
+just init
 ```
 
 ### First Experiment
@@ -88,8 +81,7 @@ just bench
 | Package | Path | Description |
 |---------|------|-------------|
 | [lgp](crates/lgp/README.md) | `crates/lgp` | Core Rust library — traits, evolutionary engine, built-in problems |
-| [lgp-cli](crates/lgp-cli/README.md) | `crates/lgp-cli` | CLI binary (`lgp`) for running experiments with TOML configuration |
-| [lgp-tools](lgp_tools/README.md) | `lgp_tools` | Python CLI for hyperparameter search, experiment automation, and analysis |
+| [lgp-cli](crates/lgp-cli/README.md) | `crates/lgp-cli` | CLI binary (`lgp`) for running experiments, search, and analysis |
 
 ## Project Architecture
 
@@ -108,21 +100,14 @@ linear-gp/
 │   └── lgp-cli/                # CLI application
 │       └── src/
 │           ├── main.rs         # CLI entry point
-│           ├── commands/       # Subcommands (experiment)
+│           ├── commands/       # Subcommands (run, list, search, analyze, experiment)
 │           ├── config_discovery.rs
-│           └── config_override.rs
+│           ├── config_override.rs
+│           └── experiment_runner.rs
 ├── configs/                    # Experiment configurations
 │   ├── iris_baseline/default.toml
 │   ├── cart_pole_lgp/default.toml
 │   └── ...
-├── lgp_tools/                  # Python CLI package
-│   ├── cli.py                  # Main CLI entry point
-│   ├── commands/               # CLI subcommands
-│   │   ├── analyze.py          # Results analysis
-│   │   ├── experiment.py       # End-to-end pipeline
-│   │   └── search.py           # Hyperparameter search
-│   ├── config.py               # Config discovery
-│   └── models.py               # Pydantic models
 ├── outputs/                    # Experiment outputs
 │   ├── parameters/             # Optimized hyperparameters (JSON)
 │   ├── <experiment>/           # Per-experiment outputs
@@ -197,10 +182,6 @@ lgp --log-format json run iris_baseline 2>&1 | jq .
 
 ## CLI Reference
 
-### lgp (Rust CLI)
-
-Run experiments with TOML-based configuration:
-
 ```bash
 # List available experiments
 lgp list
@@ -219,6 +200,19 @@ lgp run cart_pole_with_q --override operations.q_learning.alpha=0.5
 
 # Preview config (dry-run)
 lgp run iris_baseline --dry-run
+
+# Search hyperparameters
+lgp search iris_baseline
+lgp search iris_baseline --n-trials 20 --n-threads 8
+
+# Analyze results (generates CSV tables + optional PNG plots)
+lgp analyze
+lgp analyze --input outputs --output outputs
+
+# Run full experiment pipeline (search -> run -> analyze)
+lgp experiment iris_baseline
+lgp experiment iris_baseline --iterations 20
+lgp experiment --skip-search
 
 # Run a Rust example
 lgp example cart_pole
@@ -240,94 +234,22 @@ lgp example --list
 | `mountain_car_lgp` | MountainCar with pure LGP |
 | `mountain_car_with_q` | MountainCar with Q-Learning |
 
-### lgp-tools (Python)
-
-Python CLI for hyperparameter search and analysis:
-
-```bash
-# Search hyperparameters (all configs)
-uv run lgp-tools search
-
-# Search specific config
-uv run lgp-tools search iris_baseline
-
-# Search with custom options
-uv run lgp-tools search -t 20 -j 8 -m 5
-
-# Analyze results (generates tables + figures)
-uv run lgp-tools analyze
-
-# Analyze with custom paths
-uv run lgp-tools analyze --input outputs/output --output outputs
-
-# Run complete experiment pipeline (search -> run -> analyze)
-uv run lgp-tools experiment
-
-# Run single config
-uv run lgp-tools experiment iris_baseline
-
-# Run with 20 iterations
-uv run lgp-tools experiment -n 20
-
-# Skip search phase (use existing optimal.toml)
-uv run lgp-tools experiment --skip-search
-```
-
-## Examples
-
-Run Rust API examples to see the library in action:
-
-```bash
-# List available examples
-lgp example --list
-
-# CartPole reinforcement learning example
-lgp example cart_pole
-
-# Iris classification example
-lgp example iris_classification
-```
-
 ## Hyperparameter Search
 
-The framework includes automated hyperparameter optimization using [Optuna](https://optuna.org/).
-
-### Setup
-
-```bash
-# Start PostgreSQL backend
-just start-db
-
-# Stop PostgreSQL
-just stop-db
-
-# Verify database is running
-docker-compose ps
-```
+The framework includes built-in hyperparameter search with parallel evaluation via `rayon`.
 
 ### Running Search
 
 ```bash
 # Search for a specific config
-uv run lgp-tools search cart_pole_lgp
+lgp search cart_pole_lgp
 
 # Search all configs (LGP first, then Q-Learning)
-uv run lgp-tools search
+lgp search
 
 # Search with custom options
-uv run lgp-tools search cart_pole_with_q -t 100 -j 8 -m 15
+lgp search cart_pole_with_q --n-trials 100 --n-threads 8 --median-trials 15
 ```
-
-### Available Configs
-
-- `iris_baseline` - Iris classification (baseline)
-- `iris_mutation` - Iris with mutation only
-- `iris_crossover` - Iris with crossover only
-- `iris_full` - Iris full (mutation + crossover)
-- `cart_pole_lgp` - CartPole with pure LGP
-- `cart_pole_with_q` - CartPole with Q-Learning
-- `mountain_car_lgp` - MountainCar with pure LGP
-- `mountain_car_with_q` - MountainCar with Q-Learning
 
 ### Parameters Searched
 
@@ -379,11 +301,12 @@ lgp run cart_pole_lgp --override hyperparameters.n_generations=200
 ### Generating Visualizations
 
 ```bash
-# Analyze results (generates tables + figures)
-uv run lgp-tools analyze
+# Analyze results (generates CSV tables)
+lgp analyze
 
-# Analyze with custom paths
-uv run lgp-tools analyze --input outputs/output --output outputs
+# Build with plot feature for PNG chart generation
+cargo build --release --features plot
+lgp analyze
 ```
 
 ### Output Structure
@@ -406,7 +329,7 @@ outputs/
 │       └── post_process/       # Post-processing outputs
 ├── tables/                     # Generated CSV statistics
 │   └── <experiment>.csv
-└── figures/                    # Generated PNG plots
+└── figures/                    # Generated PNG plots (with --features plot)
     └── <experiment>.png
 
 configs/

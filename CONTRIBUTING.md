@@ -19,10 +19,6 @@ Ensure you have the following installed:
 | Tool | Version | Purpose |
 |------|---------|---------|
 | Rust | 1.70+ | Core framework |
-| Python | 3.11+ | Automation scripts |
-| uv | Latest | Python package management |
-| Docker | 20.10+ | PostgreSQL for Optuna |
-| Docker Compose | 2.0+ | Container orchestration |
 | just | Latest | Task runner |
 
 ### Initial Setup
@@ -35,11 +31,8 @@ cd linear-gp
 # Install just (task runner)
 cargo install just
 
-# Install uv (Python package manager)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Run full setup (builds binary, Python environment, database)
-just setup-full
+# Run setup (builds binary, installs git hooks)
+just init
 
 # Verify everything is working
 just verify
@@ -48,17 +41,9 @@ just test
 
 ### Manual Setup
 
-If `just setup-full` doesn't work for your environment:
-
 ```bash
 # Build the project
 cargo build --release
-
-# Set up Python environment with uv
-uv sync
-
-# Start PostgreSQL for hyperparameter search
-docker-compose up -d
 ```
 
 ### IDE Setup
@@ -74,23 +59,19 @@ docker-compose up -d
 
 ### Pre-commit Hooks
 
-This project uses [pre-commit](https://pre-commit.com/) to enforce code quality before commits and pushes.
+This project uses custom git hooks in `scripts/` to enforce code quality.
 
 **Setup:**
 ```bash
-# Install pre-commit hooks (runs on every commit)
-pre-commit install
+# Install hooks
+just init_
 
-# Install pre-push hooks (runs cargo test before push)
-pre-commit install --hook-type pre-push
-
-# Run all hooks manually on all files
-pre-commit run --all-files
+# Run checks manually
+just check
 ```
 
 **Hooks included:**
-- **General:** trailing-whitespace, end-of-file-fixer, check-merge-conflict
-- **Python (ruff):** linting and formatting
+- **General:** trailing-whitespace, merge-conflict check
 - **Rust:** cargo fmt and clippy on commit, cargo test on push
 
 ## Code Style
@@ -168,26 +149,6 @@ pub fn run_experiment(name: &str) -> Result<()> {
 - Keep `info!` logs sparse - one per major operation
 - Use `trace!` for hot paths (instruction execution, Q-table updates)
 - Test with `RUST_LOG=lgp=trace` to verify output isn't excessive
-
-### Python
-
-For automation scripts in `lgp_tools/`:
-
-- Follow PEP 8 style guidelines
-- Use type hints where practical
-- Use `pathlib` for file paths
-- Document functions with docstrings
-
-```bash
-# Format Python code with ruff
-uv run ruff format lgp_tools
-
-# Lint Python code with ruff
-uv run ruff check lgp_tools
-
-# Fix lint issues automatically
-uv run ruff check --fix lgp_tools
-```
 
 ## Testing
 
