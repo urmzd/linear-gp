@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.1 (2026-03-14)
+
+### Bug Fixes
+
+- **ci**: remove search phase and reduce log level in experiments ([4808a8b](https://github.com/urmzd/linear-gp/commit/4808a8bbf0d11b14845d06f8ce639677c5af9860))
+
+### Documentation
+
+- expand references to include all cited works ([d832b4d](https://github.com/urmzd/linear-gp/commit/d832b4d4f200cfaca1be5d8faeba15e3dc755e8d))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.4.0...v1.4.1)
+
+
 ## 1.4.0 (2026-03-14)
 
 ### Features
