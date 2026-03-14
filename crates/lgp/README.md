@@ -3,7 +3,7 @@
 Core Rust library for Linear Genetic Programming.
 
 [![Crates.io](https://img.shields.io/crates/v/lgp.svg)](https://crates.io/crates/lgp)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
 
 ## Overview
 

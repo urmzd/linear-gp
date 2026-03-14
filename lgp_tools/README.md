@@ -2,7 +2,7 @@
 
 Python CLI tools for hyperparameter search, experiment automation, and result analysis.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
 
 ## Overview
 

@@ -57,7 +57,7 @@ Rust workspace + Python CLI tooling:
 
 ## Code Style
 
-- Rust 2021 edition, MIT license
+- Rust 2021 edition, Apache-2.0 license
 - `cargo fmt` and `cargo clippy -- -D warnings`
 - Python: `ruff` for formatting and linting
 - Structured logging via `tracing` (`RUST_LOG=lgp=debug`)

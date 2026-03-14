@@ -3,7 +3,7 @@
 A Rust framework for solving reinforcement learning and classification tasks using Linear Genetic Programming (LGP).
 
 [![Build Status](https://github.com/urmzd/linear-gp/actions/workflows/experiments.yml/badge.svg)](https://github.com/urmzd/linear-gp/actions/workflows/experiments.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 ## Overview
 
