@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 authors.workspace = true
 description = "CLI for Linear Genetic Programming experiments"
-license = "MIT"
+license = "Apache-2.0"
 repository = "https://github.com/urmzd/linear-gp"
 
 [[bin]]
