@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.4.0 (2026-03-14)
+
+### Features
+
+- port Python CLI to pure Rust, remove Python ecosystem ([cea926a](https://github.com/urmzd/linear-gp/commit/cea926a934f15d023cb1267c0bfc10346656d28f))
+
+### Documentation
+
+- add AGENTS.md and agent skill for Claude Code ([2433768](https://github.com/urmzd/linear-gp/commit/2433768bde3cb0bc25df30af5f37f46e3c2b4438))
+
+### Miscellaneous
+
+- replace MIT license with Apache-2.0 ([34784a8](https://github.com/urmzd/linear-gp/commit/34784a8cf7a981f9083a5e7b0b17754d97780e0e))
+- trigger experiments workflow after each release ([2f4508b](https://github.com/urmzd/linear-gp/commit/2f4508ba4ced570226e0926d8449bd34192a26df))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.3.1...v1.4.0)
+
+
 ## 1.3.1 (2026-02-27)
 
 ### Bug Fixes
