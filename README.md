@@ -114,7 +114,8 @@ linear-gp/
 │   │   └── <timestamp>/        # Timestamped runs
 │   ├── tables/                 # CSV statistics
 │   └── figures/                # PNG plots
-└── docs/                       # Documentation
+├── thesis/                     # Academic thesis (LaTeX)
+└── skills/                     # Agent skills & documentation
 ```
 
 ### Core Traits
@@ -128,7 +129,7 @@ The framework is built around these key traits:
 - **`Breed`** - Two-point crossover for creating offspring
 - **`Mutate`** - Mutation operators for genetic variation
 
-See [docs/EXTENDING.md](docs/EXTENDING.md) for detailed trait documentation.
+See [skills/lgp-experiment/SKILL.md](skills/lgp-experiment/SKILL.md#core-traits) for detailed trait documentation.
 
 ## Logging and Tracing
 
@@ -347,7 +348,7 @@ The framework is designed to be extensible. You can add:
 - Custom genetic operators (mutation, crossover)
 - Alternative fitness functions
 
-See the [Quick Start](docs/EXTENDING.md#quick-start) for a minimal example, or [docs/EXTENDING.md](docs/EXTENDING.md) for the complete guide.
+See the [Quick Start](skills/lgp-experiment/SKILL.md#extension-quick-start) for a minimal example, or [skills/lgp-experiment/SKILL.md](skills/lgp-experiment/SKILL.md) for the complete guide.
 
 ## Agent Skill
 

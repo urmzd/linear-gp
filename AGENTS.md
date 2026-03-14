@@ -32,7 +32,7 @@ Pure Rust workspace:
 - `crates/lgp/src/problems/` — Problem implementations (CartPole, MountainCar, Iris)
 - `configs/` — TOML experiment configurations (`default.toml`, `optimal.toml`)
 - `outputs/` — Experiment results (parameters, tables, figures)
-- `docs/EXTENDING.md` — Guide for adding new environments
+- `skills/lgp-experiment/SKILL.md` — Guide for running experiments and adding new environments
 
 ## Commands
 
@@ -68,4 +68,4 @@ Pure Rust workspace:
 
 ## Adding a New Environment
 
-See `docs/EXTENDING.md`. Implement the `State` (or `RlState`) trait, create a TOML config under `configs/`, and wire it into the CLI.
+See `skills/lgp-experiment/SKILL.md`. Implement the `State` (or `RlState`) trait, create a TOML config under `configs/`, and wire it into the CLI.

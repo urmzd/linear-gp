@@ -329,6 +329,6 @@ just analyze
 
 - Open an issue for questions about contributing
 - Check existing issues and discussions
-- Review the [README](README.md) and [Extension Guide](docs/EXTENDING.md)
+- Review the [README](README.md) and [Extension Guide](skills/lgp-experiment/SKILL.md)
 
 Thank you for contributing!

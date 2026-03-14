@@ -18,13 +18,13 @@ jobs:
       - name: Compile LaTeX Document
         run: ../scripts/compile_latex.sh thesis.tex
         shell: bash
-        working-directory: docs
+        working-directory: thesis
 
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
           name: Urmzd_Mukhammadnaim_RLGP_Thesis.pdf
-          path: docs/thesis.pdf
+          path: thesis/thesis.pdf
 
   arxiv:
     runs-on: ubuntu-latest
@@ -42,14 +42,14 @@ jobs:
       - name: Compile thesis to generate .bbl file
         run: |
           latexmk -pdf -pdflatex="pdflatex -shell-escape -interaction=nonstopmode" -use-make thesis.tex
-        working-directory: docs
+        working-directory: thesis
 
       - name: Create arXiv package
         run: |
           mkdir -p arxiv_build
-          cp docs/thesis.tex arxiv_build/
-          cp docs/thesis.bbl arxiv_build/
-          cp docs/dalcsthesis.cls arxiv_build/
+          cp thesis/thesis.tex arxiv_build/
+          cp thesis/thesis.bbl arxiv_build/
+          cp thesis/dalcsthesis.cls arxiv_build/
           cp -r assets arxiv_build/
           tar -czvf arxiv_submission.tar.gz -C arxiv_build .
 

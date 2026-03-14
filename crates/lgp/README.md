@@ -63,7 +63,7 @@ fn main() {
 }
 ```
 
-See the [examples](../../examples/) directory and [extension guide](../../docs/EXTENDING.md) for more.
+See the [examples](../../examples/) directory and [extension guide](../../skills/lgp-experiment/SKILL.md) for more.
 
 ## Features
 
