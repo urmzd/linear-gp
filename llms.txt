@@ -1,0 +1,24 @@
+# Linear Genetic Programming
+
+> A Rust framework for solving reinforcement learning and classification tasks using Linear Genetic Programming (LGP). Provides a modular, trait-based architecture with built-in support for OpenAI Gym environments (CartPole, MountainCar) and classification (Iris). Includes Q-Learning integration, parallel fitness evaluation via Rayon, hyperparameter search, and a CLI for running full experiment pipelines.
+
+## Docs
+
+- [README](https://github.com/urmzd/linear-gp/blob/main/README.md): Installation, CLI reference, experiments, and architecture
+- [AGENTS.md](https://github.com/urmzd/linear-gp/blob/main/AGENTS.md): Architecture and development guide
+- [CHANGELOG](https://github.com/urmzd/linear-gp/blob/main/CHANGELOG.md): Version history
+
+## API / Key Files
+
+- [crates/lgp/src/lib.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp/src/lib.rs): Library exports
+- [crates/lgp/src/core/characteristics.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp/src/core/characteristics.rs): Core traits (State, Fitness, Breed, Mutate)
+- [crates/lgp/src/core/program.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp/src/core/program.rs): Program representation (instruction sequences on registers)
+- [crates/lgp/src/core/engines/core_engine.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp/src/core/engines/core_engine.rs): Main evolutionary loop
+- [crates/lgp/src/extensions/q_learning.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp/src/extensions/q_learning.rs): Hybrid LGP + Q-Learning
+- [crates/lgp/src/problems/](https://github.com/urmzd/linear-gp/tree/main/crates/lgp/src/problems): Built-in problem implementations (Iris, Gym)
+- [crates/lgp-cli/src/main.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp-cli/src/main.rs): CLI entry point (run, search, analyze, experiment)
+
+## Optional
+
+- [CONTRIBUTING](https://github.com/urmzd/linear-gp/blob/main/CONTRIBUTING.md): How to contribute
+- [Skill](https://github.com/urmzd/linear-gp/blob/main/skills/lgp-experiment/SKILL.md): Agent skill for running experiments and tuning hyperparameters
