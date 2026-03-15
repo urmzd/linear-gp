@@ -1,0 +1,11 @@
+[output]
+dir = "./showcase"
+formats = ["png"]
+
+[[scenes]]
+type = "terminal"
+command = "cargo run -p lgp-cli -- run iris_baseline 2>&1"
+name = "experiment-output"
+theme = "dracula"
+cols = 100
+maxLines = 50

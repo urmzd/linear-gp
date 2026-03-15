@@ -1,9 +1,19 @@
-# Linear Genetic Programming
+<p align="center">
+  <h1 align="center">linear-gp</h1>
+  <p align="center">
+    A Rust framework for solving reinforcement learning and classification tasks using Linear Genetic Programming (LGP).
+    <br /><br />
+    <a href="https://github.com/urmzd/linear-gp/releases">Download</a>
+    &middot;
+    <a href="https://github.com/urmzd/linear-gp/issues">Report Bug</a>
+    &middot;
+    <a href="https://github.com/urmzd/linear-gp/tree/main/outputs">Experiments</a>
+  </p>
+</p>
 
-A Rust framework for solving reinforcement learning and classification tasks using Linear Genetic Programming (LGP).
-
-[![Build Status](https://github.com/urmzd/linear-gp/actions/workflows/experiments.yml/badge.svg)](https://github.com/urmzd/linear-gp/actions/workflows/experiments.yml)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/urmzd/linear-gp/actions/workflows/ci.yml"><img src="https://github.com/urmzd/linear-gp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+</p>
 
 ## Overview
 
