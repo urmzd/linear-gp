@@ -25,6 +25,8 @@ gymnasia = { version = "1.0", default-features = false }
 rayon = "1.7"
 tracing = { version = "0.1", features = ["attributes"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "json", "std", "ansi"] }
+crossterm = { workspace = true }
+indicatif = { workspace = true }
 plotters = { version = "0.3", optional = true }
 
 [features]

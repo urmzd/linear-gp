@@ -5,6 +5,8 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use crate::ui;
+
 #[derive(Args)]
 pub struct ExampleArgs {
     /// Example name to run (without .rs extension)
@@ -30,7 +32,7 @@ fn list_examples() -> Result<(), Box<dyn std::error::Error>> {
     let examples_dir = Path::new("examples");
 
     if !examples_dir.exists() {
-        println!("No examples directory found");
+        ui::warn("No examples directory found");
         return Ok(());
     }
 
@@ -47,18 +49,17 @@ fn list_examples() -> Result<(), Box<dyn std::error::Error>> {
         .collect();
 
     if examples.is_empty() {
-        println!("No examples found in examples/");
+        ui::warn("No examples found in examples/");
         return Ok(());
     }
 
     examples.sort();
 
-    println!("Available examples:");
+    ui::header("Available examples");
     for example in examples {
-        println!("  {}", example);
+        ui::line(&example);
     }
-    println!();
-    println!("Run with: lgp example <name>");
+    ui::info("Run with: lgp example <name>");
 
     Ok(())
 }
@@ -74,12 +75,13 @@ fn run_example(name: &str) -> Result<(), Box<dyn std::error::Error>> {
         .into());
     }
 
-    println!("Running example: {}", name);
-    println!();
+    ui::header(&format!("Running example: {}", name));
 
+    let sp = ui::spinner("Compiling and running...");
     let status = Command::new("cargo")
         .args(["run", "--example", name, "--release"])
         .status()?;
+    sp.finish_and_clear();
 
     if !status.success() {
         return Err(format!(
@@ -89,6 +91,8 @@ fn run_example(name: &str) -> Result<(), Box<dyn std::error::Error>> {
         )
         .into());
     }
+
+    ui::phase_ok(&format!("Example '{}' completed", name));
 
     Ok(())
 }
