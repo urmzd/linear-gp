@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.5.0 (2026-03-21)
+
+### Features
+
+- **cli**: add styled terminal output matching sr UI standard ([3ad8f07](https://github.com/urmzd/linear-gp/commit/3ad8f07e4861944f8aa01d5a074af6d9b173be42))
+
+### Documentation
+
+- consolidate extension guide into skill and rename docs/ to thesis/ ([8562b11](https://github.com/urmzd/linear-gp/commit/8562b1159c430491d3922b4e18fd32dca5fe3a63))
+
+### Miscellaneous
+
+- standardize project files and README header ([3aaa917](https://github.com/urmzd/linear-gp/commit/3aaa917ce2ee410f045461e5039dd22fe38f3474))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.4.1...v1.5.0)
+
+
 ## 1.4.1 (2026-03-14)
 
 ### Bug Fixes
