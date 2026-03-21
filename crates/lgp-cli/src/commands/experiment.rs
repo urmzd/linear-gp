@@ -11,6 +11,7 @@ use crate::commands::analyze::AnalyzeArgs;
 use crate::commands::search;
 use crate::config_discovery::{discover_configs, get_configs_dir};
 use crate::experiment_runner::run_experiment;
+use crate::ui;
 
 #[derive(Args)]
 pub struct ExperimentArgs {
@@ -95,24 +96,31 @@ fn run_experiments(
         configs
     };
 
-    println!(
+    ui::info(&format!(
         "Running {} iterations for {} config(s)",
         iterations,
         target_configs.len()
-    );
+    ));
 
     for cfg in &target_configs {
-        println!("\n{}", "=".repeat(50));
-        println!("Config: {}", cfg);
+        ui::header(&format!("Config: {}", cfg));
 
+        let sp = ui::spinner(&format!("Running {} iterations...", iterations));
         for i in 1..=iterations {
+            sp.set_message(format!("Iteration {}/{}...", i, iterations));
             match run_single_experiment(cfg, i, output_dir) {
                 Ok(()) => {}
-                Err(e) => warn!(config = %cfg, iteration = i, error = %e, "Iteration failed"),
+                Err(e) => {
+                    warn!(config = %cfg, iteration = i, error = %e, "Iteration failed");
+                    sp.suspend(|| {
+                        ui::warn(&format!("Iteration {} failed for {}: {}", i, cfg, e));
+                    });
+                }
             }
         }
+        sp.finish_and_clear();
 
-        println!("Completed {} iterations for {}", iterations, cfg);
+        ui::phase_ok(&format!("Completed {} iterations for {}", iterations, cfg));
     }
 
     Ok(())
@@ -121,11 +129,11 @@ fn run_experiments(
 pub fn execute(args: &ExperimentArgs) -> Result<(), Box<dyn std::error::Error>> {
     let output_dir = PathBuf::from("outputs");
 
-    println!("Starting experiment pipeline");
+    ui::header("Experiment pipeline");
 
     // Phase 1: Search
     if !args.skip_search {
-        println!("\nPhase 1: Hyperparameter Search");
+        ui::header("Phase 1: Hyperparameter Search");
         if let Some(ref config) = args.config {
             search::search_single_config(
                 config,
@@ -143,26 +151,28 @@ pub fn execute(args: &ExperimentArgs) -> Result<(), Box<dyn std::error::Error>> 
             };
             search::execute(&search_args)?;
         }
+        ui::phase_ok("Hyperparameter search complete");
     } else {
-        println!("\nSkipping hyperparameter search");
+        ui::info("Skipping hyperparameter search");
     }
 
     // Phase 2: Run experiments
-    println!("\nPhase 2: Running Experiments");
+    ui::header("Phase 2: Running Experiments");
     run_experiments(args.config.as_deref(), args.iterations, &output_dir)?;
+    ui::phase_ok("Experiment runs complete");
 
     // Phase 3: Analyze
     if !args.skip_analyze {
-        println!("\nPhase 3: Analysis");
+        ui::header("Phase 3: Analysis");
         let analyze_args = AnalyzeArgs {
             input: output_dir.clone(),
             output: output_dir,
         };
         crate::commands::analyze::execute(&analyze_args)?;
     } else {
-        println!("\nSkipping analysis");
+        ui::info("Skipping analysis");
     }
 
-    println!("\nPipeline complete!");
+    ui::phase_ok("Pipeline complete!");
     Ok(())
 }

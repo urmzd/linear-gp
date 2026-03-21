@@ -6,6 +6,8 @@ use std::path::{Path, PathBuf};
 use clap::Args;
 use tracing::{debug, info, warn};
 
+use crate::ui;
+
 #[cfg(feature = "plot")]
 use lgp::core::experiment_config::ExperimentConfig;
 
@@ -239,6 +241,8 @@ pub fn execute(args: &AnalyzeArgs) -> Result<(), Box<dyn std::error::Error>> {
         return Err(format!("Input directory not found: {}", input_dir.display()).into());
     }
 
+    ui::header("Analysis");
+
     // Collect all population.json files across experiment directories.
     // Structure: outputs/<experiment>/<timestamp>/outputs/population.json
     let mut table_count = 0;
@@ -282,6 +286,8 @@ pub fn execute(args: &AnalyzeArgs) -> Result<(), Box<dyn std::error::Error>> {
         return Err("No experiment output directories with population.json found".into());
     }
 
+    let sp = ui::spinner("Generating tables...");
+
     // For each experiment, use the most recently modified population.json
     for (exp_name, mut pop_files) in experiment_names {
         pop_files.sort();
@@ -289,16 +295,22 @@ pub fn execute(args: &AnalyzeArgs) -> Result<(), Box<dyn std::error::Error>> {
             debug!(experiment = %exp_name, path = %pop_path.display(), "Processing population");
             match generate_table(pop_path, &exp_name, &tables_dir) {
                 Ok(()) => table_count += 1,
-                Err(e) => warn!(experiment = %exp_name, error = %e, "Failed to generate table"),
+                Err(e) => {
+                    warn!(experiment = %exp_name, error = %e, "Failed to generate table");
+                    sp.suspend(|| {
+                        ui::warn(&format!("Failed to generate table for {}: {}", exp_name, e));
+                    });
+                }
             }
         }
     }
 
-    println!(
+    sp.finish_and_clear();
+    ui::phase_ok(&format!(
         "Generated {} tables in {}",
         table_count,
         tables_dir.display()
-    );
+    ));
 
     // Generate figures if plot feature is enabled
     #[cfg(feature = "plot")]
@@ -314,28 +326,37 @@ pub fn execute(args: &AnalyzeArgs) -> Result<(), Box<dyn std::error::Error>> {
             })
             .collect();
 
+        let sp = ui::spinner("Generating figures...");
         let mut fig_count = 0;
         for csv_entry in &csv_files {
             let csv_path = csv_entry.path();
             let exp_name = csv_path.file_stem().and_then(|n| n.to_str()).unwrap_or("");
             match generate_figure(&csv_path, exp_name, &figures_dir) {
                 Ok(()) => fig_count += 1,
-                Err(e) => warn!(experiment = %exp_name, error = %e, "Failed to generate figure"),
+                Err(e) => {
+                    warn!(experiment = %exp_name, error = %e, "Failed to generate figure");
+                    sp.suspend(|| {
+                        ui::warn(&format!(
+                            "Failed to generate figure for {}: {}",
+                            exp_name, e
+                        ));
+                    });
+                }
             }
         }
-
-        println!(
+        sp.finish_and_clear();
+        ui::phase_ok(&format!(
             "Generated {} figures in {}",
             fig_count,
             figures_dir.display()
-        );
+        ));
     }
 
     #[cfg(not(feature = "plot"))]
     {
-        println!("Plotting disabled (build with --features plot to enable)");
+        ui::info("Plotting disabled (build with --features plot to enable)");
     }
 
-    println!("Analysis complete!");
+    ui::phase_ok("Analysis complete!");
     Ok(())
 }

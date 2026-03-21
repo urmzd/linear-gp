@@ -10,6 +10,7 @@ mod commands;
 mod config_discovery;
 mod config_override;
 mod experiment_runner;
+pub mod ui;
 
 /// Output format for log messages.
 #[derive(Debug, Clone, Copy, ValueEnum, Default)]
@@ -99,7 +100,7 @@ fn main() {
 
     info!(verbose = cli.verbose, "Starting LGP CLI");
 
-    let result = match cli.command {
+    let result: Result<(), Box<dyn std::error::Error>> = match cli.command {
         Commands::List(args) => commands::list::execute(&args),
         Commands::Run(args) => commands::run::execute(&args),
         Commands::Example(args) => commands::example::execute(&args),
@@ -108,7 +109,7 @@ fn main() {
         Commands::Experiment(args) => commands::experiment::execute(&args),
     };
     if let Err(e) = result {
-        eprintln!("Error: {}", e);
+        ui::warn(&format!("Error: {}", e));
         std::process::exit(1);
     }
 }

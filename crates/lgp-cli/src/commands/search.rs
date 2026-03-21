@@ -13,6 +13,7 @@ use lgp::core::experiment_config::ExperimentConfig;
 use crate::config_discovery::{discover_configs, find_config, get_configs_dir};
 use crate::config_override::apply_overrides;
 use crate::experiment_runner::run_experiment;
+use crate::ui;
 
 #[derive(Args)]
 pub struct SearchArgs {
@@ -220,6 +221,10 @@ fn generate_optimal_config(
 
     if !default_path.exists() {
         warn!(config = %config_name, "No default.toml found, skipping optimal.toml generation");
+        ui::warn(&format!(
+            "No default.toml found for {}, skipping optimal.toml",
+            config_name
+        ));
         return Ok(());
     }
 
@@ -266,6 +271,7 @@ fn generate_optimal_config(
 
     config.save(&optimal_path)?;
     info!(path = %optimal_path.display(), "Generated optimal config");
+    ui::phase_ok(&format!("Generated {}", optimal_path.display()));
     Ok(())
 }
 
@@ -286,10 +292,10 @@ pub fn search_single_config(
         .into());
     }
 
-    println!("Starting hyperparameter search for {}", config_name);
-    println!("  Trials: {}", n_trials);
-    println!("  Threads: {}", n_threads);
-    println!("  Median trials: {}", median_trials);
+    ui::header(&format!("Hyperparameter search: {}", config_name));
+    ui::info(&format!("Trials: {}", n_trials));
+    ui::info(&format!("Threads: {}", n_threads));
+    ui::info(&format!("Median trials: {}", median_trials));
 
     // Load LGP params for Q-learning configs
     let lgp_params: Option<serde_json::Value> = if is_q_config(config_name) {
@@ -318,6 +324,8 @@ pub fn search_single_config(
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(n_threads)
         .build()?;
+
+    let sp = ui::spinner(&format!("Searching ({} trials)...", n_trials));
 
     pool.install(|| {
         (0..n_trials).into_par_iter().for_each(|trial_idx| {
@@ -348,6 +356,8 @@ pub fn search_single_config(
         });
     });
 
+    sp.finish_and_clear();
+
     let best_result = best.lock().unwrap().take();
     if let Some((score, params)) = best_result {
         // Save parameters
@@ -355,14 +365,14 @@ pub fn search_single_config(
         std::fs::create_dir_all(params_dir)?;
         let params_path = params_dir.join(format!("{}.json", config_name));
         std::fs::write(&params_path, serde_json::to_string_pretty(&params)?)?;
-        println!("Saved parameters to {}", params_path.display());
+        ui::phase_ok(&format!("Saved parameters to {}", params_path.display()));
 
         // Generate optimal.toml
         generate_optimal_config(config_name, &params)?;
 
-        println!("Search complete! Best score: {}", score);
+        ui::phase_ok(&format!("Search complete! Best score: {}", score));
     } else {
-        println!("Search complete. No valid trials found.");
+        ui::warn("Search complete. No valid trials found.");
     }
 
     Ok(())
@@ -386,21 +396,19 @@ fn search_all_configs(
         .map(|s| s.as_str())
         .collect();
 
-    println!("Starting hyperparameter search for all configs");
+    ui::header("Hyperparameter search: all configs");
 
-    println!("\nPhase 1: LGP configs");
+    ui::header("Phase 1: LGP configs");
     for name in &lgp_configs {
-        println!("\n{}", "=".repeat(50));
         search_single_config(name, n_trials, n_threads, median_trials)?;
     }
 
-    println!("\nPhase 2: Q-learning configs");
+    ui::header("Phase 2: Q-learning configs");
     for name in &q_configs {
-        println!("\n{}", "=".repeat(50));
         search_single_config(name, n_trials, n_threads, median_trials)?;
     }
 
-    println!("\nAll configs completed!");
+    ui::phase_ok("All configs completed!");
     Ok(())
 }
 

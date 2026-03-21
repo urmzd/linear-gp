@@ -7,6 +7,7 @@ use tracing::{debug, info, instrument};
 use crate::config_discovery::find_config;
 use crate::config_override::apply_overrides;
 use crate::experiment_runner::run_experiment;
+use crate::ui;
 use lgp::core::experiment_config::ExperimentConfig;
 
 #[derive(Args)]
@@ -52,15 +53,15 @@ pub fn execute(args: &RunArgs) -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    println!("Running experiment: {}", config.name);
-    println!("  Config: {}/{}.toml", args.name, args.config);
-    println!("  Environment: {}", config.environment);
-    println!(
-        "  Mutation: {:.0}%, Crossover: {:.0}%, Q-Learning: {}",
+    ui::header(&format!("Running experiment: {}", config.name));
+    ui::info(&format!("Config: {}/{}.toml", args.name, args.config));
+    ui::info(&format!("Environment: {}", config.environment));
+    ui::info(&format!(
+        "Mutation: {:.0}%, Crossover: {:.0}%, Q-Learning: {}",
         config.mutation_percent() * 100.0,
         config.crossover_percent() * 100.0,
         if config.has_q_learning() { "yes" } else { "no" }
-    );
+    ));
 
     info!(
         environment = %config.environment,
@@ -70,12 +71,14 @@ pub fn execute(args: &RunArgs) -> Result<(), Box<dyn std::error::Error>> {
         "Experiment configuration loaded"
     );
 
+    let sp = ui::spinner("Training...");
     let output = run_experiment(&config, &args.output_dir)?;
+    sp.finish_and_clear();
 
     info!(output_dir = %output.base_dir.display(), "Experiment completed successfully");
 
-    println!("Experiment complete!");
-    println!("  Output: {}", output.base_dir.display());
+    ui::phase_ok("Experiment complete!");
+    ui::info(&format!("Output: {}", output.base_dir.display()));
 
     Ok(())
 }
