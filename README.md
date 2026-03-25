@@ -388,7 +388,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## Thesis
 
-The accompanying thesis, *Reinforced Linear Genetic Programming*, is maintained in a [separate repository](https://github.com/urmzd/linear-gp-thesis).
+The accompanying thesis, *Reinforced Linear Genetic Programming*, is maintained in a [separate repository](https://github.com/urmzd/rlgp-thesis).
 
 ## References
 
