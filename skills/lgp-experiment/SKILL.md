@@ -1,7 +1,8 @@
 ---
 name: lgp-experiment
 description: Run Linear Genetic Programming experiments — train agents on CartPole, MountainCar, or Iris classification with optional Q-Learning and hyperparameter optimization. Use when running LGP experiments, tuning hyperparameters, analyzing results, or extending the framework with new problem domains.
-argument-hint: [experiment-name]
+metadata:
+  argument-hint: [experiment-name]
 ---
 
 # LGP Experiment Runner
