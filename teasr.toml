@@ -1,11 +1,27 @@
 [output]
 dir = "./showcase"
-formats = ["png"]
+
+[[output.formats]]
+output_type = "png"
+
+[font]
+family = "MonaspiceNe Nerd Font"
 
 [[scenes]]
 type = "terminal"
-command = "cargo run -p lgp-cli -- run iris_baseline 2>&1"
 name = "experiment-output"
 theme = "dracula"
+cwd = "."
 cols = 100
-maxLines = 50
+rows = 50
+
+[[scenes.interactions]]
+type = "type"
+text = "RUSTUP_HOME=/Users/urmzd/.rustup CARGO_HOME=/Users/urmzd/.cargo /Users/urmzd/.cargo/bin/cargo run -p lgp-cli -- run iris_baseline 2>&1"
+speed = 50
+[[scenes.interactions]]
+type = "key"
+key = "enter"
+[[scenes.interactions]]
+type = "wait"
+duration = 60000
