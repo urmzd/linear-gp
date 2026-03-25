@@ -1082,7 +1082,7 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "lgp"
-version = "1.4.1"
+version = "1.5.0"
 dependencies = [
  "chrono",
  "clap 4.5.58",
@@ -1112,7 +1112,7 @@ dependencies = [
 
 [[package]]
 name = "lgp-cli"
-version = "1.4.1"
+version = "1.5.0"
 dependencies = [
  "chrono",
  "clap 4.5.58",
