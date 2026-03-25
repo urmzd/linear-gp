@@ -41,7 +41,7 @@ jobs:
 
       - name: Run semantic release
         id: sr
-        uses: urmzd/semantic-release@v1
+        uses: urmzd/sr@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           force: ${{ inputs.force }}
