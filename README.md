@@ -130,7 +130,6 @@ linear-gp/
 │   │   └── <timestamp>/        # Timestamped runs
 │   ├── tables/                 # CSV statistics
 │   └── figures/                # PNG plots
-├── thesis/                     # Academic thesis (LaTeX)
 └── skills/                     # Agent skills & documentation
 ```
 
@@ -386,6 +385,10 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Code style guidelines
 - Testing requirements
 - Pull request process
+
+## Thesis
+
+The accompanying thesis, *Reinforced Linear Genetic Programming*, is maintained in a [separate repository](https://github.com/urmzd/linear-gp-thesis).
 
 ## References
 
