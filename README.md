@@ -369,11 +369,7 @@ See the [Quick Start](skills/lgp-experiment/SKILL.md#extension-quick-start) for 
 
 This project ships an [Agent Skill](https://github.com/vercel-labs/skills) for use with Claude Code, Cursor, and other compatible agents.
 
-**Install:**
-
-```sh
-npx skills add urmzd/linear-gp
-```
+Available as portable agent skills in [`skills/`](skills/).
 
 Once installed, use `/lgp-experiment` to run experiments, tune hyperparameters, and analyze results.
 
