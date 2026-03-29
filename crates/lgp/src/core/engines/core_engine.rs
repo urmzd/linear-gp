@@ -4,6 +4,7 @@ use clap::{Args, Parser};
 use derivative::Derivative;
 use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
+use rayon::prelude::*;
 
 use crate::{
     core::{
@@ -118,7 +119,7 @@ where
 
         C::eval_fitness(
             &mut population,
-            &mut self.trials,
+            &self.trials,
             self.params.default_fitness,
         );
         C::rank(&mut population);
@@ -189,7 +190,7 @@ where
 pub trait Core {
     type Individual: Ord + Clone + Send + Sync + Serialize + DeserializeOwned;
     type ProgramParameters: Copy + Send + Sync + Clone + Serialize + DeserializeOwned + Args;
-    type State: State;
+    type State: State + Clone + Send + Sync;
     type FitnessMarker;
     type Generate: Generate<Self::ProgramParameters, Self::Individual> + Generate<(), Self::State>;
     type Fitness: Fitness<Self::Individual, Self::State, Self::FitnessMarker>;
@@ -210,27 +211,23 @@ pub trait Core {
 
     fn eval_fitness(
         population: &mut Vec<Self::Individual>,
-        trials: &mut Vec<Self::State>,
+        trials: &[Self::State],
         default_fitness: f64,
     ) {
-        for individual in population.iter_mut() {
-            let mut scores = trials
-                .iter_mut()
-                .map(|trial| {
+        let n_trials = trials.len();
+        population.par_iter_mut().for_each(|individual| {
+            let total: f64 = trials
+                .iter()
+                .cloned()
+                .map(|mut trial| {
                     Self::Reset::reset(individual);
-                    Self::Reset::reset(trial);
-                    Self::Fitness::eval_fitness(individual, trial)
+                    Self::Reset::reset(&mut trial);
+                    let score = Self::Fitness::eval_fitness(individual, &mut trial);
+                    if score.is_finite() { score } else { default_fitness }
                 })
-                .collect_vec();
-
-            let n_trials = scores.len();
-            scores = scores
-                .into_iter()
-                .map(|s| if !s.is_finite() { default_fitness } else { s })
-                .collect_vec();
-            let average = scores.into_iter().sum::<f64>() / n_trials as f64;
-            Self::Status::set_fitness(individual, average);
-        }
+                .sum();
+            Self::Status::set_fitness(individual, total / n_trials as f64);
+        });
     }
 
     fn rank(population: &mut Vec<Self::Individual>) {
