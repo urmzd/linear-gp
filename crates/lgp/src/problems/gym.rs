@@ -23,9 +23,9 @@ use crate::extensions::interactive::UseRlFitness;
 use crate::extensions::q_learning::QProgram;
 use crate::extensions::q_learning::QProgramGeneratorParameters;
 
-pub trait GymRsEnvExt: Env<Action = usize>
+pub trait GymRsEnvExt: Env<Action = usize> + Send + Sync
 where
-    Self::Observation: Copy + Into<Vec<f64>>,
+    Self::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     fn create() -> Self;
     fn max_steps() -> usize;
@@ -59,7 +59,7 @@ impl GymRsEnvExt for MountainCarEnv {
 #[derive(Clone, Debug)]
 pub struct GymRsInput<E: GymRsEnvExt>
 where
-    E::Observation: Copy + Into<Vec<f64>>,
+    E::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     environment: E,
     terminated: bool,
@@ -71,7 +71,7 @@ where
 impl<E> State for GymRsInput<E>
 where
     E: GymRsEnvExt,
-    E::Observation: Copy + Into<Vec<f64>>,
+    E::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     fn get_value(&self, idx: usize) -> f64 {
         self.observation[idx]
@@ -98,7 +98,7 @@ where
 impl<T> RlState for GymRsInput<T>
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>>,
+    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     fn is_terminal(&mut self) -> bool {
         self.terminated
@@ -112,7 +112,7 @@ where
 impl<T> Reset<GymRsInput<T>> for ResetEngine
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>>,
+    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     fn reset(item: &mut GymRsInput<T>) {
         item.environment.reset(None, false, None);
@@ -126,7 +126,7 @@ where
 impl<T> Generate<(), GymRsInput<T>> for GenerateEngine
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>>,
+    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     fn generate(_from: ()) -> GymRsInput<T> {
         let mut environment: T = T::create();
@@ -151,7 +151,7 @@ pub struct GymRsEngine<T>(PhantomData<T>);
 impl<T> Core for GymRsQEngine<T>
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>>,
+    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     type Individual = QProgram;
     type ProgramParameters = QProgramGeneratorParameters;
@@ -169,7 +169,7 @@ where
 impl<T> Core for GymRsEngine<T>
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>>,
+    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
 {
     type Individual = Program;
     type ProgramParameters = ProgramGeneratorParameters;

@@ -72,6 +72,10 @@ pub struct ExperimentParams {
     #[arg(long)]
     pub seed: Option<u64>,
 
+    /// Number of threads for parallel evaluation (defaults to all available cores)
+    #[arg(long)]
+    pub n_threads: Option<usize>,
+
     /// Fitness assigned to invalid programs (overridden per environment if not set)
     #[arg(long)]
     pub default_fitness: Option<f64>,
@@ -236,6 +240,7 @@ impl ExperimentParams {
                     n_generations: self.n_generations,
                     n_trials: self.n_trials,
                     seed: self.seed,
+                    n_threads: self.n_threads,
                     program_parameters: self.build_program_params(),
                 };
                 run_experiment!(hyperparameters);
@@ -252,6 +257,7 @@ impl ExperimentParams {
                         n_generations: self.n_generations,
                         n_trials: self.n_trials,
                         seed: self.seed,
+                        n_threads: self.n_threads,
                         program_parameters: self.build_q_program_params(),
                     };
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
@@ -269,6 +275,7 @@ impl ExperimentParams {
                         n_generations: self.n_generations,
                         n_trials: self.n_trials,
                         seed: self.seed,
+                        n_threads: self.n_threads,
                         program_parameters: self.build_program_params(),
                     };
                 run_experiment!(hyperparameters);
@@ -285,6 +292,7 @@ impl ExperimentParams {
                         n_generations: self.n_generations,
                         n_trials: self.n_trials,
                         seed: self.seed,
+                        n_threads: self.n_threads,
                         program_parameters: self.build_q_program_params(),
                     };
                 ResetEngine::reset(&mut hyperparameters.program_parameters.consts);
@@ -300,6 +308,7 @@ impl ExperimentParams {
                     n_generations: self.n_generations,
                     n_trials: self.n_trials,
                     seed: self.seed,
+                    n_threads: self.n_threads,
                     program_parameters: self.build_program_params(),
                 };
                 run_experiment!(hyperparameters);

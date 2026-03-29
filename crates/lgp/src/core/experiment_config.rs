@@ -99,6 +99,9 @@ pub struct HyperParams {
     /// Serialized as a string to support values > i64::MAX in TOML format.
     #[serde(default, with = "optional_u64_as_string")]
     pub seed: Option<u64>,
+    /// Number of threads for parallel evaluation. If None, uses all available cores.
+    #[serde(default)]
+    pub n_threads: Option<usize>,
     pub program: ProgramConfig,
 }
 
