@@ -3,7 +3,7 @@
 //! This example demonstrates how to use the LGP framework for a classification task
 //! using the classic Iris flower dataset.
 //!
-//! Run with: `cargo run --example iris_classification`
+//! Run with: `cargo run -p lgp --example iris_classification`
 
 use itertools::Itertools;
 

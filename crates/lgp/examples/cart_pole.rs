@@ -3,7 +3,7 @@
 //! This example demonstrates how to use the LGP framework to evolve programs
 //! that can balance a pole on a cart (the classic CartPole control problem).
 //!
-//! Run with: `cargo run --example cart_pole`
+//! Run with: `cargo run -p lgp --example cart_pole --features gym`
 
 use itertools::Itertools;
 
