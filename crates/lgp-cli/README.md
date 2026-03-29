@@ -17,10 +17,10 @@ cargo install lgp-cli
 Or build from source:
 
 ```bash
-cargo build --release -p lgp-cli
+cargo install --path crates/lgp-cli
 
 # With plot support (PNG chart generation)
-cargo build --release -p lgp-cli --features plot
+cargo install --path crates/lgp-cli --features plot
 ```
 
 ## Usage
