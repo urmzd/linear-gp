@@ -21,12 +21,12 @@ where
     let program = C::Individual::load(program_path);
     let original_fitness = C::Status::get_fitness(&program);
 
-    let mut trials: Vec<C::State> = repeat_with(|| C::Generate::generate(()))
+    let trials: Vec<C::State> = repeat_with(|| C::Generate::generate(()))
         .take(n_trials)
         .collect_vec();
 
     let mut population = vec![program];
-    C::eval_fitness(&mut population, &mut trials, default_fitness);
+    C::eval_fitness(&mut population, &trials, default_fitness);
 
     let new_fitness = C::Status::get_fitness(population.first().unwrap());
 
