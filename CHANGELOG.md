@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.6.0 (2026-03-29)
+
+### Features
+
+- **core**: expose n_threads CLI flag for parallel evaluation ([5c5a2f4](https://github.com/urmzd/linear-gp/commit/5c5a2f4b883b859d10649b059e488ba2e9076197))
+- **iris**: derive Clone for IrisState ([19a4b85](https://github.com/urmzd/linear-gp/commit/19a4b857a0872200678d25ecc0cd918c1d6e136e))
+- **gym**: add Send + Sync bounds to environment traits ([a0e02b1](https://github.com/urmzd/linear-gp/commit/a0e02b128b0a0683b245c8798dcdfd6fb01e7605))
+- **core**: parallelize fitness evaluation with rayon ([8df4dce](https://github.com/urmzd/linear-gp/commit/8df4dcec1b2f088fb205ed1fed3e5473cbe5fe4c))
+
+### Bug Fixes
+
+- **tracing**: use non-blocking stdout to prevent debug logging from stalling computation ([f1e7d5f](https://github.com/urmzd/linear-gp/commit/f1e7d5fa9de978ed587b714374ecc45e423370e9))
+
+### Documentation
+
+- update README ([9651db3](https://github.com/urmzd/linear-gp/commit/9651db39587e14354e0e059647907bcfcf5c52bc))
+- **skills**: align SKILL.md with agentskills.io spec ([2d718ae](https://github.com/urmzd/linear-gp/commit/2d718aeb0b942bd68308ba4fbed4785329d51cad))
+- update thesis repo link after rename to rlgp-thesis ([25cbc29](https://github.com/urmzd/linear-gp/commit/25cbc29ddd4dbf3b7fe9ebe2236594b8fc821ce5))
+- add showcase screenshot ([d74b437](https://github.com/urmzd/linear-gp/commit/d74b4374be070a4531df2f45f315f00257c43539))
+- add showcase section to README ([3d20d19](https://github.com/urmzd/linear-gp/commit/3d20d199707d112103a760b8e8796f143011ce53))
+
+### Refactoring
+
+- **benchmark**: use immutable trials reference ([dc2df07](https://github.com/urmzd/linear-gp/commit/dc2df07f61639c2c17c3e26d5aafc662a5afedcb))
+
+### Miscellaneous
+
+- fix rustfmt formatting ([0568a99](https://github.com/urmzd/linear-gp/commit/0568a99a907dfdc05cf0e784b8d1fab5f27c4eaa))
+- **benchmark**: add parallel vs sequential fitness evaluation benchmark ([a3986a8](https://github.com/urmzd/linear-gp/commit/a3986a8422dc2c94dc40a94de7fe7f4d70c2e1c9))
+- use sr-releaser GitHub App for release workflow (#7) ([b7cce78](https://github.com/urmzd/linear-gp/commit/b7cce78ccbaa0de6fc6ce8ec39fc456125ee6a87))
+- update semantic-release action to sr@v2 ([82ffaf6](https://github.com/urmzd/linear-gp/commit/82ffaf606851fc90a93179db56a8c3456dda13c8))
+- move thesis to separate repository ([77b5ad3](https://github.com/urmzd/linear-gp/commit/77b5ad3846b55f5d99b3049e49bd9f34d5484a70))
+- **teasr**: restructure demo configuration with interactions ([7ad2ac0](https://github.com/urmzd/linear-gp/commit/7ad2ac09953bc11e2036c7cd0403377540722af4))
+- **git**: add commit message hooks ([e26a1c5](https://github.com/urmzd/linear-gp/commit/e26a1c52cd52435e912810d934d3240107816517))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.5.0...v1.6.0)
+
+
 ## 1.5.0 (2026-03-21)
 
 ### Features
