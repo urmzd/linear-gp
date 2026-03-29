@@ -75,8 +75,15 @@ lgp run cart_pole_lgp
 # Run Iris classification
 lgp run iris_baseline
 
-# Run a Rust example
-lgp example cart_pole
+```
+
+### Examples
+
+Run the standalone Rust examples directly with cargo:
+
+```bash
+cargo run -p lgp --example cart_pole --features gym
+cargo run -p lgp --example iris_classification
 ```
 
 ## CLI Reference
@@ -109,12 +116,6 @@ lgp analyze --input outputs --output outputs
 lgp experiment iris_baseline
 lgp experiment iris_baseline --iterations 20
 lgp experiment --skip-search
-
-# Run a Rust example
-lgp example cart_pole
-
-# List available examples
-lgp example --list
 ```
 
 ### Available Experiments
