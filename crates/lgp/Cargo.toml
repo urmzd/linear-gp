@@ -1,11 +1,14 @@
 [package]
-name = "lgp"
+name = "lgp-core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 description = "A library to solve problems using linear genetic programming"
 license = "Apache-2.0"
 repository = "https://github.com/urmzd/linear-gp"
+
+[lib]
+name = "lgp"
 
 [dependencies]
 csv = "1.1"
@@ -37,6 +40,7 @@ gym = ["dep:gymnasia"]
 
 [dev-dependencies]
 criterion = "0.4.0"
+itertools = "0.10"
 
 [[bench]]
 name = "performance_after_training"
@@ -46,3 +50,10 @@ required-features = ["gym"]
 [[bench]]
 name = "parallel_fitness"
 harness = false
+
+[[example]]
+name = "cart_pole"
+required-features = ["gym"]
+
+[[example]]
+name = "iris_classification"

@@ -17,7 +17,7 @@ rows = 50
 
 [[scenes.interactions]]
 type = "type"
-text = "RUSTUP_HOME=/Users/urmzd/.rustup CARGO_HOME=/Users/urmzd/.cargo /Users/urmzd/.cargo/bin/cargo run -p lgp-cli -- run iris_baseline 2>&1"
+text = "RUSTUP_HOME=/Users/urmzd/.rustup CARGO_HOME=/Users/urmzd/.cargo /Users/urmzd/.cargo/bin/cargo run -p lgp -- run iris_baseline 2>&1"
 speed = 50
 [[scenes.interactions]]
 type = "key"
