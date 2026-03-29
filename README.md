@@ -108,7 +108,25 @@ The accompanying thesis, *Reinforced Linear Genetic Programming*, is maintained 
 
 ## References
 
+### Genetic Programming
+
+- Koza, J. R. (1993). *Genetic Programming: On the Programming of Computers by Means of Natural Selection*. MIT Press.
+- Poli, R., Langdon, W. B., & McPhee, N. F. (2008). *A Field Guide to Genetic Programming*. lulu.com. http://www.gp-field-guide.org.uk/
+- Luke, S. (2009). *Essentials of Metaheuristics*. Lulu. https://cs.gmu.edu/~sean/book/metaheuristics/
+
+### Linear Genetic Programming
+
 - Brameier, M., & Banzhaf, W. (2001). A Comparison of Linear Genetic Programming and Neural Networks in Medical Data Mining. *IEEE Transactions on Evolutionary Computation*, 5(1), 17-26.
+- Song, D., Heywood, M. I., & Zincir-Heywood, A. N. (2003). A Linear Genetic Programming Approach to Intrusion Detection. In *GECCO 2003*, LNCS 2724, pp. 2325-2336. Springer.
+- Peeler, H., Li, S. S., Sloss, A. N., Reid, K. N., Yuan, Y., & Banzhaf, W. (2022). Optimizing LLVM Pass Sequences with Shackleton: A Linear Genetic Programming Framework. In *GECCO 2022 Companion*, pp. 578-581. ACM.
+
+### Reinforcement Learning
+
 - Sutton, R. S., & Barto, A. G. (2018). *Reinforcement Learning: An Introduction* (2nd ed.). MIT Press.
-- Koza, J. R. (1993). *Genetic Programming*. MIT Press.
+- Downing, H. L. (1995). Reinforced Genetic Programming. In *Proceedings of the Sixth International Conference on Genetic Algorithms (ICGA95)*, pp. 276-283.
+- Amaral, R., Ianta, A., Bayer, C., Smith, R. J., & Heywood, M. I. (2022). Benchmarking Genetic Programming in a Multi-Action Reinforcement Learning Locomotion Task. In *GECCO 2022 Companion*, pp. 522-525. ACM.
+
+### Environments & Datasets
+
+- Brockman, G., Cheung, V., Pettersson, L., Schneider, J., Schulman, J., Tang, J., & Zaremba, W. (2016). OpenAI Gym. arXiv:1606.01540.
 - Fisher, R. A. (1936). The Use of Multiple Measurements in Taxonomic Problems. *Annals of Eugenics*, 7(2), 179-188.
