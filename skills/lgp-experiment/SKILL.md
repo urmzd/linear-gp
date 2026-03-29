@@ -13,13 +13,13 @@ Run and manage LGP experiments.
 
 ```sh
 # List available experiments
-just list
+lgp list
 
 # Run an experiment
-just run cart_pole_lgp
+lgp run cart_pole_lgp
 
 # Run with optimized hyperparameters
-just run cart_pole_lgp --config optimal
+lgp run cart_pole_lgp --config optimal
 ```
 
 ## Available Experiments
@@ -39,20 +39,20 @@ just run cart_pole_lgp --config optimal
 
 ```sh
 # Search -> Run -> Analyze (end-to-end)
-just experiment cart_pole_lgp
+lgp experiment cart_pole_lgp
 
 # Hyperparameter search only
-just search cart_pole_lgp
+lgp search cart_pole_lgp
 
 # Analyze existing results
-just analyze
+lgp analyze
 ```
 
 ## Logging
 
 ```sh
-RUST_LOG=lgp=debug just run iris_baseline   # Debug output
-RUST_LOG=lgp=trace just run iris_baseline   # Instruction-level trace
+RUST_LOG=lgp=debug lgp run iris_baseline   # Debug output
+RUST_LOG=lgp=trace lgp run iris_baseline   # Instruction-level trace
 ```
 
 ## Output Structure

@@ -19,7 +19,6 @@ Ensure you have the following installed:
 | Tool | Version | Purpose |
 |------|---------|---------|
 | Rust | 1.70+ | Core framework |
-| just | Latest | Task runner |
 
 ### Initial Setup
 
@@ -28,22 +27,11 @@ Ensure you have the following installed:
 git clone https://github.com/urmzd/linear-gp.git
 cd linear-gp
 
-# Install just (task runner)
-cargo install just
+# Install the lgp binary
+cargo install --path crates/lgp-cli
 
-# Run setup (builds binary, installs git hooks)
-just init
-
-# Verify everything is working
-just verify
-just test
-```
-
-### Manual Setup
-
-```bash
-# Build the project
-cargo build --release
+# Run tests to verify
+cargo test
 ```
 
 ### IDE Setup
@@ -59,20 +47,7 @@ cargo build --release
 
 ### Pre-commit Hooks
 
-This project uses custom git hooks in `scripts/` to enforce code quality.
-
-**Setup:**
-```bash
-# Install hooks
-just init_
-
-# Run checks manually
-just check
-```
-
-**Hooks included:**
-- **General:** trailing-whitespace, merge-conflict check
-- **Rust:** cargo fmt and clippy on commit, cargo test on push
+Git hooks are managed by `sr`. See `sr.yaml` for configuration.
 
 ## Code Style
 
@@ -83,7 +58,7 @@ We follow standard Rust conventions with some project-specific guidelines:
 **Formatting:**
 ```bash
 # Format all code
-just fmt
+cargo fmt
 
 # Check formatting without modifying
 cargo fmt -- --check
@@ -92,9 +67,6 @@ cargo fmt -- --check
 **Linting:**
 ```bash
 # Run clippy with strict warnings
-just lint
-
-# Or directly
 cargo clippy -- -D warnings
 ```
 
@@ -156,23 +128,20 @@ pub fn run_experiment(name: &str) -> Result<()> {
 
 ```bash
 # Run all tests
-just test
+cargo test
 
 # Run tests for specific crate
 cargo test -p lgp
 cargo test -p lgp-cli
 
 # Run tests with output
-just test-verbose
+cargo test -- --nocapture
 
 # Run specific test suite
 cargo test -p lgp iris
 
-# Run with nextest (faster)
-just test-nextest
-
 # Run benchmarks
-just bench
+cargo bench
 
 # Test experiment CLI (dry-run)
 lgp run iris_baseline --dry-run
@@ -219,10 +188,10 @@ After making changes that affect evolution:
 
 ```bash
 # Run baseline experiments
-just run iris_baseline
+lgp run iris_baseline
 
 # Generate analysis
-just analyze
+lgp analyze
 ```
 
 ## Pull Request Process
@@ -249,7 +218,7 @@ just analyze
 
 3. **Run checks locally:**
    ```bash
-   just check  # Runs fmt, lint, and test
+   cargo fmt && cargo clippy -- -D warnings && cargo test
    ```
 
 4. **Commit your changes:**
@@ -273,9 +242,9 @@ just analyze
 
 ### PR Requirements
 
-- [ ] All tests pass (`just test`)
-- [ ] Code is formatted (`just fmt`)
-- [ ] No clippy warnings (`just lint`)
+- [ ] All tests pass (`cargo test`)
+- [ ] Code is formatted (`cargo fmt`)
+- [ ] No clippy warnings (`cargo clippy -- -D warnings`)
 - [ ] Documentation updated if needed
 - [ ] Commit messages follow convention
 - [ ] PR description explains the change

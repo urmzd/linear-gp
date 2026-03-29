@@ -38,18 +38,18 @@ Pure Rust workspace:
 
 | Task | Command |
 |------|---------|
-| Build | `just build` or `cargo build --release` |
-| Build (with plots) | `just build-plot` or `cargo build --release --features plot` |
-| Test | `just test` or `cargo test --release` |
-| Bench | `just bench` or `cargo bench` |
-| Lint | `just lint` or `cargo clippy -- -D warnings` |
-| Format | `just fmt` or `cargo fmt` |
-| Run experiment | `just run <name>` (e.g., `just run cart_pole_lgp`) |
-| List experiments | `just list` |
-| Hyperparameter search | `just search <config>` or `lgp search <config>` |
-| Analyze results | `just analyze` or `lgp analyze` |
-| Full pipeline | `just experiment <config>` (search -> run -> analyze) |
-| Setup | `just init` (Rust build + git hooks) |
+| Install | `cargo install --path crates/lgp-cli` |
+| Build | `cargo build` |
+| Build (with plots) | `cargo build --features plot` |
+| Test | `cargo test` |
+| Bench | `cargo bench` |
+| Lint | `cargo clippy -- -D warnings` |
+| Format | `cargo fmt` |
+| Run experiment | `lgp run <name>` (e.g., `lgp run cart_pole_lgp`) |
+| List experiments | `lgp list` |
+| Hyperparameter search | `lgp search <config>` |
+| Analyze results | `lgp analyze` |
+| Full pipeline | `lgp experiment <config>` (search -> run -> analyze) |
 
 ## Code Style
 
