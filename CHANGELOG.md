@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.6.1 (2026-03-29)
+
+### Bug Fixes
+
+- add examples ([11bbcc7](https://github.com/urmzd/linear-gp/commit/11bbcc744c633de389c54a2fc8c8519961935442))
+
+### Documentation
+
+- **readme**: update example usage instructions ([4600b73](https://github.com/urmzd/linear-gp/commit/4600b734419625ba118b87c5e2ca4b69cc95c0d6))
+- restore overview, CLI reference, search, and output sections ([8d179c7](https://github.com/urmzd/linear-gp/commit/8d179c7788ca9116d170b77ab56aa5265e97d4e7))
+- move references to rlgp-thesis repository ([8883ee0](https://github.com/urmzd/linear-gp/commit/8883ee0ab5fec88db28cd48ef944e8ff30ceb2a9))
+- restore full references section ([31e6657](https://github.com/urmzd/linear-gp/commit/31e6657ea605a0a94d0812fe7c0322ab10c6fbcf))
+- simplify README to focus on install.sh and core usage ([380d69e](https://github.com/urmzd/linear-gp/commit/380d69e35f50dbdf2aa21d75579a00326d26ffe9))
+- update documentation for simplified setup ([130cb30](https://github.com/urmzd/linear-gp/commit/130cb30bd865c0fe5394caeaad56e149f2544142))
+
+### Refactoring
+
+- **examples**: move examples to lgp crate directory ([94850df](https://github.com/urmzd/linear-gp/commit/94850df56df13ce636c29cab42335cffef215579))
+- **cli**: remove example command ([9466be3](https://github.com/urmzd/linear-gp/commit/9466be3f1d3c4eec82f0ca35ebb73855a376886e))
+- rename lgp-cli to lgp and lgp to lgp-core for simpler cargo install ([73ec7a0](https://github.com/urmzd/linear-gp/commit/73ec7a00b302e86ccd3b7d5a5c674592594fde00))
+
+### Miscellaneous
+
+- **install**: add installation script for prebuilt binaries ([6be0809](https://github.com/urmzd/linear-gp/commit/6be08098863e8232e8bea184b52fe1151a45f7ad))
+- **build**: simplify justfile to core commands ([f5de875](https://github.com/urmzd/linear-gp/commit/f5de87584eab51a142d651a1604a47ca55b3dd68))
+- **release**: add cross-platform binary builds ([55a8ebf](https://github.com/urmzd/linear-gp/commit/55a8ebfa36611c5687fed42ebd21e61d75fbd6e3))
+- remove obsolete latex compilation script ([4f46759](https://github.com/urmzd/linear-gp/commit/4f46759f252b14ccc8636bfa71c55c8275ccbac9))
+- **hooks**: migrate git hooks to sr management ([26b3aaa](https://github.com/urmzd/linear-gp/commit/26b3aaad3b15f961119a03fe537b8b01be697a03))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.6.0...v1.6.1)
+
+
 ## 1.6.0 (2026-03-29)
 
 ### Features
