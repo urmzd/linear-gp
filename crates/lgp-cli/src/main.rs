@@ -61,9 +61,6 @@ enum Commands {
     /// Run an experiment from config
     Run(commands::run::RunArgs),
 
-    /// Run a Rust example
-    Example(commands::example::ExampleArgs),
-
     /// Analyze experiment results (generate tables and optional plots)
     Analyze(commands::analyze::AnalyzeArgs),
 
@@ -103,7 +100,6 @@ fn main() {
     let result: Result<(), Box<dyn std::error::Error>> = match cli.command {
         Commands::List(args) => commands::list::execute(&args),
         Commands::Run(args) => commands::run::execute(&args),
-        Commands::Example(args) => commands::example::execute(&args),
         Commands::Analyze(args) => commands::analyze::execute(&args),
         Commands::Search(args) => commands::search::execute(&args),
         Commands::Experiment(args) => commands::experiment::execute(&args),
