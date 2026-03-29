@@ -121,11 +121,7 @@ where
 
         let mut population = self.next_population.clone();
 
-        C::eval_fitness(
-            &mut population,
-            &self.trials,
-            self.params.default_fitness,
-        );
+        C::eval_fitness(&mut population, &self.trials, self.params.default_fitness);
         C::rank(&mut population);
 
         assert!(population.iter().all(C::Status::evaluated));
@@ -235,7 +231,11 @@ pub trait Core {
                     Self::Reset::reset(individual);
                     Self::Reset::reset(&mut trial);
                     let score = Self::Fitness::eval_fitness(individual, &mut trial);
-                    if score.is_finite() { score } else { default_fitness }
+                    if score.is_finite() {
+                        score
+                    } else {
+                        default_fitness
+                    }
                 })
                 .sum();
             Self::Status::set_fitness(individual, total / n_trials as f64);
