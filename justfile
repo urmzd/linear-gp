@@ -1,163 +1,17 @@
 # Linear Genetic Programming Framework
-# Run `just --list` to see all available recipes
 
-default:
-    @just --list
+# Install binary to PATH
+install:
+    cargo install --path crates/lgp-cli
 
-# === BUILD ===
-
-# Build release binary
+# Build debug binary
 build:
-    cargo build --release
-
-# Build with plot feature
-build-plot:
-    cargo build --release --features plot
-
-# Build with debug symbols
-build-dev:
     cargo build
-
-# Clean build artifacts
-clean:
-    cargo clean
-
-# === TEST ===
 
 # Run all tests
 test:
-    cargo test --release
+    cargo test
 
-# Run tests with verbose output
-test-verbose:
-    cargo test --release -- --nocapture
-
-# Run tests with nextest (faster)
-test-nextest:
-    cargo nextest run --release
-
-# Run benchmarks
-bench:
-    cargo bench
-
-# === RUN EXPERIMENTS ===
-
-# Default log level for experiments (can be overridden)
-export RUST_LOG := env_var_or_default("RUST_LOG", "lgp=info,lgp_cli=info")
-
-# Run an experiment by name
-run name *args:
-    cargo run -p lgp-cli --release -- run {{name}} {{args}}
-
-# Run an experiment with verbose (debug) logging (logs to file)
-run-verbose name *args:
-    RUST_LOG=lgp=debug,lgp_cli=debug cargo run -p lgp-cli --release -- --log-file debug-{{name}}.log run {{name}} {{args}}
-
-# Run an experiment with trace logging (very verbose, logs to file)
-run-trace name *args:
-    RUST_LOG=lgp=trace,lgp_cli=trace cargo run -p lgp-cli --release -- --log-file trace-{{name}}.log run {{name}} {{args}}
-
-# Run example by name
-run-example name:
-    cargo run -p lgp-cli --release -- example {{name}}
-
-# List available experiments
-list:
-    cargo run -p lgp-cli --release -- list
-
-# List available examples
-list-examples:
-    cargo run -p lgp-cli --release -- example --list
-
-# === EXPERIMENT PIPELINE ===
-
-# Run full experiment pipeline (search -> run -> analyze)
-experiment config="" *args:
-    cargo run -p lgp-cli --release -- experiment {{config}} {{args}}
-
-# Run experiments without search (use existing optimal.toml)
-experiment-quick config="" n="10":
-    cargo run -p lgp-cli --release -- experiment {{config}} --skip-search -n {{n}}
-
-# === HYPERPARAMETER SEARCH ===
-
-# Search hyperparameters for a config
-search config *args:
-    cargo run -p lgp-cli --release -- search {{config}} {{args}}
-
-# === ANALYSIS ===
-
-# Analyze experiment results
-analyze *args:
-    cargo run -p lgp-cli --release -- analyze {{args}}
-
-# === DEVELOPMENT ===
-
-# Format Rust code
+# Format code
 fmt:
     cargo fmt
-
-# Run clippy linter
-lint:
-    cargo clippy -- -D warnings
-
-# Run all checks (format, lint, test)
-check: fmt lint test
-
-# Install git hooks from scripts/
-init_:
-    cp scripts/pre-commit .git/hooks/pre-commit
-    cp scripts/pre-push .git/hooks/pre-push
-    chmod +x .git/hooks/pre-commit .git/hooks/pre-push
-    @echo "Git hooks installed."
-
-# Generate and open documentation
-docs:
-    cargo doc --open
-
-# Watch for changes and run tests
-watch:
-    cargo watch -x test
-
-# === RELEASE ===
-
-# Preview the next release
-release-plan:
-    sr plan
-
-# Dry-run a release (no side effects)
-release-dry-run:
-    sr release --dry-run
-
-# Execute a full release
-release:
-    sr release
-
-# Generate/update changelog
-changelog:
-    sr changelog
-
-# Show next version
-next-version:
-    sr version
-
-# === SETUP ===
-
-# Initialize dev environment: build Rust and install git hooks
-init:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo "Building release binary..."
-    cargo build --release
-    echo "Installing git hooks..."
-    just init_
-    echo "Ready to go."
-
-# Verify all dependencies are installed
-verify:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo "Verifying dependencies..."
-    rustc --version
-    cargo --version
-    echo "All dependencies verified!"
