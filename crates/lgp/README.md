@@ -2,7 +2,7 @@
 
 Core Rust library for Linear Genetic Programming.
 
-[![Crates.io](https://img.shields.io/crates/v/lgp.svg)](https://crates.io/crates/lgp)
+[![Crates.io](https://img.shields.io/crates/v/lgp-core.svg)](https://crates.io/crates/lgp-core)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
 
 ## Overview
@@ -15,14 +15,14 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-lgp = "1.3"
+lgp-core = "1.6"
 ```
 
 To enable OpenAI Gym environment support:
 
 ```toml
 [dependencies]
-lgp = { version = "1.3", features = ["gym"] }
+lgp-core = { version = "1.6", features = ["gym"] }
 ```
 
 ## Core Traits
@@ -48,22 +48,52 @@ The framework is built around these key traits:
 ## Quick Example
 
 ```rust
-use lgp::core::engines::core_engine::CoreEngine;
-use lgp::problems::iris::IrisLgp;
+use itertools::Itertools;
+use lgp::core::engines::core_engine::HyperParametersBuilder;
+use lgp::core::engines::status_engine::{Status, StatusEngine};
+use lgp::core::instruction::InstructionGeneratorParametersBuilder;
+use lgp::core::program::ProgramGeneratorParametersBuilder;
+use lgp::problems::iris::IrisEngine;
 
 fn main() {
-    // Configure and run an Iris classification experiment
-    let engine = CoreEngine::<IrisLgp>::builder()
-        .n_generations(100)
-        .n_individuals(100)
+    let instruction_parameters = InstructionGeneratorParametersBuilder::default()
+        .n_actions(3)
+        .n_inputs(4)
+        .n_extras(2)
+        .external_factor(1.0)
         .build()
         .unwrap();
 
-    engine.run();
+    let program_parameters = ProgramGeneratorParametersBuilder::default()
+        .max_instructions(50)
+        .instruction_generator_parameters(instruction_parameters)
+        .build()
+        .unwrap();
+
+    let parameters = HyperParametersBuilder::<IrisEngine>::default()
+        .program_parameters(program_parameters)
+        .population_size(100)
+        .n_generations(50)
+        .n_trials(1)
+        .mutation_percent(0.5)
+        .crossover_percent(0.5)
+        .gap(0.5)
+        .default_fitness(0.0)
+        .build()
+        .unwrap();
+
+    let populations: Vec<_> = parameters
+        .build_engine()
+        .take(parameters.n_generations)
+        .collect_vec();
+
+    let best = populations.last().unwrap().first().unwrap();
+    let accuracy = (StatusEngine::get_fitness(best) / 150.0) * 100.0;
+    println!("Best accuracy: {accuracy:.1}%");
 }
 ```
 
-See the [examples](../../examples/) directory and [extension guide](../../skills/lgp-experiment/SKILL.md) for more.
+See the [examples](examples/) directory and [extension guide](../../skills/lgp-experiment/SKILL.md) for more.
 
 ## Features
 
