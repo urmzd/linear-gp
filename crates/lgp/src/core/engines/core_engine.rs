@@ -54,6 +54,9 @@ where
     #[builder(default = "None")]
     #[arg(long)]
     pub seed: Option<u64>,
+    #[builder(default = "None")]
+    #[arg(long)]
+    pub n_threads: Option<usize>,
     #[command(flatten)]
     pub program_parameters: C::ProgramParameters,
 }
@@ -79,7 +82,8 @@ where
         gap = hp.gap,
         mutation_percent = hp.mutation_percent,
         crossover_percent = hp.crossover_percent,
-        seed = ?hp.seed
+        seed = ?hp.seed,
+        n_threads = ?hp.n_threads
     ))]
     pub fn new(hp: HyperParameters<C>) -> Self {
         debug!("Initializing evolution engine");
@@ -183,6 +187,14 @@ where
 {
     pub fn build_engine(&self) -> CoreIter<T> {
         update_seed(self.seed);
+
+        if let Some(n_threads) = self.n_threads {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(n_threads)
+                .build_global()
+                .ok();
+        }
+
         CoreIter::new(self.clone())
     }
 }

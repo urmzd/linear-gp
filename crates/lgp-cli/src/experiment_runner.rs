@@ -152,6 +152,7 @@ fn run_iris(
         n_generations: config.hyperparameters.n_generations,
         n_trials: config.hyperparameters.n_trials,
         seed: Some(seed),
+        n_threads: config.hyperparameters.n_threads,
         program_parameters: build_program_params(config),
     };
 
@@ -173,6 +174,7 @@ fn run_cart_pole_lgp(
         n_generations: config.hyperparameters.n_generations,
         n_trials: config.hyperparameters.n_trials,
         seed: Some(seed),
+        n_threads: config.hyperparameters.n_threads,
         program_parameters: build_program_params(config),
     };
 
@@ -208,6 +210,7 @@ fn run_cart_pole_q(
         n_generations: config.hyperparameters.n_generations,
         n_trials: config.hyperparameters.n_trials,
         seed: Some(seed),
+        n_threads: config.hyperparameters.n_threads,
         program_parameters: q_program_params,
     };
 
@@ -229,6 +232,7 @@ fn run_mountain_car_lgp(
         n_generations: config.hyperparameters.n_generations,
         n_trials: config.hyperparameters.n_trials,
         seed: Some(seed),
+        n_threads: config.hyperparameters.n_threads,
         program_parameters: build_program_params(config),
     };
 
@@ -264,6 +268,7 @@ fn run_mountain_car_q(
         n_generations: config.hyperparameters.n_generations,
         n_trials: config.hyperparameters.n_trials,
         seed: Some(seed),
+        n_threads: config.hyperparameters.n_threads,
         program_parameters: q_program_params,
     };
 
