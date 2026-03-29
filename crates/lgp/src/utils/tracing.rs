@@ -201,10 +201,17 @@ impl TracingConfig {
     }
 }
 
+/// Guards returned by tracing initialization. Must be held for the program
+/// lifetime to ensure all non-blocking log writes are flushed.
+pub struct TracingGuard {
+    _guards: Vec<WorkerGuard>,
+}
+
 /// Initialize the tracing subscriber with the given configuration.
 ///
-/// Returns a `WorkerGuard` if file logging is enabled. This guard must be held
-/// for the duration of the program to ensure all logs are flushed to the file.
+/// Returns a [`TracingGuard`] that must be held for the duration of the program
+/// to ensure all logs are flushed. All writers (stdout and file) use non-blocking
+/// I/O so that high-volume debug/trace logging does not block computation.
 ///
 /// This function should be called once at application startup, before any
 /// tracing macros are used.
@@ -223,7 +230,7 @@ impl TracingConfig {
 ///
 /// This function will panic if called more than once, as the global subscriber
 /// can only be set once.
-pub fn init_tracing(config: TracingConfig) -> Option<WorkerGuard> {
+pub fn init_tracing(config: TracingConfig) -> TracingGuard {
     // Check for format override via environment variable
     let format = env::var("LGP_LOG_FORMAT")
         .ok()
@@ -257,23 +264,26 @@ pub fn init_tracing(config: TracingConfig) -> Option<WorkerGuard> {
             .open(log_path)
             .expect("Failed to open log file");
 
-        let (non_blocking, guard) = tracing_appender::non_blocking(file);
+        let (non_blocking, file_guard) = tracing_appender::non_blocking(file);
 
         // Build subscriber with file layer (and optionally stdout)
+        let mut guards = vec![file_guard];
         if config.log_to_stdout {
-            // Both file and stdout
-            init_with_file_and_stdout(format, filter, span_events, &config, non_blocking);
+            let stdout_guard =
+                init_with_file_and_stdout(format, filter, span_events, &config, non_blocking);
+            guards.push(stdout_guard);
         } else {
-            // File only
             init_with_file_only(format, filter, span_events, &config, non_blocking);
         }
 
-        return Some(guard);
+        return TracingGuard { _guards: guards };
     }
 
-    // Standard stdout-only setup
-    init_stdout_only(format, filter, span_events, &config);
-    None
+    // Standard stdout-only setup (also non-blocking)
+    let stdout_guard = init_stdout_only(format, filter, span_events, &config);
+    TracingGuard {
+        _guards: vec![stdout_guard],
+    }
 }
 
 /// Initialize tracing with file output only.
@@ -336,13 +346,18 @@ fn init_with_file_only(
 }
 
 /// Initialize tracing with both file and stdout output.
+///
+/// Returns a `WorkerGuard` for the non-blocking stdout writer that must be held
+/// alongside the file guard for proper cleanup.
 fn init_with_file_and_stdout(
     format: TracingFormat,
     filter: EnvFilter,
     span_events: FmtSpan,
     config: &TracingConfig,
     file_writer: tracing_appender::non_blocking::NonBlocking,
-) {
+) -> WorkerGuard {
+    let (nb_stdout, stdout_guard) = tracing_appender::non_blocking(std::io::stdout());
+
     match format {
         TracingFormat::Pretty => {
             let file_layer = fmt::layer()
@@ -356,6 +371,7 @@ fn init_with_file_and_stdout(
                 .with_thread_names(config.thread_names)
                 .with_target(config.target);
             let stdout_layer = fmt::layer()
+                .with_writer(nb_stdout)
                 .pretty()
                 .with_span_events(span_events)
                 .with_file(config.file_info)
@@ -382,6 +398,7 @@ fn init_with_file_and_stdout(
                 .with_thread_names(config.thread_names)
                 .with_target(config.target);
             let stdout_layer = fmt::layer()
+                .with_writer(nb_stdout)
                 .compact()
                 .with_span_events(span_events)
                 .with_file(config.file_info)
@@ -407,6 +424,7 @@ fn init_with_file_and_stdout(
                 .with_thread_names(config.thread_names)
                 .with_target(config.target);
             let stdout_layer = fmt::layer()
+                .with_writer(nb_stdout)
                 .json()
                 .with_span_events(span_events)
                 .with_file(config.file_info)
@@ -422,19 +440,27 @@ fn init_with_file_and_stdout(
                 .expect("Failed to set tracing subscriber");
         }
     }
+
+    stdout_guard
 }
 
-/// Initialize tracing with stdout only.
+/// Initialize tracing with stdout only (non-blocking).
+///
+/// Returns a `WorkerGuard` for the non-blocking stdout writer that must be held
+/// for the program lifetime to ensure all logs are flushed.
 fn init_stdout_only(
     format: TracingFormat,
     filter: EnvFilter,
     span_events: FmtSpan,
     config: &TracingConfig,
-) {
+) -> WorkerGuard {
+    let (nb_stdout, guard) = tracing_appender::non_blocking(std::io::stdout());
+
     match format {
         TracingFormat::Pretty => {
             let subscriber = tracing_subscriber::registry().with(filter).with(
                 fmt::layer()
+                    .with_writer(nb_stdout)
                     .pretty()
                     .with_span_events(span_events)
                     .with_file(config.file_info)
@@ -449,6 +475,7 @@ fn init_stdout_only(
         TracingFormat::Compact => {
             let subscriber = tracing_subscriber::registry().with(filter).with(
                 fmt::layer()
+                    .with_writer(nb_stdout)
                     .compact()
                     .with_span_events(span_events)
                     .with_file(config.file_info)
@@ -463,6 +490,7 @@ fn init_stdout_only(
         TracingFormat::Json => {
             let subscriber = tracing_subscriber::registry().with(filter).with(
                 fmt::layer()
+                    .with_writer(nb_stdout)
                     .json()
                     .with_span_events(span_events)
                     .with_file(config.file_info)
@@ -475,6 +503,8 @@ fn init_stdout_only(
                 .expect("Failed to set tracing subscriber");
         }
     }
+
+    guard
 }
 
 /// Try to initialize tracing, returning Ok if successful or if already initialized.

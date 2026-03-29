@@ -57,6 +57,7 @@ pub struct IrisInput {
     class: IrisClass,
 }
 
+#[derive(Clone)]
 pub struct IrisState {
     data: Vec<IrisInput>,
     idx: usize,
