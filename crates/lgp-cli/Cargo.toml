@@ -1,5 +1,5 @@
 [package]
-name = "lgp-cli"
+name = "lgp"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -12,7 +12,7 @@ name = "lgp"
 path = "src/main.rs"
 
 [dependencies]
-lgp = { path = "../lgp", version = "1.1", features = ["gym"] }
+lgp = { package = "lgp-core", path = "../lgp", version = "1.1", features = ["gym"] }
 clap = { version = "4.1.8", features = ["derive"] }
 chrono = "0.4"
 toml = "0.8"
