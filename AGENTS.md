@@ -11,7 +11,7 @@ Pure Rust workspace:
 | Package | Path | Role |
 |---------|------|------|
 | `lgp` | `crates/lgp` | Core library — traits, evolutionary engine, built-in problems |
-| `lgp-cli` | `crates/lgp-cli` | CLI binary (`lgp`) for running experiments, hyperparameter search, and analysis |
+| `lgp` | `crates/lgp-cli` | CLI binary for running experiments, hyperparameter search, and analysis |
 
 ### Core Traits
 

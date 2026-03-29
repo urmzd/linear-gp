@@ -1,4 +1,4 @@
-# lgp-cli
+# lgp
 
 Command-line interface for running Linear Genetic Programming experiments.
 
@@ -6,12 +6,12 @@ Command-line interface for running Linear Genetic Programming experiments.
 
 ## Overview
 
-`lgp-cli` provides the `lgp` binary for running LGP experiments using TOML-based configuration files. It supports listing available experiments, running them with config overrides, hyperparameter search, result analysis, and end-to-end experiment pipelines.
+`lgp` is a CLI for running LGP experiments using TOML-based configuration files. It supports listing available experiments, running them with config overrides, hyperparameter search, result analysis, and end-to-end experiment pipelines.
 
 ## Installation
 
 ```bash
-cargo install lgp-cli
+cargo install lgp
 ```
 
 Or build from source:

@@ -369,7 +369,7 @@ The config system uses TOML files in the `configs/` directory. To add a new expe
 
 3. **Register the environment in `experiment_runner.rs`:**
 
-   Add a match arm in `crates/lgp-cli/src/experiment_runner.rs` (around line 81):
+   Add a match arm in `crates/lgp-cli/src/experiment_runner.rs`:
 
    ```rust
    // In run_experiment function's match statement:

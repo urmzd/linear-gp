@@ -16,7 +16,7 @@
 - [crates/lgp/src/core/engines/core_engine.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp/src/core/engines/core_engine.rs): Main evolutionary loop
 - [crates/lgp/src/extensions/q_learning.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp/src/extensions/q_learning.rs): Hybrid LGP + Q-Learning
 - [crates/lgp/src/problems/](https://github.com/urmzd/linear-gp/tree/main/crates/lgp/src/problems): Built-in problem implementations (Iris, Gym)
-- [crates/lgp-cli/src/main.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp-cli/src/main.rs): CLI entry point (run, search, analyze, experiment)
+- [crates/lgp-cli/src/main.rs](https://github.com/urmzd/linear-gp/blob/main/crates/lgp-cli/src/main.rs): CLI entry point (`lgp` binary — run, search, analyze, experiment)
 
 ## Optional
 
