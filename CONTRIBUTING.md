@@ -132,7 +132,7 @@ cargo test
 
 # Run tests for specific crate
 cargo test -p lgp
-cargo test -p lgp-cli
+cargo test -p lgp
 
 # Run tests with output
 cargo test -- --nocapture

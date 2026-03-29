@@ -227,7 +227,7 @@ RUST_LOG=lgp::core=trace,lgp=info lgp run iris_baseline
 | Package | Description |
 |---------|-------------|
 | [lgp](crates/lgp/README.md) | Core library — traits, evolutionary engine, built-in problems |
-| [lgp-cli](crates/lgp-cli/README.md) | CLI binary for running experiments, search, and analysis |
+| [lgp](crates/lgp-cli/README.md) | CLI binary for running experiments, search, and analysis |
 
 ## Extending the Framework
 
