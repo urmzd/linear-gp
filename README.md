@@ -82,8 +82,8 @@ lgp run iris_baseline
 Run the standalone Rust examples directly with cargo:
 
 ```bash
-cargo run -p lgp --example cart_pole --features gym
-cargo run -p lgp --example iris_classification
+cargo run -p lgp-core --example cart_pole --features gym
+cargo run -p lgp-core --example iris_classification
 ```
 
 ## CLI Reference
@@ -226,7 +226,7 @@ RUST_LOG=lgp::core=trace,lgp=info lgp run iris_baseline
 
 | Package | Description |
 |---------|-------------|
-| [lgp](crates/lgp/README.md) | Core library — traits, evolutionary engine, built-in problems |
+| [lgp-core](crates/lgp/README.md) | Core library — traits, evolutionary engine, built-in problems |
 | [lgp](crates/lgp-cli/README.md) | CLI binary for running experiments, search, and analysis |
 
 ## Extending the Framework
