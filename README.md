@@ -48,19 +48,6 @@ Linear Genetic Programming (LGP) is a variant of genetic programming that evolve
 | Dependency | Version | Installation |
 |------------|---------|--------------|
 | Rust | 1.70+ | [rustup.rs](https://rustup.rs/) |
-| just | Latest | `cargo install just` |
-
-**macOS:**
-```bash
-brew install rust
-cargo install just
-```
-
-**Ubuntu:**
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-cargo install just
-```
 
 ### Installation
 
@@ -69,27 +56,27 @@ cargo install just
 git clone https://github.com/urmzd/linear-gp.git
 cd linear-gp
 
-# Build and install git hooks
-just init
+# Install the lgp binary
+cargo install --path crates/lgp-cli
 ```
 
 ### First Experiment
 
 ```bash
 # List available experiments
-just list
+lgp list
 
 # Run CartPole with pure LGP
-just run cart_pole_lgp
+lgp run cart_pole_lgp
 
 # Run Iris classification
-just run iris_baseline
+lgp run iris_baseline
 
 # Run an example
-just run-example cart_pole
+lgp example cart_pole
 
 # Run benchmarks
-just bench
+cargo bench
 ```
 
 ## Packages
@@ -285,24 +272,6 @@ Results are saved to:
 
 ## Running Experiments
 
-### Quick Start with Just
-
-```bash
-# List available experiments
-just list
-
-# Run individual experiments
-just run cart_pole_lgp
-just run cart_pole_with_q
-just run mountain_car_lgp
-just run iris_baseline
-
-# Run with dry-run to preview config
-just run iris_baseline --dry-run
-```
-
-### Running with lgp
-
 ```bash
 # Run with default config
 lgp run cart_pole_lgp
@@ -321,7 +290,7 @@ lgp run cart_pole_lgp --override hyperparameters.n_generations=200
 lgp analyze
 
 # Build with plot feature for PNG chart generation
-cargo build --release --features plot
+cargo install --path crates/lgp-cli --features plot
 lgp analyze
 ```
 
