@@ -48,11 +48,11 @@ jobs:
 
       - name: Run baseline
         if: inputs.experiment_type == 'baseline'
-        run: cargo run -p lgp-cli --release -- experiment iris_baseline --skip-search
+        run: cargo run -p lgp --release -- experiment iris_baseline --skip-search
 
       - name: Run experiments
         if: inputs.experiment_type == 'experiments'
-        run: cargo run -p lgp-cli --release -- experiment --skip-search -n ${{ inputs.iterations }}
+        run: cargo run -p lgp --release -- experiment --skip-search -n ${{ inputs.iterations }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

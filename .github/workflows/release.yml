@@ -85,8 +85,8 @@ jobs:
       - name: Wait for crates.io index update
         run: sleep 30
 
-      - name: Publish lgp-cli to crates.io
-        run: cargo publish -p lgp-cli
+      - name: Publish lgp to crates.io
+        run: cargo publish -p lgp
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.crates-token.outputs.token }}
 
@@ -127,7 +127,7 @@ jobs:
           echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
 
       - name: Build binary
-        run: cargo build --release --target ${{ matrix.target }} -p lgp-cli
+        run: cargo build --release --target ${{ matrix.target }} -p lgp
 
       - name: Package binary
         run: |
