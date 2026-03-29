@@ -50,11 +50,6 @@ lgp analyze
 # Run full pipeline (search -> run -> analyze)
 lgp experiment iris_baseline --iterations 10
 
-# Run a Rust API example
-lgp example cart_pole
-
-# List available examples
-lgp example --list
 ```
 
 ## Global Options
@@ -112,14 +107,6 @@ Run end-to-end pipeline: search -> run -> analyze.
 | `--n-trials <N>` | Search trials (default: 40) |
 | `--n-threads <N>` | Search threads (default: 4) |
 | `--median-trials <N>` | Runs for median (default: 10) |
-
-### `lgp example <NAME>`
-
-Runs a Rust API example from the `examples/` directory.
-
-| Option | Description |
-|--------|-------------|
-| `--list` | List available examples |
 
 ## Available Experiments
 
