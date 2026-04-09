@@ -81,7 +81,7 @@ jobs:
 
       - name: Publish lgp to crates.io
         run: |
-          output=$(cargo publish -p lgp --allow-dirty 2>&1) && exit 0
+          output=$(cargo publish -p lgp 2>&1) && exit 0
           if echo "$output" | grep -q "already exists"; then
             echo "Already published, skipping"
             exit 0
