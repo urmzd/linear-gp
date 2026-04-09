@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.1 (2026-04-09)
+
+### Bug Fixes
+
+- **ci**: checkout release tag, deduplicate publish, handle already-published ([b35a3b3](https://github.com/urmzd/linear-gp/commit/b35a3b30f87154adc297640982e1a06976034c89))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.0...v1.7.1)
+
+
 ## 1.7.0 (2026-04-09)
 
 ### Features
