@@ -66,6 +66,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -78,15 +80,14 @@ jobs:
         id: crates-token
 
       - name: Publish lgp to crates.io
-        run: cargo publish -p lgp
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.crates-token.outputs.token }}
-
-      - name: Wait for crates.io index update
-        run: sleep 30
-
-      - name: Publish lgp to crates.io
-        run: cargo publish -p lgp
+        run: |
+          output=$(cargo publish -p lgp --allow-dirty 2>&1) && exit 0
+          if echo "$output" | grep -q "already exists"; then
+            echo "Already published, skipping"
+            exit 0
+          fi
+          echo "$output" >&2
+          exit 1
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.crates-token.outputs.token }}
 
