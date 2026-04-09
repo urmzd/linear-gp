@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.7.0 (2026-04-09)
+
+### Features
+
+- **cli**: add self-update, version, and --format flag ([0dc9de1](https://github.com/urmzd/linear-gp/commit/0dc9de1ded6951758e41aca1c6da0779dd922e45))
+
+### Documentation
+
+- add LICENSE to sub-crates for publishing compliance ([eadc79f](https://github.com/urmzd/linear-gp/commit/eadc79f05bdfbae565e7fc1e55bbedaf9de83443))
+- fix incorrect crate names, versions, and non-existent CLI subcommand ([6bc227c](https://github.com/urmzd/linear-gp/commit/6bc227c5c48d5e2e29543ffcc905505ad181cdc7))
+- update legacy lgp-cli references to lgp ([1f77fcf](https://github.com/urmzd/linear-gp/commit/1f77fcfa2c8dcb7d70228b5978c765c68c764da4))
+
+### Miscellaneous
+
+- add linguist overrides to fix language stats (#16) ([0093d2a](https://github.com/urmzd/linear-gp/commit/0093d2a946fdec91bc277ed918e9f07b290cfe30))
+- **deps**: bump actions/create-github-app-token from 1 to 3 ([12b8e5b](https://github.com/urmzd/linear-gp/commit/12b8e5b45b5e93df3b87cc12ca47eb87ec9144db))
+- update sr action from v2 to v3 ([75e9ef2](https://github.com/urmzd/linear-gp/commit/75e9ef2ec0c48d457c391608cc8d09466d372010))
+- standardize sr.yaml and justfile — floating_tags, refactor bump, full recipes ([3325d36](https://github.com/urmzd/linear-gp/commit/3325d3655362619671a530c605bd6d240c2e262a))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.6.1...v1.7.0)
+
+
 ## 1.6.1 (2026-03-29)
 
 ### Bug Fixes
