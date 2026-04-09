@@ -6,39 +6,33 @@ use lgp::{
     utils::benchmark_tools::load_and_run_program,
 };
 
-const TYPES: &[&str] = &[
-    "mountain_car_q",
-    "mountain_car_lgp",
-    "cart_pole_q",
-    "cart_pole_lgp",
+/// Maps benchmark type to the config directory name used by the experiment runner.
+const TYPES: &[(&str, &str)] = &[
+    ("mountain_car_q", "mountain_car_with_q"),
+    ("mountain_car_lgp", "mountain_car_lgp"),
+    ("cart_pole_q", "cart_pole_with_q"),
+    ("cart_pole_lgp", "cart_pole_lgp"),
 ];
 
 fn performance_benchmark(c: &mut Criterion) {
     let n_trials = 5;
-    let n_iterations = 100;
 
-    for program_type in TYPES {
+    for (program_type, config_dir) in TYPES {
         let mut better_count = 0;
-        let mut improvement_values = Vec::with_capacity(n_iterations);
+        let mut improvement_values = Vec::new();
 
-        for path in glob(&format!(
-            "assets/experiments/**/benchmarks/{}/best.json",
-            program_type
-        ))
-        .unwrap()
-        .flatten()
-        {
-            let parent = path.parent().unwrap().parent().unwrap().parent().unwrap();
-            let iteration_count = parent
-                .file_name()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .replace("iteration_", "")
-                .parse::<u32>()
-                .unwrap();
+        let pattern = format!("outputs/{}/**/outputs/best.json", config_dir);
 
-            let bench_id = format!("perf_{}_iteration_{}", program_type, iteration_count);
+        for path in glob(&pattern).unwrap().flatten() {
+            // Layout: outputs/<name>/<run_id>/outputs/best.json
+            let run_id = path
+                .parent()
+                .and_then(|p| p.parent())
+                .and_then(|p| p.file_name())
+                .and_then(|n| n.to_str())
+                .unwrap_or("unknown");
+
+            let bench_id = format!("perf_{}_{}", program_type, run_id);
 
             c.bench_function(&bench_id, |b| {
                 b.iter(|| {
@@ -73,6 +67,14 @@ fn performance_benchmark(c: &mut Criterion) {
                     improvement_values.push(improvement);
                 });
             });
+        }
+
+        if improvement_values.is_empty() {
+            eprintln!(
+                "No benchmark data found for '{}' (glob: {}). Skipping.",
+                program_type, pattern
+            );
+            continue;
         }
 
         let mean =
