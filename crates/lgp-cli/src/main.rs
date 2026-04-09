@@ -12,6 +12,13 @@ mod config_override;
 mod experiment_runner;
 pub mod ui;
 
+#[derive(Debug, Clone, Copy, PartialEq, clap::ValueEnum, Default)]
+pub enum OutputFormat {
+    #[default]
+    Human,
+    Json,
+}
+
 /// Output format for log messages.
 #[derive(Debug, Clone, Copy, ValueEnum, Default)]
 pub enum LogFormat {
@@ -49,6 +56,10 @@ struct Cli {
     #[arg(long, global = true)]
     log_file: Option<PathBuf>,
 
+    /// Output format for data commands (list, analyze)
+    #[arg(long, global = true, value_enum, default_value = "human")]
+    format: OutputFormat,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -69,6 +80,11 @@ enum Commands {
 
     /// Run end-to-end experiment pipeline (search -> run -> analyze)
     Experiment(commands::experiment::ExperimentArgs),
+
+    /// Self-update lgp to the latest release
+    Update,
+    /// Print the current version
+    Version,
 }
 
 fn main() {
@@ -98,11 +114,32 @@ fn main() {
     info!(verbose = cli.verbose, "Starting LGP CLI");
 
     let result: Result<(), Box<dyn std::error::Error>> = match cli.command {
-        Commands::List(args) => commands::list::execute(&args),
+        Commands::List(args) => commands::list::execute(&args, cli.format),
         Commands::Run(args) => commands::run::execute(&args),
         Commands::Analyze(args) => commands::analyze::execute(&args),
         Commands::Search(args) => commands::search::execute(&args),
         Commands::Experiment(args) => commands::experiment::execute(&args),
+        Commands::Update => {
+            eprintln!("current version: {}", env!("CARGO_PKG_VERSION"));
+            match agentspec_update::self_update("urmzd/linear-gp", env!("CARGO_PKG_VERSION"), "lgp")
+            {
+                Ok(agentspec_update::UpdateResult::AlreadyUpToDate) => {
+                    eprintln!("already up to date")
+                }
+                Ok(agentspec_update::UpdateResult::Updated { from, to }) => {
+                    eprintln!("updated: {from} → {to}")
+                }
+                Err(e) => {
+                    ui::warn(&format!("update failed: {e}"));
+                    std::process::exit(1);
+                }
+            }
+            Ok(())
+        }
+        Commands::Version => {
+            println!("lgp v{}", env!("CARGO_PKG_VERSION"));
+            Ok(())
+        }
     };
     if let Err(e) = result {
         ui::warn(&format!("Error: {}", e));
