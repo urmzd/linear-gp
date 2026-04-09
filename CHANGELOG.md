@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.2 (2026-04-09)
+
+### Bug Fixes
+
+- **ci**: remove --allow-dirty from cargo publish ([67175ff](https://github.com/urmzd/linear-gp/commit/67175ff7e13f0e6ea8658e972350940b059736d7))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.1...v1.7.2)
+
+
 ## 1.7.1 (2026-04-09)
 
 ### Bug Fixes
