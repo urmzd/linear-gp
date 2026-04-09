@@ -657,17 +657,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "derive-new"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2cdc8d50f426189eef89dac62fabfa0abb27d5cc008f25bf4156a0203325becc"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.115",
-]
-
-[[package]]
 name = "derive_builder"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -977,12 +966,11 @@ checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
 name = "gymnasia"
-version = "1.0.0"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3278e90dc6a211786ea279466e162ae47fc7b62f55c4e4f9527cd640d349fb7"
+checksum = "12dbdcee9ae3a17a6a3b181f80fbd6e14d6c06bf3c51851ff8a206d98592a36d"
 dependencies = [
  "derivative",
- "derive-new",
  "log",
  "num-traits",
  "ordered-float",

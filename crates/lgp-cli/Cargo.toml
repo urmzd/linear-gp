@@ -21,7 +21,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 csv = "1.1"
 itertools = "0.10"
-gymnasia = { version = "1.0", default-features = false }
+gymnasia = { version = "3.0", default-features = false }
 rayon = "1.7"
 tracing = { version = "0.1", features = ["attributes"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "json", "std", "ansi"] }

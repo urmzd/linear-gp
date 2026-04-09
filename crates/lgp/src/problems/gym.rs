@@ -1,9 +1,10 @@
 use std::marker::PhantomData;
 
 use gymnasia::core::Env;
+use gymnasia::core::Flatten;
+use gymnasia::core::StepResult;
 use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
 use gymnasia::envs::classical_control::mountain_car::MountainCarEnv;
-use gymnasia::utils::renderer::RenderMode;
 
 use crate::core::engines::breed_engine::BreedEngine;
 use crate::core::engines::core_engine::Core;
@@ -23,9 +24,9 @@ use crate::extensions::interactive::UseRlFitness;
 use crate::extensions::q_learning::QProgram;
 use crate::extensions::q_learning::QProgramGeneratorParameters;
 
-pub trait GymRsEnvExt: Env<Action = usize> + Send + Sync
+pub trait GymRsEnvExt: Env<Action = i64> + Clone + Send + Sync
 where
-    Self::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    Self::Observation: Copy + Flatten + Send + Sync,
 {
     fn create() -> Self;
     fn max_steps() -> usize;
@@ -34,7 +35,7 @@ where
 
 impl GymRsEnvExt for CartPoleEnv {
     fn create() -> Self {
-        CartPoleEnv::new(RenderMode::None)
+        CartPoleEnv::new()
     }
     fn max_steps() -> usize {
         500
@@ -46,7 +47,7 @@ impl GymRsEnvExt for CartPoleEnv {
 
 impl GymRsEnvExt for MountainCarEnv {
     fn create() -> Self {
-        MountainCarEnv::new(RenderMode::None)
+        MountainCarEnv::new()
     }
     fn max_steps() -> usize {
         200
@@ -59,7 +60,7 @@ impl GymRsEnvExt for MountainCarEnv {
 #[derive(Clone, Debug)]
 pub struct GymRsInput<E: GymRsEnvExt>
 where
-    E::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    E::Observation: Copy + Flatten + Send + Sync,
 {
     environment: E,
     terminated: bool,
@@ -71,19 +72,19 @@ where
 impl<E> State for GymRsInput<E>
 where
     E: GymRsEnvExt,
-    E::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    E::Observation: Copy + Flatten + Send + Sync,
 {
     fn get_value(&self, idx: usize) -> f64 {
         self.observation[idx]
     }
 
     fn execute_action(&mut self, action: usize) -> f64 {
-        let action_reward = self.environment.step(action);
+        let step_result: StepResult<E::Observation> = self.environment.step(action as i64);
         self.episode_idx += 1;
-        self.observation = action_reward.observation.into();
+        self.observation = step_result.observation.flatten();
         self.terminated =
-            self.episode_idx >= E::max_steps() || action_reward.done || action_reward.truncated;
-        action_reward.reward.into_inner()
+            self.episode_idx >= E::max_steps() || step_result.terminated || step_result.truncated;
+        step_result.reward
     }
 
     fn get(&mut self) -> Option<&mut Self> {
@@ -98,26 +99,26 @@ where
 impl<T> RlState for GymRsInput<T>
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    T::Observation: Copy + Flatten + Send + Sync,
 {
     fn is_terminal(&mut self) -> bool {
         self.terminated
     }
 
     fn get_initial_state(&self) -> Vec<f64> {
-        self.initial_state.into()
+        self.initial_state.flatten()
     }
 }
 
 impl<T> Reset<GymRsInput<T>> for ResetEngine
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    T::Observation: Copy + Flatten + Send + Sync,
 {
     fn reset(item: &mut GymRsInput<T>) {
-        item.environment.reset(None, false, None);
+        item.environment.reset(None, Default::default());
         item.environment.set_state(item.initial_state);
-        item.observation = item.initial_state.into();
+        item.observation = item.initial_state.flatten();
         item.terminated = false;
         item.episode_idx = 0;
     }
@@ -126,12 +127,12 @@ where
 impl<T> Generate<(), GymRsInput<T>> for GenerateEngine
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    T::Observation: Copy + Flatten + Send + Sync,
 {
     fn generate(_from: ()) -> GymRsInput<T> {
         let mut environment: T = T::create();
-        let (initial_state, _) = environment.reset(None, false, None);
-        let observation = initial_state.into();
+        let initial_state = environment.reset(None, Default::default());
+        let observation = initial_state.flatten();
 
         GymRsInput {
             environment,
@@ -151,7 +152,7 @@ pub struct GymRsEngine<T>(PhantomData<T>);
 impl<T> Core for GymRsQEngine<T>
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    T::Observation: Copy + Flatten + Send + Sync,
 {
     type Individual = QProgram;
     type ProgramParameters = QProgramGeneratorParameters;
@@ -169,7 +170,7 @@ where
 impl<T> Core for GymRsEngine<T>
 where
     T: GymRsEnvExt,
-    T::Observation: Copy + Into<Vec<f64>> + Send + Sync,
+    T::Observation: Copy + Flatten + Send + Sync,
 {
     type Individual = Program;
     type ProgramParameters = ProgramGeneratorParameters;

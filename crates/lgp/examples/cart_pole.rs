@@ -5,9 +5,8 @@
 //!
 //! Run with: `cargo run -p lgp-core --example cart_pole --features gym`
 
-use itertools::Itertools;
-
 use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
+use itertools::Itertools;
 
 use lgp::core::engines::core_engine::HyperParametersBuilder;
 use lgp::core::engines::status_engine::{Status, StatusEngine};
