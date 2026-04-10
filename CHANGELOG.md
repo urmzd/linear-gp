@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.4 (2026-04-10)
+
+### Bug Fixes
+
+- **ci**: publish lgp-core before lgp to crates.io ([0125cdd](https://github.com/urmzd/linear-gp/commit/0125cddf915c7e73647e9070b697bdce537fd19b))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.3...v1.7.4)
+
+
 ## 1.7.3 (2026-04-10)
 
 ### Refactoring
