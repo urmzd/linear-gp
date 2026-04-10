@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.7.3 (2026-04-10)
+
+### Refactoring
+
+- migrate gymnasia dependency from v1 to v3 ([56497b2](https://github.com/urmzd/linear-gp/commit/56497b25966d850390c500f465f906a3154a7864))
+
+### Miscellaneous
+
+- **benchmarks**: update performance benchmark for new experiment output structure ([33e8f88](https://github.com/urmzd/linear-gp/commit/33e8f880a0c48e3ed7fabb84b113825f5e9738eb))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.2...v1.7.3)
+
+
 ## 1.7.2 (2026-04-09)
 
 ### Bug Fixes
