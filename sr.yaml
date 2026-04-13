@@ -1,8 +1,11 @@
-branches: [main]
-tag_prefix: "v"
-floating_tags: true
+# sr v4 configuration
+# Reference: https://github.com/urmzd/sr#configuration
 
-types:
+commit:
+  pattern: ^(?P<type>\w+)(?:\((?P<scope>[^)]+)\))?(?P<breaking>!)?:\s+(?P<description>.+)
+  breaking_section: Breaking Changes
+  misc_section: Miscellaneous
+  types:
   - name: feat
     bump: minor
     section: Features
@@ -24,26 +27,12 @@ types:
   - name: test
   - name: build
   - name: style
-
-version_files:
+release:
+  branches:
+  - main
+  tag_prefix: v
+  changelog:
+    file: CHANGELOG.md
+  version_files:
   - Cargo.toml
-
-changelog:
-  file: CHANGELOG.md
-
-hooks:
-  commit-msg:
-    - sr hook commit-msg
-  pre-commit:
-    - step: format
-      patterns:
-        - "*.rs"
-      rules:
-        - "rustfmt --check --edition 2021 {files}"
-    - step: lint
-      patterns:
-        - "*.rs"
-      rules:
-        - "cargo clippy --workspace -- -D warnings"
-  pre-push:
-    - cargo test --workspace
+  floating_tags: true
