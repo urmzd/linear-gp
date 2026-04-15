@@ -10,6 +10,7 @@ mod commands;
 mod config_discovery;
 mod config_override;
 mod experiment_runner;
+mod self_update;
 pub mod ui;
 
 #[derive(Debug, Clone, Copy, PartialEq, clap::ValueEnum, Default)]
@@ -121,12 +122,11 @@ fn main() {
         Commands::Experiment(args) => commands::experiment::execute(&args),
         Commands::Update => {
             eprintln!("current version: {}", env!("CARGO_PKG_VERSION"));
-            match agentspec_update::self_update("urmzd/linear-gp", env!("CARGO_PKG_VERSION"), "lgp")
-            {
-                Ok(agentspec_update::UpdateResult::AlreadyUpToDate) => {
+            match self_update::self_update("urmzd/linear-gp", env!("CARGO_PKG_VERSION"), "lgp") {
+                Ok(self_update::UpdateResult::AlreadyUpToDate) => {
                     eprintln!("already up to date")
                 }
-                Ok(agentspec_update::UpdateResult::Updated { from, to }) => {
+                Ok(self_update::UpdateResult::Updated { from, to }) => {
                     eprintln!("updated: {from} → {to}")
                 }
                 Err(e) => {
