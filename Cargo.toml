@@ -38,4 +38,6 @@ chrono = "0.4"
 criterion = "0.4.0"
 crossterm = "0.28"
 indicatif = "0.17"
-agentspec-update = "0.6.0"
+anyhow = "1"
+sha2 = "0.10"
+ureq = { version = "3", features = ["json"] }

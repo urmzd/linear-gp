@@ -7,6 +7,7 @@ use lgp::utils::tracing::{init_tracing, TracingConfig, TracingFormat};
 use tracing::info;
 
 mod commands;
+mod self_update;
 mod config_discovery;
 mod config_override;
 mod experiment_runner;
@@ -121,12 +122,12 @@ fn main() {
         Commands::Experiment(args) => commands::experiment::execute(&args),
         Commands::Update => {
             eprintln!("current version: {}", env!("CARGO_PKG_VERSION"));
-            match agentspec_update::self_update("urmzd/linear-gp", env!("CARGO_PKG_VERSION"), "lgp")
+            match self_update::self_update("urmzd/linear-gp", env!("CARGO_PKG_VERSION"), "lgp")
             {
-                Ok(agentspec_update::UpdateResult::AlreadyUpToDate) => {
+                Ok(self_update::UpdateResult::AlreadyUpToDate) => {
                     eprintln!("already up to date")
                 }
-                Ok(agentspec_update::UpdateResult::Updated { from, to }) => {
+                Ok(self_update::UpdateResult::Updated { from, to }) => {
                     eprintln!("updated: {from} → {to}")
                 }
                 Err(e) => {

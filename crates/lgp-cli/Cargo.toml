@@ -27,7 +27,9 @@ tracing = { version = "0.1", features = ["attributes"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "json", "std", "ansi"] }
 crossterm = { workspace = true }
 indicatif = { workspace = true }
-agentspec-update = { workspace = true }
+anyhow = { workspace = true }
+sha2 = { workspace = true }
+ureq = { workspace = true }
 plotters = { version = "0.3", optional = true }
 
 [features]
