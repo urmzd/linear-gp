@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.7.5 (2026-04-15)
+
+### Refactoring
+
+- inline agentspec-update (#18) ([3759137](https://github.com/urmzd/linear-gp/commit/37591372f477862b54281d762b0c2647152e1918))
+
+### Miscellaneous
+
+- migrate sr config and action to v4 ([c8f751a](https://github.com/urmzd/linear-gp/commit/c8f751a64899bcc8e5f88314e74b785711a36ea8))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.4...v1.7.5)
+
+
 ## 1.7.4 (2026-04-10)
 
 ### Bug Fixes
