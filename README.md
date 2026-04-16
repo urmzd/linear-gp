@@ -46,14 +46,14 @@ Linear Genetic Programming (LGP) is a variant of genetic programming that evolve
 **Prebuilt binary (recommended):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/urmzd/linear-gp/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/urmzd/linear-gp/main/install.sh | sh
 ```
 
 You can pin a version or change the install directory:
 
 ```bash
 LGP_VERSION=v1.0.0 LGP_INSTALL_DIR=~/.local/bin \
-  curl -fsSL https://raw.githubusercontent.com/urmzd/linear-gp/main/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/urmzd/linear-gp/main/install.sh | sh
 ```
 
 **From source:**
