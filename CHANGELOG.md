@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.8 (2026-04-16)
+
+### Bug Fixes
+
+- update README install commands to use sh instead of bash ([e8b8caa](https://github.com/urmzd/linear-gp/commit/e8b8caafe69eb2ed184341c51f6566bab4d5698d))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.7...v1.7.8)
+
+
 ## 1.7.7 (2026-04-16)
 
 ### Bug Fixes
