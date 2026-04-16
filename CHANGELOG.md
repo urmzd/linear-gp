@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.6 (2026-04-16)
+
+### Bug Fixes
+
+- **ci**: migrate sr v4 to v7 for artifact and input support (#20) ([3b59962](https://github.com/urmzd/linear-gp/commit/3b599629f6b7e7e5a381efe91392b3a3f79395d8))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.5...v1.7.6)
+
+
 ## 1.7.5 (2026-04-15)
 
 ### Refactoring
