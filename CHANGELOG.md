@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.7 (2026-04-16)
+
+### Bug Fixes
+
+- install to ~/.local/bin by default and add PATH setup ([d911fdc](https://github.com/urmzd/linear-gp/commit/d911fdce36885f6c88b6e2558a02559ac6d22b1a))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.6...v1.7.7)
+
+
 ## 1.7.6 (2026-04-16)
 
 ### Bug Fixes
