@@ -2,26 +2,49 @@
 dir = "./showcase"
 
 [[output.formats]]
+output_type = "gif"
+[[output.formats]]
 output_type = "png"
 
 [font]
 family = "MonaspiceNe Nerd Font"
 
+# Scene 1: Show available experiments
 [[scenes]]
 type = "terminal"
-name = "experiment-output"
+name = "list-experiments"
 theme = "dracula"
 cwd = "."
-cols = 100
-rows = 50
+cols = 90
+rows = 30
 
 [[scenes.interactions]]
 type = "type"
-text = "RUSTUP_HOME=/Users/urmzd/.rustup CARGO_HOME=/Users/urmzd/.cargo /Users/urmzd/.cargo/bin/cargo run -p lgp -- run iris_baseline 2>&1"
+text = "lgp list"
 speed = 50
 [[scenes.interactions]]
 type = "key"
 key = "enter"
 [[scenes.interactions]]
 type = "wait"
-duration = 60000
+duration = 3000
+
+# Scene 2: Run a quick Iris experiment
+[[scenes]]
+type = "terminal"
+name = "run-experiment"
+theme = "dracula"
+cwd = "."
+cols = 90
+rows = 24
+
+[[scenes.interactions]]
+type = "type"
+text = "lgp run iris_crossover 2>&1 | tail -20"
+speed = 40
+[[scenes.interactions]]
+type = "key"
+key = "enter"
+[[scenes.interactions]]
+type = "wait"
+duration = 20000

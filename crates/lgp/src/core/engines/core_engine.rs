@@ -20,7 +20,7 @@ use super::{
 };
 use derive_builder::Builder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use tracing::{debug, info, instrument, trace};
+use tracing::{debug, instrument, trace};
 
 #[derive(Debug, Deserialize, Serialize, Builder, Copy, Derivative, Parser)]
 #[command(author, version, about, long_about=None)]
@@ -132,7 +132,7 @@ where
             .map(C::Status::get_fitness);
         let worst_fitness = population.last().map(C::Status::get_fitness);
 
-        info!(
+        debug!(
             generation = self.generation,
             best_fitness = ?best_fitness,
             median_fitness = ?median_fitness,

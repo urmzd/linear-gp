@@ -11,6 +11,10 @@ repository = "https://github.com/urmzd/linear-gp"
 name = "lgp"
 path = "src/main.rs"
 
+[[example]]
+name = "generate_showcase"
+required-features = ["plot"]
+
 [dependencies]
 lgp = { package = "lgp-core", path = "../lgp", version = "1.1", features = ["gym"] }
 clap = { version = "4.1.8", features = ["derive"] }
