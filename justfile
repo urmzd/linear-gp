@@ -3,7 +3,7 @@ default: check
 # Initialize project
 init:
     rustup component add clippy rustfmt
-    sr init --merge 2>/dev/null || sr init
+    sr init
 
 # Install binary to PATH
 install:
