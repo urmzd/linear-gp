@@ -13,6 +13,8 @@
 
 <p align="center">
   <a href="https://github.com/urmzd/linear-gp/actions/workflows/ci.yml"><img src="https://github.com/urmzd/linear-gp/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  &nbsp;
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/urmzd/linear-gp" alt="License"></a>
 </p>
 
 ## Showcase
@@ -110,6 +112,23 @@ cargo run -p lgp --example generate_showcase --features plot
 ```
 
 </details>
+
+## Contents
+
+- [Overview](#overview)
+- [Install](#install)
+- [Quick Start](#quick-start)
+- [CLI Reference](#cli-reference)
+- [Performance](#performance)
+- [Hyperparameter Search](#hyperparameter-search)
+- [Visualizations](#visualizations)
+- [Output Structure](#output-structure)
+- [Logging](#logging)
+- [Packages](#packages)
+- [Extending the Framework](#extending-the-framework)
+- [Thesis & References](#thesis--references)
+- [Agent Skill](#agent-skill)
+- [License](#license)
 
 ## Overview
 
@@ -354,3 +373,11 @@ You can add new classification problems, RL environments, genetic operators, and
 ## Thesis & References
 
 The accompanying thesis, *Reinforced Linear Genetic Programming*, and full references are maintained in a [separate repository](https://github.com/urmzd/rlgp-thesis).
+
+## Agent Skill
+
+This repo's conventions are available as portable agent skills in [`skills/`](skills/).
+
+## License
+
+[Apache-2.0](LICENSE)
