@@ -4,11 +4,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      force:
-        description: "Re-release the current tag (use when a previous release partially failed)"
-        type: boolean
-        default: false
 
 permissions:
   contents: write
