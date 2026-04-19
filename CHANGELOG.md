@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.10 (2026-04-19)
+
+### Bug Fixes
+
+- retrigger release with sr v7.1.2 Cargo.lock handling ([84943ca](https://github.com/urmzd/linear-gp/commit/84943cad87b4ddf75e85125791cf9a277695871a))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.9...v1.7.10)
+
+
 ## 1.7.9 (2026-04-19)
 
 ### Bug Fixes
