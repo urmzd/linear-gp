@@ -154,10 +154,7 @@ fn main() {
         .unwrap();
 
     // Fill background
-    chart
-        .plotting_area()
-        .fill(&bg)
-        .unwrap();
+    chart.plotting_area().fill(&bg).unwrap();
 
     // Redraw mesh on top of background
     chart
@@ -183,16 +180,17 @@ fn main() {
             .collect();
         chart
             .draw_series(area_data.iter().map(|&(x, low, high)| {
-                Rectangle::new(
-                    [(x, low), (x + 1, high)],
-                    color.mix(0.15).filled(),
-                )
+                Rectangle::new([(x, low), (x + 1, high)], color.mix(0.15).filled())
             }))
             .unwrap();
 
         // Best fitness line
-        let best_points: Vec<(usize, f64)> =
-            series.best.iter().enumerate().map(|(i, &v)| (i, v)).collect();
+        let best_points: Vec<(usize, f64)> = series
+            .best
+            .iter()
+            .enumerate()
+            .map(|(i, &v)| (i, v))
+            .collect();
         chart
             .draw_series(LineSeries::new(best_points, color.stroke_width(2)))
             .unwrap()
@@ -293,9 +291,7 @@ fn main() {
             .draw_series(std::iter::once(Text::new(
                 label_text,
                 (center_x - 0.15, val + 0.03),
-                ("sans-serif", 15)
-                    .into_font()
-                    .color(&title_color),
+                ("sans-serif", 15).into_font().color(&title_color),
             )))
             .unwrap();
 
@@ -304,9 +300,7 @@ fn main() {
             .draw_series(std::iter::once(Text::new(
                 labels[i].clone(),
                 (center_x - 0.35, -0.06),
-                ("sans-serif", 11)
-                    .into_font()
-                    .color(&text_color),
+                ("sans-serif", 11).into_font().color(&text_color),
             )))
             .unwrap();
     }
