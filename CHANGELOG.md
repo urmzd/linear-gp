@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.7.9 (2026-04-19)
+
+### Bug Fixes
+
+- **ci**: apply cargo fmt, sync lockfile, stage Cargo.lock ([b209ac2](https://github.com/urmzd/linear-gp/commit/b209ac2d33c6c57ca5b22f84e3205c132615e699))
+- **ci**: drop removed sr force input and nonexistent init --merge flag ([37b8762](https://github.com/urmzd/linear-gp/commit/37b876217282f3e728df35f9a63e6a6753164465))
+
+### Refactoring
+
+- move cargo publish into sr hooks.post_release ([a3f6c57](https://github.com/urmzd/linear-gp/commit/a3f6c57fcca98a10648a86c528863defabc5ce98))
+
+### Misc
+
+- revamp showcase with operator comparison and benchmarks ([a4dc958](https://github.com/urmzd/linear-gp/commit/a4dc958c8dbaec62edd7590c3fab0f091fe19b5e))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.8...v1.7.9)
+
+
 ## 1.7.8 (2026-04-16)
 
 ### Bug Fixes
