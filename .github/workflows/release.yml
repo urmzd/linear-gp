@@ -52,7 +52,7 @@ jobs:
 
       - name: Run semantic release
         id: sr
-        uses: urmzd/sr@v7
+        uses: urmzd/sr@v8
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.crates-token.outputs.token }}
         with:
