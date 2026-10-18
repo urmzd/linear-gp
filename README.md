@@ -34,7 +34,7 @@
   </tr>
 </table>
 
-### Iris Classification — Operator Comparison
+### Iris Classification: Operator Comparison
 
 Comparison of four experiments (population 100, 200 generations, seed 42), each isolating a different genetic operator.
 
@@ -48,7 +48,7 @@ Comparison of four experiments (population 100, 200 generations, seed 42), each 
 
 | Experiment | Operators | Final Accuracy | Description |
 |------------|-----------|----------------|-------------|
-| `iris_baseline` | None | 33.3% | Pure elitism — population converges to a single individual |
+| `iris_baseline` | None | 33.3% | Pure elitism: population converges to a single individual |
 | `iris_mutation` | Mutation | 66.7% | Random instruction perturbation explores nearby program space |
 | `iris_crossover` | Crossover | 97.3% | Two-point crossover recombines instruction sequences from fit parents |
 | `iris_full` | Both | 90.7% | Full GP with mutation + crossover |
@@ -257,7 +257,7 @@ Wall-clock times for `lgp run <experiment> --override hyperparameters.seed=42` w
 | `mountain_car_lgp` | 1.54s | 2.06s | 2.20s | 2.92s | 4.54s |
 | `mountain_car_with_q` | 1.69s | 2.23s | 2.40s | 3.30s | 4.78s |
 
-Running all 8 experiments sequentially takes ≈ 7s at the medians. `iris_crossover` has the widest spread — recombining variable-length programs produces runs with meaningfully more instructions to execute. MountainCar dominates wall-clock time because episodes run the full 200-step default, while CartPole episodes terminate early when the pole falls.
+Running all 8 experiments sequentially takes ≈ 7s at the medians. `iris_crossover` has the widest spread: recombining variable-length programs produces runs with meaningfully more instructions to execute. MountainCar dominates wall-clock time because episodes run the full 200-step default, while CartPole episodes terminate early when the pole falls.
 
 ## Hyperparameter Search
 
@@ -354,7 +354,7 @@ RUST_LOG=lgp::core=trace,lgp=info lgp run iris_baseline
 
 | Package | Description |
 |---------|-------------|
-| [lgp-core](crates/lgp/README.md) | Core library — traits, evolutionary engine, built-in problems |
+| [lgp-core](crates/lgp/README.md) | Core library: traits, evolutionary engine, built-in problems |
 | [lgp](crates/lgp-cli/README.md) | CLI binary for running experiments, search, and analysis |
 
 ## Extending the Framework
