@@ -1323,7 +1323,7 @@ checksum = "20870f649af7073d53e38067b2a84312175d56ea15217e1b15bc83506ec50afb"
 
 [[package]]
 name = "lgp"
-version = "1.7.10"
+version = "1.7.11"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1348,7 +1348,7 @@ dependencies = [
 
 [[package]]
 name = "lgp-core"
-version = "1.7.10"
+version = "1.7.11"
 dependencies = [
  "chrono",
  "clap",

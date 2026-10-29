@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.7.11 (2026-10-29)
+
+### Bug Fixes
+
+- **deps**: patch vulnerable dependencies (#24) ([5c046e0](https://github.com/urmzd/linear-gp/commit/5c046e0536e0f04ebc9ede7d246bb70f5307cb89))
+
+### Misc
+
+- **readme**: align with fleet standard (#23) ([cb513a2](https://github.com/urmzd/linear-gp/commit/cb513a2e16233c6d40a0a6b9bc9f840401752903))
+- **deps**: bump actions/checkout from 6 to 7 (#21) ([47b02af](https://github.com/urmzd/linear-gp/commit/47b02af960e5ae57262dac1a18bbb267f5de246c))
+- upgrade urmzd/sr action to v9 (#22) ([16f22ba](https://github.com/urmzd/linear-gp/commit/16f22baf57368cf91a08226c176405df6345193d))
+- bump GitHub Actions to Node 24 majors and switch app token to client-id ([40e6fd2](https://github.com/urmzd/linear-gp/commit/40e6fd2bad58c0350bf05c3426c0851b21068fe6))
+- **ci**: bump sr to v8, convert post_release hook to typed cargo workspace publisher ([844d370](https://github.com/urmzd/linear-gp/commit/844d370a78b5d65b7d6e0f493e6955e062d39100))
+- **ci**: remove unused force input from release workflow ([b73edde](https://github.com/urmzd/linear-gp/commit/b73eddea1e441aff606da291cfe1d2b04ab28cc3))
+- **community**: add GitHub community-health files ([0fd9f67](https://github.com/urmzd/linear-gp/commit/0fd9f67225f18339d2db9a386ceed4f4cf00f8fb))
+- **fix**: standardize README format ([db68517](https://github.com/urmzd/linear-gp/commit/db68517a01960cd76a64f440fdfc33ef3b515e65))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.10...v1.7.11)
+
+
 ## 1.7.10 (2026-04-19)
 
 ### Bug Fixes
