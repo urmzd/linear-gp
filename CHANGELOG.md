@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.12 (2026-10-29)
+
+### Bug Fixes
+
+- **deps**: bump gymnasia to 3.0.6 (#25) ([9176a28](https://github.com/urmzd/linear-gp/commit/9176a28b897bdb843e0e33a1f7400e70c2c25876))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.11...v1.7.12)
+
+
 ## 1.7.11 (2026-10-29)
 
 ### Bug Fixes
