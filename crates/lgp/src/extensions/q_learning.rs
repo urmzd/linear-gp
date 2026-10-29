@@ -1,7 +1,6 @@
 use std::fmt::{self, Debug};
 
 use clap::Args;
-use derivative::Derivative;
 use derive_builder::Builder;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -142,12 +141,31 @@ impl QTable {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Derivative)]
-#[derivative(PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QProgram {
-    #[derivative(PartialEq = "ignore", PartialOrd = "ignore", Ord = "ignore")]
     pub q_table: QTable,
     pub program: Program,
+}
+
+// Equality and ordering ignore `q_table` and compare only `program`.
+impl PartialEq for QProgram {
+    fn eq(&self, other: &Self) -> bool {
+        self.program == other.program
+    }
+}
+
+impl Eq for QProgram {}
+
+impl PartialOrd for QProgram {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for QProgram {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.program.cmp(&other.program)
+    }
 }
 
 impl Freeze<QProgram> for FreezeEngine {

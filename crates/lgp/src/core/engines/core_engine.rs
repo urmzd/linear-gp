@@ -1,7 +1,6 @@
 use std::{iter::repeat_with, sync::Arc};
 
 use clap::{Args, Parser};
-use derivative::Derivative;
 use itertools::Itertools;
 use rand::{seq::IteratorRandom, Rng};
 use rayon::prelude::*;
@@ -22,10 +21,9 @@ use derive_builder::Builder;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::{debug, instrument, trace};
 
-#[derive(Debug, Deserialize, Serialize, Builder, Copy, Derivative, Parser)]
+#[derive(Debug, Deserialize, Serialize, Builder, Copy, Parser)]
 #[command(author, version, about, long_about=None)]
 #[command(propagate_version = true)]
-#[derivative(Clone)]
 pub struct HyperParameters<C>
 where
     C: Core,
@@ -59,6 +57,27 @@ where
     pub n_threads: Option<usize>,
     #[command(flatten)]
     pub program_parameters: C::ProgramParameters,
+}
+
+// Manual impl: a derive would require `C: Clone`, but only the fields need it.
+impl<C> Clone for HyperParameters<C>
+where
+    C: Core,
+{
+    fn clone(&self) -> Self {
+        Self {
+            default_fitness: self.default_fitness,
+            population_size: self.population_size,
+            gap: self.gap,
+            mutation_percent: self.mutation_percent,
+            crossover_percent: self.crossover_percent,
+            n_generations: self.n_generations,
+            n_trials: self.n_trials,
+            seed: self.seed,
+            n_threads: self.n_threads,
+            program_parameters: self.program_parameters,
+        }
+    }
 }
 
 pub struct CoreIter<C>

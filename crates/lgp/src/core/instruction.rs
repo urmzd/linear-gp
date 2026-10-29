@@ -1,5 +1,4 @@
 use clap::Args;
-use derivative::Derivative;
 use derive_builder::Builder;
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
@@ -65,8 +64,7 @@ impl Distribution<Mode> for Standard {
     }
 }
 
-#[derive(Clone, Derivative, Debug, Serialize, Args, PartialEq, Deserialize, Builder)]
-#[derivative(Copy)]
+#[derive(Clone, Copy, Debug, Serialize, Args, PartialEq, Deserialize, Builder)]
 pub struct InstructionGeneratorParameters {
     #[arg(long, default_value = "1")]
     #[builder(default = "1")]
@@ -87,8 +85,7 @@ impl InstructionGeneratorParameters {
     }
 }
 
-#[derive(Serialize, PartialEq, Debug, Deserialize, Derivative)]
-#[derivative(Copy, Clone)]
+#[derive(Serialize, PartialEq, Debug, Deserialize, Clone, Copy)]
 pub struct Instruction {
     src_idx: usize,
     tgt_idx: usize,
