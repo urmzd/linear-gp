@@ -2,7 +2,6 @@ use std::iter::repeat_with;
 
 use crate::utils::random::generator;
 use clap::Args;
-use derivative::Derivative;
 use derive_builder::Builder;
 use rand::{seq::IteratorRandom, Rng};
 
@@ -25,8 +24,7 @@ use super::{
     registers::Registers,
 };
 
-#[derive(Clone, Debug, Args, Deserialize, Serialize, Derivative, Builder)]
-#[derivative(Copy)]
+#[derive(Clone, Copy, Debug, Args, Deserialize, Serialize, Builder)]
 pub struct ProgramGeneratorParameters {
     #[arg(long, default_value = "12")]
     #[builder(default = "12")]
@@ -62,7 +60,7 @@ impl Status<Program> for StatusEngine {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Derivative, Builder)]
+#[derive(Debug, Clone, Serialize, Deserialize, Builder)]
 pub struct Program {
     pub id: Uuid,
     pub instructions: Instructions,
