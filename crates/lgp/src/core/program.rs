@@ -146,11 +146,16 @@ impl Breed<Program> for BreedEngine {
         let (child_1_instructions, child_2_instructions) =
             BreedEngine::two_point_crossover(&mate_1.instructions, &mate_2.instructions);
 
-        let mut child_1 = mate_1.clone();
-        let mut child_2 = mate_2.clone();
-
-        child_1.instructions = child_1_instructions;
-        child_2.instructions = child_2_instructions;
+        // Build each child from its parent's fields instead of cloning the whole
+        // parent, so the parent's instructions are not copied only to be replaced.
+        let child = |mate: &Program, instructions: Instructions| Program {
+            id: mate.id,
+            instructions,
+            registers: mate.registers.clone(),
+            fitness: mate.fitness,
+        };
+        let mut child_1 = child(mate_1, child_1_instructions);
+        let mut child_2 = child(mate_2, child_2_instructions);
 
         ResetEngine::reset(&mut child_1.id);
         ResetEngine::reset(&mut child_2.id);

@@ -290,11 +290,15 @@ impl Breed<QProgram> for BreedEngine {
         let (child_1_program, child_2_program) =
             BreedEngine::two_point_crossover(&mate_1.program, &mate_2.program);
 
-        let mut child_1 = mate_1.clone();
-        let mut child_2 = mate_2.clone();
-
-        child_1.program = child_1_program;
-        child_2.program = child_2_program;
+        // Clone only the Q-table. The program comes from the crossover above.
+        let mut child_1 = QProgram {
+            q_table: mate_1.q_table.clone(),
+            program: child_1_program,
+        };
+        let mut child_2 = QProgram {
+            q_table: mate_2.q_table.clone(),
+            program: child_2_program,
+        };
 
         ResetEngine::reset(&mut child_1.program.id);
         ResetEngine::reset(&mut child_2.program.id);

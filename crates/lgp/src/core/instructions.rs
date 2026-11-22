@@ -1,5 +1,4 @@
 use crate::utils::random::generator;
-use itertools::Itertools;
 use rand::Rng;
 
 use super::{
@@ -12,58 +11,41 @@ impl Breed<Instructions> for BreedEngine {
         mate_1: &Instructions,
         mate_2: &Instructions,
     ) -> (Instructions, Instructions) {
-        let mut instructions_a = mate_1.clone();
-        let mut instructions_b = mate_2.clone();
+        debug_assert!(!mate_1.is_empty());
+        debug_assert!(!mate_2.is_empty());
 
-        debug_assert!(!instructions_a.is_empty());
-        debug_assert!(!instructions_b.is_empty());
+        let a_len = mate_1.len();
+        let b_len = mate_2.len();
 
-        let a_start = generator().gen_range(0..instructions_a.len());
-        let b_start = generator().gen_range(0..instructions_b.len());
+        // Draw the cut points in a fixed order: both starts, then each end.
+        // A start on the last instruction swaps the tail, so its end is the length.
+        let a_start = generator().gen_range(0..a_len);
+        let b_start = generator().gen_range(0..b_len);
 
-        let a_end = if a_start == instructions_a.len() - 1 {
-            None
+        let a_end = if a_start == a_len - 1 {
+            a_len
         } else {
-            debug_assert!(instructions_a.len() > a_start);
-            Some(generator().gen_range(a_start + 1..instructions_a.len()))
+            generator().gen_range(a_start + 1..a_len)
         };
 
-        let b_end = if b_start == instructions_b.len() - 1 {
-            None
+        let b_end = if b_start == b_len - 1 {
+            b_len
         } else {
-            debug_assert!(instructions_b.len() > b_start);
-            Some(generator().gen_range(b_start + 1..instructions_b.len()))
+            generator().gen_range(b_start + 1..b_len)
         };
 
-        let a_chunk = match a_end {
-            None => &instructions_a[a_start..],
-            Some(a_end_idx) => &instructions_a[a_start..a_end_idx],
-        }
-        .iter()
-        .cloned()
-        .collect_vec();
+        // Build each child once from slices of the parents: head, the other
+        // parent's chunk, tail. This copies each instruction one time.
+        let splice = |base: &[Instruction], start: usize, end: usize, chunk: &[Instruction]| {
+            let mut child = Vec::with_capacity(base.len() - (end - start) + chunk.len());
+            child.extend_from_slice(&base[..start]);
+            child.extend_from_slice(chunk);
+            child.extend_from_slice(&base[end..]);
+            child
+        };
 
-        let b_chunk = match b_end {
-            None => &instructions_b[b_start..],
-            Some(b_end_idx) => &instructions_b[b_start..b_end_idx],
-        }
-        .iter()
-        .cloned()
-        .collect_vec();
-
-        if let Some(a_end_idx) = a_end {
-            instructions_a.splice(a_start..a_end_idx, b_chunk)
-        } else {
-            instructions_a.splice(a_start.., b_chunk)
-        }
-        .collect_vec();
-
-        if let Some(b_end_idx) = b_end {
-            instructions_b.splice(b_start..b_end_idx, a_chunk)
-        } else {
-            instructions_b.splice(b_start.., a_chunk)
-        }
-        .collect_vec();
+        let instructions_a = splice(mate_1, a_start, a_end, &mate_2[b_start..b_end]);
+        let instructions_b = splice(mate_2, b_start, b_end, &mate_1[a_start..a_end]);
 
         debug_assert!(!instructions_a.is_empty(), "instructions A after crossover");
         debug_assert!(!instructions_b.is_empty(), "instructions B after crossover");
