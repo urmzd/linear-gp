@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.7.15 (2026-11-22)
+
+### Bug Fixes
+
+- restore divide-by-2 and stop scoring CartPole overflows as perfect (#31) ([630df8b](https://github.com/urmzd/linear-gp/commit/630df8bfb8d1ee3d7c71fd2041e8112a8558b5a6))
+
+### Misc
+
+- **showcase**: recapture screenshots (#28) ([4a9a459](https://github.com/urmzd/linear-gp/commit/4a9a459477f2db31dfcec4e13a4a57274a6a9550))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.14...v1.7.15)
+
+
 ## 1.7.14 (2026-11-22)
 
 ### Bug Fixes
