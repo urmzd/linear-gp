@@ -107,7 +107,13 @@ impl QTable {
 
         let prob = generator().gen_range(0.0..1.0);
 
-        let winning_action = if prob <= self.q_consts.epsilon_active {
+        // A frozen table is being evaluated, not trained: act greedily.
+        let epsilon = if self.freeze {
+            0.
+        } else {
+            self.q_consts.epsilon_active
+        };
+        let winning_action = if prob <= epsilon {
             self.action_random()
         } else {
             self.action_argmax(winning_register)
@@ -143,6 +149,10 @@ impl QTable {
         current_reward: f64,
         next_q_value: f64,
     ) {
+        // A frozen table is being evaluated, not trained.
+        if self.freeze {
+            return;
+        }
         let current_q_value =
             self.table[current_action_state.register][current_action_state.action];
 
@@ -466,6 +476,15 @@ mod tests {
         q.update(pair(0, 1), 1., pair(1, 0));
         // 0 + 0.5 * (1 + 0.9 * 10 - 0) = 5.0
         assert_eq!(q.table[0][1], 5.0);
+    }
+
+    #[test]
+    fn frozen_table_does_not_learn() {
+        let mut q = table(vec![vec![0., 4.], vec![10., 2.]]);
+        FreezeEngine::freeze(&mut q);
+        q.update(pair(0, 1), 1., pair(1, 0));
+        q.update_terminal(pair(0, 1), 1.);
+        assert_eq!(q.table[0][1], 4.);
     }
 
     #[test]

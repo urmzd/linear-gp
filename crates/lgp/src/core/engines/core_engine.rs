@@ -200,6 +200,38 @@ where
     }
 }
 
+/// Scores `individual` on `n_trials` fresh trials, for held-out evaluation.
+///
+/// The trials come from a generator seeded with `seed`, separate from the
+/// training stream, so they do not repeat the start states used for selection.
+/// Returns one score per trial; non-finite scores become `default_fitness`.
+pub fn evaluate<C: Core>(
+    individual: &C::Individual,
+    n_trials: usize,
+    seed: u64,
+    default_fitness: f64,
+) -> Vec<f64> {
+    with_seed(seed, || {
+        let trials: Vec<C::State> = repeat_with(|| C::Generate::generate(()))
+            .take(n_trials)
+            .collect();
+        let mut individual = individual.clone();
+        trials
+            .into_iter()
+            .map(|mut trial| {
+                C::Reset::reset(&mut individual);
+                C::Reset::reset(&mut trial);
+                let score = C::Fitness::eval_fitness(&mut individual, &mut trial);
+                if score.is_finite() {
+                    score
+                } else {
+                    default_fitness
+                }
+            })
+            .collect()
+    })
+}
+
 impl<T> HyperParameters<T>
 where
     T: Core,

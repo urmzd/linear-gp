@@ -317,13 +317,21 @@ outputs/
 │       │   ├── median.json     # Median individual
 │       │   ├── worst.json      # Worst individual
 │       │   ├── population.json # Full population history
-│       │   └── params.json     # Hyperparameters used
+│       │   ├── params.json     # Hyperparameters used
+│       │   └── evaluation.json # Held-out scores of best and median (gym only)
 │       └── post_process/       # Post-processing outputs
 ├── tables/                     # Generated CSV statistics
 │   └── <experiment>.csv
 └── figures/                    # Generated PNG plots (with --features plot)
     └── <experiment>.png
 ```
+
+`evaluation.json` scores the final best and median programs on
+`n_eval_trials` fresh start states (default 100, set under
+`[hyperparameters]`, 0 to skip). The start states come from a seed separate
+from training, so they measure generalization, not fit to the training
+trials. RLGP programs are scored greedily, with Q-learning frozen. Iris has
+no held-out split yet, so it skips evaluation.
 
 ## Logging
 
