@@ -152,14 +152,14 @@ impl Registers {
         self.data.is_empty()
     }
 
+    #[inline]
     pub fn update(&mut self, index: usize, value: f64) {
-        let Registers { data, .. } = self;
-        data[index] = value;
+        self.data[index] = value;
     }
 
+    #[inline]
     pub fn get(&self, index: usize) -> &f64 {
-        let Registers { data, .. } = self;
-        data.get(index).unwrap()
+        &self.data[index]
     }
 
     pub fn iter(&self) -> Iter<'_, f64> {

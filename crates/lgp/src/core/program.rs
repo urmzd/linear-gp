@@ -6,7 +6,7 @@ use derive_builder::Builder;
 use rand::{seq::IteratorRandom, Rng};
 
 use serde::{Deserialize, Serialize};
-use tracing::{instrument, trace};
+use tracing::{instrument, trace, Level};
 use uuid::Uuid;
 
 use super::{
@@ -89,8 +89,25 @@ impl PartialOrd for Program {
 }
 
 impl Program {
-    #[instrument(skip_all, fields(program_id = %self.id, n_instructions = self.instructions.len()), level = "trace")]
     pub fn run(&mut self, input: &impl State) {
+        // Check the trace level once per run, not once per instruction. The
+        // instruction module has its own target, so check it too.
+        if tracing::enabled!(Level::TRACE)
+            || tracing::enabled!(target: "lgp::core::instruction", Level::TRACE)
+        {
+            self.run_traced(input);
+            return;
+        }
+
+        for instruction in self.instructions.iter() {
+            instruction.apply_untraced(&mut self.registers, input);
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    #[instrument(name = "run", skip_all, fields(program_id = %self.id, n_instructions = self.instructions.len()), level = "trace")]
+    fn run_traced(&mut self, input: &impl State) {
         for (idx, instruction) in self.instructions.iter().enumerate() {
             trace!(instruction_idx = idx, "Executing instruction");
             instruction.apply(&mut self.registers, input)
