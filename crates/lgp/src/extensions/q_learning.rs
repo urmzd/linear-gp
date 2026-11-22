@@ -125,11 +125,26 @@ impl QTable {
         current_reward: f64,
         next_action_state: ActionRegisterPair,
     ) {
-        let current_q_value =
-            self.table[current_action_state.register][current_action_state.action];
         // Bootstrap from the best Q value of the next register, not the index
         // of the best action.
         let next_q_value = self.max_q(next_action_state.register);
+        self.apply_update(current_action_state, current_reward, next_q_value);
+    }
+
+    /// Updates the final transition of an episode. A terminal state has no
+    /// future value, so the target is the reward alone.
+    pub fn update_terminal(&mut self, current_action_state: ActionRegisterPair, reward: f64) {
+        self.apply_update(current_action_state, reward, 0.);
+    }
+
+    fn apply_update(
+        &mut self,
+        current_action_state: ActionRegisterPair,
+        current_reward: f64,
+        next_q_value: f64,
+    ) {
+        let current_q_value =
+            self.table[current_action_state.register][current_action_state.action];
 
         let new_q_value = self.q_consts.alpha_active
             * (current_reward + (self.q_consts.gamma * next_q_value) - current_q_value);
@@ -224,6 +239,14 @@ impl<T: RlState> Fitness<QProgram, T, ()> for FitnessEngine {
             score += reward;
 
             if state.is_terminal() {
+                // Learn from the final transition too. Without it, the table
+                // never sees the reward signal that ends an episode. A time
+                // limit is not a terminal state, so skip the update there.
+                if !state.is_truncated() {
+                    program
+                        .q_table
+                        .update_terminal(current_action_state, reward);
+                }
                 break;
             }
 
@@ -412,5 +435,40 @@ impl Default for QConsts {
             alpha_active: alpha,
             epsilon_active: epsilon,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn table(rows: Vec<Vec<f64>>) -> QTable {
+        // alpha = 0.5, gamma = 0.9, no exploration, no decay.
+        QTable {
+            table: rows,
+            q_consts: QConsts::new(0.5, 0.9, 0., 0., 0.),
+            freeze: false,
+        }
+    }
+
+    fn pair(register: usize, action: usize) -> ActionRegisterPair {
+        ActionRegisterPair { action, register }
+    }
+
+    #[test]
+    fn update_bootstraps_from_max_q_value() {
+        // Register 1's best action is index 0 with value 10.
+        let mut q = table(vec![vec![0., 0.], vec![10., 2.]]);
+        q.update(pair(0, 1), 1., pair(1, 0));
+        // 0 + 0.5 * (1 + 0.9 * 10 - 0) = 5.0
+        assert_eq!(q.table[0][1], 5.0);
+    }
+
+    #[test]
+    fn terminal_update_has_no_future_value() {
+        let mut q = table(vec![vec![0., 4.], vec![10., 2.]]);
+        q.update_terminal(pair(0, 1), 1.);
+        // 4 + 0.5 * (1 - 4) = 2.5
+        assert_eq!(q.table[0][1], 2.5);
     }
 }
