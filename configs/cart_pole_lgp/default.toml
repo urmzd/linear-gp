@@ -19,7 +19,9 @@ population_size = 100
 n_generations = 100
 n_trials = 100
 gap = 0.5
-default_fitness = 500.0
+# Score for a trial whose program overflows (inf or NaN). Use the worst
+# possible score, or selection rewards programs that blow up.
+default_fitness = 0.0
 # seed = 12345  # uncomment for reproducibility
 
 [hyperparameters.program]

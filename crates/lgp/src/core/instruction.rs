@@ -38,7 +38,10 @@ impl Op {
         match *self {
             Op::Add => a + b,
             Op::Mult => a * b,
-            Op::Divide => a / b, // Division by zero produces inf/NaN, causing program failure
+            // Halve, as the thesis specifies. Dividing by another register divides
+            // by zero whenever that register is still 0, which turns most random
+            // programs into overflows.
+            Op::Divide => a / 2.,
             Op::Sub => a - b,
         }
     }
@@ -168,5 +171,16 @@ impl Instruction {
         );
 
         registers.update(self.src_idx, new_source_value);
+    }
+}
+
+#[cfg(test)]
+mod op_tests {
+    use super::Op;
+
+    #[test]
+    fn divide_halves_and_never_divides_by_zero() {
+        assert_eq!(Op::Divide.apply(3.0, 0.0), 1.5);
+        assert_eq!(Op::Divide.apply(-8.0, 123.0), -4.0);
     }
 }
