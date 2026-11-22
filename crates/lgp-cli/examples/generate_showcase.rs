@@ -4,9 +4,10 @@
 //!   cargo run -p lgp --example generate_showcase --features plot
 
 use plotters::prelude::*;
-use serde_json::Value;
+use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::fs;
+use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
 struct FitnessSeries {
@@ -16,21 +17,35 @@ struct FitnessSeries {
     worst: Vec<f64>,
 }
 
-fn extract_fitness(individual: &Value) -> f64 {
-    if let Some(inner) = individual.get("program") {
-        if let Some(f) = inner.get("fitness").and_then(|v| v.as_f64()) {
-            return f;
-        }
-    }
+/// Only the fitness fields of an individual; every other field is skipped
+/// while parsing. Handles plain programs and the Q-learning `program` wrapper.
+#[derive(Deserialize)]
+struct IndividualFitness {
+    #[serde(default)]
+    fitness: Option<f64>,
+    #[serde(default)]
+    program: Option<ProgramFitness>,
+}
+
+#[derive(Deserialize)]
+struct ProgramFitness {
+    #[serde(default)]
+    fitness: Option<f64>,
+}
+
+fn extract_fitness(individual: &IndividualFitness) -> f64 {
     individual
-        .get("fitness")
-        .and_then(|v| v.as_f64())
+        .program
+        .as_ref()
+        .and_then(|p| p.fitness)
+        .or(individual.fitness)
         .unwrap_or(0.0)
 }
 
 fn load_fitness_series(population_path: &Path) -> FitnessSeries {
-    let data = fs::read_to_string(population_path).expect("failed to read population.json");
-    let generations: Vec<Vec<Value>> = serde_json::from_str(&data).expect("invalid JSON");
+    let file = fs::File::open(population_path).expect("failed to read population.json");
+    let generations: Vec<Vec<IndividualFitness>> =
+        serde_json::from_reader(BufReader::new(file)).expect("invalid JSON");
 
     let mut best = Vec::with_capacity(generations.len());
     let mut median = Vec::with_capacity(generations.len());

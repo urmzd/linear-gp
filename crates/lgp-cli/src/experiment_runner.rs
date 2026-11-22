@@ -2,10 +2,11 @@
 //!
 //! Runs experiments based on configuration and produces structured output.
 
+use std::fs::File;
+use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 
 use chrono::Utc;
-use itertools::Itertools;
 use rand::Rng;
 use tracing::{debug, info, instrument};
 
@@ -21,7 +22,6 @@ use lgp::core::program::ProgramGeneratorParameters;
 use lgp::extensions::q_learning::{QConsts, QProgramGeneratorParameters};
 use lgp::problems::gym::{GymRsEngine, GymRsQEngine};
 use lgp::problems::iris::IrisEngine;
-use lgp::utils::misc::create_path;
 
 /// Output structure for an experiment run.
 pub struct ExperimentOutput {
@@ -276,6 +276,11 @@ fn run_mountain_car_q(
 }
 
 /// Run the experiment and save results.
+///
+/// Each generation is streamed to `population.json` as soon as the engine
+/// produces it, so only the current generation is held in memory. The file
+/// is still a single JSON array of generations (each an array of
+/// individuals), written compactly.
 fn run_and_save<C>(
     parameters: &HyperParameters<C>,
     output: &ExperimentOutput,
@@ -283,51 +288,61 @@ fn run_and_save<C>(
 where
     C: Core,
 {
-    let populations = parameters
-        .build_engine()
-        .take(parameters.n_generations)
-        .collect_vec();
+    let outputs_dir = output.outputs_dir();
+    std::fs::create_dir_all(&outputs_dir)?;
 
-    save_experiment_outputs::<C>(&populations, parameters, output)?;
+    let population_path = outputs_dir.join("population.json");
+    debug!(path = %population_path.display(), "Streaming population.json");
+    let mut writer = BufWriter::new(File::create(&population_path)?);
 
-    Ok(())
+    writer.write_all(b"[")?;
+    let mut n_written = 0usize;
+    let mut last_population = None;
+    for population in parameters.build_engine().take(parameters.n_generations) {
+        if n_written > 0 {
+            writer.write_all(b",")?;
+        }
+        serde_json::to_writer(&mut writer, &population)?;
+        n_written += 1;
+        last_population = Some(population);
+    }
+    writer.write_all(b"]")?;
+    writer.flush()?;
+    drop(writer);
+
+    debug!(population_count = n_written, "Saved population.json");
+
+    let last_population = last_population.ok_or("engine produced no generations")?;
+    save_summary_outputs::<C>(&last_population, parameters, &outputs_dir)
 }
 
-/// Save experiment results to the output structure.
-fn save_experiment_outputs<C>(
-    populations: &Vec<Vec<C::Individual>>,
+/// Save best/median/worst individuals of the final generation and the
+/// hyperparameters used.
+fn save_summary_outputs<C>(
+    last_population: &[C::Individual],
     params: &HyperParameters<C>,
-    output: &ExperimentOutput,
+    outputs_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>>
 where
     C: Core,
 {
-    let outputs_dir = output.outputs_dir();
-
     let best_path = outputs_dir.join("best.json");
     let median_path = outputs_dir.join("median.json");
     let worst_path = outputs_dir.join("worst.json");
     let params_path = outputs_dir.join("params.json");
-    let population_path = outputs_dir.join("population.json");
 
-    create_path(best_path.to_str().unwrap(), true)?;
-    create_path(median_path.to_str().unwrap(), true)?;
-    create_path(worst_path.to_str().unwrap(), true)?;
-    create_path(params_path.to_str().unwrap(), true)?;
-    create_path(population_path.to_str().unwrap(), true)?;
-
-    let last_population = populations.last().unwrap();
-
-    let (mut worst, mut median, mut best) = populations
+    let mut worst = last_population
         .last()
-        .map(|p| {
-            (
-                p.last().cloned().unwrap(),
-                p.get(last_population.len() / 2).cloned().unwrap(),
-                p.first().cloned().unwrap(),
-            )
-        })
-        .unwrap();
+        .cloned()
+        .ok_or("final generation is empty")?;
+    let mut median = last_population
+        .get(last_population.len() / 2)
+        .cloned()
+        .ok_or("final generation is empty")?;
+    let mut best = last_population
+        .first()
+        .cloned()
+        .ok_or("final generation is empty")?;
 
     C::Freeze::freeze(&mut worst);
     C::Freeze::freeze(&mut median);
@@ -344,12 +359,6 @@ where
 
     debug!(seed = ?params.seed, "Saving params.json");
     params.save(params_path.to_str().unwrap())?;
-
-    debug!(
-        population_count = populations.len(),
-        "Saving population.json"
-    );
-    populations.save(population_path.to_str().unwrap())?;
 
     Ok(())
 }

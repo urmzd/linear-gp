@@ -1,9 +1,12 @@
 //! Analyze command: generate statistics tables and optional plots from experiment results.
 
 use std::collections::BTreeMap;
+use std::fs::File;
+use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
 use clap::Args;
+use serde::Deserialize;
 use tracing::{debug, info, warn};
 
 use crate::ui;
@@ -33,22 +36,38 @@ struct GenerationStats {
     min: f64,
 }
 
-/// Extract fitness from a serde_json::Value, handling both plain and Q-learning wrapper formats.
-fn extract_fitness(individual: &serde_json::Value) -> f64 {
-    // Q-learning wrapper: { "fitness": 0.0, "program": { "fitness": <real> } }
-    if let Some(inner) = individual.get("program") {
-        if let Some(f) = inner.get("fitness").and_then(|v| v.as_f64()) {
-            return f;
-        }
-    }
+/// The only fields of an individual that analysis needs.
+///
+/// Deserializing into this struct skips instructions, registers and Q-tables
+/// while parsing, so a large `population.json` never lives fully in memory.
+/// Handles plain programs and the Q-learning wrapper
+/// (`{ "q_table": .., "program": { "fitness": <real> } }`).
+#[derive(Deserialize)]
+struct IndividualFitness {
+    #[serde(default)]
+    fitness: Option<f64>,
+    #[serde(default)]
+    program: Option<ProgramFitness>,
+}
+
+#[derive(Deserialize)]
+struct ProgramFitness {
+    #[serde(default)]
+    fitness: Option<f64>,
+}
+
+/// Extract fitness: the wrapped program's first, then the top level, then 0.0.
+fn extract_fitness(individual: &IndividualFitness) -> f64 {
     individual
-        .get("fitness")
-        .and_then(|v| v.as_f64())
+        .program
+        .as_ref()
+        .and_then(|p| p.fitness)
+        .or(individual.fitness)
         .unwrap_or(0.0)
 }
 
 /// Compute stats for one generation of individuals.
-fn compute_generation_stats(individuals: &[serde_json::Value]) -> GenerationStats {
+fn compute_generation_stats(individuals: &[IndividualFitness]) -> GenerationStats {
     let mut fitnesses: Vec<f64> = individuals.iter().map(extract_fitness).collect();
     fitnesses.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 
@@ -79,8 +98,8 @@ fn generate_table(
     experiment_name: &str,
     tables_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let data = std::fs::read_to_string(population_path)?;
-    let generations: Vec<Vec<serde_json::Value>> = serde_json::from_str(&data)?;
+    let reader = BufReader::new(File::open(population_path)?);
+    let generations: Vec<Vec<IndividualFitness>> = serde_json::from_reader(reader)?;
 
     std::fs::create_dir_all(tables_dir)?;
     let csv_path = tables_dir.join(format!("{}.csv", experiment_name));
