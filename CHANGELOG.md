@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.16 (2026-11-22)
+
+### Performance
+
+- faster runs with identical outputs (#32) ([526bb90](https://github.com/urmzd/linear-gp/commit/526bb9037e3faf7884740e8b4b722abb5eb111f4))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.15...v1.7.16)
+
+
 ## 1.7.15 (2026-11-22)
 
 ### Bug Fixes
