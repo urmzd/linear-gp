@@ -87,6 +87,16 @@ impl QTable {
         max.expect("Available action to yield an index.")
     }
 
+    /// The highest Q value available from `register_number`: `max_a Q(r, a)`.
+    pub fn max_q(&self, register_number: usize) -> f64 {
+        self.table
+            .get(register_number)
+            .expect("Register number to be less than length of QTable.")
+            .iter()
+            .copied()
+            .fold(f64::NEG_INFINITY, f64::max)
+    }
+
     pub fn get_action_register(&self, registers: &Registers) -> Option<ActionRegisterPair> {
         let winning_register = match registers.argmax(ArgmaxInput::All).any() {
             ActionRegister::Value(register) => register,
@@ -117,7 +127,9 @@ impl QTable {
     ) {
         let current_q_value =
             self.table[current_action_state.register][current_action_state.action];
-        let next_q_value = self.action_argmax(next_action_state.register) as f64;
+        // Bootstrap from the best Q value of the next register, not the index
+        // of the best action.
+        let next_q_value = self.max_q(next_action_state.register);
 
         let new_q_value = self.q_consts.alpha_active
             * (current_reward + (self.q_consts.gamma * next_q_value) - current_q_value);
@@ -398,7 +410,7 @@ impl Default for QConsts {
             alpha_decay,
             epsilon_decay,
             alpha_active: alpha,
-            epsilon_active: epsilon_decay,
+            epsilon_active: epsilon,
         }
     }
 }
