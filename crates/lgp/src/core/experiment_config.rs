@@ -102,11 +102,19 @@ pub struct HyperParams {
     /// Number of threads for parallel evaluation. If None, uses all available cores.
     #[serde(default)]
     pub n_threads: Option<usize>,
+    /// Fresh trials used to score the final best and median programs after
+    /// training. 0 skips held-out evaluation.
+    #[serde(default = "default_n_eval_trials")]
+    pub n_eval_trials: usize,
     pub program: ProgramConfig,
 }
 
 fn default_n_trials() -> usize {
     1
+}
+
+fn default_n_eval_trials() -> usize {
+    100
 }
 
 fn default_gap() -> f64 {

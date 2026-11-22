@@ -14,7 +14,7 @@ use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
 use gymnasia::envs::classical_control::mountain_car::MountainCarEnv;
 
 use lgp::core::characteristics::Save;
-use lgp::core::engines::core_engine::{Core, HyperParameters};
+use lgp::core::engines::core_engine::{evaluate, Core, HyperParameters};
 use lgp::core::engines::freeze_engine::Freeze;
 use lgp::core::experiment_config::{ExperimentConfig, QLearningParams};
 use lgp::core::instruction::InstructionGeneratorParameters;
@@ -156,7 +156,9 @@ fn run_iris(
         program_parameters: build_program_params(config),
     };
 
-    run_and_save::<IrisEngine>(&parameters, output)
+    // Iris trials reshuffle the same 150 rows, so fresh trials would not be
+    // held out. Skip evaluation until the dataset has a test split.
+    run_and_save::<IrisEngine>(&parameters, output, 0)
 }
 
 /// Run CartPole with pure LGP.
@@ -178,7 +180,11 @@ fn run_cart_pole_lgp(
         program_parameters: build_program_params(config),
     };
 
-    run_and_save::<GymRsEngine<CartPoleEnv>>(&parameters, output)
+    run_and_save::<GymRsEngine<CartPoleEnv>>(
+        &parameters,
+        output,
+        config.hyperparameters.n_eval_trials,
+    )
 }
 
 /// Run CartPole with Q-Learning.
@@ -214,7 +220,11 @@ fn run_cart_pole_q(
         program_parameters: q_program_params,
     };
 
-    run_and_save::<GymRsQEngine<CartPoleEnv>>(&parameters, output)
+    run_and_save::<GymRsQEngine<CartPoleEnv>>(
+        &parameters,
+        output,
+        config.hyperparameters.n_eval_trials,
+    )
 }
 
 /// Run MountainCar with pure LGP.
@@ -236,7 +246,11 @@ fn run_mountain_car_lgp(
         program_parameters: build_program_params(config),
     };
 
-    run_and_save::<GymRsEngine<MountainCarEnv>>(&parameters, output)
+    run_and_save::<GymRsEngine<MountainCarEnv>>(
+        &parameters,
+        output,
+        config.hyperparameters.n_eval_trials,
+    )
 }
 
 /// Run MountainCar with Q-Learning.
@@ -272,7 +286,11 @@ fn run_mountain_car_q(
         program_parameters: q_program_params,
     };
 
-    run_and_save::<GymRsQEngine<MountainCarEnv>>(&parameters, output)
+    run_and_save::<GymRsQEngine<MountainCarEnv>>(
+        &parameters,
+        output,
+        config.hyperparameters.n_eval_trials,
+    )
 }
 
 /// Run the experiment and save results.
@@ -284,6 +302,7 @@ fn run_mountain_car_q(
 fn run_and_save<C>(
     parameters: &HyperParameters<C>,
     output: &ExperimentOutput,
+    n_eval_trials: usize,
 ) -> Result<(), Box<dyn std::error::Error>>
 where
     C: Core,
@@ -313,7 +332,7 @@ where
     debug!(population_count = n_written, "Saved population.json");
 
     let last_population = last_population.ok_or("engine produced no generations")?;
-    save_summary_outputs::<C>(&last_population, parameters, &outputs_dir)
+    save_summary_outputs::<C>(&last_population, parameters, &outputs_dir, n_eval_trials)
 }
 
 /// Save best/median/worst individuals of the final generation and the
@@ -322,6 +341,7 @@ fn save_summary_outputs<C>(
     last_population: &[C::Individual],
     params: &HyperParameters<C>,
     outputs_dir: &Path,
+    n_eval_trials: usize,
 ) -> Result<(), Box<dyn std::error::Error>>
 where
     C: Core,
@@ -360,5 +380,64 @@ where
     debug!(seed = ?params.seed, "Saving params.json");
     params.save(params_path.to_str().unwrap())?;
 
+    if n_eval_trials > 0 {
+        save_evaluation::<C>(&best, &median, params, outputs_dir, n_eval_trials)?;
+    }
+
+    Ok(())
+}
+
+/// Offset that separates the evaluation seed from the training seed.
+const EVAL_SEED_OFFSET: u64 = 0x9E37_79B9_7F4A_7C15;
+
+fn score_summary(scores: &[f64]) -> serde_json::Value {
+    let mut sorted = scores.to_vec();
+    sorted.sort_by(f64::total_cmp);
+    let n = sorted.len();
+    let median = if n % 2 == 1 {
+        sorted[n / 2]
+    } else {
+        (sorted[n / 2 - 1] + sorted[n / 2]) / 2.
+    };
+    serde_json::json!({
+        "mean": scores.iter().sum::<f64>() / n as f64,
+        "median": median,
+        "min": sorted[0],
+        "max": sorted[n - 1],
+        "scores": scores,
+    })
+}
+
+/// Score the frozen best and median programs on fresh trials and save
+/// `evaluation.json`. A frozen RLGP program acts greedily and stops learning.
+fn save_evaluation<C>(
+    best: &C::Individual,
+    median: &C::Individual,
+    params: &HyperParameters<C>,
+    outputs_dir: &Path,
+    n_eval_trials: usize,
+) -> Result<(), Box<dyn std::error::Error>>
+where
+    C: Core,
+{
+    let seed = params
+        .seed
+        .unwrap_or_default()
+        .wrapping_add(EVAL_SEED_OFFSET);
+    let best_scores = evaluate::<C>(best, n_eval_trials, seed, params.default_fitness);
+    let median_scores = evaluate::<C>(median, n_eval_trials, seed, params.default_fitness);
+
+    let evaluation = serde_json::json!({
+        "n_trials": n_eval_trials,
+        "seed": seed.to_string(),
+        "best": score_summary(&best_scores),
+        "median": score_summary(&median_scores),
+    });
+
+    let path = outputs_dir.join("evaluation.json");
+    debug!(path = %path.display(), "Saving evaluation.json");
+    let mut writer = BufWriter::new(File::create(&path)?);
+    serde_json::to_writer_pretty(&mut writer, &evaluation)?;
+    writer.flush()?;
     Ok(())
 }

@@ -9,7 +9,7 @@
 use gymnasia::envs::classical_control::cartpole::CartPoleEnv;
 use itertools::Itertools;
 
-use lgp::core::engines::core_engine::{Core, HyperParametersBuilder};
+use lgp::core::engines::core_engine::{evaluate, Core, HyperParametersBuilder};
 use lgp::core::instruction::InstructionGeneratorParametersBuilder;
 use lgp::core::program::ProgramGeneratorParametersBuilder;
 use lgp::problems::gym::GymRsEngine;
@@ -54,4 +54,21 @@ fn same_seed_repeats_exactly() {
 #[test]
 fn different_seeds_differ() {
     assert_ne!(seeded_run(1), seeded_run(2));
+}
+
+fn trained_best() -> <GymRsEngine<CartPoleEnv> as Core>::Individual {
+    let populations: Vec<Vec<<GymRsEngine<CartPoleEnv> as Core>::Individual>> =
+        serde_json::from_str(&seeded_run(42)).expect("Failed to parse populations");
+    populations.last().unwrap().first().unwrap().clone()
+}
+
+#[test]
+fn evaluation_repeats_exactly_and_uses_its_own_trials() {
+    let best = trained_best();
+    let a = evaluate::<GymRsEngine<CartPoleEnv>>(&best, 20, 7, 0.);
+    let b = evaluate::<GymRsEngine<CartPoleEnv>>(&best, 20, 7, 0.);
+    let c = evaluate::<GymRsEngine<CartPoleEnv>>(&best, 20, 8, 0.);
+    assert_eq!(a.len(), 20);
+    assert_eq!(a, b);
+    assert_ne!(a, c);
 }
