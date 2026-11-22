@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.7.13 (2026-11-22)
+
+### Bug Fixes
+
+- **rng**: make seeded runs repeat exactly (#27) ([9ee04d6](https://github.com/urmzd/linear-gp/commit/9ee04d6f9586a8ebc9744e2a4d393f0c7ef886c5))
+
+### Misc
+
+- load the lgp-experiment skill in Claude Code from this repo (#26) ([a21369b](https://github.com/urmzd/linear-gp/commit/a21369bbadab6bb7a00d1b33cdece31a6fb8cab0))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.12...v1.7.13)
+
+
 ## 1.7.12 (2026-10-29)
 
 ### Bug Fixes
