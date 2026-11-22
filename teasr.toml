@@ -15,9 +15,19 @@ type = "terminal"
 name = "list-experiments"
 theme = "dracula"
 cwd = "."
-cols = 90
-rows = 30
+cols = 64
+rows = 12
 
+[[scenes.interactions]]
+type = "type"
+text = "export PS1='$ ' PATH=\"$PWD/target/release:$PATH\" RUST_LOG=error && clear"
+speed = 1
+[[scenes.interactions]]
+type = "key"
+key = "enter"
+[[scenes.interactions]]
+type = "wait"
+duration = 500
 [[scenes.interactions]]
 type = "type"
 text = "lgp list"
@@ -29,22 +39,32 @@ key = "enter"
 type = "wait"
 duration = 3000
 
-# Scene 2: Run a quick Iris experiment
+# Scene 2: Run a quick Iris experiment and show the final row (generation, max, mean, median, min fitness)
 [[scenes]]
 type = "terminal"
 name = "run-experiment"
 theme = "dracula"
 cwd = "."
-cols = 90
-rows = 24
+cols = 80
+rows = 15
 
 [[scenes.interactions]]
 type = "type"
-text = "lgp run iris_crossover 2>&1 | tail -20"
-speed = 40
+text = "export PS1='$ ' PATH=\"$PWD/target/release:$PATH\" RUST_LOG=error && clear"
+speed = 1
 [[scenes.interactions]]
 type = "key"
 key = "enter"
 [[scenes.interactions]]
 type = "wait"
-duration = 20000
+duration = 500
+[[scenes.interactions]]
+type = "type"
+text = "lgp run iris_crossover && lgp analyze && tail -n1 outputs/tables/*.csv"
+speed = 30
+[[scenes.interactions]]
+type = "key"
+key = "enter"
+[[scenes.interactions]]
+type = "wait"
+duration = 30000
