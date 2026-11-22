@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.0 (2026-11-22)
+
+### Features
+
+- score the final best and median programs on held-out trials (#33) ([32ac4a5](https://github.com/urmzd/linear-gp/commit/32ac4a5e243da3e20ba556b745099aedf608ce72))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.16...v1.8.0)
+
+
 ## 1.7.16 (2026-11-22)
 
 ### Performance
