@@ -40,3 +40,9 @@ indicatif = "0.18"
 anyhow = "1"
 sha2 = "0.11"
 ureq = { version = "3", features = ["json"] }
+
+[profile.release]
+# One codegen unit and fat LTO let the compiler inline across crates
+# (gymnasia, rand) into the per-step loop.
+lto = "fat"
+codegen-units = 1
