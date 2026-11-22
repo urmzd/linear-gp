@@ -26,6 +26,6 @@ pub fn create_path(path: &str, file: bool) -> Result<PathBuf, Box<dyn Error>> {
 
 impl Reset<uuid::Uuid> for ResetEngine {
     fn reset(item: &mut uuid::Uuid) {
-        *item = uuid::Uuid::new_v4();
+        *item = crate::utils::random::random_uuid();
     }
 }

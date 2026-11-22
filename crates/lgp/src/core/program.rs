@@ -117,7 +117,7 @@ impl Generate<ProgramGeneratorParameters, Program> for GenerateEngine {
                 .collect();
 
         Program {
-            id: Uuid::new_v4(),
+            id: crate::utils::random::random_uuid(),
             instructions,
             registers,
             fitness: f64::NAN,

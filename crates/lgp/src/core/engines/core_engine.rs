@@ -2,7 +2,7 @@ use std::{iter::repeat_with, sync::Arc};
 
 use clap::{Args, Parser};
 use itertools::Itertools;
-use rand::{seq::IteratorRandom, Rng};
+use rand::{seq::IteratorRandom, Rng, RngCore};
 use rayon::prelude::*;
 
 use crate::{
@@ -10,7 +10,7 @@ use crate::{
         engines::{breed_engine::Breed, reset_engine::Reset},
         environment::State,
     },
-    utils::random::{generator, update_seed},
+    utils::random::{generator, update_seed, with_seed},
 };
 
 use super::{
@@ -242,23 +242,31 @@ pub trait Core {
         default_fitness: f64,
     ) {
         let n_trials = trials.len();
-        population.par_iter_mut().for_each(|individual| {
-            let total: f64 = trials
-                .iter()
-                .cloned()
-                .map(|mut trial| {
-                    Self::Reset::reset(individual);
-                    Self::Reset::reset(&mut trial);
-                    let score = Self::Fitness::eval_fitness(individual, &mut trial);
-                    if score.is_finite() {
-                        score
-                    } else {
-                        default_fitness
-                    }
+        // One seed per individual, drawn on the calling thread, so the result
+        // does not depend on which worker thread evaluates which individual.
+        let seeds: Vec<u64> = population.iter().map(|_| generator().next_u64()).collect();
+        population
+            .par_iter_mut()
+            .zip(seeds)
+            .for_each(|(individual, seed)| {
+                with_seed(seed, || {
+                    let total: f64 = trials
+                        .iter()
+                        .cloned()
+                        .map(|mut trial| {
+                            Self::Reset::reset(individual);
+                            Self::Reset::reset(&mut trial);
+                            let score = Self::Fitness::eval_fitness(individual, &mut trial);
+                            if score.is_finite() {
+                                score
+                            } else {
+                                default_fitness
+                            }
+                        })
+                        .sum();
+                    Self::Status::set_fitness(individual, total / n_trials as f64);
                 })
-                .sum();
-            Self::Status::set_fitness(individual, total / n_trials as f64);
-        });
+            });
     }
 
     fn rank(population: &mut Vec<Self::Individual>) {
@@ -317,54 +325,66 @@ pub trait Core {
 
         let rc_population = Arc::new(population.clone());
 
+        // Each spawned task may run on any worker thread. Seed each one from the
+        // calling thread so seeded runs repeat exactly.
+        let crossover_seed = generator().next_u64();
+        let mutation_seed = generator().next_u64();
+        let clone_seed = generator().next_u64();
+
         rayon::scope(|s| {
             s.spawn(|_| {
-                crossover_offspring.extend((0..n_crossovers).filter_map(|_| {
-                    let population_to_read = rc_population.clone();
-                    let parent_a = population_to_read.iter().choose(&mut generator());
-                    let parent_b = population_to_read.iter().choose(&mut generator());
+                with_seed(crossover_seed, || {
+                    crossover_offspring.extend((0..n_crossovers).filter_map(|_| {
+                        let population_to_read = rc_population.clone();
+                        let parent_a = population_to_read.iter().choose(&mut generator());
+                        let parent_b = population_to_read.iter().choose(&mut generator());
 
-                    if let (Some(parent_a), Some(parent_b)) = (parent_a, parent_b) {
-                        let children = Self::Breed::two_point_crossover(parent_a, parent_b);
-                        match generator().gen_range(0..2) {
-                            0 => Some(children.0),
-                            1 => Some(children.1),
-                            _ => unreachable!(),
+                        if let (Some(parent_a), Some(parent_b)) = (parent_a, parent_b) {
+                            let children = Self::Breed::two_point_crossover(parent_a, parent_b);
+                            match generator().gen_range(0..2) {
+                                0 => Some(children.0),
+                                1 => Some(children.1),
+                                _ => unreachable!(),
+                            }
+                        } else {
+                            None
                         }
-                    } else {
-                        None
-                    }
-                }));
+                    }));
+                })
             });
 
             s.spawn(|_| {
-                mutation_offspring.extend((0..n_mutations).filter_map(|_| {
-                    let population_to_read = rc_population.clone();
-                    let parent = population_to_read.iter().choose(&mut generator());
+                with_seed(mutation_seed, || {
+                    mutation_offspring.extend((0..n_mutations).filter_map(|_| {
+                        let population_to_read = rc_population.clone();
+                        let parent = population_to_read.iter().choose(&mut generator());
 
-                    if let Some(internal_parent) = parent {
-                        let mut clone = internal_parent.clone();
-                        Self::Mutate::mutate(&mut clone, program_parameters);
-                        Some(clone)
-                    } else {
-                        None
-                    }
-                }))
+                        if let Some(internal_parent) = parent {
+                            let mut clone = internal_parent.clone();
+                            Self::Mutate::mutate(&mut clone, program_parameters);
+                            Some(clone)
+                        } else {
+                            None
+                        }
+                    }))
+                })
             });
 
             s.spawn(|_| {
-                clone_offspring.extend((0..n_clones).filter_map(|_| {
-                    let population_to_read = rc_population.clone();
-                    let parent = population_to_read.iter().choose(&mut generator());
+                with_seed(clone_seed, || {
+                    clone_offspring.extend((0..n_clones).filter_map(|_| {
+                        let population_to_read = rc_population.clone();
+                        let parent = population_to_read.iter().choose(&mut generator());
 
-                    if let Some(internal_parent) = parent {
-                        let mut clone = internal_parent.clone();
-                        Self::Reset::reset(&mut clone);
-                        Some(clone)
-                    } else {
-                        None
-                    }
-                }))
+                        if let Some(internal_parent) = parent {
+                            let mut clone = internal_parent.clone();
+                            Self::Reset::reset(&mut clone);
+                            Some(clone)
+                        } else {
+                            None
+                        }
+                    }))
+                })
             });
         });
 
