@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.14 (2026-11-22)
+
+### Bug Fixes
+
+- **q-learning**: bootstrap from max Q and learn the terminal transition (#30) ([89726b2](https://github.com/urmzd/linear-gp/commit/89726b22becf22d8aa923067d9a8159edf8d5c79))
+
+[Full Changelog](https://github.com/urmzd/linear-gp/compare/v1.7.13...v1.7.14)
+
+
 ## 1.7.13 (2026-11-22)
 
 ### Bug Fixes
