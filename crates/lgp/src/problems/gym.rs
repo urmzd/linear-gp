@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+use rand::RngCore;
+
 use gymnasia::core::Env;
 use gymnasia::core::Flatten;
 use gymnasia::core::StepResult;
@@ -23,6 +25,7 @@ use crate::core::program::ProgramGeneratorParameters;
 use crate::extensions::interactive::UseRlFitness;
 use crate::extensions::q_learning::QProgram;
 use crate::extensions::q_learning::QProgramGeneratorParameters;
+use crate::utils::random::generator;
 
 pub trait GymRsEnvExt: Env<Action = i64> + Clone + Send + Sync
 where
@@ -116,7 +119,8 @@ where
     T::Observation: Copy + Flatten + Send + Sync,
 {
     fn reset(item: &mut GymRsInput<T>) {
-        item.environment.reset(None, Default::default());
+        item.environment
+            .reset(Some(generator().next_u64()), Default::default());
         item.environment.set_state(item.initial_state);
         item.observation = item.initial_state.flatten();
         item.terminated = false;
@@ -131,7 +135,7 @@ where
 {
     fn generate(_from: ()) -> GymRsInput<T> {
         let mut environment: T = T::create();
-        let initial_state = environment.reset(None, Default::default());
+        let initial_state = environment.reset(Some(generator().next_u64()), Default::default());
         let observation = initial_state.flatten();
 
         GymRsInput {

@@ -31,6 +31,30 @@ pub fn update_seed(seed: Option<u64>) {
     });
 }
 
+/// Runs `f` with this thread's generator seeded from `seed`, then restores the
+/// previous generator state.
+///
+/// Rayon worker threads own their own generators, which `update_seed` never
+/// reaches. Parallel work draws a seed per task from the calling thread and
+/// runs the task through this function, so seeded runs repeat exactly no matter
+/// which worker picks up the task. Restoring the old state keeps a worker that
+/// steals a task from another engine from corrupting that engine's stream.
+pub fn with_seed<R>(seed: u64, f: impl FnOnce() -> R) -> R {
+    let previous = GENERATOR.with(|t| {
+        let generator = unsafe { &mut *t.get() };
+        std::mem::replace(generator, Xoshiro256PlusPlus::seed_from_u64(seed))
+    });
+
+    let result = f();
+
+    GENERATOR.with(|t| {
+        let generator = unsafe { &mut *t.get() };
+        *generator = previous;
+    });
+
+    result
+}
+
 pub fn generator() -> Random {
     let rng = GENERATOR.with(|t| t.clone());
     Random { rng }
@@ -62,4 +86,12 @@ impl RngCore for Random {
         let rng = unsafe { &mut *self.rng.get() };
         rng.try_fill_bytes(dest)
     }
+}
+
+/// Returns a version 4 UUID drawn from this thread's generator, so seeded runs
+/// produce the same program ids.
+pub fn random_uuid() -> uuid::Uuid {
+    let mut bytes = [0u8; 16];
+    generator().fill_bytes(&mut bytes);
+    uuid::Builder::from_random_bytes(bytes).into_uuid()
 }
