@@ -98,7 +98,7 @@ impl QTable {
     }
 
     pub fn get_action_register(&self, registers: &Registers) -> Option<ActionRegisterPair> {
-        let winning_register = match registers.argmax(ArgmaxInput::All).any() {
+        let winning_register = match registers.select(ArgmaxInput::All) {
             ActionRegister::Value(register) => register,
             _ => {
                 return None;

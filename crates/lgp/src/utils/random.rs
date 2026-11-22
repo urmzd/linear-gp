@@ -55,6 +55,15 @@ pub fn with_seed<R>(seed: u64, f: impl FnOnce() -> R) -> R {
     result
 }
 
+/// Runs `f` with this thread's generator, without cloning a handle to it.
+/// Draws the same values as `generator()`; use it in hot loops.
+pub fn with_generator<R>(f: impl FnOnce(&mut Xoshiro256PlusPlus) -> R) -> R {
+    GENERATOR.with(|t| {
+        let generator = unsafe { &mut *t.get() };
+        f(generator)
+    })
+}
+
 pub fn generator() -> Random {
     let rng = GENERATOR.with(|t| t.clone());
     Random { rng }
