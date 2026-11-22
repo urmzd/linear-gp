@@ -67,6 +67,7 @@ where
 {
     environment: E,
     terminated: bool,
+    truncated: bool,
     episode_idx: usize,
     initial_state: E::Observation,
     observation: Vec<f64>,
@@ -85,8 +86,9 @@ where
         let step_result: StepResult<E::Observation> = self.environment.step(action as i64);
         self.episode_idx += 1;
         self.observation = step_result.observation.flatten();
-        self.terminated =
-            self.episode_idx >= E::max_steps() || step_result.terminated || step_result.truncated;
+        self.truncated = !step_result.terminated
+            && (self.episode_idx >= E::max_steps() || step_result.truncated);
+        self.terminated = step_result.terminated || self.truncated;
         step_result.reward
     }
 
@@ -108,6 +110,10 @@ where
         self.terminated
     }
 
+    fn is_truncated(&self) -> bool {
+        self.truncated
+    }
+
     fn get_initial_state(&self) -> Vec<f64> {
         self.initial_state.flatten()
     }
@@ -124,6 +130,7 @@ where
         item.environment.set_state(item.initial_state);
         item.observation = item.initial_state.flatten();
         item.terminated = false;
+        item.truncated = false;
         item.episode_idx = 0;
     }
 }
@@ -141,6 +148,7 @@ where
         GymRsInput {
             environment,
             terminated: false,
+            truncated: false,
             episode_idx: 0,
             initial_state,
             observation,
