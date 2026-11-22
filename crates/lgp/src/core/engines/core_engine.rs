@@ -1,4 +1,4 @@
-use std::{iter::repeat_with, sync::Arc};
+use std::iter::repeat_with;
 
 use clap::{Args, Parser};
 use itertools::Itertools;
@@ -138,7 +138,9 @@ where
             return None;
         }
 
-        let mut population = self.next_population.clone();
+        // The previous call built this population and nothing else reads it,
+        // so take it instead of cloning it.
+        let mut population = std::mem::take(&mut self.next_population);
 
         C::eval_fitness(&mut population, &self.trials, self.params.default_fitness);
         C::rank(&mut population);
@@ -167,6 +169,8 @@ where
             "Full individual details"
         );
 
+        // `population` goes to the caller, so the next generation needs its own
+        // copy. `variation` fills it back up to this clone's capacity.
         let mut new_population = population.clone();
 
         trace!(
@@ -323,7 +327,8 @@ pub trait Core {
 
         debug_assert!(n_mutations + n_crossovers <= remaining_pool_spots);
 
-        let rc_population = Arc::new(population.clone());
+        // Parents are only read while the offspring are built, so borrow them.
+        let parents: &[Self::Individual] = population;
 
         // Each spawned task may run on any worker thread. Seed each one from the
         // calling thread so seeded runs repeat exactly.
@@ -335,9 +340,8 @@ pub trait Core {
             s.spawn(|_| {
                 with_seed(crossover_seed, || {
                     crossover_offspring.extend((0..n_crossovers).filter_map(|_| {
-                        let population_to_read = rc_population.clone();
-                        let parent_a = population_to_read.iter().choose(&mut generator());
-                        let parent_b = population_to_read.iter().choose(&mut generator());
+                        let parent_a = parents.iter().choose(&mut generator());
+                        let parent_b = parents.iter().choose(&mut generator());
 
                         if let (Some(parent_a), Some(parent_b)) = (parent_a, parent_b) {
                             let children = Self::Breed::two_point_crossover(parent_a, parent_b);
@@ -356,8 +360,7 @@ pub trait Core {
             s.spawn(|_| {
                 with_seed(mutation_seed, || {
                     mutation_offspring.extend((0..n_mutations).filter_map(|_| {
-                        let population_to_read = rc_population.clone();
-                        let parent = population_to_read.iter().choose(&mut generator());
+                        let parent = parents.iter().choose(&mut generator());
 
                         if let Some(internal_parent) = parent {
                             let mut clone = internal_parent.clone();
@@ -373,8 +376,7 @@ pub trait Core {
             s.spawn(|_| {
                 with_seed(clone_seed, || {
                     clone_offspring.extend((0..n_clones).filter_map(|_| {
-                        let population_to_read = rc_population.clone();
-                        let parent = population_to_read.iter().choose(&mut generator());
+                        let parent = parents.iter().choose(&mut generator());
 
                         if let Some(internal_parent) = parent {
                             let mut clone = internal_parent.clone();

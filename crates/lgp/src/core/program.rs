@@ -6,7 +6,7 @@ use derive_builder::Builder;
 use rand::{seq::IteratorRandom, Rng};
 
 use serde::{Deserialize, Serialize};
-use tracing::{instrument, trace};
+use tracing::{instrument, trace, Level};
 use uuid::Uuid;
 
 use super::{
@@ -89,8 +89,25 @@ impl PartialOrd for Program {
 }
 
 impl Program {
-    #[instrument(skip_all, fields(program_id = %self.id, n_instructions = self.instructions.len()), level = "trace")]
     pub fn run(&mut self, input: &impl State) {
+        // Check the trace level once per run, not once per instruction. The
+        // instruction module has its own target, so check it too.
+        if tracing::enabled!(Level::TRACE)
+            || tracing::enabled!(target: "lgp::core::instruction", Level::TRACE)
+        {
+            self.run_traced(input);
+            return;
+        }
+
+        for instruction in self.instructions.iter() {
+            instruction.apply_untraced(&mut self.registers, input);
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    #[instrument(name = "run", skip_all, fields(program_id = %self.id, n_instructions = self.instructions.len()), level = "trace")]
+    fn run_traced(&mut self, input: &impl State) {
         for (idx, instruction) in self.instructions.iter().enumerate() {
             trace!(instruction_idx = idx, "Executing instruction");
             instruction.apply(&mut self.registers, input)
@@ -146,11 +163,16 @@ impl Breed<Program> for BreedEngine {
         let (child_1_instructions, child_2_instructions) =
             BreedEngine::two_point_crossover(&mate_1.instructions, &mate_2.instructions);
 
-        let mut child_1 = mate_1.clone();
-        let mut child_2 = mate_2.clone();
-
-        child_1.instructions = child_1_instructions;
-        child_2.instructions = child_2_instructions;
+        // Build each child from its parent's fields instead of cloning the whole
+        // parent, so the parent's instructions are not copied only to be replaced.
+        let child = |mate: &Program, instructions: Instructions| Program {
+            id: mate.id,
+            instructions,
+            registers: mate.registers.clone(),
+            fitness: mate.fitness,
+        };
+        let mut child_1 = child(mate_1, child_1_instructions);
+        let mut child_2 = child(mate_2, child_2_instructions);
 
         ResetEngine::reset(&mut child_1.id);
         ResetEngine::reset(&mut child_2.id);

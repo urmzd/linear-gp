@@ -49,7 +49,7 @@ where
             program.run(state);
 
             // Eval
-            let reward = match program.registers.argmax(ArgmaxInput::ActionRegisters).any() {
+            let reward = match program.registers.select(ArgmaxInput::ActionRegisters) {
                 ActionRegister::Value(action) => {
                     let r = state.execute_action(action);
                     trace!(step = step, action = action, reward = r, "Step executed");

@@ -1320,7 +1320,6 @@ dependencies = [
  "csv",
  "gymnasia",
  "indicatif",
- "itertools 0.10.5",
  "lgp-core",
  "plotters",
  "rand",

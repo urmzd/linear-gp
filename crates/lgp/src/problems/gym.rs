@@ -34,6 +34,8 @@ where
     fn create() -> Self;
     fn max_steps() -> usize;
     fn set_state(&mut self, obs: Self::Observation);
+    /// One observation value, in `Flatten` order, without allocating.
+    fn observation_value(obs: &Self::Observation, idx: usize) -> f64;
 }
 
 impl GymRsEnvExt for CartPoleEnv {
@@ -45,6 +47,15 @@ impl GymRsEnvExt for CartPoleEnv {
     }
     fn set_state(&mut self, obs: Self::Observation) {
         self.state = obs;
+    }
+    fn observation_value(obs: &Self::Observation, idx: usize) -> f64 {
+        match idx {
+            0 => obs.x.into_inner(),
+            1 => obs.x_dot.into_inner(),
+            2 => obs.theta.into_inner(),
+            3 => obs.theta_dot.into_inner(),
+            _ => panic!("CartPole has 4 observation values, got index {idx}"),
+        }
     }
 }
 
@@ -58,6 +69,13 @@ impl GymRsEnvExt for MountainCarEnv {
     fn set_state(&mut self, obs: Self::Observation) {
         self.state = obs;
     }
+    fn observation_value(obs: &Self::Observation, idx: usize) -> f64 {
+        match idx {
+            0 => obs.position.into_inner(),
+            1 => obs.velocity.into_inner(),
+            _ => panic!("MountainCar has 2 observation values, got index {idx}"),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -70,7 +88,7 @@ where
     truncated: bool,
     episode_idx: usize,
     initial_state: E::Observation,
-    observation: Vec<f64>,
+    observation: E::Observation,
 }
 
 impl<E> State for GymRsInput<E>
@@ -79,13 +97,13 @@ where
     E::Observation: Copy + Flatten + Send + Sync,
 {
     fn get_value(&self, idx: usize) -> f64 {
-        self.observation[idx]
+        E::observation_value(&self.observation, idx)
     }
 
     fn execute_action(&mut self, action: usize) -> f64 {
         let step_result: StepResult<E::Observation> = self.environment.step(action as i64);
         self.episode_idx += 1;
-        self.observation = step_result.observation.flatten();
+        self.observation = step_result.observation;
         self.truncated = !step_result.terminated
             && (self.episode_idx >= E::max_steps() || step_result.truncated);
         self.terminated = step_result.terminated || self.truncated;
@@ -128,7 +146,7 @@ where
         item.environment
             .reset(Some(generator().next_u64()), Default::default());
         item.environment.set_state(item.initial_state);
-        item.observation = item.initial_state.flatten();
+        item.observation = item.initial_state;
         item.terminated = false;
         item.truncated = false;
         item.episode_idx = 0;
@@ -143,7 +161,7 @@ where
     fn generate(_from: ()) -> GymRsInput<T> {
         let mut environment: T = T::create();
         let initial_state = environment.reset(Some(generator().next_u64()), Default::default());
-        let observation = initial_state.flatten();
+        let observation = initial_state;
 
         GymRsInput {
             environment,

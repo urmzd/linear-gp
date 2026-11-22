@@ -34,6 +34,7 @@ pub enum Op {
 }
 
 impl Op {
+    #[inline]
     pub fn apply(&self, a: f64, b: f64) -> f64 {
         match *self {
             Op::Add => a + b,
@@ -150,14 +151,31 @@ impl Mutate<InstructionGeneratorParameters, Instruction> for MutateEngine {
 }
 
 impl Instruction {
-    pub fn apply(&self, registers: &mut Registers, input: &impl State) {
+    /// Reads the operands and computes the new source value.
+    /// Returns `(source_value, target_value, result)`.
+    #[inline]
+    fn eval(&self, registers: &Registers, input: &impl State) -> (f64, f64, f64) {
         let target_value = match self.mode {
             Mode::External => self.external_factor * input.get_value(self.tgt_idx),
-            _ => *registers.get(self.tgt_idx),
+            Mode::Internal => *registers.get(self.tgt_idx),
         };
 
         let source_value = *registers.get(self.src_idx);
         let new_source_value = self.op.apply(source_value, target_value);
+
+        (source_value, target_value, new_source_value)
+    }
+
+    /// Applies the instruction without emitting a trace event.
+    /// `Program::run` uses this when trace logging is disabled.
+    #[inline]
+    pub(crate) fn apply_untraced(&self, registers: &mut Registers, input: &impl State) {
+        let (_, _, new_source_value) = self.eval(registers, input);
+        registers.update(self.src_idx, new_source_value);
+    }
+
+    pub fn apply(&self, registers: &mut Registers, input: &impl State) {
+        let (source_value, target_value, new_source_value) = self.eval(registers, input);
 
         trace!(
             op = %self.op,

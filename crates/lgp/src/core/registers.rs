@@ -5,7 +5,9 @@ use itertools::Itertools;
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Deserializer, Serialize};
 
-use crate::utils::random::generator;
+use rand::Rng;
+
+use crate::utils::random::{generator, with_generator};
 
 use super::engines::reset_engine::{Reset, ResetEngine};
 
@@ -106,6 +108,41 @@ impl Registers {
         ArgmaxResult::MaxValues(max_indices)
     }
 
+    /// Same result and same random draws as `self.argmax(range).any()`, without
+    /// allocating. Runs once per environment step, so it is the hot path.
+    pub fn select(&self, range: ArgmaxInput) -> ActionRegister {
+        let end = match range {
+            ArgmaxInput::All => self.data.len(),
+            ArgmaxInput::ActionRegisters => self.n_actions,
+        };
+        let sliced_data = &self.data[..end];
+
+        let max_value = sliced_data
+            .iter()
+            .copied()
+            .reduce(f64::max)
+            .expect("Sliced values to not be of cardinality 0.");
+
+        if max_value.is_infinite() || max_value.is_nan() {
+            return ActionRegister::Overflow;
+        }
+
+        let n_ties = sliced_data.iter().filter(|v| **v == max_value).count();
+        // `SliceRandom::choose` draws `gen_range(0..len as u32)`; match it so
+        // seeded runs stay identical.
+        let pick = with_generator(|rng| rng.gen_range(0..n_ties as u32)) as usize;
+
+        let index = sliced_data
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| **v == max_value)
+            .nth(pick)
+            .map(|(i, _)| i)
+            .expect("pick to be less than the number of ties");
+
+        ActionRegister::Value(index)
+    }
+
     pub fn len(&self) -> usize {
         let Registers { data, .. } = self;
         data.len()
@@ -115,14 +152,14 @@ impl Registers {
         self.data.is_empty()
     }
 
+    #[inline]
     pub fn update(&mut self, index: usize, value: f64) {
-        let Registers { data, .. } = self;
-        data[index] = value;
+        self.data[index] = value;
     }
 
+    #[inline]
     pub fn get(&self, index: usize) -> &f64 {
-        let Registers { data, .. } = self;
-        data.get(index).unwrap()
+        &self.data[index]
     }
 
     pub fn iter(&self) -> Iter<'_, f64> {
