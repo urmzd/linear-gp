@@ -14,6 +14,13 @@ pub trait RlState: State {
     /// Returns true if episode count > MAX or terminal_signal sent from environment.
     fn is_terminal(&mut self) -> bool;
 
+    /// Returns true if the episode ended because of a time limit, not because
+    /// the environment reached a terminal state. A truncated episode still has
+    /// future value, so Q-learning must not treat it as terminal.
+    fn is_truncated(&self) -> bool {
+        false
+    }
+
     // Returns the initial state.
     fn get_initial_state(&self) -> Vec<f64>;
 }
